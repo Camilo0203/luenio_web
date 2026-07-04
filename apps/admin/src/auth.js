@@ -65,6 +65,7 @@ form.addEventListener("submit", async (event) => {
     email: String(data.get("email") || "").trim(),
     password: String(data.get("password") || ""),
     plan: String(data.get("plan") || "starter"),
+    acceptedTerms: data.get("acceptedTerms") === "on",
   };
 
   if (!payload.email || !payload.password) {
@@ -77,6 +78,10 @@ form.addEventListener("submit", async (event) => {
   }
   if (mode === "register" && payload.businessName.length < 2) {
     setStatus(form, "error", "Escribe el nombre del negocio.");
+    return;
+  }
+  if (mode === "register" && !payload.acceptedTerms) {
+    setStatus(form, "error", "Debes aceptar los Términos de Servicio y la Política de Privacidad.");
     return;
   }
 

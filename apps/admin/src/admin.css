@@ -88,6 +88,26 @@ body[data-auth-mode="login"] .auth-register-only {
   display: none;
 }
 
+.auth-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-soft);
+}
+.auth-consent input[type="checkbox"] {
+  width: auto;
+  margin-top: 2px;
+  padding: 0;
+  border-radius: 4px;
+  background: none;
+}
+.auth-consent a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
 .admin-shell,
 .admin-main {
   position: relative;

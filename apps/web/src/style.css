@@ -577,6 +577,16 @@ textarea:focus {
 .footer-links a:hover {
   color: var(--text);
 }
+.footer-nav-groups {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--s-3);
+}
+.footer-legal-links {
+  opacity: 0.85;
+  font-size: 12px;
+}
 
 .demo-page {
   width: min(1180px, calc(100% - 40px));
@@ -1837,6 +1847,9 @@ textarea:focus {
   }
   .footer-links {
     flex-wrap: wrap;
+  }
+  .footer-nav-groups {
+    align-items: flex-start;
   }
 }
 
