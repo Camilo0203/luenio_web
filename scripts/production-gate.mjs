@@ -121,9 +121,38 @@ const steps = [
   ["Full SaaS E2E", runE2EWithServer],
 ];
 
+const results = [];
+let hasFailure = false;
+
 for (const [label, step] of steps) {
   console.info(`\n[production-gate] ${label}`);
-  await step();
+  const startedAt = Date.now();
+  try {
+    await step();
+    results.push({ label, status: "passed", error: null, durationMs: Date.now() - startedAt });
+  } catch (error) {
+    hasFailure = true;
+    results.push({ label, status: "failed", error, durationMs: Date.now() - startedAt });
+    console.error(`[production-gate] ${label} failed: ${error.message}`);
+  }
 }
 
-console.info("\nProduction gate passed");
+console.info("\n[production-gate] Summary");
+console.info("-".repeat(72));
+for (const result of results) {
+  const statusLabel = result.status === "passed" ? "PASS" : "FAIL";
+  const duration = `${(result.durationMs / 1000).toFixed(1)}s`;
+  console.info(`${statusLabel.padEnd(6)} ${duration.padStart(8)}  ${result.label}`);
+  if (result.status === "failed" && result.error) {
+    console.info(`         -> ${result.error.message}`);
+  }
+}
+console.info("-".repeat(72));
+console.info(`${results.filter((r) => r.status === "passed").length}/${results.length} steps passed`);
+
+if (hasFailure) {
+  console.error("\nProduction gate FAILED");
+  process.exitCode = 1;
+} else {
+  console.info("\nProduction gate passed");
+}
