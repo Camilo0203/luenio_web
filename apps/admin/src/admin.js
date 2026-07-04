@@ -10,12 +10,29 @@
 } from "./api-client.js";
 
 const stages = ["new", "qualified", "contacted", "converted"];
+
+const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
+const STAGE_LABELS = {
+  new: "Nuevo",
+  qualified: "Calificado",
+  contacted: "Contactado",
+  converted: "Convertido",
+};
+
+function classificationLabel(value) {
+  return CLASSIFICATION_LABELS[value] || value;
+}
+
+function stageLabel(value) {
+  return STAGE_LABELS[value] || value;
+}
+
 const demoStepTemplate = [
-  "Lead received...",
-  "Analyzing intent...",
-  "Lead scored: HOT / WARM / COLD",
-  "Sent to CRM",
-  "Automation triggered",
+  "Lead recibido...",
+  "Analizando intención...",
+  "Lead calificado: CALIENTE / TIBIO / FRÍO",
+  "Enviado al CRM",
+  "Automatización activada",
 ];
 const demoLeads = [
   {
@@ -27,7 +44,7 @@ const demoLeads = [
     source: "live_demo",
     score: 92,
     classification: "hot",
-    scoreReasons: ["high urgency", "sales intent", "whatsapp automation"],
+    scoreReasons: ["alta urgencia", "intención de compra", "automatización de whatsapp"],
     workflow: "whatsapp_qualification",
   },
   {
@@ -39,7 +56,7 @@ const demoLeads = [
     source: "live_demo",
     score: 74,
     classification: "warm",
-    scoreReasons: ["crm need", "operations intent", "follow-up gap"],
+    scoreReasons: ["necesidad de crm", "intención operativa", "falta de seguimiento"],
     workflow: "crm_sync",
   },
   {
@@ -51,7 +68,7 @@ const demoLeads = [
     source: "live_demo",
     score: 48,
     classification: "cold",
-    scoreReasons: ["research stage", "low urgency", "education use case"],
+    scoreReasons: ["etapa de investigación", "baja urgencia", "caso de uso educativo"],
     workflow: "nurture_sequence",
   },
 ];
@@ -184,7 +201,7 @@ function getEventId(event) {
   );
 }
 
-function showLiveStatus(message = "Live sync active") {
+function showLiveStatus(message = "Sincronización en vivo activa") {
   const element = document.querySelector("#liveStatus");
   if (!element) return;
 
@@ -192,7 +209,7 @@ function showLiveStatus(message = "Live sync active") {
   element.classList.add("pulse");
   window.clearTimeout(showLiveStatus.timeout);
   showLiveStatus.timeout = window.setTimeout(() => {
-    element.lastChild.textContent = "Live sync active";
+    element.lastChild.textContent = "Sincronización en vivo activa";
     element.classList.remove("pulse");
   }, 2200);
 }
@@ -224,13 +241,14 @@ function detectLiveChanges(nextLeads, nextEvents) {
   });
 
   if (state.newLeadIds.size) {
+    const count = state.newLeadIds.size;
     showLiveStatus(
-      `${state.newLeadIds.size} new lead${state.newLeadIds.size > 1 ? "s" : ""} synced`,
+      `${count} ${count === 1 ? "lead nuevo sincronizado" : "leads nuevos sincronizados"}`,
     );
   } else if (state.updatedStages.size) {
-    showLiveStatus("Pipeline updated");
+    showLiveStatus("Pipeline actualizado");
   } else if (state.newEventIds.size) {
-    showLiveStatus("Automation event received");
+    showLiveStatus("Evento de automatización recibido");
   }
 }
 
@@ -303,8 +321,8 @@ function updateMetrics() {
   if (storageBadge) {
     const isSupabase = state.storage === "supabase";
     storageBadge.textContent = isSupabase
-      ? "Storage: Supabase connected"
-      : "Storage: local JSON fallback";
+      ? "Almacenamiento: Supabase conectado"
+      : "Almacenamiento: respaldo JSON local";
     storageBadge.classList.toggle("supabase", isSupabase);
   }
 }
@@ -314,7 +332,7 @@ function renderUser() {
   if (!userBox || !state.user) return;
   userBox.innerHTML = `
     <span>${safeText(state.user.email)}</span>
-    <strong>${safeText(state.user.businessName, "Workspace")} - ${safeText(state.user.plan, "starter")}</strong>
+    <strong>${safeText(state.user.businessName, "Espacio de trabajo")} - ${safeText(state.user.plan, "starter")}</strong>
   `;
 }
 
@@ -331,44 +349,44 @@ function renderHealth() {
   const health = state.health;
   const note = document.querySelector("#healthNote");
   if (!health) {
-    setHealthItem("#healthDatabase", "Unknown", "warn");
+    setHealthItem("#healthDatabase", "Desconocido", "warn");
     return;
   }
 
-  const storageMode = health.storage?.mode || "unknown";
+  const storageMode = health.storage?.mode || "desconocido";
   if (storageMode === "supabase") {
-    setHealthItem("#healthDatabase", "Supabase connected", "ok");
+    setHealthItem("#healthDatabase", "Supabase conectado", "ok");
   } else if (storageMode === "supabase_required_missing" || !health.httpOk) {
-    setHealthItem("#healthDatabase", "Supabase missing", "error");
+    setHealthItem("#healthDatabase", "Supabase no configurado", "error");
   } else {
-    setHealthItem("#healthDatabase", "Local fallback", "warn");
+    setHealthItem("#healthDatabase", "Respaldo local", "warn");
   }
 
   setHealthItem(
     "#healthCrmWebhook",
-    health.integrations?.crmWebhook ? "Configured" : "Missing",
+    health.integrations?.crmWebhook ? "Configurado" : "No configurado",
     health.integrations?.crmWebhook ? "ok" : "warn",
   );
   setHealthItem(
     "#healthWhatsapp",
-    health.integrations?.whatsapp ? "Configured" : "Missing",
+    health.integrations?.whatsapp ? "Configurado" : "No configurado",
     health.integrations?.whatsapp ? "ok" : "warn",
   );
   setHealthItem(
     "#healthEmail",
-    health.integrations?.email ? "Configured" : "Missing",
+    health.integrations?.email ? "Configurado" : "No configurado",
     health.integrations?.email ? "ok" : "warn",
   );
 
   if (note) {
     note.textContent = health.ok
-      ? `API online. Storage mode: ${storageMode}.`
-      : `System requires attention: ${health.error || "unknown error"}`;
+      ? `API en línea. Modo de almacenamiento: ${storageMode}.`
+      : `El sistema requiere atención: ${health.error || "error desconocido"}`;
   }
 }
 
 function formatDate(value) {
-  if (!value) return "unknown";
+  if (!value) return "desconocido";
   return new Intl.DateTimeFormat("es", {
     day: "2-digit",
     month: "short",
@@ -383,13 +401,13 @@ function renderBilling() {
   if (!state.billing?.plans) {
     grid.innerHTML = `
       <div class="empty-state">
-        <strong>Billing unavailable</strong>
+        <strong>Facturación no disponible</strong>
         <p>No pudimos cargar los planes. Revisa la sesión o la configuración de Stripe.</p>
       </div>
     `;
     if (status) {
       status.hidden = false;
-      status.textContent = state.billing?.error || "Billing API unavailable.";
+      status.textContent = state.billing?.error || "La API de facturación no está disponible.";
     }
     return;
   }
@@ -397,7 +415,7 @@ function renderBilling() {
   if (status) {
     status.hidden = !state.billing.stripeConfigured;
     status.textContent = state.billing.stripeConfigured
-      ? "Stripe checkout is configured. Plan upgrades open securely in Stripe."
+      ? "El checkout de Stripe está configurado. Las mejoras de plan se abren de forma segura en Stripe."
       : "";
   }
 
@@ -408,23 +426,23 @@ function renderBilling() {
       const usagePercent = Math.max(0, Math.min(100, safeNumber(usage?.percentUsed)));
       return `
       <article>
-        <span>${isCurrent ? "Current plan" : "Plan"}</span>
+        <span>${isCurrent ? "Plan actual" : "Plan"}</span>
         <strong>${safeText(plan.name)}</strong>
-        <p>${safeNumber(plan.monthlyLeadLimit).toLocaleString()} leads/month</p>
+        <p>${safeNumber(plan.monthlyLeadLimit).toLocaleString()} leads/mes</p>
         ${
           usage
             ? `
           <div class="usage-card">
-            <strong>${safeNumber(usage.used).toLocaleString()} / ${safeNumber(usage.limit).toLocaleString()} leads used</strong>
+            <strong>${safeNumber(usage.used).toLocaleString()} / ${safeNumber(usage.limit).toLocaleString()} leads usados</strong>
             <div class="usage-bar" data-usage="${usagePercent}"><span></span></div>
-            <p>${safeNumber(usage.remaining).toLocaleString()} remaining. Period ${formatDate(usage.period?.start)} - ${formatDate(usage.period?.end)}.</p>
+            <p>${safeNumber(usage.remaining).toLocaleString()} restantes. Periodo ${formatDate(usage.period?.start)} - ${formatDate(usage.period?.end)}.</p>
           </div>
         `
             : ""
         }
-        <p>${plan.features.includes("webhooks") ? "Webhooks enabled" : "Webhooks restricted"}</p>
+        <p>${plan.features.includes("webhooks") ? "Webhooks habilitados" : "Webhooks restringidos"}</p>
         <button class="button ${isCurrent ? "button-small" : "button-primary button-small"}" type="button" data-plan="${safeText(planId)}" ${isCurrent ? "disabled" : ""}>
-          ${isCurrent ? "Active" : "Upgrade"}
+          ${isCurrent ? "Activo" : "Mejorar plan"}
         </button>
       </article>
     `;
@@ -439,10 +457,10 @@ function renderBilling() {
     button.addEventListener("click", async () => {
       const billingStatus = document.querySelector("#billingStatus");
       button.disabled = true;
-      button.textContent = "Opening Stripe...";
+      button.textContent = "Abriendo Stripe...";
       if (billingStatus) {
         billingStatus.hidden = false;
-        billingStatus.textContent = "Preparing secure checkout...";
+        billingStatus.textContent = "Preparando checkout seguro...";
       }
       const { response, data: result } = await createCheckout(button.dataset.plan);
       if (response.ok && result.url) {
@@ -450,10 +468,10 @@ function renderBilling() {
         return;
       }
       button.disabled = false;
-      button.textContent = "Upgrade";
+      button.textContent = "Mejorar plan";
       if (billingStatus) {
         billingStatus.hidden = false;
-        billingStatus.textContent = result.error || "Stripe is not configured yet.";
+        billingStatus.textContent = result.error || "Stripe aún no está configurado.";
       }
     });
   });
@@ -463,17 +481,20 @@ function renderChecklist() {
   const checklist = document.querySelector("#setupChecklist");
   if (!checklist || !state.settings?.checklist) return;
 
-  const workspaceItems = state.settings.checklist.map((item) => ({ ...item, group: "Workspace" }));
+  const workspaceItems = state.settings.checklist.map((item) => ({
+    ...item,
+    group: "Espacio de trabajo",
+  }));
   const readinessItems = (state.settings.readiness?.checks || []).map((item) => ({
     ...item,
-    group: item.severity === "critical" ? "Production" : "Recommended",
+    group: item.severity === "critical" ? "Producción" : "Recomendado",
   }));
 
   checklist.innerHTML = [...workspaceItems, ...readinessItems]
     .map(
       (item) => `
     <article class="checklist-item ${item.done ? "done" : "warn"}">
-      <span>${safeText(item.group)} - ${item.done ? "Ready" : "Action needed"}</span>
+      <span>${safeText(item.group)} - ${item.done ? "Listo" : "Acción requerida"}</span>
       <strong>${safeText(item.label)}</strong>
       <p>${safeText(item.description)}</p>
     </article>
@@ -487,35 +508,35 @@ function renderOnboarding() {
   if (!flow) return;
   const hasLeads = getWorkspaceLeads().length > 0;
   const hasDemo = state.demoLeads.length > 0;
-  const workspaceName = state.user?.businessName || state.user?.email || "your workspace";
+  const workspaceName = state.user?.businessName || state.user?.email || "tu espacio de trabajo";
   const items = [
     {
-      title: "Welcome screen",
+      title: "Pantalla de bienvenida",
       description: state.user
-        ? `Workspace ready for ${workspaceName}.`
-        : "Create or access your workspace.",
+        ? `Espacio de trabajo listo para ${workspaceName}.`
+        : "Crea o accede a tu espacio de trabajo.",
       done: Boolean(state.user),
     },
     {
-      title: "Connect business",
+      title: "Conecta tu negocio",
       description:
         state.health?.integrations?.crmWebhook || state.storage !== "checking"
-          ? "CRM and storage layer are available."
-          : "Connect storage and automation channels.",
+          ? "El CRM y la capa de almacenamiento están disponibles."
+          : "Conecta el almacenamiento y los canales de automatización.",
       done: state.storage !== "checking",
     },
     {
-      title: "Create first lead",
+      title: "Crea tu primer lead",
       description: hasLeads
-        ? "Lead intake is active in the CRM."
-        : "Capture a real lead or run Live Demo Mode.",
+        ? "La recepción de leads está activa en el CRM."
+        : "Captura un lead real o ejecuta la Demo en Vivo.",
       done: hasLeads,
     },
     {
-      title: "See system in action",
+      title: "Mira el sistema en acción",
       description: hasDemo
-        ? "Demo flow completed inside this workspace."
-        : "Run Live Demo Mode to show the engine working.",
+        ? "El flujo de demo se completó dentro de este espacio de trabajo."
+        : "Ejecuta la Demo en Vivo para mostrar el motor en acción.",
       done: hasDemo,
     },
   ];
@@ -544,11 +565,11 @@ function renderSystemSteps() {
       const isActive = state.demo.currentStep === index;
       const stepLabel =
         index === 2 && activeLead
-          ? `Lead scored: ${activeLead.classification.toUpperCase()}${activeLead.classification === "hot" ? " 🔥" : ""}`
+          ? `Lead calificado: ${classificationLabel(activeLead.classification)}${activeLead.classification === "hot" ? " 🔥" : ""}`
           : label;
       return `
       <article class="${isDone ? "done" : ""} ${isActive ? "active" : ""} ${index === 2 && activeLead ? `score-${safeText(activeLead.classification)}` : ""}">
-        <span>${isDone ? "Done" : isActive ? "Running" : "Waiting"}</span>
+        <span>${isDone ? "Listo" : isActive ? "En curso" : "Esperando"}</span>
         <strong>${safeText(stepLabel)}</strong>
       </article>
     `;
@@ -603,7 +624,7 @@ function runLiveDemo() {
   state.newLeadIds.add(lead.id);
   state.selectedLeadId = lead.id;
   addDemoEvent("message.received", lead, { source: "whatsapp" });
-  setDemoStep(0, lead, "Lead received...");
+  setDemoStep(0, lead, "Lead recibido...");
 
   const schedule = (delay, action) => {
     const timer = window.setTimeout(action, delay);
@@ -615,21 +636,24 @@ function runLiveDemo() {
       score: lead.score,
       classification: lead.classification,
     });
-    setDemoStep(1, lead, "Analyzing intent...");
+    setDemoStep(1, lead, "Analizando intención...");
   });
 
   schedule(1800, () => {
     setDemoStep(
       2,
       lead,
-      `Lead scored: ${lead.classification.toUpperCase()}${lead.classification === "hot" ? " 🔥" : ""}`,
+      `Lead calificado: ${classificationLabel(lead.classification)}${lead.classification === "hot" ? " 🔥" : ""}`,
     );
   });
 
   schedule(2700, () => {
     lead.status = "qualified";
     state.updatedStages = new Set(["qualified"]);
-    addDemoEvent("crm.updated", lead, { action: "Lead synced to CRM", pipelineStage: "qualified" });
+    addDemoEvent("crm.updated", lead, {
+      action: "Lead sincronizado con el CRM",
+      pipelineStage: "qualified",
+    });
     state.demoActions.unshift({
       leadId: lead.id,
       workflow: lead.workflow,
@@ -638,7 +662,7 @@ function runLiveDemo() {
       integrationResults: [{ status: "simulated", provider: "CRM" }],
       internalActionResults: [{ status: "queued", action: "sales_follow_up" }],
     });
-    setDemoStep(3, lead, "Sent to CRM");
+    setDemoStep(3, lead, "Enviado al CRM");
   });
 
   schedule(3700, () => {
@@ -646,20 +670,20 @@ function runLiveDemo() {
     state.updatedStages = new Set([lead.status]);
     addDemoEvent("followup.triggered", lead, { actions: ["whatsapp_reply", "sales_task"] });
     addDemoEvent("automation.triggered", lead, { integrations: ["crm", "whatsapp"] });
-    setDemoStep(4, lead, "Automation triggered");
+    setDemoStep(4, lead, "Automatización activada");
   });
 
   schedule(5000, () => {
     state.demo.running = false;
     state.demo.currentStep = -1;
-    showLiveStatus("Live demo completed");
+    showLiveStatus("Demo en vivo completada");
     renderAll();
   });
 }
 
 function formatEventTime(event) {
   const timestamp = event.created_at || event.timestamp;
-  if (!timestamp) return "just now";
+  if (!timestamp) return "justo ahora";
   return new Intl.DateTimeFormat("es", {
     hour: "2-digit",
     minute: "2-digit",
@@ -670,30 +694,35 @@ function formatEventTime(event) {
 
 function formatEventLabel(event, leadName) {
   const labels = {
-    "message.received": "Lead message received",
-    "intent.classified": "AI intent classified",
-    "crm.updated": "CRM record updated",
-    "followup.triggered": "Follow-up triggered",
-    "automation.triggered": "Automation triggered",
-    "lead.created": "Lead created",
-    "pipeline.updated": "Pipeline updated",
-    "subscription.updated": "Subscription updated",
+    "message.received": "Mensaje de lead recibido",
+    "intent.classified": "Intención clasificada por IA",
+    "crm.updated": "Registro de CRM actualizado",
+    "followup.triggered": "Seguimiento activado",
+    "automation.triggered": "Automatización activada",
+    "lead.created": "Lead creado",
+    "pipeline.updated": "Pipeline actualizado",
+    "subscription.updated": "Suscripción actualizada",
   };
-  const label = labels[event.type] || event.type || "System event";
+  const label = labels[event.type] || event.type || "Evento del sistema";
   return leadName ? `${label} - ${leadName}` : label;
 }
 
 function formatEventDetail(event) {
   const payload = event.payload || {};
   if (event.type === "intent.classified")
-    return `${payload.classification || "lead"} - score ${payload.score || 0}/100`;
-  if (event.type === "crm.updated") return payload.action || payload.pipelineStage || "CRM synced";
+    return `${classificationLabel(payload.classification) || "lead"} - puntaje ${payload.score || 0}/100`;
+  if (event.type === "crm.updated")
+    return payload.action || stageLabel(payload.pipelineStage) || "CRM sincronizado";
   if (event.type === "followup.triggered")
-    return `${(payload.actions || []).length} actions queued`;
+    return `${(payload.actions || []).length} acciones en cola`;
   if (event.type === "automation.triggered")
-    return `${(payload.integrations || []).length} integrations checked`;
+    return `${(payload.integrations || []).length} integraciones verificadas`;
   return (
-    payload.classification || payload.plan || payload.pipelineStage || payload.source || "system"
+    classificationLabel(payload.classification) ||
+    payload.plan ||
+    stageLabel(payload.pipelineStage) ||
+    payload.source ||
+    "sistema"
   );
 }
 
@@ -706,8 +735,8 @@ function renderEvents() {
   if (!events.length) {
     feed.innerHTML = `
       <div class="empty-state">
-        <strong>No automation events yet</strong>
-        <p>New leads, CRM updates and billing changes will appear here automatically.</p>
+        <strong>Aún no hay eventos de automatización</strong>
+        <p>Los nuevos leads, actualizaciones de CRM y cambios de facturación aparecerán aquí automáticamente.</p>
       </div>
     `;
     return;
@@ -737,17 +766,17 @@ function renderPipeline() {
       const stageLeads = visibleLeads.filter((lead) => lead.status === stage);
       return `
       <section class="pipeline-column ${state.updatedStages.has(stage) ? "updated" : ""}">
-        <h3>${stage}<span>${stageLeads.length}</span></h3>
+        <h3>${safeText(stageLabel(stage))}<span>${stageLeads.length}</span></h3>
         <div class="lead-list">
           ${
             stageLeads
               .map(
                 (lead) => `
             <button class="lead-row score-${safeText(lead.classification)} ${lead.demo ? "demo-lead" : ""} ${lead.id === state.selectedLeadId ? "active" : ""} ${state.newLeadIds.has(lead.id) ? "is-new" : ""}" type="button" data-lead-id="${safeText(lead.id)}">
-              <span>${safeText(lead.classification)}</span>
+              <span>${safeText(classificationLabel(lead.classification))}</span>
               <strong>${safeText(lead.name)}</strong>
-              <small>${safeText(lead.business)} - ${safeText(lead.source, "direct")}</small>
-              <small>${safeText(lead.service, "No service selected")}</small>
+              <small>${safeText(lead.business)} - ${safeText(lead.source, "directo")}</small>
+              <small>${safeText(lead.service, "Sin servicio seleccionado")}</small>
               <small><b class="score-pill">${safeNumber(lead.score)}</b> ${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit" }).format(new Date(lead.timestamp))) : ""}</small>
             </button>
           `,
@@ -755,8 +784,8 @@ function renderPipeline() {
               .join("") ||
             `
             <div class="empty-state compact">
-              <strong>No leads</strong>
-              <p>No matching leads in this stage.</p>
+              <strong>Sin leads</strong>
+              <p>No hay leads que coincidan en esta etapa.</p>
             </div>
           `
           }
@@ -783,8 +812,8 @@ function renderLeadTable() {
   if (!leads.length) {
     table.innerHTML = `
       <div class="empty-state">
-        <strong>No matching records</strong>
-        <p>Adjust filters or run Live Demo Mode to see the CRM fill in real time.</p>
+        <strong>Sin registros coincidentes</strong>
+        <p>Ajusta los filtros o ejecuta la Demo en Vivo para ver el CRM llenarse en tiempo real.</p>
       </div>
     `;
     return;
@@ -793,20 +822,20 @@ function renderLeadTable() {
   table.innerHTML = `
     <div class="lead-table-row lead-table-head">
       <span>Lead</span>
-      <span>Business</span>
+      <span>Negocio</span>
       <span>Score</span>
-      <span>Stage</span>
-      <span>Last activity</span>
+      <span>Etapa</span>
+      <span>Última actividad</span>
     </div>
     ${leads
       .map(
         (lead) => `
       <button class="lead-table-row ${lead.id === state.selectedLeadId ? "active" : ""}" type="button" data-table-lead-id="${safeText(lead.id)}">
-        <span><strong>${safeText(lead.name)}</strong><small>${safeText(lead.service, "No service")}</small></span>
-        <span>${safeText(lead.business)}${lead.demo ? "<small>Live demo</small>" : ""}</span>
-        <span><b class="score-pill score-${safeText(lead.classification)}">${safeNumber(lead.score)}</b>${safeText(lead.classification)}</span>
-        <span>${safeText(lead.status)}</span>
-        <span>${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" }).format(new Date(lead.timestamp))) : "now"}</span>
+        <span><strong>${safeText(lead.name)}</strong><small>${safeText(lead.service, "Sin servicio")}</small></span>
+        <span>${safeText(lead.business)}${lead.demo ? "<small>Demo en vivo</small>" : ""}</span>
+        <span><b class="score-pill score-${safeText(lead.classification)}">${safeNumber(lead.score)}</b>${safeText(classificationLabel(lead.classification))}</span>
+        <span>${safeText(stageLabel(lead.status))}</span>
+        <span>${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" }).format(new Date(lead.timestamp))) : "ahora"}</span>
       </button>
     `,
       )
@@ -829,9 +858,9 @@ function renderDetail() {
 
   if (!lead) {
     detail.innerHTML = `
-      <p class="eyebrow">Detalle</p>
+      <p class="eyebrow">Detalle del lead</p>
       <h2>Selecciona un lead</h2>
-      <p>Veras score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
+      <p>Verás score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
     `;
     return;
   }
@@ -844,19 +873,19 @@ function renderDetail() {
     .slice(0, 6);
   const restrictedActions = action?.restrictedActions || action?.restricted_actions || [];
   detail.innerHTML = `
-    <p class="eyebrow">Lead detail</p>
+    <p class="eyebrow">Detalle del lead</p>
     <h2>${safeText(lead.name)}</h2>
     <p>${safeText(lead.business)} - ${safeText(lead.phone)}</p>
     <div class="detail-grid">
-      <article><span>Score</span><strong>${safeNumber(lead.score)}/100 - ${safeText(lead.classification)}</strong></article>
-      <article><span>Pipeline</span><strong>${safeText(lead.status)}</strong></article>
-      <article><span>Source</span><strong>${safeText(lead.source, "direct")}</strong></article>
-      <article><span>Interest</span><strong>${safeText(lead.service)}</strong></article>
-      <article><span>Workflow</span><strong>${safeText(lead.workflow || action?.workflow, "pending")}</strong></article>
-      <article><span>Reasons</span><strong>${safeText((lead.scoreReasons || []).join(", "), "No reasons stored")}</strong></article>
+      <article><span>Score</span><strong>${safeNumber(lead.score)}/100 - ${safeText(classificationLabel(lead.classification))}</strong></article>
+      <article><span>Pipeline</span><strong>${safeText(stageLabel(lead.status))}</strong></article>
+      <article><span>Fuente</span><strong>${safeText(lead.source, "directo")}</strong></article>
+      <article><span>Interés</span><strong>${safeText(lead.service)}</strong></article>
+      <article><span>Flujo</span><strong>${safeText(lead.workflow || action?.workflow, "pendiente")}</strong></article>
+      <article><span>Razones</span><strong>${safeText((lead.scoreReasons || []).join(", "), "Sin razones registradas")}</strong></article>
     </div>
     <div class="actions-history">
-      <strong>Actions history</strong>
+      <strong>Historial de acciones</strong>
       ${
         history.length
           ? history
@@ -870,16 +899,16 @@ function renderDetail() {
       `,
               )
               .join("")
-          : "<p>No actions recorded yet.</p>"
+          : "<p>Sin acciones registradas aún.</p>"
       }
     </div>
     ${
       restrictedActions.length
         ? `
       <div class="upgrade-callout">
-        <strong>Upgrade unlocks automation</strong>
-        <p>${safeText(restrictedActions.join(", "))} are restricted on your current plan.</p>
-        <button class="button button-primary button-small" type="button" data-open-billing>View billing</button>
+        <strong>Mejorar tu plan desbloquea automatización</strong>
+        <p>${safeText(restrictedActions.join(", "))} están restringidas en tu plan actual.</p>
+        <button class="button button-primary button-small" type="button" data-open-billing>Ver facturación</button>
       </div>
     `
         : ""
@@ -898,8 +927,8 @@ function renderDetail() {
     const currentIndex = stages.indexOf(lead.status);
     const nextStage = stages[Math.min(Math.max(currentIndex, 0) + 1, stages.length - 1)];
     button.disabled = true;
-    button.textContent = "Updating pipeline...";
-    showLiveStatus(`Moving lead to ${nextStage}`);
+    button.textContent = "Actualizando pipeline...";
+    showLiveStatus(`Moviendo lead a ${stageLabel(nextStage)}`);
     if (isDemoLead(lead.id)) {
       lead.status = nextStage;
       lead.timestamp = new Date().toISOString();
@@ -910,14 +939,14 @@ function renderDetail() {
       button.disabled = false;
       button.textContent = "Mover etapa";
       renderAll();
-      showLiveStatus("Demo pipeline updated");
+      showLiveStatus("Pipeline de demo actualizado");
       return;
     }
     await updatePipeline({ leadId: lead.id, status: nextStage, pipelineStage: nextStage });
     state.updatedStages = new Set([nextStage]);
     await loadDashboard();
     state.selectedLeadId = lead.id;
-    showLiveStatus("Pipeline updated");
+    showLiveStatus("Pipeline actualizado");
     renderDetail();
   });
 }
@@ -940,7 +969,7 @@ async function loadDashboard(options = {}) {
   ]);
   const failed = results.filter((result) => result.status === "rejected");
   if (failed.length) {
-    showLiveStatus("Some data failed to sync");
+    showLiveStatus("Algunos datos no se pudieron sincronizar");
     failed.forEach((result) => console.warn("[Luenio CRM] Dashboard sync failed", result.reason));
   }
 
@@ -982,23 +1011,23 @@ document.querySelectorAll("[data-status-filter]").forEach((button) => {
 document.querySelector("#refreshLeads").addEventListener("click", async () => {
   const button = document.querySelector("#refreshLeads");
   button.disabled = true;
-  button.textContent = "Syncing...";
-  showLiveStatus("Syncing CRM...");
+  button.textContent = "Sincronizando...";
+  showLiveStatus("Sincronizando CRM...");
   await loadDashboard({ showSkeleton: false });
   button.disabled = false;
   button.textContent = "Actualizar CRM";
-  showLiveStatus("CRM synced");
+  showLiveStatus("CRM sincronizado");
 });
 
 document.querySelector("#startLiveDemo")?.addEventListener("click", () => {
   const button = document.querySelector("#startLiveDemo");
   if (state.demo.running) return;
   button.disabled = true;
-  button.textContent = "Demo running...";
+  button.textContent = "Demo en ejecución...";
   runLiveDemo();
   window.setTimeout(() => {
     button.disabled = false;
-    button.textContent = "Live Demo Mode";
+    button.textContent = "Ejecutar Demo en Vivo";
   }, 5200);
 });
 

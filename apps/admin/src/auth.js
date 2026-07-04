@@ -7,7 +7,7 @@ function currentMode() {
 }
 
 function submitLabel(mode = currentMode()) {
-  return mode === "register" ? "Crear workspace" : "Entrar al dashboard";
+  return mode === "register" ? "Crear espacio de trabajo" : "Entrar al dashboard";
 }
 
 function setStatus(targetForm, state, message) {
@@ -68,11 +68,11 @@ form.addEventListener("submit", async (event) => {
   };
 
   if (!payload.email || !payload.password) {
-    setStatus(form, "error", "Email y password son obligatorios.");
+    setStatus(form, "error", "Email y contraseña son obligatorios.");
     return;
   }
   if (payload.password.length < 8) {
-    setStatus(form, "error", "El password debe tener mínimo 8 caracteres.");
+    setStatus(form, "error", "La contraseña debe tener mínimo 8 caracteres.");
     return;
   }
   if (mode === "register" && payload.businessName.length < 2) {
@@ -80,7 +80,11 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  setStatus(form, "loading", mode === "register" ? "Creando workspace..." : "Iniciando sesión...");
+  setStatus(
+    form,
+    "loading",
+    mode === "register" ? "Creando espacio de trabajo..." : "Iniciando sesión...",
+  );
 
   try {
     const { response, data: result } = await authenticate(payload);

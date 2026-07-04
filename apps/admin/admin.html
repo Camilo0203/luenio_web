@@ -24,50 +24,51 @@
       </a>
       <div>
         <p class="eyebrow">Luenio CRM</p>
-        <h1>Sales automation dashboard</h1>
-        <span class="storage-badge" id="storageBadge">Storage: checking...</span>
+        <h1>Panel de automatización de ventas</h1>
+        <span class="storage-badge" id="storageBadge">Almacenamiento: verificando...</span>
       </div>
       <div class="admin-user" id="adminUser">
-        <span>Workspace</span>
-        <strong>Checking session</strong>
+        <span>Espacio de trabajo</span>
+        <strong>Verificando sesión</strong>
       </div>
       <div class="live-status" id="liveStatus" aria-live="polite">
         <span></span>
-        Live sync active
+        Sincronización en vivo activa
       </div>
       <button class="button button-primary button-small" id="startLiveDemo" type="button">
-        Live Demo Mode
+        Ejecutar Demo en Vivo
       </button>
       <button class="button button-primary button-small" id="refreshLeads" type="button">
         Actualizar CRM
       </button>
-      <button class="button button-small" id="logoutButton" type="button">Logout</button>
+      <button class="button button-small" id="logoutButton" type="button">Cerrar sesión</button>
     </header>
 
     <main class="admin-main">
       <section class="admin-metrics" aria-label="Resumen CRM">
-        <article><span>Total leads</span><strong id="metricTotal">0</strong></article>
-        <article><span>Hot</span><strong id="metricHot">0</strong></article>
-        <article><span>Warm</span><strong id="metricWarm">0</strong></article>
-        <article><span>Cold</span><strong id="metricCold">0</strong></article>
+        <article><span>Leads totales</span><strong id="metricTotal">0</strong></article>
+        <article><span>Caliente</span><strong id="metricHot">0</strong></article>
+        <article><span>Tibio</span><strong id="metricWarm">0</strong></article>
+        <article><span>Frío</span><strong id="metricCold">0</strong></article>
       </section>
 
-      <section class="demo-console" id="demoConsole" aria-label="Live Demo Mode">
+      <section class="demo-console" id="demoConsole" aria-label="Ejecutar Demo en Vivo">
         <div class="demo-copy">
-          <p class="eyebrow">Live Demo Mode</p>
-          <h2>Watch Luenio qualify a lead in real time</h2>
+          <p class="eyebrow">Ejecutar Demo en Vivo</p>
+          <h2>Mira a Luenio calificar un lead en tiempo real</h2>
           <p>
-            Run a safe sales demo that shows intake, intent analysis, scoring, CRM sync and
-            automation trigger without touching production data.
+            Ejecuta una demo segura que muestra recepción, análisis de intención, scoring,
+            sincronización con el CRM y activación de automatización sin tocar datos de
+            producción.
           </p>
         </div>
         <div class="system-steps" id="systemSteps" aria-live="polite"></div>
       </section>
 
-      <section class="onboarding-panel" aria-label="Workspace setup">
+      <section class="onboarding-panel" aria-label="Configuración del espacio de trabajo">
         <div>
-          <p class="eyebrow">Onboarding</p>
-          <h2>Launch your revenue workspace</h2>
+          <p class="eyebrow">Primeros pasos</p>
+          <h2>Lanza tu espacio de trabajo de ventas</h2>
         </div>
         <div class="onboarding-flow" id="onboardingFlow"></div>
         <div class="checklist-grid" id="setupChecklist"></div>
@@ -75,34 +76,34 @@
 
       <section class="system-health" id="systemHealth" aria-label="Estado del sistema">
         <div>
-          <p class="eyebrow">System health</p>
-          <h2>Operational status</h2>
+          <p class="eyebrow">Estado del sistema</p>
+          <h2>Estado operativo</h2>
         </div>
         <div class="health-grid">
-          <article><span>Database</span><strong id="healthDatabase">Checking</strong></article>
-          <article><span>CRM webhook</span><strong id="healthCrmWebhook">Checking</strong></article>
-          <article><span>WhatsApp</span><strong id="healthWhatsapp">Checking</strong></article>
-          <article><span>Email</span><strong id="healthEmail">Checking</strong></article>
+          <article><span>Base de datos</span><strong id="healthDatabase">Verificando</strong></article>
+          <article><span>Webhook de CRM</span><strong id="healthCrmWebhook">Verificando</strong></article>
+          <article><span>WhatsApp</span><strong id="healthWhatsapp">Verificando</strong></article>
+          <article><span>Email</span><strong id="healthEmail">Verificando</strong></article>
         </div>
-        <p id="healthNote">Validando conexion del sistema.</p>
+        <p id="healthNote">Validando conexión del sistema.</p>
       </section>
 
-      <section class="billing-panel" aria-label="Billing">
+      <section class="billing-panel" aria-label="Facturación">
         <div>
-          <p class="eyebrow">Billing</p>
-          <h2>Plan and limits</h2>
+          <p class="eyebrow">Facturación</p>
+          <h2>Plan y límites</h2>
         </div>
         <p class="billing-status" id="billingStatus" role="status" aria-live="polite" hidden></p>
         <div class="billing-grid" id="billingGrid"></div>
       </section>
 
-      <section class="activity-panel" aria-label="Activity feed">
+      <section class="activity-panel" aria-label="Actividad en vivo">
         <div>
-          <p class="eyebrow">Live activity</p>
-          <h2>Automation events</h2>
+          <p class="eyebrow">Actividad en vivo</p>
+          <h2>Eventos de automatización</h2>
         </div>
         <div class="activity-feed" id="activityFeed">
-          <p>Loading events...</p>
+          <p>Cargando eventos...</p>
         </div>
       </section>
 
@@ -113,17 +114,17 @@
             <h2>Leads capturados</h2>
           </div>
           <div class="admin-filters" aria-label="Filtros">
-            <button class="active" type="button" data-filter="all">All</button>
-            <button type="button" data-filter="hot">Hot</button>
-            <button type="button" data-filter="warm">Warm</button>
-            <button type="button" data-filter="cold">Cold</button>
+            <button class="active" type="button" data-filter="all">Todos</button>
+            <button type="button" data-filter="hot">Caliente</button>
+            <button type="button" data-filter="warm">Tibio</button>
+            <button type="button" data-filter="cold">Frío</button>
           </div>
-          <div class="admin-filters" aria-label="Status filters">
-            <button class="active" type="button" data-status-filter="all">All stages</button>
-            <button type="button" data-status-filter="new">New</button>
-            <button type="button" data-status-filter="qualified">Qualified</button>
-            <button type="button" data-status-filter="contacted">Contacted</button>
-            <button type="button" data-status-filter="converted">Converted</button>
+          <div class="admin-filters" aria-label="Filtros de estado">
+            <button class="active" type="button" data-status-filter="all">Todas las etapas</button>
+            <button type="button" data-status-filter="new">Nuevo</button>
+            <button type="button" data-status-filter="qualified">Calificado</button>
+            <button type="button" data-status-filter="contacted">Contactado</button>
+            <button type="button" data-status-filter="converted">Convertido</button>
           </div>
         </div>
 
@@ -131,16 +132,16 @@
       </section>
 
       <aside class="lead-detail" id="leadDetail">
-        <p class="eyebrow">Detalle</p>
+        <p class="eyebrow">Detalle del lead</p>
         <h2>Selecciona un lead</h2>
-        <p>Veras score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
+        <p>Verás score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
       </aside>
 
-      <section class="lead-table-panel" aria-label="Lead table">
+      <section class="lead-table-panel" aria-label="Tabla de leads">
         <div class="admin-toolbar">
           <div>
-            <p class="eyebrow">CRM records</p>
-            <h2>Lead table</h2>
+            <p class="eyebrow">Registros de CRM</p>
+            <h2>Tabla de leads</h2>
           </div>
         </div>
         <div class="lead-table" id="leadTable"></div>
