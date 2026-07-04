@@ -1,7 +1,4 @@
-import {
-  clearSessionCookie,
-  setSessionCookie,
-} from "./services/auth-service.js";
+import { clearSessionCookie, setSessionCookie } from "./services/auth-service.js";
 import {
   getAuthErrorStatus,
   getAuthSession,
@@ -45,6 +42,9 @@ export default async function handler(request, response) {
 
     return response.status(400).json({ ok: false, error: "Unknown auth action." });
   } catch (error) {
-    return sendApiError(response, error, { status: getAuthErrorStatus(error), includeStorage: true });
+    return sendApiError(response, error, {
+      status: getAuthErrorStatus(error),
+      includeStorage: true,
+    });
   }
 }

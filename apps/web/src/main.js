@@ -106,14 +106,18 @@ function bindContactForm() {
   form.addEventListener("input", () => {
     if (funnelState.formStarted) return;
     funnelState.formStarted = true;
-    trackEvent("form_start", { source: funnelState.lastSource === "direct" ? getSourceFromElement(form) : funnelState.lastSource });
+    trackEvent("form_start", {
+      source:
+        funnelState.lastSource === "direct" ? getSourceFromElement(form) : funnelState.lastSource,
+    });
   });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (funnelState.submitting) return;
 
-    const source = funnelState.lastSource === "direct" ? getSourceFromElement(form) : funnelState.lastSource;
+    const source =
+      funnelState.lastSource === "direct" ? getSourceFromElement(form) : funnelState.lastSource;
     const lead = buildLeadPayload(form, source || "contacto");
     const errors = validateLead(lead);
 
@@ -135,7 +139,11 @@ function bindContactForm() {
         backendStatus: result.ok ? "stored" : "unknown",
       });
 
-      setFormState(form, "success", "Solicitud recibida. Te contactaremos por WhatsApp para revisar tu proceso y recomendar la automatización adecuada.");
+      setFormState(
+        form,
+        "success",
+        "Solicitud recibida. Te contactaremos por WhatsApp para revisar tu proceso y recomendar la automatización adecuada.",
+      );
       form.reset();
     } catch (error) {
       console.warn("[Luenio] Contact endpoint unavailable.", error);
@@ -144,7 +152,11 @@ function bindContactForm() {
         service: lead.service,
         reason: "contact_api_unavailable",
       });
-      setFormState(form, "error", "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.");
+      setFormState(
+        form,
+        "error",
+        "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.",
+      );
     } finally {
       funnelState.submitting = false;
     }

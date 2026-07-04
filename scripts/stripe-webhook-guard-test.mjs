@@ -35,14 +35,19 @@ function createMockResponse() {
 }
 
 const response = createMockResponse();
-await stripeWebhookHandler({
-  method: "POST",
-  headers: { "stripe-signature": "t=123,v1=bad" },
-  rawBody: JSON.stringify({ id: "evt_missing_secret", type: "checkout.session.completed" }),
-}, response);
+await stripeWebhookHandler(
+  {
+    method: "POST",
+    headers: { "stripe-signature": "t=123,v1=bad" },
+    rawBody: JSON.stringify({ id: "evt_missing_secret", type: "checkout.session.completed" }),
+  },
+  response,
+);
 
 if (response.statusCode !== 503) {
-  throw new Error(`Expected 503 without STRIPE_WEBHOOK_SECRET in production, got ${response.statusCode}.`);
+  throw new Error(
+    `Expected 503 without STRIPE_WEBHOOK_SECRET in production, got ${response.statusCode}.`,
+  );
 }
 
 if (response.body?.error !== "STRIPE_WEBHOOK_SECRET is not configured.") {
@@ -51,46 +56,75 @@ if (response.body?.error !== "STRIPE_WEBHOOK_SECRET is not configured.") {
 
 process.env.STRIPE_WEBHOOK_SECRET = "whsec_luenio_local_test_secret";
 
-const replayedRawBody = JSON.stringify({ id: "evt_replayed", type: "customer.subscription.updated" });
+const replayedRawBody = JSON.stringify({
+  id: "evt_replayed",
+  type: "customer.subscription.updated",
+});
 const replayedResponse = createMockResponse();
-await stripeWebhookHandler({
-  method: "POST",
-  headers: {
-    "stripe-signature": stripeSignature(
-      replayedRawBody,
-      process.env.STRIPE_WEBHOOK_SECRET,
-      Math.floor(Date.now() / 1000) - 3600
-    ),
+await stripeWebhookHandler(
+  {
+    method: "POST",
+    headers: {
+      "stripe-signature": stripeSignature(
+        replayedRawBody,
+        process.env.STRIPE_WEBHOOK_SECRET,
+        Math.floor(Date.now() / 1000) - 3600,
+      ),
+    },
+    rawBody: replayedRawBody,
   },
-  rawBody: replayedRawBody,
-}, replayedResponse);
+  replayedResponse,
+);
 
 if (replayedResponse.statusCode !== 400) {
-  throw new Error(`Expected old Stripe signatures to be rejected with 400, got ${replayedResponse.statusCode}.`);
+  throw new Error(
+    `Expected old Stripe signatures to be rejected with 400, got ${replayedResponse.statusCode}.`,
+  );
 }
 
 const invalidPayload = "{not-json";
 const invalidPayloadResponse = createMockResponse();
-await stripeWebhookHandler({
-  method: "POST",
-  headers: { "stripe-signature": stripeSignature(invalidPayload, process.env.STRIPE_WEBHOOK_SECRET) },
-  rawBody: invalidPayload,
-}, invalidPayloadResponse);
+await stripeWebhookHandler(
+  {
+    method: "POST",
+    headers: {
+      "stripe-signature": stripeSignature(invalidPayload, process.env.STRIPE_WEBHOOK_SECRET),
+    },
+    rawBody: invalidPayload,
+  },
+  invalidPayloadResponse,
+);
 
-if (invalidPayloadResponse.statusCode !== 400 || invalidPayloadResponse.body?.error !== "Invalid Stripe webhook payload.") {
-  throw new Error(`Expected invalid Stripe JSON payload to return 400, got ${JSON.stringify(invalidPayloadResponse.body)}.`);
+if (
+  invalidPayloadResponse.statusCode !== 400 ||
+  invalidPayloadResponse.body?.error !== "Invalid Stripe webhook payload."
+) {
+  throw new Error(
+    `Expected invalid Stripe JSON payload to return 400, got ${JSON.stringify(invalidPayloadResponse.body)}.`,
+  );
 }
 
-const currentRawBody = JSON.stringify({ id: "evt_current", type: "customer.subscription.updated", data: { object: { metadata: {} } } });
+const currentRawBody = JSON.stringify({
+  id: "evt_current",
+  type: "customer.subscription.updated",
+  data: { object: { metadata: {} } },
+});
 const currentResponse = createMockResponse();
-await stripeWebhookHandler({
-  method: "POST",
-  headers: { "stripe-signature": stripeSignature(currentRawBody, process.env.STRIPE_WEBHOOK_SECRET) },
-  rawBody: currentRawBody,
-}, currentResponse);
+await stripeWebhookHandler(
+  {
+    method: "POST",
+    headers: {
+      "stripe-signature": stripeSignature(currentRawBody, process.env.STRIPE_WEBHOOK_SECRET),
+    },
+    rawBody: currentRawBody,
+  },
+  currentResponse,
+);
 
 if (currentResponse.statusCode !== 200 || currentResponse.body?.received !== true) {
-  throw new Error(`Expected current signed Stripe webhook to be accepted, got ${JSON.stringify(currentResponse.body)}.`);
+  throw new Error(
+    `Expected current signed Stripe webhook to be accepted, got ${JSON.stringify(currentResponse.body)}.`,
+  );
 }
 
 if (previousNodeEnv === undefined) delete process.env.NODE_ENV;

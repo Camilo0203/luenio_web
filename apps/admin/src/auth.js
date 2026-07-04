@@ -36,7 +36,9 @@ function setMode(mode) {
 }
 
 async function syncSession() {
-  const session = await getSession().then(({ data }) => data).catch(() => null);
+  const session = await getSession()
+    .then(({ data }) => data)
+    .catch(() => null);
   if (session?.authenticated) window.location.href = "/dashboard";
 }
 
@@ -94,7 +96,11 @@ form.addEventListener("submit", async (event) => {
     }, 300);
   } catch (error) {
     console.warn("[Luenio Auth] Request failed", error);
-    setStatus(form, "error", "No pudimos conectar con el servidor. Intenta de nuevo en unos segundos.");
+    setStatus(
+      form,
+      "error",
+      "No pudimos conectar con el servidor. Intenta de nuevo en unos segundos.",
+    );
   }
 });
 

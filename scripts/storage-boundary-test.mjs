@@ -1,6 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
-import { storeCrmRecord, storePublicInquiry, updateLeadPipeline, updateUserSubscription } from "../db/storage.js";
+import {
+  storeCrmRecord,
+  storePublicInquiry,
+  updateLeadPipeline,
+  updateUserSubscription,
+} from "../db/storage.js";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -30,24 +35,40 @@ try {
   let incompleteCrmRecordRejected = false;
   try {
     await storeCrmRecord({
-      lead: { id: "lead_storage_boundary", userId: "user_storage_boundary", phone: "+573001110001" },
+      lead: {
+        id: "lead_storage_boundary",
+        userId: "user_storage_boundary",
+        phone: "+573001110001",
+      },
       action: { id: "action_storage_boundary", userId: "user_storage_boundary" },
       events: [],
     });
   } catch (error) {
-    incompleteCrmRecordRejected = error.message === "notification id is required to store CRM data.";
+    incompleteCrmRecordRejected =
+      error.message === "notification id is required to store CRM data.";
   }
 
-  assert(incompleteCrmRecordRejected, "Storage must reject CRM bundles without prebuilt notification ids.");
+  assert(
+    incompleteCrmRecordRejected,
+    "Storage must reject CRM bundles without prebuilt notification ids.",
+  );
 
   let missingPipelineEventRejected = false;
   try {
-    await updateLeadPipeline("lead_storage_boundary", { status: "converted", pipelineStage: "converted" }, "user_storage_boundary");
+    await updateLeadPipeline(
+      "lead_storage_boundary",
+      { status: "converted", pipelineStage: "converted" },
+      "user_storage_boundary",
+    );
   } catch (error) {
-    missingPipelineEventRejected = error.message === "pipeline event id is required to update CRM data.";
+    missingPipelineEventRejected =
+      error.message === "pipeline event id is required to update CRM data.";
   }
 
-  assert(missingPipelineEventRejected, "Storage must reject pipeline updates without prebuilt domain events.");
+  assert(
+    missingPipelineEventRejected,
+    "Storage must reject pipeline updates without prebuilt domain events.",
+  );
 
   let missingSubscriptionEventRejected = false;
   try {
@@ -59,10 +80,14 @@ try {
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    missingSubscriptionEventRejected = error.message === "subscription event id is required to update subscription.";
+    missingSubscriptionEventRejected =
+      error.message === "subscription event id is required to update subscription.";
   }
 
-  assert(missingSubscriptionEventRejected, "Storage must reject subscription updates without prebuilt domain events.");
+  assert(
+    missingSubscriptionEventRejected,
+    "Storage must reject subscription updates without prebuilt domain events.",
+  );
   console.info("Storage boundary guard passed");
 } finally {
   if (localDbSnapshot !== null) {

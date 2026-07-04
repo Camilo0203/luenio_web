@@ -14,9 +14,7 @@ mountIndustryDemo({
     leadName: "#gymLeadName",
     score: "#gymLeadScore",
   },
-  bindInitial: [
-    { selector: "#gymPain", value: (scenario) => scenario.pain },
-  ],
+  bindInitial: [{ selector: "#gymPain", value: (scenario) => scenario.pain }],
   lists: [
     {
       selector: "#gymPricingCards",
@@ -49,7 +47,10 @@ mountIndustryDemo({
       delay: 900,
       advanceIndex: 1,
       status: "Analyzing intent...",
-      event: { label: "Interest detected", detail: "La IA detectó intención por precio y posible visita." },
+      event: {
+        label: "Interest detected",
+        detail: "La IA detectó intención por precio y posible visita.",
+      },
     },
     {
       delay: 1700,
@@ -82,7 +83,10 @@ mountIndustryDemo({
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         stageIndex: 2,
-        event: { label: "Automation triggered", detail: "Planes enviados + visita sugerida + recordatorio programado." },
+        event: {
+          label: "Automation triggered",
+          detail: "Planes enviados + visita sugerida + recordatorio programado.",
+        },
       },
     },
   ],

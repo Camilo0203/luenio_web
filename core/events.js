@@ -1,6 +1,12 @@
 import { generateRecordId } from "./ids.js";
 
-export function createDomainEvent({ userId, leadId = null, type, payload = {}, timestamp = new Date().toISOString() }) {
+export function createDomainEvent({
+  userId,
+  leadId = null,
+  type,
+  payload = {},
+  timestamp = new Date().toISOString(),
+}) {
   if (!userId) throw new Error("userId is required to create a domain event.");
   if (!type) throw new Error("event type is required.");
 

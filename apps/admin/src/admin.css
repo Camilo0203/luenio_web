@@ -155,7 +155,10 @@ body[data-auth-mode="login"] .auth-register-only {
   background: rgba(255, 255, 255, 0.035);
   font-size: 12px;
   font-weight: 850;
-  transition: border-color 180ms ease, color 180ms ease, background-color 180ms ease;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    background-color 180ms ease;
 }
 
 .live-status span {
@@ -255,7 +258,10 @@ body[data-auth-mode="login"] .auth-register-only {
   border-radius: var(--radius-md);
   padding: var(--s-4);
   background: rgba(255, 255, 255, 0.034);
-  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
 }
 
 .system-steps article.active,
@@ -311,7 +317,9 @@ body[data-auth-mode="login"] .auth-register-only {
   border-radius: var(--radius-md);
   padding: var(--s-4);
   background: rgba(255, 255, 255, 0.035);
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease;
 }
 
 .checklist-item:hover {
@@ -356,7 +364,9 @@ body[data-auth-mode="login"] .auth-register-only {
   border-radius: var(--radius-md);
   padding: var(--s-4);
   background: rgba(255, 255, 255, 0.035);
-  transition: transform 180ms ease, border-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease;
 }
 
 .activity-item.is-new,
@@ -428,8 +438,12 @@ body[data-auth-mode="login"] .auth-register-only {
 .admin-loading .activity-feed {
   min-height: 160px;
   border-radius: var(--radius-md);
-  background:
-    linear-gradient(90deg, rgba(255,255,255,0.035), rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.035),
+    rgba(255, 255, 255, 0.075),
+    rgba(255, 255, 255, 0.035)
+  );
   background-size: 220% 100%;
   animation: adminSkeleton 1.25s ease-in-out infinite;
 }
@@ -616,7 +630,9 @@ body[data-auth-mode="login"] .auth-register-only {
   min-height: 360px;
   border-radius: var(--radius-md);
   padding: var(--s-4);
-  transition: border-color 180ms ease, background-color 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 
 .pipeline-column.updated {
@@ -644,7 +660,10 @@ body[data-auth-mode="login"] .auth-register-only {
   padding: var(--s-4);
   cursor: pointer;
   text-align: left;
-  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 
 .lead-row:hover,
@@ -713,7 +732,10 @@ body[data-auth-mode="login"] .auth-register-only {
 
 .lead-table-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(110px, 0.7fr) minmax(110px, 0.7fr) minmax(140px, 0.8fr);
+  grid-template-columns: minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(110px, 0.7fr) minmax(
+      110px,
+      0.7fr
+    ) minmax(140px, 0.8fr);
   gap: var(--s-3);
   align-items: center;
   width: 100%;
@@ -723,7 +745,9 @@ body[data-auth-mode="login"] .auth-register-only {
   color: var(--text-soft);
   background: rgba(255, 255, 255, 0.028);
   text-align: left;
-  transition: border-color 180ms ease, background-color 180ms ease;
+  transition:
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 
 button.lead-table-row {
@@ -860,11 +884,22 @@ button.lead-table-row:hover,
 }
 
 @keyframes adminSkeleton {
-  from { background-position: 120% 0; }
-  to { background-position: -120% 0; }
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -120% 0;
+  }
 }
 
 @keyframes adminPulse {
-  0%, 100% { opacity: 0.55; transform: scale(0.92); }
-  50% { opacity: 1; transform: scale(1); }
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

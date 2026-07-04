@@ -1,6 +1,10 @@
 import { requireUser } from "./services/auth-service.js";
 import { sendApiError } from "./services/http-response.js";
-import { captureCrmLeadFromBody, LeadValidationError, listCrmWorkspace } from "./services/lead-processing-service.js";
+import {
+  captureCrmLeadFromBody,
+  LeadValidationError,
+  listCrmWorkspace,
+} from "./services/lead-processing-service.js";
 
 export default async function handler(request, response) {
   let user;

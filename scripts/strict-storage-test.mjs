@@ -9,7 +9,10 @@ function assert(condition, message) {
 }
 
 const health = getStorageHealth();
-assert(health.mode === "supabase_required_missing", `Expected strict missing mode, got ${health.mode}.`);
+assert(
+  health.mode === "supabase_required_missing",
+  `Expected strict missing mode, got ${health.mode}.`,
+);
 assert(health.supabaseRequired === true, "Supabase should be marked as required.");
 assert(health.supabaseConfigured === false, "Supabase should not be configured in this test.");
 

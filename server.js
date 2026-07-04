@@ -13,7 +13,10 @@ function loadEnvFile() {
     if (!trimmedLine || trimmedLine.startsWith("#") || !trimmedLine.includes("=")) return;
     const [key, ...valueParts] = trimmedLine.split("=");
     if (!process.env[key]) {
-      process.env[key] = valueParts.join("=").trim().replace(/^["']|["']$/g, "");
+      process.env[key] = valueParts
+        .join("=")
+        .trim()
+        .replace(/^["']|["']$/g, "");
     }
   });
 }
@@ -190,7 +193,9 @@ function isInsideRoot(resolvedPath) {
 
 function isInsideDirectory(resolvedPath, directory) {
   const resolvedDirectory = path.resolve(directory);
-  return resolvedPath === resolvedDirectory || resolvedPath.startsWith(`${resolvedDirectory}${path.sep}`);
+  return (
+    resolvedPath === resolvedDirectory || resolvedPath.startsWith(`${resolvedDirectory}${path.sep}`)
+  );
 }
 
 function isAllowedStaticPath(resolvedPath) {
@@ -200,11 +205,9 @@ function isAllowedStaticPath(resolvedPath) {
     return isInsideDirectory(resolvedPath, distRoot);
   }
 
-  return [
-    publicRoot,
-    path.join(root, "apps", "web"),
-    path.join(root, "apps", "admin"),
-  ].some((directory) => isInsideDirectory(resolvedPath, directory));
+  return [publicRoot, path.join(root, "apps", "web"), path.join(root, "apps", "admin")].some(
+    (directory) => isInsideDirectory(resolvedPath, directory),
+  );
 }
 
 function hasUnsafePathSegment(cleanPath) {
@@ -313,7 +316,10 @@ function isSensitiveApiPath(pathname) {
 }
 
 function isRateLimited(request, pathname) {
-  const ip = request.headers["x-forwarded-for"]?.split(",")[0]?.trim() || request.socket.remoteAddress || "local";
+  const ip =
+    request.headers["x-forwarded-for"]?.split(",")[0]?.trim() ||
+    request.socket.remoteAddress ||
+    "local";
   const scope = isSensitiveApiPath(pathname) ? pathname : "api";
   const limit = isSensitiveApiPath(pathname) ? sensitiveRateLimitMax : rateLimitMax;
   const bucketKey = `${ip}:${scope}`;
@@ -346,7 +352,9 @@ function rejectUnsupportedApiContentType(request, response, pathname) {
   if (hasJsonContentType(request)) return false;
 
   response.writeHead(415, { "Content-Type": "application/json; charset=utf-8" });
-  response.end(JSON.stringify({ ok: false, error: "Unsupported media type. Use application/json." }));
+  response.end(
+    JSON.stringify({ ok: false, error: "Unsupported media type. Use application/json." }),
+  );
   return true;
 }
 
@@ -429,7 +437,11 @@ const server = http.createServer(async (request, response) => {
     if (rejectUnsupportedApiContentType(request, response, requestUrl.pathname)) {
       return;
     }
-    if (requestUrl.pathname.startsWith("/api/") && requestUrl.pathname !== "/api/health" && isRateLimited(request, requestUrl.pathname)) {
+    if (
+      requestUrl.pathname.startsWith("/api/") &&
+      requestUrl.pathname !== "/api/health" &&
+      isRateLimited(request, requestUrl.pathname)
+    ) {
       response.writeHead(429, { "Content-Type": "application/json; charset=utf-8" });
       response.end(JSON.stringify({ ok: false, error: "Too many requests" }));
       return;
@@ -482,7 +494,9 @@ function announceServer(portLabel) {
 function listen(portToUse, allowDevelopmentFallback = !isProduction()) {
   server.once("error", (error) => {
     if (error.code === "EADDRINUSE" && allowDevelopmentFallback) {
-      console.warn(`[Luenio] Port ${portToUse} is in use on ${host}. Falling back to an available development port.`);
+      console.warn(
+        `[Luenio] Port ${portToUse} is in use on ${host}. Falling back to an available development port.`,
+      );
       listen(0, false);
       return;
     }

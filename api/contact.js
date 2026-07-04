@@ -1,4 +1,7 @@
-import { capturePublicInquiryFromBody, PublicInquiryValidationError } from "./services/contact-service.js";
+import {
+  capturePublicInquiryFromBody,
+  PublicInquiryValidationError,
+} from "./services/contact-service.js";
 import { sendApiError } from "./services/http-response.js";
 
 export default async function handler(request, response) {

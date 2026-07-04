@@ -24,7 +24,8 @@ const demoConfigs = {
       score: 94,
       classification: "hot",
     },
-    aiReply: "Hola, sí. Te comparto el menú de hoy: hamburguesas, bowls, pastas y bebidas. Si estás en Chapinero podemos coordinar tu pedido ahora. ¿Qué te gustaría pedir?",
+    aiReply:
+      "Hola, sí. Te comparto el menú de hoy: hamburguesas, bowls, pastas y bebidas. Si estás en Chapinero podemos coordinar tu pedido ahora. ¿Qué te gustaría pedir?",
     captureLabel: "Pedido capturado",
     pain: "Cada WhatsApp sin respuesta puede convertirse en una mesa vacía o un pedido perdido.",
     automation: ["Confirmar disponibilidad", "Guardar reserva en CRM", "Enviar menú y ubicación"],
@@ -36,12 +37,14 @@ const demoConfigs = {
       name: "Mateo Vargas",
       business: "Vivienda Capital",
       service: "Filtro de compradores",
-      message: "Busco apartamento en el norte, máximo 320 mil dólares, y quiero visitar esta semana.",
+      message:
+        "Busco apartamento en el norte, máximo 320 mil dólares, y quiero visitar esta semana.",
       source: "Landing",
       score: 88,
       classification: "hot",
     },
-    aiReply: "Perfecto. Con ese presupuesto puedo mostrarte apartamentos en el norte y filtrar opciones con visita esta semana. Te asigno un asesor con dos propiedades que encajan.",
+    aiReply:
+      "Perfecto. Con ese presupuesto puedo mostrarte apartamentos en el norte y filtrar opciones con visita esta semana. Te asigno un asesor con dos propiedades que encajan.",
     captureLabel: "Comprador calificado",
     crmStage: "Buyer Pipeline",
     pain: "Cuando una inmobiliaria responde tarde, pierde compradores con presupuesto claro y alta intención de visita.",
@@ -59,12 +62,14 @@ const demoConfigs = {
       name: "Santiago León",
       business: "Pulse Gym",
       service: "Membresía mensual",
-      message: "Hola, vivo cerca del gimnasio. ¿Cuánto cuesta la mensualidad y puedo hacer una clase de prueba hoy?",
+      message:
+        "Hola, vivo cerca del gimnasio. ¿Cuánto cuesta la mensualidad y puedo hacer una clase de prueba hoy?",
       source: "WhatsApp",
       score: 90,
       classification: "hot",
     },
-    aiReply: "Tenemos plan mensual desde $39, trimestral con descuento y premium con clases. Como estás cerca, puedo agendarte una visita o clase de prueba hoy. ¿Qué hora te sirve?",
+    aiReply:
+      "Tenemos plan mensual desde $39, trimestral con descuento y premium con clases. Como estás cerca, puedo agendarte una visita o clase de prueba hoy. ¿Qué hora te sirve?",
     captureLabel: "Interesado en membresía",
     crmStage: "Interested Leads",
     pain: "Responder tarde una pregunta de precio deja que el interesado se enfríe o se inscriba en otro gimnasio.",
@@ -82,12 +87,14 @@ const demoConfigs = {
       name: "Mariana Gil",
       business: "Casa Áurea",
       service: "Consulta de producto",
-      message: "Hola, ¿tienes disponible este producto en negro? Lo necesito para regalo esta semana.",
+      message:
+        "Hola, ¿tienes disponible este producto en negro? Lo necesito para regalo esta semana.",
       source: "Web chat",
       score: 91,
       classification: "hot",
     },
-    aiReply: "Sí, está disponible en negro y llega esta semana. También tenemos una alternativa premium con envío gratis hoy. ¿Quieres que te comparta el enlace de compra?",
+    aiReply:
+      "Sí, está disponible en negro y llega esta semana. También tenemos una alternativa premium con envío gratis hoy. ¿Quieres que te comparta el enlace de compra?",
     captureLabel: "Compra recuperada",
     crmStage: "Sales Pipeline",
     pain: "Cada chat de producto sin respuesta enfría la intención de compra y empuja al cliente hacia otra tienda.",
@@ -96,7 +103,12 @@ const demoConfigs = {
       { name: "Alternativa premium", status: "Recomendada", detail: "Envío gratis hoy" },
       { name: "Complemento", status: "Upsell", detail: "Aumenta ticket promedio" },
     ],
-    automation: ["Confirmar disponibilidad", "Sugerir alternativa", "Guardar intención de compra", "Mover a sales pipeline"],
+    automation: [
+      "Confirmar disponibilidad",
+      "Sugerir alternativa",
+      "Guardar intención de compra",
+      "Mover a sales pipeline",
+    ],
   },
   agencies: {
     label: "Agencias",
@@ -105,12 +117,14 @@ const demoConfigs = {
       name: "Nicolás Prieto",
       business: "BrandOps",
       service: "Lead qualification para clientes",
-      message: "Tengo clientes con campañas activas y quiero que reciban más clientes sin perder leads por WhatsApp.",
+      message:
+        "Tengo clientes con campañas activas y quiero que reciban más clientes sin perder leads por WhatsApp.",
       source: "Formulario",
       score: 93,
       classification: "hot",
     },
-    aiReply: "Entiendo. Tu oportunidad es convertir cada lead de campaña en una conversación atendida. Te recomiendo WhatsApp IA + calificación automática + pipeline para venderlo como servicio mensual.",
+    aiReply:
+      "Entiendo. Tu oportunidad es convertir cada lead de campaña en una conversación atendida. Te recomiendo WhatsApp IA + calificación automática + pipeline para venderlo como servicio mensual.",
     captureLabel: "Cliente high-value",
     crmStage: "Agency Pipeline",
     pain: "Una agencia pierde margen cuando califica leads manualmente para cada cliente y no convierte esa operación en un servicio recurrente.",
@@ -119,7 +133,12 @@ const demoConfigs = {
       { name: "LegalHub", status: "WhatsApp", detail: "Briefing comercial programado" },
       { name: "Studio Vega", status: "CRM", detail: "Pipeline de cliente actualizado" },
     ],
-    automation: ["Analizar intención", "Sugerir servicio", "Etiquetar high-value client", "Crear oportunidad en agency pipeline"],
+    automation: [
+      "Analizar intención",
+      "Sugerir servicio",
+      "Etiquetar high-value client",
+      "Crear oportunidad en agency pipeline",
+    ],
   },
 };
 
@@ -156,11 +175,36 @@ export function createDemoScenario(type = "restaurants") {
     properties: config.properties || [],
     lead,
     steps: [
-      { key: "received", label: "Lead received...", stage: "new", event: `${lead.name} escribió desde ${lead.source}` },
-      { key: "intent", label: "Analyzing intent...", stage: "new", event: "IA detectando intención comercial y urgencia" },
-      { key: "score", label: `Lead scored: ${lead.classification.toUpperCase()}${lead.classification === "hot" ? " 🔥" : ""}`, stage: "qualified", event: `Score ${lead.score}/100` },
-      { key: "crm", label: "Sent to CRM", stage: "qualified", event: "Registro creado con contexto y siguiente paso" },
-      { key: "automation", label: "Automation triggered", stage: "contacted", event: config.automation.join(" · ") },
+      {
+        key: "received",
+        label: "Lead received...",
+        stage: "new",
+        event: `${lead.name} escribió desde ${lead.source}`,
+      },
+      {
+        key: "intent",
+        label: "Analyzing intent...",
+        stage: "new",
+        event: "IA detectando intención comercial y urgencia",
+      },
+      {
+        key: "score",
+        label: `Lead scored: ${lead.classification.toUpperCase()}${lead.classification === "hot" ? " 🔥" : ""}`,
+        stage: "qualified",
+        event: `Score ${lead.score}/100`,
+      },
+      {
+        key: "crm",
+        label: "Sent to CRM",
+        stage: "qualified",
+        event: "Registro creado con contexto y siguiente paso",
+      },
+      {
+        key: "automation",
+        label: "Automation triggered",
+        stage: "contacted",
+        event: config.automation.join(" · "),
+      },
     ],
     automation: config.automation,
   };

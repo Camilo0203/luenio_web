@@ -1,5 +1,11 @@
 import { getStorageHealth } from "../db/storage.js";
-import { getAutomationEnv, getSecurityConfig, getServerConfig, getStripeEnv, isProduction } from "./env.js";
+import {
+  getAutomationEnv,
+  getSecurityConfig,
+  getServerConfig,
+  getStripeEnv,
+  isProduction,
+} from "./env.js";
 
 export function getIntegrationStatus() {
   const automation = getAutomationEnv();
@@ -76,9 +82,10 @@ export function buildReadiness() {
       label: "Public app URL",
       done: deployment.appUrlConfigured && deployment.appUrlHttps,
       severity: "critical",
-      description: deployment.appUrlConfigured && deployment.appUrlHttps
-        ? "APP_URL is configured with an HTTPS origin."
-        : "Set APP_URL to your production HTTPS origin.",
+      description:
+        deployment.appUrlConfigured && deployment.appUrlHttps
+          ? "APP_URL is configured with an HTTPS origin."
+          : "Set APP_URL to your production HTTPS origin.",
     },
     {
       id: "static_assets",
@@ -103,9 +110,10 @@ export function buildReadiness() {
       label: "Production database",
       done: storage.mode === "supabase" && storage.supabaseConfigured,
       severity: "critical",
-      description: storage.mode === "supabase"
-        ? "Supabase is connected for persistent tenant data."
-        : "Connect Supabase and enable REQUIRE_SUPABASE=true before launch.",
+      description:
+        storage.mode === "supabase"
+          ? "Supabase is connected for persistent tenant data."
+          : "Connect Supabase and enable REQUIRE_SUPABASE=true before launch.",
     },
     {
       id: "auth_secret",
@@ -135,14 +143,21 @@ export function buildReadiness() {
     {
       id: "stripe_prices",
       label: "Stripe price IDs",
-      done: billing.starterPriceConfigured && billing.proPriceConfigured && billing.agencyPriceConfigured,
+      done:
+        billing.starterPriceConfigured &&
+        billing.proPriceConfigured &&
+        billing.agencyPriceConfigured,
       severity: "critical",
       description: "Starter, Pro and Agency price IDs must be configured.",
     },
     {
       id: "automation_outputs",
       label: "Automation outputs",
-      done: integrations.crmWebhook || integrations.whatsapp || integrations.email || integrations.webhook,
+      done:
+        integrations.crmWebhook ||
+        integrations.whatsapp ||
+        integrations.email ||
+        integrations.webhook,
       severity: "recommended",
       description: "Configure CRM, WhatsApp, email or webhook outputs for live notifications.",
     },
@@ -168,6 +183,11 @@ export function buildPublicReadiness(readiness = buildReadiness()) {
   return {
     ready: readiness.ready,
     criticalReady: readiness.criticalReady,
-    checks: readiness.checks.map(({ id, label, done, severity }) => ({ id, label, done, severity })),
+    checks: readiness.checks.map(({ id, label, done, severity }) => ({
+      id,
+      label,
+      done,
+      severity,
+    })),
   };
 }

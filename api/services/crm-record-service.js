@@ -5,7 +5,11 @@ export function buildCrmRecordBundle({ lead, actionLog, userId }) {
 
   const tenantLead = { ...lead, userId };
   const tenantActionLog = { ...actionLog, userId };
-  const notification = buildLeadNotification({ userId, lead: tenantLead, actionLog: tenantActionLog });
+  const notification = buildLeadNotification({
+    userId,
+    lead: tenantLead,
+    actionLog: tenantActionLog,
+  });
   const events = buildLeadLifecycleEvents({ userId, lead: tenantLead, actionLog: tenantActionLog });
 
   return {

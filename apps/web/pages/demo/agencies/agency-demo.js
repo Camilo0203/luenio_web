@@ -54,14 +54,20 @@ mountIndustryDemo({
       delay: 0,
       advanceIndex: 0,
       status: "Lead received...",
-      event: { label: "Client lead received", detail: (scenario) => `"${scenario.lead.message}" entró desde ${scenario.lead.source}.` },
+      event: {
+        label: "Client lead received",
+        detail: (scenario) => `"${scenario.lead.message}" entró desde ${scenario.lead.source}.`,
+      },
     },
     {
       delay: 850,
       advanceIndex: 1,
       status: "Analyzing intent...",
       crm: { stageIndex: 0, activeSequence: 0 },
-      event: { label: "Intent analyzed", detail: "La IA detectó necesidad de adquisición de clientes y crecimiento comercial." },
+      event: {
+        label: "Intent analyzed",
+        detail: "La IA detectó necesidad de adquisición de clientes y crecimiento comercial.",
+      },
     },
     {
       delay: 1650,
@@ -72,7 +78,10 @@ mountIndustryDemo({
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         stageIndex: 1,
         activeSequence: 1,
-        event: { label: "Agency CRM update", detail: "Lead calificado y servicio recomendado: IA + CRM + WhatsApp." },
+        event: {
+          label: "Agency CRM update",
+          detail: "Lead calificado y servicio recomendado: IA + CRM + WhatsApp.",
+        },
       },
     },
     {
@@ -84,7 +93,10 @@ mountIndustryDemo({
         score: (scenario) => `${scenario.lead.score}/100 HOT · High-value client`,
         stageIndex: 1,
         activeSequence: 2,
-        event: { label: "Agency CRM update", detail: "Lead añadido a Agency Pipeline y etiquetado como high-value client." },
+        event: {
+          label: "Agency CRM update",
+          detail: "Lead añadido a Agency Pipeline y etiquetado como high-value client.",
+        },
       },
     },
     {
@@ -96,7 +108,10 @@ mountIndustryDemo({
         score: (scenario) => `${scenario.lead.score}/100 HOT · High-value client`,
         stageIndex: 2,
         activeSequence: 3,
-        event: { label: "Resell workflow", detail: "La agencia puede vender Luenio como servicio recurrente para este cliente." },
+        event: {
+          label: "Resell workflow",
+          detail: "La agencia puede vender Luenio como servicio recurrente para este cliente.",
+        },
       },
     },
   ],

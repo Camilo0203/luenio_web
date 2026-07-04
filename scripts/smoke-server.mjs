@@ -45,7 +45,10 @@ async function expectOkRoute(baseUrl, pathname, expectedContentType) {
   assert(response.ok, `${pathname} must return 200.`);
   if (expectedContentType) {
     const contentType = response.headers.get("content-type") || "";
-    assert(contentType.includes(expectedContentType), `${pathname} must include content-type ${expectedContentType}.`);
+    assert(
+      contentType.includes(expectedContentType),
+      `${pathname} must include content-type ${expectedContentType}.`,
+    );
   }
   return response;
 }
@@ -57,10 +60,19 @@ function expectSecurityHeaders(response, { production = false } = {}) {
   assert(csp.includes("frame-ancestors 'none'"), "CSP must block framing ancestors.");
   assert(csp.includes("script-src 'self'"), "CSP must restrict scripts to same-origin assets.");
   assert(response.headers.get("x-frame-options") === "DENY", "Responses must deny framing.");
-  assert(response.headers.get("x-content-type-options") === "nosniff", "Responses must set nosniff.");
-  assert(response.headers.get("referrer-policy") === "strict-origin-when-cross-origin", "Responses must set referrer policy.");
+  assert(
+    response.headers.get("x-content-type-options") === "nosniff",
+    "Responses must set nosniff.",
+  );
+  assert(
+    response.headers.get("referrer-policy") === "strict-origin-when-cross-origin",
+    "Responses must set referrer policy.",
+  );
   if (production) {
-    assert(response.headers.get("strict-transport-security")?.includes("max-age=31536000"), "Production responses must set HSTS.");
+    assert(
+      response.headers.get("strict-transport-security")?.includes("max-age=31536000"),
+      "Production responses must set HSTS.",
+    );
   }
 }
 
@@ -111,10 +123,26 @@ async function runSmoke() {
     await expectTextRoute(baseUrl, "/demo/ecommerce", "Live Demo Mode");
     await expectTextRoute(baseUrl, "/demo/agencies", "Live Demo Mode");
     await expectTextRoute(baseUrl, "/gym", "You're losing customers right now without noticing.");
-    await expectTextRoute(baseUrl, "/restaurants", "You're losing customers right now without noticing.");
-    await expectTextRoute(baseUrl, "/real-estate", "You're losing customers right now without noticing.");
-    await expectTextRoute(baseUrl, "/ecommerce", "You're losing customers right now without noticing.");
-    await expectTextRoute(baseUrl, "/agencies", "You're losing customers right now without noticing.");
+    await expectTextRoute(
+      baseUrl,
+      "/restaurants",
+      "You're losing customers right now without noticing.",
+    );
+    await expectTextRoute(
+      baseUrl,
+      "/real-estate",
+      "You're losing customers right now without noticing.",
+    );
+    await expectTextRoute(
+      baseUrl,
+      "/ecommerce",
+      "You're losing customers right now without noticing.",
+    );
+    await expectTextRoute(
+      baseUrl,
+      "/agencies",
+      "You're losing customers right now without noticing.",
+    );
     await expectTextRoute(baseUrl, "/login", "Accede a tu CRM de automatización.");
     await expectOkRoute(baseUrl, "/favicon.svg", "image/svg+xml");
     const faviconHead = await fetch(`${baseUrl}/favicon.svg`, { method: "HEAD" });
@@ -122,25 +150,43 @@ async function runSmoke() {
     assert((await faviconHead.text()) === "", "HEAD responses must not include a body.");
     const invalidStaticMethod = await fetch(`${baseUrl}/login`, { method: "POST" });
     assert(invalidStaticMethod.status === 405, "Static routes must reject unsupported methods.");
-    assert(invalidStaticMethod.headers.get("allow") === "GET, HEAD", "Static method rejection must advertise GET, HEAD.");
+    assert(
+      invalidStaticMethod.headers.get("allow") === "GET, HEAD",
+      "Static method rejection must advertise GET, HEAD.",
+    );
     await expectNotExposed(baseUrl, "/package.json");
     await expectNotExposed(baseUrl, "/.env");
     await expectNotExposed(baseUrl, "/%2e%2e/package.json");
     const malformedPath = await fetch(`${baseUrl}/%E0%A4%A`);
     const malformedPathBody = await malformedPath.json();
     assert(malformedPath.status === 400, "Malformed encoded paths must return 400, not 500.");
-    assert(malformedPathBody.error === "Malformed request path.", "Malformed path errors must be explicit.");
+    assert(
+      malformedPathBody.error === "Malformed request path.",
+      "Malformed path errors must be explicit.",
+    );
 
     if (isProductionSmoke) {
-      assert(landingHtml.includes("/assets/"), "Production landing must reference built Vite assets.");
-      assert(!landingHtml.includes("/apps/web/src/"), "Production landing must not reference source modules.");
+      assert(
+        landingHtml.includes("/assets/"),
+        "Production landing must reference built Vite assets.",
+      );
+      assert(
+        !landingHtml.includes("/apps/web/src/"),
+        "Production landing must not reference source modules.",
+      );
 
       const builtAssetPath = landingHtml.match(/\/assets\/[^"']+\.js/)?.[0];
       assert(builtAssetPath, "Production landing must include a built JavaScript asset.");
       const builtAsset = await expectOkRoute(baseUrl, builtAssetPath, "text/javascript");
-      assert(builtAsset.headers.get("cache-control") === "public, max-age=31536000, immutable", "Built assets must use immutable cache headers.");
+      assert(
+        builtAsset.headers.get("cache-control") === "public, max-age=31536000, immutable",
+        "Built assets must use immutable cache headers.",
+      );
     } else {
-      assert(landingHtml.includes("/apps/web/src/main.js"), "Development landing must reference source modules.");
+      assert(
+        landingHtml.includes("/apps/web/src/main.js"),
+        "Development landing must reference source modules.",
+      );
     }
 
     const admin = await fetch(`${baseUrl}/admin.html`, { redirect: "manual" });
@@ -149,12 +195,18 @@ async function runSmoke() {
 
     const dashboard = await fetch(`${baseUrl}/dashboard`, { redirect: "manual" });
     assert(dashboard.status === 302, "Protected dashboard route must redirect.");
-    assert(dashboard.headers.get("location") === "/login", "Dashboard redirect must target /login.");
+    assert(
+      dashboard.headers.get("location") === "/login",
+      "Dashboard redirect must target /login.",
+    );
 
     const unknownApi = await fetch(`${baseUrl}/api/nope`);
     const unknownApiBody = await unknownApi.json();
     assert(unknownApi.status === 404, "Unknown API route must return 404.");
-    assert(unknownApiBody.error === "API route not found.", "Unknown API route must return a JSON error.");
+    assert(
+      unknownApiBody.error === "API route not found.",
+      "Unknown API route must return a JSON error.",
+    );
 
     const health = await fetch(`${baseUrl}/api/health`);
     const healthBody = await health.json();

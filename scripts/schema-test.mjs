@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const schema = fs.readFileSync(path.join(process.cwd(), "supabase", "schema.sql"), "utf8").toLowerCase();
+const schema = fs
+  .readFileSync(path.join(process.cwd(), "supabase", "schema.sql"), "utf8")
+  .toLowerCase();
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -17,7 +19,10 @@ function assert(condition, message) {
   "subscriptions",
   "contact_inquiries",
 ].forEach((table) => {
-  assert(schema.includes(`create table if not exists public.${table}`), `Supabase schema must create ${table}.`);
+  assert(
+    schema.includes(`create table if not exists public.${table}`),
+    `Supabase schema must create ${table}.`,
+  );
 });
 
 [
@@ -44,7 +49,10 @@ function assert(condition, message) {
   "subscriptions_user_idx",
   "contact_inquiries_phone_created_at_idx",
 ].forEach((index) => {
-  assert(schema.includes(`create index if not exists ${index}`), `Supabase schema must include ${index}.`);
+  assert(
+    schema.includes(`create index if not exists ${index}`),
+    `Supabase schema must include ${index}.`,
+  );
 });
 
 [

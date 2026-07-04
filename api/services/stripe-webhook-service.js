@@ -21,8 +21,8 @@ export class StripeWebhookError extends Error {
 }
 
 function getWebhookSecret() {
-  const secret = getStripeEnv().webhookSecret
-    || (isProduction() ? "" : "whsec_luenio_local_test_secret");
+  const secret =
+    getStripeEnv().webhookSecret || (isProduction() ? "" : "whsec_luenio_local_test_secret");
 
   if (!secret) {
     throw new StripeWebhookError("STRIPE_WEBHOOK_SECRET is not configured.", 503);
@@ -38,7 +38,7 @@ function verifyStripeSignature(rawBody, signatureHeader, secret) {
     signatureHeader.split(",").map((part) => {
       const [key, value] = part.split("=");
       return [key, value];
-    })
+    }),
   );
 
   const timestamp = signatureParts.t;
@@ -85,7 +85,14 @@ function normalizePlan(plan) {
   return plans[plan] ? plan : "starter";
 }
 
-function buildSubscriptionUpdate({ userId, plan, status, stripeCustomerId, stripeSubscriptionId, currentPeriodEnd }) {
+function buildSubscriptionUpdate({
+  userId,
+  plan,
+  status,
+  stripeCustomerId,
+  stripeSubscriptionId,
+  currentPeriodEnd,
+}) {
   const subscription = {
     id: stripeSubscriptionId || `subscription_${userId}`,
     userId,

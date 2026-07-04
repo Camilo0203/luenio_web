@@ -13,7 +13,14 @@ export const leadFieldLimits = {
   source: 40,
 };
 
-const highIntentTerms = ["quiero automatizar", "precio", "precios", "empezar ahora", "cotizacion", "automatizar mis ventas"];
+const highIntentTerms = [
+  "quiero automatizar",
+  "precio",
+  "precios",
+  "empezar ahora",
+  "cotizacion",
+  "automatizar mis ventas",
+];
 const mediumIntentTerms = ["whatsapp", "crm", "seguimiento", "leads", "informacion", "demo"];
 const lowIntentTerms = ["curiosidad", "curioso", "solo mirando", "solo quiero ver", "mas adelante"];
 
@@ -107,7 +114,13 @@ export function buildWorkflow(lead) {
     return {
       type: "hot_lead_workflow",
       segment: "hot_leads",
-      actions: ["create_crm_deal", "send_webhook", "send_crm_webhook", "send_whatsapp_notification", "assign_sales_owner"],
+      actions: [
+        "create_crm_deal",
+        "send_webhook",
+        "send_crm_webhook",
+        "send_whatsapp_notification",
+        "assign_sales_owner",
+      ],
     };
   }
   if (lead.score >= 60) {
@@ -120,7 +133,13 @@ export function buildWorkflow(lead) {
   return {
     type: "nurture_sequence",
     segment: "nurture",
-    actions: ["create_crm_record", "add_to_nurture_segment", "schedule_followup", "send_webhook", "send_crm_webhook"],
+    actions: [
+      "create_crm_record",
+      "add_to_nurture_segment",
+      "schedule_followup",
+      "send_webhook",
+      "send_crm_webhook",
+    ],
   };
 }
 
@@ -152,12 +171,16 @@ export function normalizeLead(rawLead = {}) {
 }
 
 export function validateLead(lead) {
-  return ["name", "business", "phone", "service"].filter((field) => !String(lead[field] || "").trim());
+  return ["name", "business", "phone", "service"].filter(
+    (field) => !String(lead[field] || "").trim(),
+  );
 }
 
 export function buildAutomationPlan(lead, options = {}) {
   const workflow = buildWorkflow(lead);
-  const allowedActionSet = Array.isArray(options.allowedActions) ? new Set(options.allowedActions) : null;
+  const allowedActionSet = Array.isArray(options.allowedActions)
+    ? new Set(options.allowedActions)
+    : null;
   const allowedActions = allowedActionSet
     ? workflow.actions.filter((action) => allowedActionSet.has(action))
     : workflow.actions;

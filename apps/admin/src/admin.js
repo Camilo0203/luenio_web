@@ -89,13 +89,17 @@ const state = {
 };
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;",
-  })[character]);
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character],
+  );
 }
 
 function safeText(value, fallback = "") {
@@ -174,7 +178,10 @@ function createDemoLead(template, stage = "new") {
 }
 
 function getEventId(event) {
-  return event.id || `${event.type}_${event.created_at || event.timestamp || ""}_${event.lead_id || event.leadId || ""}`;
+  return (
+    event.id ||
+    `${event.type}_${event.created_at || event.timestamp || ""}_${event.lead_id || event.leadId || ""}`
+  );
 }
 
 function showLiveStatus(message = "Live sync active") {
@@ -217,7 +224,9 @@ function detectLiveChanges(nextLeads, nextEvents) {
   });
 
   if (state.newLeadIds.size) {
-    showLiveStatus(`${state.newLeadIds.size} new lead${state.newLeadIds.size > 1 ? "s" : ""} synced`);
+    showLiveStatus(
+      `${state.newLeadIds.size} new lead${state.newLeadIds.size > 1 ? "s" : ""} synced`,
+    );
   } else if (state.updatedStages.size) {
     showLiveStatus("Pipeline updated");
   } else if (state.newEventIds.size) {
@@ -280,14 +289,22 @@ function filteredLeads() {
 function updateMetrics() {
   const leads = getWorkspaceLeads();
   document.querySelector("#metricTotal").textContent = leads.length;
-  document.querySelector("#metricHot").textContent = leads.filter((lead) => lead.classification === "hot").length;
-  document.querySelector("#metricWarm").textContent = leads.filter((lead) => lead.classification === "warm").length;
-  document.querySelector("#metricCold").textContent = leads.filter((lead) => lead.classification === "cold" || lead.classification === "nurture").length;
+  document.querySelector("#metricHot").textContent = leads.filter(
+    (lead) => lead.classification === "hot",
+  ).length;
+  document.querySelector("#metricWarm").textContent = leads.filter(
+    (lead) => lead.classification === "warm",
+  ).length;
+  document.querySelector("#metricCold").textContent = leads.filter(
+    (lead) => lead.classification === "cold" || lead.classification === "nurture",
+  ).length;
 
   const storageBadge = document.querySelector("#storageBadge");
   if (storageBadge) {
     const isSupabase = state.storage === "supabase";
-    storageBadge.textContent = isSupabase ? "Storage: Supabase connected" : "Storage: local JSON fallback";
+    storageBadge.textContent = isSupabase
+      ? "Storage: Supabase connected"
+      : "Storage: local JSON fallback";
     storageBadge.classList.toggle("supabase", isSupabase);
   }
 }
@@ -327,9 +344,21 @@ function renderHealth() {
     setHealthItem("#healthDatabase", "Local fallback", "warn");
   }
 
-  setHealthItem("#healthCrmWebhook", health.integrations?.crmWebhook ? "Configured" : "Missing", health.integrations?.crmWebhook ? "ok" : "warn");
-  setHealthItem("#healthWhatsapp", health.integrations?.whatsapp ? "Configured" : "Missing", health.integrations?.whatsapp ? "ok" : "warn");
-  setHealthItem("#healthEmail", health.integrations?.email ? "Configured" : "Missing", health.integrations?.email ? "ok" : "warn");
+  setHealthItem(
+    "#healthCrmWebhook",
+    health.integrations?.crmWebhook ? "Configured" : "Missing",
+    health.integrations?.crmWebhook ? "ok" : "warn",
+  );
+  setHealthItem(
+    "#healthWhatsapp",
+    health.integrations?.whatsapp ? "Configured" : "Missing",
+    health.integrations?.whatsapp ? "ok" : "warn",
+  );
+  setHealthItem(
+    "#healthEmail",
+    health.integrations?.email ? "Configured" : "Missing",
+    health.integrations?.email ? "ok" : "warn",
+  );
 
   if (note) {
     note.textContent = health.ok
@@ -372,29 +401,35 @@ function renderBilling() {
       : "";
   }
 
-  grid.innerHTML = Object.entries(state.billing.plans).map(([planId, plan]) => {
-    const isCurrent = state.billing.currentPlan === planId;
-    const usage = isCurrent ? state.billing.usage : null;
-    const usagePercent = Math.max(0, Math.min(100, safeNumber(usage?.percentUsed)));
-    return `
+  grid.innerHTML = Object.entries(state.billing.plans)
+    .map(([planId, plan]) => {
+      const isCurrent = state.billing.currentPlan === planId;
+      const usage = isCurrent ? state.billing.usage : null;
+      const usagePercent = Math.max(0, Math.min(100, safeNumber(usage?.percentUsed)));
+      return `
       <article>
         <span>${isCurrent ? "Current plan" : "Plan"}</span>
         <strong>${safeText(plan.name)}</strong>
         <p>${safeNumber(plan.monthlyLeadLimit).toLocaleString()} leads/month</p>
-        ${usage ? `
+        ${
+          usage
+            ? `
           <div class="usage-card">
             <strong>${safeNumber(usage.used).toLocaleString()} / ${safeNumber(usage.limit).toLocaleString()} leads used</strong>
             <div class="usage-bar" data-usage="${usagePercent}"><span></span></div>
             <p>${safeNumber(usage.remaining).toLocaleString()} remaining. Period ${formatDate(usage.period?.start)} - ${formatDate(usage.period?.end)}.</p>
           </div>
-        ` : ""}
+        `
+            : ""
+        }
         <p>${plan.features.includes("webhooks") ? "Webhooks enabled" : "Webhooks restricted"}</p>
         <button class="button ${isCurrent ? "button-small" : "button-primary button-small"}" type="button" data-plan="${safeText(planId)}" ${isCurrent ? "disabled" : ""}>
           ${isCurrent ? "Active" : "Upgrade"}
         </button>
       </article>
     `;
-  }).join("");
+    })
+    .join("");
 
   grid.querySelectorAll("[data-usage]").forEach((usageBar) => {
     usageBar.style.setProperty("--usage", `${safeNumber(usageBar.dataset.usage)}%`);
@@ -434,13 +469,17 @@ function renderChecklist() {
     group: item.severity === "critical" ? "Production" : "Recommended",
   }));
 
-  checklist.innerHTML = [...workspaceItems, ...readinessItems].map((item) => `
+  checklist.innerHTML = [...workspaceItems, ...readinessItems]
+    .map(
+      (item) => `
     <article class="checklist-item ${item.done ? "done" : "warn"}">
       <span>${safeText(item.group)} - ${item.done ? "Ready" : "Action needed"}</span>
       <strong>${safeText(item.label)}</strong>
       <p>${safeText(item.description)}</p>
     </article>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
 function renderOnboarding() {
@@ -452,35 +491,46 @@ function renderOnboarding() {
   const items = [
     {
       title: "Welcome screen",
-      description: state.user ? `Workspace ready for ${workspaceName}.` : "Create or access your workspace.",
+      description: state.user
+        ? `Workspace ready for ${workspaceName}.`
+        : "Create or access your workspace.",
       done: Boolean(state.user),
     },
     {
       title: "Connect business",
-      description: state.health?.integrations?.crmWebhook || state.storage !== "checking"
-        ? "CRM and storage layer are available."
-        : "Connect storage and automation channels.",
+      description:
+        state.health?.integrations?.crmWebhook || state.storage !== "checking"
+          ? "CRM and storage layer are available."
+          : "Connect storage and automation channels.",
       done: state.storage !== "checking",
     },
     {
       title: "Create first lead",
-      description: hasLeads ? "Lead intake is active in the CRM." : "Capture a real lead or run Live Demo Mode.",
+      description: hasLeads
+        ? "Lead intake is active in the CRM."
+        : "Capture a real lead or run Live Demo Mode.",
       done: hasLeads,
     },
     {
       title: "See system in action",
-      description: hasDemo ? "Demo flow completed inside this workspace." : "Run Live Demo Mode to show the engine working.",
+      description: hasDemo
+        ? "Demo flow completed inside this workspace."
+        : "Run Live Demo Mode to show the engine working.",
       done: hasDemo,
     },
   ];
 
-  flow.innerHTML = items.map((item, index) => `
+  flow.innerHTML = items
+    .map(
+      (item, index) => `
     <article class="${item.done ? "done" : "pending"}">
       <span>${index + 1}</span>
       <strong>${safeText(item.title)}</strong>
       <p>${safeText(item.description)}</p>
     </article>
-  `).join("");
+  `,
+    )
+    .join("");
 }
 
 function renderSystemSteps() {
@@ -488,19 +538,22 @@ function renderSystemSteps() {
   if (!steps) return;
   const activeLead = getWorkspaceLeads().find((lead) => lead.id === state.demo.currentLeadId);
 
-  steps.innerHTML = demoStepTemplate.map((label, index) => {
-    const isDone = state.demo.currentStep > index;
-    const isActive = state.demo.currentStep === index;
-    const stepLabel = index === 2 && activeLead
-      ? `Lead scored: ${activeLead.classification.toUpperCase()}${activeLead.classification === "hot" ? " 🔥" : ""}`
-      : label;
-    return `
+  steps.innerHTML = demoStepTemplate
+    .map((label, index) => {
+      const isDone = state.demo.currentStep > index;
+      const isActive = state.demo.currentStep === index;
+      const stepLabel =
+        index === 2 && activeLead
+          ? `Lead scored: ${activeLead.classification.toUpperCase()}${activeLead.classification === "hot" ? " 🔥" : ""}`
+          : label;
+      return `
       <article class="${isDone ? "done" : ""} ${isActive ? "active" : ""} ${index === 2 && activeLead ? `score-${safeText(activeLead.classification)}` : ""}">
         <span>${isDone ? "Done" : isActive ? "Running" : "Waiting"}</span>
         <strong>${safeText(stepLabel)}</strong>
       </article>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 function renderAll() {
@@ -558,12 +611,19 @@ function runLiveDemo() {
   };
 
   schedule(900, () => {
-    addDemoEvent("intent.classified", lead, { score: lead.score, classification: lead.classification });
+    addDemoEvent("intent.classified", lead, {
+      score: lead.score,
+      classification: lead.classification,
+    });
     setDemoStep(1, lead, "Analyzing intent...");
   });
 
   schedule(1800, () => {
-    setDemoStep(2, lead, `Lead scored: ${lead.classification.toUpperCase()}${lead.classification === "hot" ? " 🔥" : ""}`);
+    setDemoStep(
+      2,
+      lead,
+      `Lead scored: ${lead.classification.toUpperCase()}${lead.classification === "hot" ? " 🔥" : ""}`,
+    );
   });
 
   schedule(2700, () => {
@@ -625,11 +685,16 @@ function formatEventLabel(event, leadName) {
 
 function formatEventDetail(event) {
   const payload = event.payload || {};
-  if (event.type === "intent.classified") return `${payload.classification || "lead"} - score ${payload.score || 0}/100`;
+  if (event.type === "intent.classified")
+    return `${payload.classification || "lead"} - score ${payload.score || 0}/100`;
   if (event.type === "crm.updated") return payload.action || payload.pipelineStage || "CRM synced";
-  if (event.type === "followup.triggered") return `${(payload.actions || []).length} actions queued`;
-  if (event.type === "automation.triggered") return `${(payload.integrations || []).length} integrations checked`;
-  return payload.classification || payload.plan || payload.pipelineStage || payload.source || "system";
+  if (event.type === "followup.triggered")
+    return `${(payload.actions || []).length} actions queued`;
+  if (event.type === "automation.triggered")
+    return `${(payload.integrations || []).length} integrations checked`;
+  return (
+    payload.classification || payload.plan || payload.pipelineStage || payload.source || "system"
+  );
 }
 
 function renderEvents() {
@@ -648,29 +713,36 @@ function renderEvents() {
     return;
   }
 
-  feed.innerHTML = events.slice(0, 10).map((event) => {
-    const leadName = leads.find((lead) => lead.id === (event.leadId || event.lead_id))?.name;
-    const isNew = state.newEventIds.has(getEventId(event));
-    return `
+  feed.innerHTML = events
+    .slice(0, 10)
+    .map((event) => {
+      const leadName = leads.find((lead) => lead.id === (event.leadId || event.lead_id))?.name;
+      const isNew = state.newEventIds.has(getEventId(event));
+      return `
       <article class="activity-item ${isNew ? "is-new" : ""}">
         <strong>${safeText(formatEventLabel(event, leadName))}</strong>
         <span>${safeText(formatEventTime(event))} - ${safeText(formatEventDetail(event))}</span>
       </article>
     `;
-  }).join("");
+    })
+    .join("");
 }
 
 function renderPipeline() {
   const board = document.querySelector("#pipelineBoard");
   const visibleLeads = filteredLeads();
 
-  board.innerHTML = stages.map((stage) => {
-    const stageLeads = visibleLeads.filter((lead) => lead.status === stage);
-    return `
+  board.innerHTML = stages
+    .map((stage) => {
+      const stageLeads = visibleLeads.filter((lead) => lead.status === stage);
+      return `
       <section class="pipeline-column ${state.updatedStages.has(stage) ? "updated" : ""}">
         <h3>${stage}<span>${stageLeads.length}</span></h3>
         <div class="lead-list">
-          ${stageLeads.map((lead) => `
+          ${
+            stageLeads
+              .map(
+                (lead) => `
             <button class="lead-row score-${safeText(lead.classification)} ${lead.demo ? "demo-lead" : ""} ${lead.id === state.selectedLeadId ? "active" : ""} ${state.newLeadIds.has(lead.id) ? "is-new" : ""}" type="button" data-lead-id="${safeText(lead.id)}">
               <span>${safeText(lead.classification)}</span>
               <strong>${safeText(lead.name)}</strong>
@@ -678,16 +750,21 @@ function renderPipeline() {
               <small>${safeText(lead.service, "No service selected")}</small>
               <small><b class="score-pill">${safeNumber(lead.score)}</b> ${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit" }).format(new Date(lead.timestamp))) : ""}</small>
             </button>
-          `).join("") || `
+          `,
+              )
+              .join("") ||
+            `
             <div class="empty-state compact">
               <strong>No leads</strong>
               <p>No matching leads in this stage.</p>
             </div>
-          `}
+          `
+          }
         </div>
       </section>
     `;
-  }).join("");
+    })
+    .join("");
 
   board.querySelectorAll("[data-lead-id]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -721,7 +798,9 @@ function renderLeadTable() {
       <span>Stage</span>
       <span>Last activity</span>
     </div>
-    ${leads.map((lead) => `
+    ${leads
+      .map(
+        (lead) => `
       <button class="lead-table-row ${lead.id === state.selectedLeadId ? "active" : ""}" type="button" data-table-lead-id="${safeText(lead.id)}">
         <span><strong>${safeText(lead.name)}</strong><small>${safeText(lead.service, "No service")}</small></span>
         <span>${safeText(lead.business)}${lead.demo ? "<small>Live demo</small>" : ""}</span>
@@ -729,7 +808,9 @@ function renderLeadTable() {
         <span>${safeText(lead.status)}</span>
         <span>${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" }).format(new Date(lead.timestamp))) : "now"}</span>
       </button>
-    `).join("")}
+    `,
+      )
+      .join("")}
   `;
 
   table.querySelectorAll("[data-table-lead-id]").forEach((button) => {
@@ -755,8 +836,12 @@ function renderDetail() {
     return;
   }
 
-  const action = getWorkspaceActions().find((item) => item.lead_id === lead.id || item.leadId === lead.id);
-  const history = getWorkspaceEvents().filter((event) => (event.leadId || event.lead_id) === lead.id).slice(0, 6);
+  const action = getWorkspaceActions().find(
+    (item) => item.lead_id === lead.id || item.leadId === lead.id,
+  );
+  const history = getWorkspaceEvents()
+    .filter((event) => (event.leadId || event.lead_id) === lead.id)
+    .slice(0, 6);
   const restrictedActions = action?.restrictedActions || action?.restricted_actions || [];
   detail.innerHTML = `
     <p class="eyebrow">Lead detail</p>
@@ -772,26 +857,40 @@ function renderDetail() {
     </div>
     <div class="actions-history">
       <strong>Actions history</strong>
-      ${history.length ? history.map((event) => `
+      ${
+        history.length
+          ? history
+              .map(
+                (event) => `
         <article>
           <span>${safeText(formatEventTime(event))}</span>
           <p>${safeText(formatEventLabel(event))}</p>
           <small>${safeText(formatEventDetail(event))}</small>
         </article>
-      `).join("") : "<p>No actions recorded yet.</p>"}
+      `,
+              )
+              .join("")
+          : "<p>No actions recorded yet.</p>"
+      }
     </div>
-    ${restrictedActions.length ? `
+    ${
+      restrictedActions.length
+        ? `
       <div class="upgrade-callout">
         <strong>Upgrade unlocks automation</strong>
         <p>${safeText(restrictedActions.join(", "))} are restricted on your current plan.</p>
         <button class="button button-primary button-small" type="button" data-open-billing>View billing</button>
       </div>
-    ` : ""}
+    `
+        : ""
+    }
     <button class="button button-primary" type="button" data-next-stage="${safeText(lead.id)}">Mover etapa</button>
   `;
 
   detail.querySelector("[data-open-billing]")?.addEventListener("click", () => {
-    document.querySelector(".billing-panel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .querySelector(".billing-panel")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
   detail.querySelector("[data-next-stage]").addEventListener("click", async (event) => {
@@ -833,7 +932,12 @@ async function loadDashboard(options = {}) {
     if (!user) return;
   }
 
-  const results = await Promise.allSettled([fetchHealth(), fetchCrm(), fetchBilling(), fetchSettings()]);
+  const results = await Promise.allSettled([
+    fetchHealth(),
+    fetchCrm(),
+    fetchBilling(),
+    fetchSettings(),
+  ]);
   const failed = results.filter((result) => result.status === "rejected");
   if (failed.length) {
     showLiveStatus("Some data failed to sync");
@@ -858,7 +962,9 @@ async function loadDashboard(options = {}) {
 document.querySelectorAll("[data-filter]").forEach((button) => {
   button.addEventListener("click", () => {
     state.filter = button.dataset.filter;
-    document.querySelectorAll("[data-filter]").forEach((item) => item.classList.toggle("active", item === button));
+    document
+      .querySelectorAll("[data-filter]")
+      .forEach((item) => item.classList.toggle("active", item === button));
     renderPipeline();
   });
 });
@@ -866,7 +972,9 @@ document.querySelectorAll("[data-filter]").forEach((button) => {
 document.querySelectorAll("[data-status-filter]").forEach((button) => {
   button.addEventListener("click", () => {
     state.statusFilter = button.dataset.statusFilter;
-    document.querySelectorAll("[data-status-filter]").forEach((item) => item.classList.toggle("active", item === button));
+    document
+      .querySelectorAll("[data-status-filter]")
+      .forEach((item) => item.classList.toggle("active", item === button));
     renderPipeline();
   });
 });
@@ -900,12 +1008,14 @@ document.querySelector("#logoutButton").addEventListener("click", async () => {
 });
 
 loadDashboard({ showSkeleton: true }).catch((error) => {
-  document.querySelector("#pipelineBoard").innerHTML = `<p>No se pudo cargar el CRM: ${safeText(error.message)}</p>`;
+  document.querySelector("#pipelineBoard").innerHTML =
+    `<p>No se pudo cargar el CRM: ${safeText(error.message)}</p>`;
 });
 
 window.setInterval(() => {
   if (document.visibilityState === "visible" && state.user) {
-    loadDashboard({ silent: true, showSkeleton: false }).catch((error) => console.warn("[Luenio CRM] Live refresh failed", error));
+    loadDashboard({ silent: true, showSkeleton: false }).catch((error) =>
+      console.warn("[Luenio CRM] Live refresh failed", error),
+    );
   }
 }, 5000);
-

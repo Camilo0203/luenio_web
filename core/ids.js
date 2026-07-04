@@ -1,9 +1,11 @@
 function normalizePrefix(prefix) {
-  return String(prefix || "record")
-    .toLowerCase()
-    .replace(/[^a-z0-9_]/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "") || "record";
+  return (
+    String(prefix || "record")
+      .toLowerCase()
+      .replace(/[^a-z0-9_]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "") || "record"
+  );
 }
 
 function randomHex(bytes = 16) {

@@ -14,7 +14,14 @@ export const plans = {
   agency: {
     name: "Agency",
     monthlyLeadLimit: 10000,
-    features: ["crm", "lead_scoring", "email_notifications", "whatsapp_notifications", "webhooks", "multi_workspace"],
+    features: [
+      "crm",
+      "lead_scoring",
+      "email_notifications",
+      "whatsapp_notifications",
+      "webhooks",
+      "multi_workspace",
+    ],
     stripePriceEnv: "STRIPE_AGENCY_PRICE_ID",
   },
 };
@@ -41,7 +48,8 @@ export function countLeadsInBillingPeriod(leads = [], period = getCurrentBilling
   const end = new Date(period.end).getTime();
 
   return leads.filter((lead) => {
-    const timestamp = lead.created_at || lead.createdAt || lead.timestamp || lead.updated_at || lead.updatedAt;
+    const timestamp =
+      lead.created_at || lead.createdAt || lead.timestamp || lead.updated_at || lead.updatedAt;
     const time = timestamp ? new Date(timestamp).getTime() : 0;
     return Number.isFinite(time) && time >= start && time < end;
   }).length;
@@ -84,8 +92,10 @@ export function assertLeadLimit(user, leadsOrCurrentLeadCount) {
 export function filterActionsByPlan(planId, actions) {
   const plan = getPlan(planId);
   return actions.filter((action) => {
-    if (action === "send_whatsapp_notification") return plan.features.includes("whatsapp_notifications");
-    if (action === "send_webhook" || action === "send_crm_webhook") return plan.features.includes("webhooks");
+    if (action === "send_whatsapp_notification")
+      return plan.features.includes("whatsapp_notifications");
+    if (action === "send_webhook" || action === "send_crm_webhook")
+      return plan.features.includes("webhooks");
     return true;
   });
 }

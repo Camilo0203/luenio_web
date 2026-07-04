@@ -39,14 +39,26 @@ try {
   });
 
   const actionLog = await runAutomationEngine(lead, { plan: "pro" });
-  assert(deliveredUrls.includes(process.env.LUENIO_WEBHOOK_URL), "Configured webhook must be invoked internally.");
-  assert(deliveredUrls.includes(process.env.LUENIO_CRM_WEBHOOK_URL), "Configured CRM webhook must be invoked internally.");
-  assert(actionLog.integrationResults.length >= 2, "Automation should record integration delivery results.");
+  assert(
+    deliveredUrls.includes(process.env.LUENIO_WEBHOOK_URL),
+    "Configured webhook must be invoked internally.",
+  );
+  assert(
+    deliveredUrls.includes(process.env.LUENIO_CRM_WEBHOOK_URL),
+    "Configured CRM webhook must be invoked internally.",
+  );
+  assert(
+    actionLog.integrationResults.length >= 2,
+    "Automation should record integration delivery results.",
+  );
 
   actionLog.integrationResults.forEach((result) => {
     assert(result.label, "Integration result must include a label.");
     assert(result.status, "Integration result must include status.");
-    assert(!("destination" in result), "Integration result must not expose internal destination URLs.");
+    assert(
+      !("destination" in result),
+      "Integration result must not expose internal destination URLs.",
+    );
     assert(!("error" in result), "Integration result must not expose raw provider errors.");
   });
 

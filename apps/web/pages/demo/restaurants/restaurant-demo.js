@@ -13,9 +13,7 @@ mountIndustryDemo({
     pipeline: "#restaurantPipeline",
     score: "#restaurantLeadScore",
   },
-  bindInitial: [
-    { selector: "#restaurantPain", value: (scenario) => scenario.pain },
-  ],
+  bindInitial: [{ selector: "#restaurantPain", value: (scenario) => scenario.pain }],
   resetFields: [
     { selector: "#restaurantCaptureStatus", value: "Esperando mensaje" },
     { selector: "#restaurantLeadScore", value: "--" },
@@ -46,7 +44,10 @@ mountIndustryDemo({
         stageIndex: 1,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         fields: [{ selector: "#restaurantCaptureStatus", value: "Pedido capturado" }],
-        event: { label: "Pedido capturado", detail: "Intento de compra detectado. Lead marcado HOT." },
+        event: {
+          label: "Pedido capturado",
+          detail: "Intento de compra detectado. Lead marcado HOT.",
+        },
       },
     },
     {
@@ -68,7 +69,10 @@ mountIndustryDemo({
         stageIndex: 2,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         fields: [{ selector: "#restaurantCaptureStatus", value: "Automatización activa" }],
-        event: { label: "Automation triggered", detail: "Menú enviado, pedido solicitado y seguimiento creado." },
+        event: {
+          label: "Automation triggered",
+          detail: "Menú enviado, pedido solicitado y seguimiento creado.",
+        },
       },
     },
   ],

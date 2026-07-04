@@ -61,7 +61,9 @@ export async function runAutomationEngine(lead, options = {}) {
   for (const action of plan.actions) {
     const target = integrationTargets[action];
     if (!target) continue;
-    integrationResults.push(await sendIntegration(automation[target.configKey], plan.payload, target.label));
+    integrationResults.push(
+      await sendIntegration(automation[target.configKey], plan.payload, target.label),
+    );
   }
 
   return {

@@ -85,7 +85,11 @@ async function fetchHealth(port) {
 
 async function testDevelopmentFallback() {
   const reserved = await reservePort();
-  const child = spawnServer({ HOST: "127.0.0.1", PORT: String(reserved.port), NODE_ENV: "development" });
+  const child = spawnServer({
+    HOST: "127.0.0.1",
+    PORT: String(reserved.port),
+    NODE_ENV: "development",
+  });
 
   try {
     const result = await waitForServer(child);
@@ -100,7 +104,11 @@ async function testDevelopmentFallback() {
 
 async function testProductionFailsOnOccupiedPort() {
   const reserved = await reservePort();
-  const child = spawnServer({ HOST: "127.0.0.1", PORT: String(reserved.port), NODE_ENV: "production" });
+  const child = spawnServer({
+    HOST: "127.0.0.1",
+    PORT: String(reserved.port),
+    NODE_ENV: "production",
+  });
 
   try {
     const result = await waitForServer(child, { expectExit: true });

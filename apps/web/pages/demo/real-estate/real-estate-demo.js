@@ -14,9 +14,7 @@ mountIndustryDemo({
     leadName: "#realEstateLeadName",
     score: "#realEstateLeadScore",
   },
-  bindInitial: [
-    { selector: "#realEstatePain", value: (scenario) => scenario.pain },
-  ],
+  bindInitial: [{ selector: "#realEstatePain", value: (scenario) => scenario.pain }],
   lists: [
     {
       selector: "#realEstatePropertyList",
@@ -43,13 +41,19 @@ mountIndustryDemo({
       advanceIndex: 0,
       status: "Lead received...",
       chat: { role: "customer", text: "lead.message" },
-      event: { label: "Buyer inquiry received", detail: "Comprador compartió zona y presupuesto desde la landing." },
+      event: {
+        label: "Buyer inquiry received",
+        detail: "Comprador compartió zona y presupuesto desde la landing.",
+      },
     },
     {
       delay: 900,
       advanceIndex: 1,
       status: "Analyzing intent...",
-      event: { label: "Budget detected", detail: "IA detecta presupuesto, zona y urgencia de visita." },
+      event: {
+        label: "Budget detected",
+        detail: "IA detecta presupuesto, zona y urgencia de visita.",
+      },
     },
     {
       delay: 1800,
@@ -71,7 +75,10 @@ mountIndustryDemo({
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         stageIndex: 1,
-        event: { label: "Advisor handoff", detail: "Asesor asignado con presupuesto y propiedad sugerida." },
+        event: {
+          label: "Advisor handoff",
+          detail: "Asesor asignado con presupuesto y propiedad sugerida.",
+        },
       },
     },
     {
@@ -82,7 +89,10 @@ mountIndustryDemo({
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         stageIndex: 2,
-        event: { label: "Visit workflow", detail: "Seguimiento automático creado para agendar visita." },
+        event: {
+          label: "Visit workflow",
+          detail: "Seguimiento automático creado para agendar visita.",
+        },
       },
     },
   ],

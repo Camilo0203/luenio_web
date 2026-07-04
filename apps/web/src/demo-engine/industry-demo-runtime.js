@@ -2,13 +2,17 @@ import { advanceScenario, createDemoScenario, demoTypes } from "./index.js";
 import { submitPublicInquiry } from "../api-client.js";
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;",
-  })[character]);
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character],
+  );
 }
 
 function getValue(scenario, value) {
@@ -22,11 +26,13 @@ function renderIndustryLinks(activeType, selector = "#industryLinks") {
   const nav = document.querySelector(selector);
   if (!nav) return;
 
-  nav.innerHTML = demoTypes.map((type) => {
-    const href = `/demo/${type}`;
-    const active = type === activeType;
-    return `<a class="${active ? "active" : ""}" href="${href}">${escapeHtml(createDemoScenario(type).label)}</a>`;
-  }).join("");
+  nav.innerHTML = demoTypes
+    .map((type) => {
+      const href = `/demo/${type}`;
+      const active = type === activeType;
+      return `<a class="${active ? "active" : ""}" href="${href}">${escapeHtml(createDemoScenario(type).label)}</a>`;
+    })
+    .join("");
 }
 
 function renderCards(selector, items, template) {
@@ -39,7 +45,10 @@ function addMessage(selector, role, text) {
   const thread = document.querySelector(selector);
   if (!thread) return;
   thread.querySelector(".chat-empty")?.remove();
-  thread.insertAdjacentHTML("beforeend", `<div class="chat-bubble ${role}">${escapeHtml(text)}</div>`);
+  thread.insertAdjacentHTML(
+    "beforeend",
+    `<div class="chat-bubble ${role}">${escapeHtml(text)}</div>`,
+  );
   thread.scrollTop = thread.scrollHeight;
 }
 
@@ -65,12 +74,16 @@ function createEventRenderer(selector, state) {
     const events = document.querySelector(selector);
     if (!events) return;
     state.events.unshift({ label, detail });
-    events.innerHTML = state.events.map((event) => `
+    events.innerHTML = state.events
+      .map(
+        (event) => `
       <article>
         <strong>${escapeHtml(event.label)}</strong>
         <span>${escapeHtml(event.detail)}</span>
       </article>
-    `).join("");
+    `,
+      )
+      .join("");
   };
 }
 
@@ -110,7 +123,9 @@ function renderLeadCapture(config, state) {
   const cta = document.querySelector(config.captureSelector || ".final-cta-section");
   if (!cta || document.querySelector("#demoCaptureForm")) return;
 
-  cta.insertAdjacentHTML("beforeend", `
+  cta.insertAdjacentHTML(
+    "beforeend",
+    `
     <form class="demo-capture-form" id="demoCaptureForm" novalidate>
       <label>Nombre<input name="name" type="text" placeholder="Tu nombre" autocomplete="name" required /></label>
       <label>Negocio<input name="business" type="text" placeholder="Nombre del negocio" autocomplete="organization" required /></label>
@@ -119,14 +134,19 @@ function renderLeadCapture(config, state) {
       <button class="button button-primary wide" type="submit">Convertir esta demo en mi CRM</button>
       <p class="form-status wide" role="status" aria-live="polite" hidden></p>
     </form>
-  `);
+  `,
+  );
 
   cta.querySelector("#demoCaptureForm")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
     const payload = getCapturePayload(form, state.scenario);
 
-    if (payload.name.length < 2 || payload.business.length < 2 || payload.phone.replace(/\D/g, "").length < 8) {
+    if (
+      payload.name.length < 2 ||
+      payload.business.length < 2 ||
+      payload.phone.replace(/\D/g, "").length < 8
+    ) {
       setCaptureStatus(form, "error", "Completa nombre, negocio y WhatsApp para continuar.");
       return;
     }
@@ -134,10 +154,18 @@ function renderLeadCapture(config, state) {
     setCaptureStatus(form, "loading", "Enviando solicitud...");
     try {
       await submitPublicInquiry(payload);
-      setCaptureStatus(form, "success", "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.");
+      setCaptureStatus(
+        form,
+        "success",
+        "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.",
+      );
       form.reset();
     } catch {
-      setCaptureStatus(form, "error", "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.");
+      setCaptureStatus(
+        form,
+        "error",
+        "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.",
+      );
     }
   });
 }
@@ -163,14 +191,18 @@ export function mountIndustryDemo(config) {
   renderLeadCapture(config, state);
 
   function applyCrm(update = {}) {
-    if (update.leadName) setText(config.selectors.leadName, getValue(state.scenario, update.leadName));
+    if (update.leadName)
+      setText(config.selectors.leadName, getValue(state.scenario, update.leadName));
     if (update.score) setText(config.selectors.score, getValue(state.scenario, update.score));
-    if (typeof update.stageIndex === "number") setPipeline(config.selectors.pipeline, update.stageIndex);
+    if (typeof update.stageIndex === "number")
+      setPipeline(config.selectors.pipeline, update.stageIndex);
     if (typeof update.activeSequence === "number" && config.selectors.sequence) {
       setActiveSequence(config.selectors.sequence, update.activeSequence);
     }
     if (update.fields) {
-      update.fields.forEach(({ selector, value }) => setText(selector, getValue(state.scenario, value)));
+      update.fields.forEach(({ selector, value }) =>
+        setText(selector, getValue(state.scenario, value)),
+      );
     }
     if (update.event) addEvent(update.event.label, update.event.detail);
   }
@@ -200,10 +232,12 @@ export function mountIndustryDemo(config) {
         const next = advanceScenario(state.scenario, step.advanceIndex);
         state.scenario = next;
         if (step.status) setText(config.selectors.status, getValue(next, step.status));
-        if (step.chat) addMessage(config.selectors.chat, step.chat.role, getValue(next, step.chat.text));
+        if (step.chat)
+          addMessage(config.selectors.chat, step.chat.role, getValue(next, step.chat.text));
         if (step.event) addEvent(step.event.label, getValue(next, step.event.detail));
         if (step.crm) applyCrm(step.crm);
-        if (step.fields) step.fields.forEach(({ selector, value }) => setText(selector, getValue(next, value)));
+        if (step.fields)
+          step.fields.forEach(({ selector, value }) => setText(selector, getValue(next, value)));
       }, step.delay);
       state.timers.push(timer);
     });
@@ -219,7 +253,10 @@ export function mountIndustryDemo(config) {
   }
 
   document.querySelector(config.selectors.button)?.addEventListener("click", runDemo);
-  if (config.autoStart !== false && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  if (
+    config.autoStart !== false &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
     const autoStartTimer = window.setTimeout(runDemo, config.autoStartDelay || 650);
     state.timers.push(autoStartTimer);
   }

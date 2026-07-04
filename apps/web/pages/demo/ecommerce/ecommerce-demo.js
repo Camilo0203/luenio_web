@@ -14,9 +14,7 @@ mountIndustryDemo({
     leadName: "#ecommerceLeadName",
     score: "#ecommerceLeadScore",
   },
-  bindInitial: [
-    { selector: "#ecommercePain", value: (scenario) => scenario.pain },
-  ],
+  bindInitial: [{ selector: "#ecommercePain", value: (scenario) => scenario.pain }],
   lists: [
     {
       selector: "#ecommerceInventoryList",
@@ -44,13 +42,19 @@ mountIndustryDemo({
       advanceIndex: 0,
       status: "Lead received...",
       chat: { role: "customer", text: "lead.message" },
-      event: { label: "Product inquiry received", detail: "El comprador preguntó por disponibilidad antes de abandonar el chat." },
+      event: {
+        label: "Product inquiry received",
+        detail: "El comprador preguntó por disponibilidad antes de abandonar el chat.",
+      },
     },
     {
       delay: 850,
       advanceIndex: 1,
       status: "Tracking purchase intent...",
-      event: { label: "Purchase intent detected", detail: "La IA detectó intención de compra por disponibilidad de producto." },
+      event: {
+        label: "Purchase intent detected",
+        detail: "La IA detectó intención de compra por disponibilidad de producto.",
+      },
     },
     {
       delay: 1650,
@@ -73,7 +77,10 @@ mountIndustryDemo({
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         stageIndex: 1,
-        event: { label: "Inventory response sent", detail: "Disponibilidad confirmada + alternativa sugerida en segundos." },
+        event: {
+          label: "Inventory response sent",
+          detail: "Disponibilidad confirmada + alternativa sugerida en segundos.",
+        },
       },
     },
     {
@@ -85,7 +92,10 @@ mountIndustryDemo({
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 HOT`,
         stageIndex: 2,
-        event: { label: "Sale recovery flow", detail: "El chat abandonado queda convertido en oportunidad activa." },
+        event: {
+          label: "Sale recovery flow",
+          detail: "El chat abandonado queda convertido en oportunidad activa.",
+        },
       },
     },
   ],

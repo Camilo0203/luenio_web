@@ -18,25 +18,64 @@ const adminJs = readText("apps/admin/src/admin.js");
 const adminCss = readText("apps/admin/src/admin.css");
 
 [
-  ["landing trust metrics", landingHtml.includes("proof-section") && landingHtml.includes("proof-grid")],
-  ["landing testimonials", landingHtml.includes("testimonial-grid") && landingHtml.includes("Laura")],
-  ["landing use cases", landingHtml.includes("Ecommerce") && landingHtml.includes("Inmobiliaria") && landingHtml.includes("Educación")],
+  [
+    "landing trust metrics",
+    landingHtml.includes("proof-section") && landingHtml.includes("proof-grid"),
+  ],
+  [
+    "landing testimonials",
+    landingHtml.includes("testimonial-grid") && landingHtml.includes("Laura"),
+  ],
+  [
+    "landing use cases",
+    landingHtml.includes("Ecommerce") &&
+      landingHtml.includes("Inmobiliaria") &&
+      landingHtml.includes("Educación"),
+  ],
   ["landing conversion CTA", landingHtml.includes("Automatizar mi negocio")],
-  ["landing trust-first headline", landingHtml.includes("Convierte más clientes sin responder cada mensaje manualmente.")],
-  ["landing single CTA language", !landingHtml.includes("See how many sales you're missing") && !landingHtml.includes("Fix my missed leads")],
-  ["landing no fake demo focus", !landingHtml.includes("live-demo-section") && !landingHtml.includes('href="/demo"')],
-  ["landing proof styles", landingCss.includes(".proof-grid") && landingCss.includes(".testimonial-grid")],
-  ["landing premium polish", landingCss.includes("@keyframes heroIntro") && landingCss.includes(".trust-signals")],
+  [
+    "landing trust-first headline",
+    landingHtml.includes("Convierte más clientes sin responder cada mensaje manualmente."),
+  ],
+  [
+    "landing single CTA language",
+    !landingHtml.includes("See how many sales you're missing") &&
+      !landingHtml.includes("Fix my missed leads"),
+  ],
+  [
+    "landing no fake demo focus",
+    !landingHtml.includes("live-demo-section") && !landingHtml.includes('href="/demo"'),
+  ],
+  [
+    "landing proof styles",
+    landingCss.includes(".proof-grid") && landingCss.includes(".testimonial-grid"),
+  ],
+  [
+    "landing premium polish",
+    landingCss.includes("@keyframes heroIntro") && landingCss.includes(".trust-signals"),
+  ],
 ].forEach(([label, passed]) => {
   assert(passed, `Sellable landing must preserve ${label}.`);
 });
 
 [
-  ["Live Demo Mode button", adminHtml.includes('id="startLiveDemo"') && adminHtml.includes("Live Demo Mode")],
-  ["visible system states container", adminHtml.includes('id="systemSteps"') && adminCss.includes(".system-steps")],
-  ["onboarding flow", adminHtml.includes('id="onboardingFlow"') && adminCss.includes(".onboarding-flow")],
+  [
+    "Live Demo Mode button",
+    adminHtml.includes('id="startLiveDemo"') && adminHtml.includes("Live Demo Mode"),
+  ],
+  [
+    "visible system states container",
+    adminHtml.includes('id="systemSteps"') && adminCss.includes(".system-steps"),
+  ],
+  [
+    "onboarding flow",
+    adminHtml.includes('id="onboardingFlow"') && adminCss.includes(".onboarding-flow"),
+  ],
   ["lead table", adminHtml.includes('id="leadTable"') && adminCss.includes(".lead-table-row")],
-  ["pipeline kanban", adminHtml.includes('id="pipelineBoard"') && adminCss.includes(".pipeline-column")],
+  [
+    "pipeline kanban",
+    adminHtml.includes('id="pipelineBoard"') && adminCss.includes(".pipeline-column"),
+  ],
   ["lead detail panel", adminHtml.includes('id="leadDetail"') && adminCss.includes(".lead-detail")],
   ["actions history", adminCss.includes(".actions-history") && adminJs.includes("Actions history")],
 ].forEach(([label, passed]) => {
@@ -59,7 +98,10 @@ const adminCss = readText("apps/admin/src/admin.css");
   'classification: "cold"',
   "activeLead.classification.toUpperCase()",
 ].forEach((scoringSignal) => {
-  assert(adminJs.includes(scoringSignal), `Live demo must support dynamic scoring signal: ${scoringSignal}`);
+  assert(
+    adminJs.includes(scoringSignal),
+    `Live demo must support dynamic scoring signal: ${scoringSignal}`,
+  );
 });
 
 [
@@ -81,18 +123,27 @@ const adminCss = readText("apps/admin/src/admin.css");
   "state.demoLeads",
   "state.demoEvents",
 ].forEach((implementationHook) => {
-  assert(adminJs.includes(implementationHook), `Sellable product UI must keep implementation hook: ${implementationHook}`);
+  assert(
+    adminJs.includes(implementationHook),
+    `Sellable product UI must keep implementation hook: ${implementationHook}`,
+  );
 });
 
-[
-  "score-hot",
-  "score-warm",
-  "score-cold",
-].forEach((scoreClass) => {
-  assert(adminCss.includes(scoreClass), `CRM must preserve score visualization class: ${scoreClass}`);
+["score-hot", "score-warm", "score-cold"].forEach((scoreClass) => {
+  assert(
+    adminCss.includes(scoreClass),
+    `CRM must preserve score visualization class: ${scoreClass}`,
+  );
 });
 
-assert(!adminJs.includes("localStorage.setItem(\"luenio.demo"), "Live Demo Mode must not persist fake demo leads as customer data.");
-assert(!adminJs.includes("await updatePipeline({ leadId: lead.id") || adminJs.includes("if (isDemoLead(lead.id))"), "Demo leads must not call production pipeline updates.");
+assert(
+  !adminJs.includes('localStorage.setItem("luenio.demo'),
+  "Live Demo Mode must not persist fake demo leads as customer data.",
+);
+assert(
+  !adminJs.includes("await updatePipeline({ leadId: lead.id") ||
+    adminJs.includes("if (isDemoLead(lead.id))"),
+  "Demo leads must not call production pipeline updates.",
+);
 
 console.info("Sellable SaaS product guard passed");

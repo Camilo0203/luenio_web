@@ -16,7 +16,9 @@ function requiresSupabase() {
 
 function assertStorageAvailable() {
   if (requiresSupabase() && !getSupabaseConfig()) {
-    throw new Error("Supabase is required but SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing.");
+    throw new Error(
+      "Supabase is required but SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is missing.",
+    );
   }
 }
 
@@ -87,16 +89,32 @@ export function normalizePhone(value) {
   return String(value || "").replace(/\D/g, "");
 }
 
-export function isRecentDuplicateByPhone(records = [], phone, now = new Date(), windowMs = DUPLICATE_WINDOW_MS) {
+export function isRecentDuplicateByPhone(
+  records = [],
+  phone,
+  now = new Date(),
+  windowMs = DUPLICATE_WINDOW_MS,
+) {
   const normalizedPhone = normalizePhone(phone);
   if (!normalizedPhone) return false;
   const nowTime = now.getTime();
 
   return records.some((record) => {
-    const recordPhone = record.phoneNormalized || record.phone_normalized || normalizePhone(record.phone);
-    const timestamp = record.created_at || record.createdAt || record.timestamp || record.updated_at || record.updatedAt;
+    const recordPhone =
+      record.phoneNormalized || record.phone_normalized || normalizePhone(record.phone);
+    const timestamp =
+      record.created_at ||
+      record.createdAt ||
+      record.timestamp ||
+      record.updated_at ||
+      record.updatedAt;
     const time = timestamp ? new Date(timestamp).getTime() : 0;
-    return recordPhone === normalizedPhone && Number.isFinite(time) && nowTime - time >= 0 && nowTime - time <= windowMs;
+    return (
+      recordPhone === normalizedPhone &&
+      Number.isFinite(time) &&
+      nowTime - time >= 0 &&
+      nowTime - time <= windowMs
+    );
   });
 }
 
@@ -206,10 +224,18 @@ export async function listCrmData(userId) {
 
   if (getSupabaseConfig()) {
     const [leads, actions, notifications, events] = await Promise.all([
-      supabaseRequest(`leads?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`),
-      supabaseRequest(`lead_actions?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`),
-      supabaseRequest(`lead_notifications?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`),
-      supabaseRequest(`events?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=100`),
+      supabaseRequest(
+        `leads?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
+      ),
+      supabaseRequest(
+        `lead_actions?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
+      ),
+      supabaseRequest(
+        `lead_notifications?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
+      ),
+      supabaseRequest(
+        `events?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=100`,
+      ),
     ]);
     return {
       leads,
@@ -225,7 +251,9 @@ export async function listCrmData(userId) {
   return {
     leads: (database.leads || []).filter((lead) => lead.userId === userId),
     actions: (database.actions || []).filter((action) => action.userId === userId),
-    notifications: (database.notifications || []).filter((notification) => notification.userId === userId),
+    notifications: (database.notifications || []).filter(
+      (notification) => notification.userId === userId,
+    ),
     events: (database.events || []).filter((event) => event.userId === userId),
     updatedAt: database.updatedAt,
     storage: "json_fallback",
@@ -274,7 +302,13 @@ export async function storeCrmRecord(recordBundle) {
   if (getSupabaseConfig()) {
     await supabaseRequest("leads", {
       method: "POST",
-      body: JSON.stringify(mapLeadForSupabase({ ...tenantLead, phoneNormalized: normalizePhone(tenantLead.phone), workflow: tenantActionLog.workflow })),
+      body: JSON.stringify(
+        mapLeadForSupabase({
+          ...tenantLead,
+          phoneNormalized: normalizePhone(tenantLead.phone),
+          workflow: tenantActionLog.workflow,
+        }),
+      ),
     });
     await supabaseRequest("lead_actions", {
       method: "POST",
@@ -335,7 +369,7 @@ export async function storePublicInquiry(inquiry) {
   if (getSupabaseConfig()) {
     const cutoff = new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString();
     const duplicate = await supabaseRequest(
-      `contact_inquiries?phone_normalized=eq.${encodeURIComponent(publicInquiry.phoneNormalized)}&created_at=gte.${encodeURIComponent(cutoff)}&select=id&limit=1`
+      `contact_inquiries?phone_normalized=eq.${encodeURIComponent(publicInquiry.phoneNormalized)}&created_at=gte.${encodeURIComponent(cutoff)}&select=id&limit=1`,
     );
     if (duplicate?.length) throw duplicateError();
 
@@ -357,7 +391,8 @@ export async function storePublicInquiry(inquiry) {
   }
 
   const database = readLocalDatabase();
-  if (isRecentDuplicateByPhone(database.inquiries || [], publicInquiry.phone)) throw duplicateError();
+  if (isRecentDuplicateByPhone(database.inquiries || [], publicInquiry.phone))
+    throw duplicateError();
   const nextDatabase = writeLocalDatabase({
     ...database,
     inquiries: [publicInquiry, ...(database.inquiries || [])].slice(0, 500),
@@ -374,8 +409,10 @@ export async function updateLeadPipeline(leadId, updates, userId, pipelineEvent)
   assertStorageAvailable();
   if (!userId) throw new Error("userId is required to update CRM data.");
   if (!pipelineEvent?.id) throw new Error("pipeline event id is required to update CRM data.");
-  if (pipelineEvent.userId !== userId) throw new Error("pipeline event userId must match the workspace.");
-  if (pipelineEvent.leadId !== leadId) throw new Error("pipeline event leadId must match the updated lead.");
+  if (pipelineEvent.userId !== userId)
+    throw new Error("pipeline event userId must match the workspace.");
+  if (pipelineEvent.leadId !== leadId)
+    throw new Error("pipeline event leadId must match the updated lead.");
   const notFoundError = new Error("Lead not found in this workspace.");
   notFoundError.statusCode = 404;
 
@@ -385,39 +422,50 @@ export async function updateLeadPipeline(leadId, updates, userId, pipelineEvent)
       pipeline_stage: updates.pipelineStage || updates.status,
       updated_at: new Date().toISOString(),
     };
-    const [lead] = await supabaseRequest(`leads?id=eq.${encodeURIComponent(leadId)}&user_id=eq.${encodeURIComponent(userId)}`, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    });
+    const [lead] = await supabaseRequest(
+      `leads?id=eq.${encodeURIComponent(leadId)}&user_id=eq.${encodeURIComponent(userId)}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(body),
+      },
+    );
     if (!lead) throw notFoundError;
     await recordEvent(pipelineEvent);
     return { lead, storage: "supabase" };
   }
 
   const database = readLocalDatabase();
-  const existingLead = (database.leads || []).find((lead) => lead.id === leadId && lead.userId === userId);
+  const existingLead = (database.leads || []).find(
+    (lead) => lead.id === leadId && lead.userId === userId,
+  );
   if (!existingLead) throw notFoundError;
 
-  const leads = (database.leads || []).map((lead) => (
+  const leads = (database.leads || []).map((lead) =>
     lead.id === leadId && lead.userId === userId
       ? { ...lead, ...updates, updatedAt: new Date().toISOString() }
-      : lead
-  ));
+      : lead,
+  );
   writeLocalDatabase({
     ...database,
     leads,
     events: [pipelineEvent, ...(database.events || [])].slice(0, 1000),
   });
-  return { lead: leads.find((lead) => lead.id === leadId && lead.userId === userId), storage: "json_fallback" };
+  return {
+    lead: leads.find((lead) => lead.id === leadId && lead.userId === userId),
+    storage: "json_fallback",
+  };
 }
 
 export async function updateUserSubscription(subscription, subscriptionEvent) {
   assertStorageAvailable();
-  const { userId, plan, status, stripeCustomerId, stripeSubscriptionId, currentPeriodEnd } = subscription || {};
+  const { userId, plan, status, stripeCustomerId, stripeSubscriptionId, currentPeriodEnd } =
+    subscription || {};
   if (!userId) throw new Error("userId is required to update subscription.");
   if (!subscription?.id) throw new Error("subscription id is required to update subscription.");
-  if (!subscriptionEvent?.id) throw new Error("subscription event id is required to update subscription.");
-  if (subscriptionEvent.userId !== userId) throw new Error("subscription event userId must match the workspace.");
+  if (!subscriptionEvent?.id)
+    throw new Error("subscription event id is required to update subscription.");
+  if (subscriptionEvent.userId !== userId)
+    throw new Error("subscription event userId must match the workspace.");
 
   const timestamp = subscription.updatedAt || new Date().toISOString();
   const subscriptionRecord = { ...subscription, updatedAt: timestamp };
@@ -434,7 +482,9 @@ export async function updateUserSubscription(subscription, subscriptionEvent) {
       }),
     });
 
-    const existing = await supabaseRequest(`subscriptions?user_id=eq.${encodeURIComponent(userId)}&select=id&limit=1`);
+    const existing = await supabaseRequest(
+      `subscriptions?user_id=eq.${encodeURIComponent(userId)}&select=id&limit=1`,
+    );
     if (existing?.[0]?.id) {
       await supabaseRequest(`subscriptions?id=eq.${encodeURIComponent(existing[0].id)}`, {
         method: "PATCH",
@@ -469,11 +519,18 @@ export async function updateUserSubscription(subscription, subscriptionEvent) {
   }
 
   const database = readLocalDatabase();
-  const users = (database.users || []).map((user) => (
+  const users = (database.users || []).map((user) =>
     user.id === userId
-      ? { ...user, plan, stripeCustomerId, stripeSubscriptionId, subscriptionStatus: status, updatedAt: timestamp }
-      : user
-  ));
+      ? {
+          ...user,
+          plan,
+          stripeCustomerId,
+          stripeSubscriptionId,
+          subscriptionStatus: status,
+          updatedAt: timestamp,
+        }
+      : user,
+  );
   const subscriptions = [
     subscriptionRecord,
     ...(database.subscriptions || []).filter((item) => item.userId !== userId),

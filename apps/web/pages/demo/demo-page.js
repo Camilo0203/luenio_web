@@ -13,24 +13,30 @@ const state = {
 };
 
 function escapeHtml(value) {
-  return String(value ?? "").replace(/[&<>"']/g, (character) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;",
-  })[character]);
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (character) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[character],
+  );
 }
 
 function renderIndustryLinks() {
   const nav = document.querySelector("#industryLinks");
   if (!nav) return;
 
-  nav.innerHTML = demoTypes.map((type) => {
-    const href = type === "restaurants" ? "/demo/restaurants" : `/demo/${type}`;
-    const isActive = type === selectedType;
-    return `<a class="${isActive ? "active" : ""}" href="${href}">${escapeHtml(createDemoScenario(type).label)}</a>`;
-  }).join("");
+  nav.innerHTML = demoTypes
+    .map((type) => {
+      const href = type === "restaurants" ? "/demo/restaurants" : `/demo/${type}`;
+      const isActive = type === selectedType;
+      return `<a class="${isActive ? "active" : ""}" href="${href}">${escapeHtml(createDemoScenario(type).label)}</a>`;
+    })
+    .join("");
 }
 
 function renderScenario(nextScenario = state.scenario) {
@@ -46,40 +52,54 @@ function renderScenario(nextScenario = state.scenario) {
   document.querySelector("#leadSource").textContent = lead.source;
 
   const steps = document.querySelector("#demoSteps");
-  steps.innerHTML = nextScenario.steps.map((step, index) => {
-    const isDone = state.currentStep > index;
-    const isActive = state.currentStep === index;
-    return `
+  steps.innerHTML = nextScenario.steps
+    .map((step, index) => {
+      const isDone = state.currentStep > index;
+      const isActive = state.currentStep === index;
+      return `
       <article class="${isDone ? "done" : ""} ${isActive ? "active" : ""}">
         <span>${isDone ? "Completado" : isActive ? "En ejecución" : "Esperando"}</span>
         <strong>${escapeHtml(step.label)}</strong>
       </article>
     `;
-  }).join("");
+    })
+    .join("");
 
   const pipeline = document.querySelector("#demoPipeline");
   const stages = ["new", "qualified", "contacted", "converted"];
-  pipeline.innerHTML = stages.map((stage) => `
+  pipeline.innerHTML = stages
+    .map(
+      (stage) => `
     <article class="${lead.stage === stage ? "active" : ""}">
       <span>${escapeHtml(stage)}</span>
       ${lead.stage === stage ? `<strong>${escapeHtml(lead.name)}</strong><small>${escapeHtml(lead.service)}</small>` : "<small>Sin lead</small>"}
     </article>
-  `).join("");
+  `,
+    )
+    .join("");
 
   const feed = document.querySelector("#demoFeed");
-  feed.innerHTML = state.events.length ? state.events.map((event) => `
+  feed.innerHTML = state.events.length
+    ? state.events
+        .map(
+          (event) => `
     <article>
       <strong>${escapeHtml(event.label)}</strong>
       <span>${escapeHtml(event.detail)}</span>
     </article>
-  `).join("") : "<p>Ejecuta la demo para ver el registro de automatización.</p>";
+  `,
+        )
+        .join("")
+    : "<p>Ejecuta la demo para ver el registro de automatización.</p>";
 }
 
 function renderLeadCapture() {
   const cta = document.querySelector(".final-cta-section");
   if (!cta || document.querySelector("#demoCaptureForm")) return;
 
-  cta.insertAdjacentHTML("beforeend", `
+  cta.insertAdjacentHTML(
+    "beforeend",
+    `
     <form class="demo-capture-form" id="demoCaptureForm" novalidate>
       <label>Nombre<input name="name" type="text" placeholder="Tu nombre" autocomplete="name" required /></label>
       <label>Negocio<input name="business" type="text" placeholder="Nombre del negocio" autocomplete="organization" required /></label>
@@ -90,7 +110,8 @@ function renderLeadCapture() {
       <button class="button button-primary wide" type="submit">Convertir esta demo en mi CRM</button>
       <p class="form-status wide" role="status" aria-live="polite" hidden></p>
     </form>
-  `);
+  `,
+  );
 
   cta.querySelector("#demoCaptureForm")?.addEventListener("submit", submitDemoCapture);
 }
@@ -127,7 +148,11 @@ async function submitDemoCapture(event) {
   const form = event.currentTarget;
   const payload = getCapturePayload(form);
 
-  if (payload.name.length < 2 || payload.business.length < 2 || payload.phone.replace(/\D/g, "").length < 8) {
+  if (
+    payload.name.length < 2 ||
+    payload.business.length < 2 ||
+    payload.phone.replace(/\D/g, "").length < 8
+  ) {
     setCaptureStatus(form, "error", "Completa nombre, negocio y WhatsApp para continuar.");
     return;
   }
@@ -135,10 +160,18 @@ async function submitDemoCapture(event) {
   setCaptureStatus(form, "loading", "Enviando solicitud...");
   try {
     await submitPublicInquiry(payload);
-    setCaptureStatus(form, "success", "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.");
+    setCaptureStatus(
+      form,
+      "success",
+      "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.",
+    );
     form.reset();
   } catch {
-    setCaptureStatus(form, "error", "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.");
+    setCaptureStatus(
+      form,
+      "error",
+      "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.",
+    );
   }
 }
 
@@ -156,7 +189,7 @@ function runDemo() {
 
   const button = document.querySelector("#runDemo");
   button.disabled = true;
-  button.textContent = \"Demo en ejecución...\";
+  button.textContent = "Demo en ejecución...";
 
   state.scenario.steps.forEach((_, index) => {
     const timerId = window.setTimeout(() => {

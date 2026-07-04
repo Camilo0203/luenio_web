@@ -31,9 +31,18 @@
     "test:smoke:prod": "node scripts/smoke-server.mjs --production",
     "test:storage": "node scripts/storage-boundary-test.mjs",
     "test:strict-storage": "node scripts/strict-storage-test.mjs",
-    "test:stripe-webhook": "node scripts/stripe-webhook-guard-test.mjs"
+    "test:stripe-webhook": "node scripts/stripe-webhook-guard-test.mjs",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "vite": "^8.1.0"
+    "vite": "^8.1.0",
+    "eslint": "^9.19.0",
+    "@eslint/js": "^9.19.0",
+    "globals": "^15.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2"
   }
 }

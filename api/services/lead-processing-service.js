@@ -1,7 +1,13 @@
 import { assertLeadLimit, getLeadUsage } from "../../config/billing.js";
 import { buildPipelineUpdatedEvent } from "../../core/events.js";
 import { isValidPipelineStage, normalizeLead, validateLead } from "../../core/engine.js";
-import { assertNoRecentLeadDuplicate, getStorageMode, listCrmData, storeCrmRecord, updateLeadPipeline } from "../../db/storage.js";
+import {
+  assertNoRecentLeadDuplicate,
+  getStorageMode,
+  listCrmData,
+  storeCrmRecord,
+  updateLeadPipeline,
+} from "../../db/storage.js";
 import { runAutomationEngine } from "./automation-service.js";
 import { buildCrmRecordBundle } from "./crm-record-service.js";
 
@@ -84,7 +90,10 @@ function isPipelineUpdateRequest(body = {}) {
 }
 
 function normalizePipelineUpdates(body = {}) {
-  if (!isValidPipelineStage(body.status) || (body.pipelineStage && !isValidPipelineStage(body.pipelineStage))) {
+  if (
+    !isValidPipelineStage(body.status) ||
+    (body.pipelineStage && !isValidPipelineStage(body.pipelineStage))
+  ) {
     throw new PipelineStageValidationError();
   }
 
@@ -131,7 +140,11 @@ export async function captureCrmLeadFromBody({ body = {}, user }) {
 export async function processCrmRequestBody({ body = {}, user }) {
   if (isPipelineUpdateRequest(body)) {
     const updates = normalizePipelineUpdates(body);
-    const pipelineEvent = buildPipelineUpdatedEvent({ userId: user.id, leadId: body.leadId, updates });
+    const pipelineEvent = buildPipelineUpdatedEvent({
+      userId: user.id,
+      leadId: body.leadId,
+      updates,
+    });
     const result = await updateLeadPipeline(body.leadId, updates, user.id, pipelineEvent);
     return { response: { ok: true, mode: "pipeline_update", ...result } };
   }

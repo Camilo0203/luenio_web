@@ -22,18 +22,15 @@ const localDbRuntimePath = path.join(root, "db", "leads-db.json");
 
 function assertEmptyLocalDatabase(filePath, label) {
   const database = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  [
-    "users",
-    "leads",
-    "events",
-    "actions",
-    "notifications",
-    "subscriptions",
-    "inquiries",
-  ].forEach((collection) => {
-    assert(Array.isArray(database[collection]), `${label} ${collection} must be an array.`);
-    assert(database[collection].length === 0, `${label} ${collection} must not contain real tenant data.`);
-  });
+  ["users", "leads", "events", "actions", "notifications", "subscriptions", "inquiries"].forEach(
+    (collection) => {
+      assert(Array.isArray(database[collection]), `${label} ${collection} must be an array.`);
+      assert(
+        database[collection].length === 0,
+        `${label} ${collection} must not contain real tenant data.`,
+      );
+    },
+  );
 }
 
 assert(fs.existsSync(localDbExamplePath), "Local DB example must exist.");
@@ -46,13 +43,12 @@ const sensitivePatterns = [
   {
     pattern: /\b\d{10,15}\b/g,
     label: "long phone-like number",
-    allow: (match, filePath) => (
-      filePath.endsWith(path.join("scripts", "e2e.mjs"))
-      || filePath.endsWith(path.join("scripts", "readiness-test.mjs"))
-      || filePath.endsWith(path.join("scripts", "auth-security-test.mjs"))
-      || match.startsWith("1000000")
-      || match === "31536000"
-    ),
+    allow: (match, filePath) =>
+      filePath.endsWith(path.join("scripts", "e2e.mjs")) ||
+      filePath.endsWith(path.join("scripts", "readiness-test.mjs")) ||
+      filePath.endsWith(path.join("scripts", "auth-security-test.mjs")) ||
+      match.startsWith("1000000") ||
+      match === "31536000",
   },
   {
     pattern: /sk_live_[A-Za-z0-9_]+/g,
@@ -71,11 +67,15 @@ const mojibakePatterns = ["\u00c3", "\u00c2", "\u00ef\u00bf\u00bd", "\uFFFD"];
 for (const filePath of listFiles()) {
   const relativePath = path.relative(root, filePath);
   const extension = path.extname(filePath);
-  if (![".html", ".css", ".js", ".json", ".md", ".sql", ".example", ""].includes(extension)) continue;
+  if (![".html", ".css", ".js", ".json", ".md", ".sql", ".example", ""].includes(extension))
+    continue;
 
   const source = fs.readFileSync(filePath, "utf8");
   mojibakePatterns.forEach((pattern) => {
-    assert(!source.includes(pattern), `${relativePath} contains mojibake/encoding artifact: ${pattern}`);
+    assert(
+      !source.includes(pattern),
+      `${relativePath} contains mojibake/encoding artifact: ${pattern}`,
+    );
   });
 
   for (const { pattern, label, allow } of sensitivePatterns) {

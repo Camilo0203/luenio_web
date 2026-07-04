@@ -1,7 +1,12 @@
 import crypto from "node:crypto";
 import { isValidPlan } from "../../config/billing.js";
 import { getSecurityConfig } from "../../config/env.js";
-import { getSupabaseConfig, readLocalState, supabaseRequest, writeLocalState } from "../../db/storage.js";
+import {
+  getSupabaseConfig,
+  readLocalState,
+  supabaseRequest,
+  writeLocalState,
+} from "../../db/storage.js";
 import { generateRecordId } from "../../core/ids.js";
 
 const SESSION_COOKIE = "luenio_session";
@@ -126,12 +131,7 @@ function getCookie(request, name) {
 
 function sessionCookieAttributes() {
   const secure = getSecurityConfig().cookieSecure;
-  return [
-    "Path=/",
-    "HttpOnly",
-    "SameSite=Lax",
-    secure ? "Secure" : "",
-  ].filter(Boolean).join("; ");
+  return ["Path=/", "HttpOnly", "SameSite=Lax", secure ? "Secure" : ""].filter(Boolean).join("; ");
 }
 
 export function createSessionToken(user) {
@@ -174,7 +174,7 @@ export function verifySessionToken(token) {
 export function setSessionCookie(response, token) {
   response.setHeader(
     "Set-Cookie",
-    `${SESSION_COOKIE}=${token}; ${sessionCookieAttributes()}; Max-Age=${SESSION_TTL_SECONDS}`
+    `${SESSION_COOKIE}=${token}; ${sessionCookieAttributes()}; Max-Age=${SESSION_TTL_SECONDS}`,
   );
 }
 
@@ -187,7 +187,9 @@ export async function findUserByEmail(email) {
   if (!normalizedEmail) return null;
 
   if (getSupabaseConfig()) {
-    const [user] = await supabaseRequest(`users?email=eq.${encodeURIComponent(normalizedEmail)}&select=*&limit=1`);
+    const [user] = await supabaseRequest(
+      `users?email=eq.${encodeURIComponent(normalizedEmail)}&select=*&limit=1`,
+    );
     return normalizeUserFromSupabase(user);
   }
 
@@ -199,7 +201,9 @@ export async function findUserById(userId) {
   if (!userId) return null;
 
   if (getSupabaseConfig()) {
-    const [user] = await supabaseRequest(`users?id=eq.${encodeURIComponent(userId)}&select=*&limit=1`);
+    const [user] = await supabaseRequest(
+      `users?id=eq.${encodeURIComponent(userId)}&select=*&limit=1`,
+    );
     return normalizeUserFromSupabase(user);
   }
 
@@ -211,17 +215,20 @@ export async function createUser({ email, password, businessName, plan = DEFAULT
   const rawEmail = String(email || "").trim();
   const rawBusinessName = String(businessName || "").trim();
   if (rawEmail.length > authFieldLimits.email) throw new Error("Email is too long.");
-  if (rawBusinessName.length > authFieldLimits.businessName) throw new Error("Business name is too long.");
+  if (rawBusinessName.length > authFieldLimits.businessName)
+    throw new Error("Business name is too long.");
 
   const normalizedEmail = normalizeEmail(email);
   const normalizedBusinessName = normalizeAuthText(businessName, authFieldLimits.businessName);
   const normalizedPlan = String(plan || DEFAULT_PLAN).trim();
   const normalizedPassword = validatePasswordInput(password);
 
-  if (!normalizedEmail || !isValidEmail(normalizedEmail)) throw new Error("A valid email is required.");
+  if (!normalizedEmail || !isValidEmail(normalizedEmail))
+    throw new Error("A valid email is required.");
   if (normalizedBusinessName.length < 2) throw new Error("Business name is required.");
   if (!isValidPlan(normalizedPlan)) throw new Error("Unknown plan.");
-  if (await findUserByEmail(normalizedEmail)) throw new Error("A user with this email already exists.");
+  if (await findUserByEmail(normalizedEmail))
+    throw new Error("A user with this email already exists.");
 
   const user = {
     id: generateRecordId("user"),

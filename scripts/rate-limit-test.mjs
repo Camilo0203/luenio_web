@@ -85,7 +85,10 @@ try {
   const third = await postContact(baseUrl, 3);
 
   assert(first.response.ok, `First sensitive request should pass: ${JSON.stringify(first.body)}`);
-  assert(second.response.ok, `Second sensitive request should pass: ${JSON.stringify(second.body)}`);
+  assert(
+    second.response.ok,
+    `Second sensitive request should pass: ${JSON.stringify(second.body)}`,
+  );
   assert(third.response.status === 429, "Third sensitive request must be rate limited.");
   assert(third.body.error === "Too many requests", "Rate limit response must be explicit.");
 
