@@ -245,6 +245,21 @@ function getDemoPagePath(pathname) {
   return demoRoutes[pathname] || null;
 }
 
+function getInfoPagePath(pathname) {
+  const infoRoutes = {
+    "/terminos": path.join("legal", "terminos", "index.html"),
+    "/terminos/": path.join("legal", "terminos", "index.html"),
+    "/privacidad": path.join("legal", "privacidad", "index.html"),
+    "/privacidad/": path.join("legal", "privacidad", "index.html"),
+    "/reembolsos": path.join("legal", "reembolsos", "index.html"),
+    "/reembolsos/": path.join("legal", "reembolsos", "index.html"),
+    "/precios": path.join("pricing", "index.html"),
+    "/precios/": path.join("pricing", "index.html"),
+  };
+
+  return infoRoutes[pathname] || null;
+}
+
 function getNichePagePath(pathname) {
   const nicheRoutes = {
     "/gym": path.join("gym", "index.html"),
@@ -286,6 +301,10 @@ function resolvePublicFile(pathname) {
   const nichePagePath = getNichePagePath(pathname);
   if (nichePagePath) {
     return path.join(appRoot, "apps", "web", "pages", nichePagePath);
+  }
+  const infoPagePath = getInfoPagePath(pathname);
+  if (infoPagePath) {
+    return path.join(appRoot, "apps", "web", "pages", infoPagePath);
   }
 
   if (serverConfig.serveDist) {
