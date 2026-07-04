@@ -1,9 +1,11 @@
 import { mountIndustryDemo } from "../../../src/demo-engine/industry-demo-runtime.js";
 
+const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
+
 mountIndustryDemo({
   type: "ecommerce",
-  initialStatus: "Waiting for product inquiry",
-  completedStatus: "Demo completed: abandoned chat recovered",
+  initialStatus: "Esperando consulta de producto",
+  completedStatus: "Demo completada: chat abandonado recuperado",
   selectors: {
     links: "#industryLinks",
     button: "#runEcommerceDemo",
@@ -31,7 +33,7 @@ mountIndustryDemo({
   resetFields: [
     { selector: "#ecommerceLeadName", value: "Esperando consulta" },
     { selector: "#ecommerceLeadScore", value: "--" },
-    { selector: "#ecommerceConversionValue", value: "Recovered revenue: $0" },
+    { selector: "#ecommerceConversionValue", value: "Ingreso recuperado: $0" },
   ],
   initialCrm: {
     stageIndex: 0,
@@ -40,45 +42,46 @@ mountIndustryDemo({
     {
       delay: 0,
       advanceIndex: 0,
-      status: "Lead received...",
+      status: "Lead recibido...",
       chat: { role: "customer", text: "lead.message" },
       event: {
-        label: "Product inquiry received",
+        label: "Consulta de producto recibida",
         detail: "El comprador preguntó por disponibilidad antes de abandonar el chat.",
       },
     },
     {
       delay: 850,
       advanceIndex: 1,
-      status: "Tracking purchase intent...",
+      status: "Rastreando intención de compra...",
       event: {
-        label: "Purchase intent detected",
+        label: "Intención de compra detectada",
         detail: "La IA detectó intención de compra por disponibilidad de producto.",
       },
     },
     {
       delay: 1650,
       advanceIndex: 2,
-      status: (scenario) => `Lead scored: ${scenario.lead.classification.toUpperCase()} 🔥`,
+      status: (scenario) =>
+        `Lead calificado: ${CLASSIFICATION_LABELS[scenario.lead.classification] ?? scenario.lead.classification.toUpperCase()} 🔥`,
       chat: { role: "ai", text: "aiReply" },
-      fields: [{ selector: "#ecommerceConversionValue", value: "Recovered revenue: $129" }],
+      fields: [{ selector: "#ecommerceConversionValue", value: "Ingreso recuperado: $129" }],
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
-        event: { label: "CRM update", detail: "Comprador añadido a Sales Pipeline." },
+        event: { label: "Actualización de CRM", detail: "Comprador añadido a Pipeline de ventas." },
       },
     },
     {
       delay: 2800,
       advanceIndex: 3,
-      status: "Sent to CRM",
+      status: "Enviado al CRM",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
         event: {
-          label: "Inventory response sent",
+          label: "Respuesta de inventario enviada",
           detail: "Disponibilidad confirmada + alternativa sugerida en segundos.",
         },
       },
@@ -86,14 +89,14 @@ mountIndustryDemo({
     {
       delay: 3900,
       advanceIndex: 4,
-      status: "Conversion automation triggered",
-      fields: [{ selector: "#ecommerceConversionValue", value: "Recovered revenue: $258" }],
+      status: "Automatización de conversión activada",
+      fields: [{ selector: "#ecommerceConversionValue", value: "Ingreso recuperado: $258" }],
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 2,
         event: {
-          label: "Sale recovery flow",
+          label: "Flujo de recuperación de venta",
           detail: "El chat abandonado queda convertido en oportunidad activa.",
         },
       },

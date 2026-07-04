@@ -1,9 +1,11 @@
 import { mountIndustryDemo } from "../../../src/demo-engine/industry-demo-runtime.js";
 
+const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
+
 mountIndustryDemo({
   type: "real-estate",
-  initialStatus: "Waiting for buyer inquiry",
-  completedStatus: "Demo completed: buyer routed to advisor",
+  initialStatus: "Esperando consulta de comprador",
+  completedStatus: "Demo completada: comprador asignado a asesor",
   selectors: {
     links: "#industryLinks",
     button: "#runRealEstateDemo",
@@ -39,44 +41,48 @@ mountIndustryDemo({
     {
       delay: 0,
       advanceIndex: 0,
-      status: "Lead received...",
+      status: "Lead recibido...",
       chat: { role: "customer", text: "lead.message" },
       event: {
-        label: "Buyer inquiry received",
+        label: "Consulta de comprador recibida",
         detail: "Comprador compartió zona y presupuesto desde la landing.",
       },
     },
     {
       delay: 900,
       advanceIndex: 1,
-      status: "Analyzing intent...",
+      status: "Analizando intención...",
       event: {
-        label: "Budget detected",
+        label: "Presupuesto detectado",
         detail: "IA detecta presupuesto, zona y urgencia de visita.",
       },
     },
     {
       delay: 1800,
       advanceIndex: 2,
-      status: (scenario) => `Lead scored: ${scenario.lead.classification.toUpperCase()} 🔥`,
+      status: (scenario) =>
+        `Lead calificado: ${CLASSIFICATION_LABELS[scenario.lead.classification] ?? scenario.lead.classification.toUpperCase()} 🔥`,
       chat: { role: "ai", text: "aiReply" },
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
-        event: { label: "CRM update", detail: "Comprador añadido a Buyer Pipeline." },
+        event: {
+          label: "Actualización de CRM",
+          detail: "Comprador añadido a Pipeline de compradores.",
+        },
       },
     },
     {
       delay: 2900,
       advanceIndex: 3,
-      status: "Sent to CRM",
+      status: "Enviado al CRM",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
         event: {
-          label: "Advisor handoff",
+          label: "Asesor asignado",
           detail: "Asesor asignado con presupuesto y propiedad sugerida.",
         },
       },
@@ -84,13 +90,13 @@ mountIndustryDemo({
     {
       delay: 3900,
       advanceIndex: 4,
-      status: "Automation triggered",
+      status: "Automatización activada",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 2,
         event: {
-          label: "Visit workflow",
+          label: "Flujo de visita",
           detail: "Seguimiento automático creado para agendar visita.",
         },
       },

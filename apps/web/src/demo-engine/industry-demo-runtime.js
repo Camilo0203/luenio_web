@@ -224,7 +224,7 @@ export function mountIndustryDemo(config) {
     const button = document.querySelector(config.selectors.button);
     if (button) {
       button.disabled = true;
-      button.textContent = config.runningLabel || "Demo running...";
+      button.textContent = config.runningLabel || "Demo en ejecución...";
     }
 
     config.steps.forEach((step) => {
@@ -245,7 +245,7 @@ export function mountIndustryDemo(config) {
     const finalTimer = window.setTimeout(() => {
       if (button) {
         button.disabled = false;
-        button.textContent = config.readyLabel || "Live Demo Mode";
+        button.textContent = config.readyLabel || "Ejecutar Demo en Vivo";
       }
       setText(config.selectors.status, config.completedStatus);
     }, config.completedDelay || 5100);

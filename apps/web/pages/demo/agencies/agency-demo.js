@@ -1,9 +1,11 @@
 import { mountIndustryDemo } from "../../../src/demo-engine/industry-demo-runtime.js";
 
+const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
+
 mountIndustryDemo({
   type: "agencies",
-  initialStatus: "Waiting for client lead",
-  completedStatus: "Demo completed: agency service opportunity created",
+  initialStatus: "Esperando lead de cliente",
+  completedStatus: "Demo completada: oportunidad de servicio para agencia creada",
   selectors: {
     links: "#industryLinks",
     button: "#runAgencyDemo",
@@ -35,7 +37,7 @@ mountIndustryDemo({
       dataKey: "automation",
       template: (trigger, index, escapeHtml) => `
         <article>
-          <span>Trigger ${index + 1}</span>
+          <span>Disparador ${index + 1}</span>
           <strong>${escapeHtml(trigger)}</strong>
         </article>
       `,
@@ -53,33 +55,34 @@ mountIndustryDemo({
     {
       delay: 0,
       advanceIndex: 0,
-      status: "Lead received...",
+      status: "Lead recibido...",
       event: {
-        label: "Client lead received",
+        label: "Lead de cliente recibido",
         detail: (scenario) => `"${scenario.lead.message}" entró desde ${scenario.lead.source}.`,
       },
     },
     {
       delay: 850,
       advanceIndex: 1,
-      status: "Analyzing intent...",
+      status: "Analizando intención...",
       crm: { stageIndex: 0, activeSequence: 0 },
       event: {
-        label: "Intent analyzed",
+        label: "Intención analizada",
         detail: "La IA detectó necesidad de adquisición de clientes y crecimiento comercial.",
       },
     },
     {
       delay: 1650,
       advanceIndex: 2,
-      status: (scenario) => `Lead scored: ${scenario.lead.classification.toUpperCase()} 🔥`,
+      status: (scenario) =>
+        `Lead calificado: ${CLASSIFICATION_LABELS[scenario.lead.classification] ?? scenario.lead.classification.toUpperCase()} 🔥`,
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
         activeSequence: 1,
         event: {
-          label: "Agency CRM update",
+          label: "Actualización de CRM de agencia",
           detail: "Lead calificado y servicio recomendado: IA + CRM + WhatsApp.",
         },
       },
@@ -87,29 +90,29 @@ mountIndustryDemo({
     {
       delay: 2800,
       advanceIndex: 3,
-      status: "Sent to CRM",
+      status: "Enviado al CRM",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT · High-value client`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE · Cliente de alto valor`,
         stageIndex: 1,
         activeSequence: 2,
         event: {
-          label: "Agency CRM update",
-          detail: "Lead añadido a Agency Pipeline y etiquetado como high-value client.",
+          label: "Actualización de CRM de agencia",
+          detail: "Lead añadido a Pipeline de agencia y etiquetado como cliente de alto valor.",
         },
       },
     },
     {
       delay: 3900,
       advanceIndex: 4,
-      status: "Resell automation triggered",
+      status: "Automatización de reventa activada",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT · High-value client`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE · Cliente de alto valor`,
         stageIndex: 2,
         activeSequence: 3,
         event: {
-          label: "Resell workflow",
+          label: "Flujo de reventa",
           detail: "La agencia puede vender Luenio como servicio recurrente para este cliente.",
         },
       },

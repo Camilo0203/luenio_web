@@ -1,9 +1,11 @@
 import { mountIndustryDemo } from "../../../src/demo-engine/industry-demo-runtime.js";
 
+const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
+
 mountIndustryDemo({
   type: "gym",
-  initialStatus: "Waiting for price inquiry",
-  completedStatus: "Demo completed: inquiry moved toward membership",
+  initialStatus: "Esperando consulta de precio",
+  completedStatus: "Demo completada: consulta convertida en membresía",
   selectors: {
     links: "#industryLinks",
     button: "#runGymDemo",
@@ -39,52 +41,56 @@ mountIndustryDemo({
     {
       delay: 0,
       advanceIndex: 0,
-      status: "Lead received...",
+      status: "Lead recibido...",
       chat: { role: "customer", text: "lead.message" },
-      event: { label: "Lead received", detail: "Consulta por mensualidad recibida en WhatsApp." },
+      event: { label: "Lead recibido", detail: "Consulta por mensualidad recibida en WhatsApp." },
     },
     {
       delay: 900,
       advanceIndex: 1,
-      status: "Analyzing intent...",
+      status: "Analizando intención...",
       event: {
-        label: "Interest detected",
+        label: "Interés detectado",
         detail: "La IA detectó intención por precio y posible visita.",
       },
     },
     {
       delay: 1700,
       advanceIndex: 2,
-      status: (scenario) => `Lead scored: ${scenario.lead.classification.toUpperCase()} 🔥`,
+      status: (scenario) =>
+        `Lead calificado: ${CLASSIFICATION_LABELS[scenario.lead.classification] ?? scenario.lead.classification.toUpperCase()} 🔥`,
       chat: { role: "ai", text: "aiReply" },
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
-        event: { label: "CRM update", detail: "Lead añadido a Interested Leads." },
+        event: { label: "Actualización de CRM", detail: "Lead añadido a Leads interesados." },
       },
     },
     {
       delay: 2800,
       advanceIndex: 3,
-      status: "Sent to CRM",
+      status: "Enviado al CRM",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 1,
-        event: { label: "CRM update", detail: "CRM actualizado con interés en membresía." },
+        event: {
+          label: "Actualización de CRM",
+          detail: "CRM actualizado con interés en membresía.",
+        },
       },
     },
     {
       delay: 3800,
       advanceIndex: 4,
-      status: "Follow-up automation triggered",
+      status: "Automatización de seguimiento activada",
       crm: {
         leadName: (scenario) => scenario.lead.name,
-        score: (scenario) => `${scenario.lead.score}/100 HOT`,
+        score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
         stageIndex: 2,
         event: {
-          label: "Automation triggered",
+          label: "Automatización activada",
           detail: "Planes enviados + visita sugerida + recordatorio programado.",
         },
       },
