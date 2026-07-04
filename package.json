@@ -1,0 +1,39 @@
+{
+  "name": "luenio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "dev:vite": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js",
+    "dev:full": "node server.js",
+    "test": "node scripts/production-gate.mjs",
+    "test:api-errors": "node scripts/api-error-boundary-test.mjs",
+    "test:automation": "node scripts/automation-privacy-test.mjs",
+    "test:billing": "node scripts/billing-checkout-guard-test.mjs",
+    "test:data": "node scripts/data-hygiene-test.mjs",
+    "test:e2e": "node scripts/e2e.mjs",
+    "test:architecture": "node scripts/architecture-test.mjs",
+    "test:auth": "node scripts/auth-security-test.mjs",
+    "test:contact": "node scripts/contact-public-response-test.mjs",
+    "test:core": "node scripts/core-engine-test.mjs",
+    "test:dev-port": "node scripts/dev-port-fallback-test.mjs",
+    "test:demo-system": "node scripts/demo-system-test.mjs",
+    "test:niche-landings": "node scripts/niche-landing-test.mjs",
+    "test:rate-limit": "node scripts/rate-limit-test.mjs",
+    "test:readiness": "node scripts/readiness-test.mjs",
+    "test:sellable": "node scripts/sellable-product-test.mjs",
+    "test:schema": "node scripts/schema-test.mjs",
+    "test:smoke": "node scripts/smoke-server.mjs",
+    "test:smoke:prod": "node scripts/smoke-server.mjs --production",
+    "test:storage": "node scripts/storage-boundary-test.mjs",
+    "test:strict-storage": "node scripts/strict-storage-test.mjs",
+    "test:stripe-webhook": "node scripts/stripe-webhook-guard-test.mjs"
+  },
+  "devDependencies": {
+    "vite": "^8.1.0"
+  }
+}

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luenio Demo | Restaurantes</title>
+    <meta name="description" content="Demo de WhatsApp IA para restaurantes que pierden pedidos por responder tarde." />
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+  </head>
+  <body>
+    <main class="demo-page restaurant-demo" data-demo-type="restaurants">
+      <nav class="demo-nav">
+        <a href="/">Luenio</a>
+        <div id="industryLinks"></div>
+      </nav>
+
+      <section class="restaurant-hero">
+        <div>
+          <p class="eyebrow">Restaurant Live Demo</p>
+          <h1>Un WhatsApp sin respuesta es un pedido que se va.</h1>
+          <p id="restaurantPain">Cada minuto sin automatización le cuesta ventas al restaurante. Mira cómo Luenio responde, captura el pedido y lo manda al CRM.</p>
+          <button class="button button-primary" id="runRestaurantDemo" type="button">Live Demo Mode</button>
+        </div>
+        <aside class="restaurant-live-indicator" aria-live="polite">
+          <span></span>
+          <strong id="restaurantLiveStatus">Waiting for customer message</strong>
+        </aside>
+      </section>
+
+      <section class="restaurant-workspace">
+        <article class="restaurant-chat" aria-label="Chat simulation UI">
+          <div class="restaurant-phone-head">
+            <span>WhatsApp</span>
+            <strong>Mesa Norte</strong>
+          </div>
+          <div class="chat-thread" id="restaurantChatThread">
+            <p class="chat-empty">Presiona Live Demo Mode para simular un cliente real.</p>
+          </div>
+        </article>
+
+        <aside class="restaurant-crm-panel" aria-label="CRM side panel">
+          <p class="eyebrow">CRM Pipeline</p>
+          <h2>Pedido entrante</h2>
+          <div class="restaurant-crm-card">
+            <span>Estado</span>
+            <strong id="restaurantCaptureStatus">Esperando mensaje</strong>
+          </div>
+          <div class="restaurant-crm-card">
+            <span>Score</span>
+            <strong id="restaurantLeadScore">--</strong>
+          </div>
+          <div class="restaurant-pipeline" id="restaurantPipeline">
+            <article class="active"><span>Nuevo</span><strong>WhatsApp</strong></article>
+            <article><span>HOT</span><strong>CRM</strong></article>
+            <article><span>Pedido</span><strong>Automación</strong></article>
+          </div>
+          <div class="restaurant-events" id="restaurantEvents"></div>
+        </aside>
+      </section>
+
+      <section class="final-cta-section">
+        <div>
+          <p class="eyebrow">Conversion</p>
+          <h2>Automatiza los pedidos de tu restaurante.</h2>
+          <p>Responder lento en WhatsApp cuesta dinero. Luenio responde, captura intención y ordena el pedido para tu equipo.</p>
+        </div>
+        <a class="button button-primary" href="/#contacto">Activate this for my business</a>
+      </section>
+    </main>
+
+    <script type="module" src="/apps/web/pages/demo/restaurants/restaurant-demo.js"></script>
+  </body>
+</html>

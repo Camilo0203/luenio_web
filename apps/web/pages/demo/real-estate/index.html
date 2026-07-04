@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luenio Demo | Inmobiliarias</title>
+    <meta name="description" content="Demo de IA para inmobiliarias que califica compradores, detecta presupuesto y actualiza CRM." />
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+  </head>
+  <body>
+    <main class="demo-page real-estate-demo" data-demo-type="real-estate">
+      <nav class="demo-nav">
+        <a href="/">Luenio</a>
+        <div id="industryLinks"></div>
+      </nav>
+
+      <section class="real-estate-hero">
+        <div>
+          <p class="eyebrow">Real Estate Live Demo</p>
+          <h1>Califica compradores antes de llamar.</h1>
+          <p id="realEstatePain">Cuando un comprador llega con presupuesto claro, cada minuto sin respuesta reduce la probabilidad de visita.</p>
+          <button class="button button-primary" id="runRealEstateDemo" type="button">Ejecutar Demo en Vivo</button>
+        </div>
+        <aside class="real-estate-live-card" aria-live="polite">
+          <span></span>
+          <strong id="realEstateLiveStatus">Esperando consulta de cliente</strong>
+          <small>Buyer qualification engine</small>
+        </aside>
+      </section>
+
+      <section class="real-estate-workspace">
+        <article class="real-estate-chat" aria-label="Buyer chat simulation">
+          <div class="real-estate-chat-head">
+            <span>Landing chat</span>
+            <strong>Vivienda Capital</strong>
+          </div>
+          <div class="chat-thread" id="realEstateChatThread">
+            <p class="chat-empty">Presiona Ejecutar Demo en Vivo para simular una consulta de comprador.</p>
+          </div>
+        </article>
+
+        <section class="real-estate-match-panel" aria-label="Property match panel">
+          <p class="eyebrow">Buyer match</p>
+          <h2>Presupuesto detectado</h2>
+          <div class="real-estate-property-list" id="realEstatePropertyList"></div>
+        </section>
+
+        <aside class="real-estate-crm-panel" aria-label="CRM visualization">
+          <p class="eyebrow">Buyer Pipeline</p>
+          <h2>Comprador calificado</h2>
+          <div class="real-estate-crm-card"><span>Lead</span><strong id="realEstateLeadName">Esperando consulta</strong></div>
+          <div class="real-estate-crm-card"><span>Score</span><strong id="realEstateLeadScore">--</strong></div>
+          <div class="real-estate-pipeline" id="realEstatePipeline">
+            <article class="active"><span>Nuevo</span><strong>Consulta</strong></article>
+            <article><span>HOT</span><strong>Buyer Pipeline</strong></article>
+            <article><span>Handoff</span><strong>Asesor asignado</strong></article>
+          </div>
+          <div class="real-estate-events" id="realEstateEvents"></div>
+        </aside>
+      </section>
+
+      <section class="final-cta-section">
+        <div>
+          <p class="eyebrow">Conversion</p>
+          <h2>Convierte consultas inmobiliarias en visitas calificadas.</h2>
+          <p>Luenio detecta presupuesto, recomienda propiedad, asigna asesor y guarda el comprador en CRM.</p>
+        </div>
+        <a class="button button-primary" href="/#contacto">Activar para mi inmobiliaria</a>
+      </section>
+    </main>
+
+    <script type="module" src="/apps/web/pages/demo/real-estate/real-estate-demo.js"></script>
+  </body>
+</html>

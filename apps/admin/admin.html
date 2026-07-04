@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luenio CRM | Leads y automatizaciones</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preload" as="image" href="/Luenio Logotipe.png" />
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/admin/src/admin.css" />
+  </head>
+  <body class="admin-body">
+    <header class="admin-shell">
+      <a class="brand" href="/" aria-label="Luenio Agency">
+        <img class="brand-logo" src="/Luenio Logotipe.png" width="256" height="256" alt="" decoding="async" />
+        <span class="brand-fallback" aria-hidden="true">L</span>
+      </a>
+      <div>
+        <p class="eyebrow">Luenio CRM</p>
+        <h1>Sales automation dashboard</h1>
+        <span class="storage-badge" id="storageBadge">Storage: checking...</span>
+      </div>
+      <div class="admin-user" id="adminUser">
+        <span>Workspace</span>
+        <strong>Checking session</strong>
+      </div>
+      <div class="live-status" id="liveStatus" aria-live="polite">
+        <span></span>
+        Live sync active
+      </div>
+      <button class="button button-primary button-small" id="startLiveDemo" type="button">Live Demo Mode</button>
+      <button class="button button-primary button-small" id="refreshLeads" type="button">Actualizar CRM</button>
+      <button class="button button-small" id="logoutButton" type="button">Logout</button>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-metrics" aria-label="Resumen CRM">
+        <article><span>Total leads</span><strong id="metricTotal">0</strong></article>
+        <article><span>Hot</span><strong id="metricHot">0</strong></article>
+        <article><span>Warm</span><strong id="metricWarm">0</strong></article>
+        <article><span>Cold</span><strong id="metricCold">0</strong></article>
+      </section>
+
+      <section class="demo-console" id="demoConsole" aria-label="Live Demo Mode">
+        <div class="demo-copy">
+          <p class="eyebrow">Live Demo Mode</p>
+          <h2>Watch Luenio qualify a lead in real time</h2>
+          <p>Run a safe sales demo that shows intake, intent analysis, scoring, CRM sync and automation trigger without touching production data.</p>
+        </div>
+        <div class="system-steps" id="systemSteps" aria-live="polite"></div>
+      </section>
+
+      <section class="onboarding-panel" aria-label="Workspace setup">
+        <div>
+          <p class="eyebrow">Onboarding</p>
+          <h2>Launch your revenue workspace</h2>
+        </div>
+        <div class="onboarding-flow" id="onboardingFlow"></div>
+        <div class="checklist-grid" id="setupChecklist"></div>
+      </section>
+
+      <section class="system-health" id="systemHealth" aria-label="Estado del sistema">
+        <div>
+          <p class="eyebrow">System health</p>
+          <h2>Operational status</h2>
+        </div>
+        <div class="health-grid">
+          <article><span>Database</span><strong id="healthDatabase">Checking</strong></article>
+          <article><span>CRM webhook</span><strong id="healthCrmWebhook">Checking</strong></article>
+          <article><span>WhatsApp</span><strong id="healthWhatsapp">Checking</strong></article>
+          <article><span>Email</span><strong id="healthEmail">Checking</strong></article>
+        </div>
+        <p id="healthNote">Validando conexion del sistema.</p>
+      </section>
+
+      <section class="billing-panel" aria-label="Billing">
+        <div>
+          <p class="eyebrow">Billing</p>
+          <h2>Plan and limits</h2>
+        </div>
+        <p class="billing-status" id="billingStatus" role="status" aria-live="polite" hidden></p>
+        <div class="billing-grid" id="billingGrid"></div>
+      </section>
+
+      <section class="activity-panel" aria-label="Activity feed">
+        <div>
+          <p class="eyebrow">Live activity</p>
+          <h2>Automation events</h2>
+        </div>
+        <div class="activity-feed" id="activityFeed">
+          <p>Loading events...</p>
+        </div>
+      </section>
+
+      <section class="admin-panel">
+        <div class="admin-toolbar">
+          <div>
+            <p class="eyebrow">Pipeline</p>
+            <h2>Leads capturados</h2>
+          </div>
+          <div class="admin-filters" aria-label="Filtros">
+            <button class="active" type="button" data-filter="all">All</button>
+            <button type="button" data-filter="hot">Hot</button>
+            <button type="button" data-filter="warm">Warm</button>
+            <button type="button" data-filter="cold">Cold</button>
+          </div>
+          <div class="admin-filters" aria-label="Status filters">
+            <button class="active" type="button" data-status-filter="all">All stages</button>
+            <button type="button" data-status-filter="new">New</button>
+            <button type="button" data-status-filter="qualified">Qualified</button>
+            <button type="button" data-status-filter="contacted">Contacted</button>
+            <button type="button" data-status-filter="converted">Converted</button>
+          </div>
+        </div>
+
+        <div class="pipeline-board" id="pipelineBoard"></div>
+      </section>
+
+      <aside class="lead-detail" id="leadDetail">
+        <p class="eyebrow">Detalle</p>
+        <h2>Selecciona un lead</h2>
+        <p>Veras score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
+      </aside>
+
+      <section class="lead-table-panel" aria-label="Lead table">
+        <div class="admin-toolbar">
+          <div>
+            <p class="eyebrow">CRM records</p>
+            <h2>Lead table</h2>
+          </div>
+        </div>
+        <div class="lead-table" id="leadTable"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/apps/admin/src/admin.js"></script>
+  </body>
+</html>

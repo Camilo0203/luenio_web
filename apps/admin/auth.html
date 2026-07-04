@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luenio | Acceso SaaS CRM</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="preload" as="image" href="/Luenio Logotipe.png" />
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/admin/src/admin.css" />
+  </head>
+  <body class="auth-body">
+    <main class="auth-shell">
+      <section class="auth-panel">
+        <a class="brand" href="/" aria-label="Luenio Agency">
+          <img class="brand-logo" src="/Luenio Logotipe.png" width="256" height="256" alt="" decoding="async" />
+          <span class="brand-fallback" aria-hidden="true">L</span>
+        </a>
+        <p class="eyebrow">Luenio SaaS</p>
+        <h1>Accede a tu CRM de automatización.</h1>
+        <p>Registra tu negocio, captura leads, mide intención y gestiona tu pipeline desde un workspace privado.</p>
+
+        <div class="auth-trust" aria-label="Seguridad del workspace">
+          <span>Sesión protegida</span>
+          <span>Workspace privado</span>
+          <span>Plan limits activos</span>
+        </div>
+
+        <div class="auth-tabs" role="tablist" aria-label="Auth mode">
+          <button class="active" type="button" data-auth-mode="login">Login</button>
+          <button type="button" data-auth-mode="register">Register</button>
+        </div>
+
+        <form class="contact-form auth-form" id="authForm" novalidate>
+          <label class="wide auth-register-only">Negocio<input name="businessName" type="text" placeholder="Nombre del negocio" autocomplete="organization" /></label>
+          <label class="wide">Email<input name="email" type="email" placeholder="equipo@empresa.com" autocomplete="email" required /></label>
+          <label class="wide">Password<input name="password" type="password" placeholder="Mínimo 8 caracteres" autocomplete="current-password" required /></label>
+          <label class="wide auth-register-only">
+            Plan
+            <select name="plan">
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="agency">Agency</option>
+            </select>
+          </label>
+          <button class="button button-primary wide" type="submit">Entrar al dashboard</button>
+          <p class="form-status wide" role="status" aria-live="polite" hidden></p>
+        </form>
+      </section>
+    </main>
+
+    <script type="module" src="/apps/admin/src/auth.js"></script>
+  </body>
+</html>
