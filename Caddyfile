@@ -1,0 +1,3 @@
+your-production-domain.com {
+    reverse_proxy app:4180
+}

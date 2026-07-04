@@ -1,0 +1,16 @@
+node_modules
+dist
+.env*
+db/leads-db.json
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+npm-debug.log*
+scripts
+supabase
+*.md

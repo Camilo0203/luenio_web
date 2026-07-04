@@ -1,0 +1,46 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: luenio-crm:latest
+    container_name: luenio-app
+    restart: unless-stopped
+    env_file:
+      - .env
+    expose:
+      - "4180"
+    # Uncomment only if you are NOT using the bundled Caddy service below,
+    # and instead terminate TLS with a proxy installed directly on the host:
+    # ports:
+    #   - "127.0.0.1:4180:4180"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:4180/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    volumes:
+      # Only needed if REQUIRE_SUPABASE=false and you intentionally rely on
+      # the local JSON fallback in production (Supabase is the supported
+      # path). Persists db/leads-db.json across container recreation.
+      - luenio_db:/app/db
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: luenio-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  luenio_db:
+  caddy_data:
+  caddy_config:

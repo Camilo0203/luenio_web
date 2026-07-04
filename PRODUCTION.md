@@ -260,3 +260,7 @@ The public landing is trust-first and conversion-focused:
 - public UI avoids fake dashboards, scoring animations, live feeds, and simulator language
 
 Authenticated CRM users create scored leads through `POST /api/leads` from the admin/API flow. The CRM API returns the final score, classification, pipeline stage, workflow, restricted actions, and integration results.
+
+## 8. Deployment
+
+This project deploys to a self-managed VPS via Docker; see `DEPLOYMENT.md` for the full server setup, `docker compose`, and reverse-proxy/TLS runbook. The environment variables documented above apply identically whether running via `npm run dev`/`node server.js` directly or inside the Docker container.
