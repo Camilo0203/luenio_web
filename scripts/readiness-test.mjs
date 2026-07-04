@@ -18,7 +18,8 @@ const envKeys = [
 ];
 
 const previousEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
-const { buildPublicReadiness, buildReadiness } = await import("../config/readiness.js");
+const { buildPublicReadiness, buildReadiness, evaluateLegalContent, evaluatePricingContent } =
+  await import("../config/readiness.js");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -80,11 +81,17 @@ try {
 
   const complete = buildReadiness();
   const publicReadiness = buildPublicReadiness(complete);
+  // legal_placeholders_replaced/pricing_visible depend on on-disk page content, not env vars,
+  // so they are verified separately below with synthetic content rather than folded into this
+  // env-completeness assertion (real placeholder pages should legitimately fail this check
+  // until someone replaces them, independent of how the rest of the environment is configured).
+  const contentDependentChecks = new Set(["legal_placeholders_replaced", "pricing_visible"]);
   const failedCriticalChecks = complete.checks.filter(
-    (check) => check.severity === "critical" && !check.done,
+    (check) =>
+      check.severity === "critical" && !check.done && !contentDependentChecks.has(check.id),
   );
   assert(
-    complete.criticalReady === true,
+    failedCriticalChecks.length === 0,
     `Complete production config must be critical-ready: ${failedCriticalChecks.map((check) => check.id).join(", ")}`,
   );
   assert(complete.deployment.appUrlHttps === true, "Deployment status must expose HTTPS APP_URL.");
@@ -98,8 +105,8 @@ try {
     "Deployment status must expose configured API rate limits.",
   );
   assert(
-    publicReadiness.criticalReady === true,
-    "Public readiness must expose critical readiness summary.",
+    publicReadiness.criticalReady === complete.criticalReady,
+    "Public readiness must expose the same critical readiness summary as the full readiness report.",
   );
   assert(Array.isArray(publicReadiness.checks), "Public readiness must expose sanitized checks.");
   assert(
@@ -115,6 +122,44 @@ try {
   assert(
     unsafeLimits.checks.find((check) => check.id === "api_rate_limits")?.done === false,
     "Disabled API rate limits must fail readiness.",
+  );
+
+  const placeholderLegal = evaluateLegalContent([
+    "<p>Contacto: [TU EMAIL DE SOPORTE]</p>",
+    "<p>Sin placeholders aquí.</p>",
+    "<p>Otra página sin placeholders.</p>",
+  ]);
+  assert(
+    placeholderLegal.legalPlaceholdersReplaced === false,
+    "A remaining [placeholder] token must fail the legal content check.",
+  );
+
+  const cleanLegal = evaluateLegalContent([
+    "<p>Contacto: soporte@ejemplo.com</p>",
+    "<p>Sin placeholders aquí.</p>",
+    "<p>Otra página sin placeholders.</p>",
+  ]);
+  assert(
+    cleanLegal.legalPlaceholdersReplaced === true,
+    "Legal pages with no [placeholder] tokens must pass the legal content check.",
+  );
+
+  const missingLegal = evaluateLegalContent([null, "<p>Sin placeholders aquí.</p>", null]);
+  assert(
+    missingLegal.legalPagesFound === false && missingLegal.legalPlaceholdersReplaced === false,
+    "A missing legal page file must fail the legal content check.",
+  );
+
+  const placeholderPricing = evaluatePricingContent("<span>[PRECIO]/mes</span>");
+  assert(
+    placeholderPricing.pricingVisible === false,
+    "A remaining [PRECIO] token must fail the pricing visibility check.",
+  );
+
+  const realPricing = evaluatePricingContent("<span>$29/mes</span>");
+  assert(
+    realPricing.pricingVisible === true,
+    "A real price with no placeholder must pass the pricing visibility check.",
   );
 
   console.info("Production readiness guard passed");

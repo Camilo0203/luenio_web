@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { getStorageHealth } from "../db/storage.js";
 import {
   getAutomationEnv,
@@ -6,6 +8,64 @@ import {
   getStripeEnv,
   isProduction,
 } from "./env.js";
+
+const LEGAL_PLACEHOLDER_TOKENS = [
+  "[TU RAZÓN SOCIAL]",
+  "[TU DIRECCIÓN]",
+  "[TU EMAIL DE SOPORTE]",
+  "[PRECIO]",
+  "[FECHA]",
+  "[PAÍS/JURISDICCIÓN]",
+];
+
+const LEGAL_CONTENT_PAGES = [
+  path.join("legal", "terminos", "index.html"),
+  path.join("legal", "privacidad", "index.html"),
+  path.join("legal", "reembolsos", "index.html"),
+];
+
+const PRICING_PAGE = path.join("pricing", "index.html");
+
+function readPublicPage(relativePath, serveDist) {
+  const root = process.cwd();
+  const appRoot = serveDist ? path.join(root, "dist") : root;
+  const filePath = path.join(appRoot, "apps", "web", "pages", relativePath);
+
+  try {
+    return fs.readFileSync(filePath, "utf8");
+  } catch {
+    return null;
+  }
+}
+
+export function evaluateLegalContent(pages) {
+  const missing = pages.some((content) => content === null);
+  const hasPlaceholder = pages.some(
+    (content) => content !== null && LEGAL_PLACEHOLDER_TOKENS.some((token) => content.includes(token)),
+  );
+
+  return {
+    legalPagesFound: !missing,
+    legalPlaceholdersReplaced: !missing && !hasPlaceholder,
+  };
+}
+
+export function evaluatePricingContent(content) {
+  return {
+    pricingPageFound: content !== null,
+    pricingVisible: content !== null && !content.includes("[PRECIO]"),
+  };
+}
+
+export function getLegalContentStatus(serveDist = getServerConfig().serveDist) {
+  const pages = LEGAL_CONTENT_PAGES.map((relativePath) => readPublicPage(relativePath, serveDist));
+  return evaluateLegalContent(pages);
+}
+
+export function getPricingContentStatus(serveDist = getServerConfig().serveDist) {
+  const content = readPublicPage(PRICING_PAGE, serveDist);
+  return evaluatePricingContent(content);
+}
 
 export function getIntegrationStatus() {
   const automation = getAutomationEnv();
@@ -66,6 +126,8 @@ export function buildReadiness() {
   const security = getSecurityStatus();
   const billing = getBillingStatus();
   const deployment = getDeploymentStatus();
+  const legalContent = getLegalContentStatus(deployment.serveDist);
+  const pricingContent = getPricingContentStatus(deployment.serveDist);
 
   const checks = [
     {
@@ -161,6 +223,24 @@ export function buildReadiness() {
       severity: "recommended",
       description: "Configure CRM, WhatsApp, email or webhook outputs for live notifications.",
     },
+    {
+      id: "legal_placeholders_replaced",
+      label: "Legal pages ready",
+      done: legalContent.legalPagesFound && legalContent.legalPlaceholdersReplaced,
+      severity: "critical",
+      description: legalContent.legalPlaceholdersReplaced
+        ? "Terms, Privacy, and Refund pages have no unreplaced [placeholder] tokens."
+        : "Replace the [placeholder] tokens in the Terms/Privacy/Refund pages and have them reviewed before launch.",
+    },
+    {
+      id: "pricing_visible",
+      label: "Pricing visible",
+      done: pricingContent.pricingPageFound && pricingContent.pricingVisible,
+      severity: "recommended",
+      description: pricingContent.pricingVisible
+        ? "The public pricing page shows real prices."
+        : "Replace the [PRECIO] placeholder on the pricing page with real prices.",
+    },
   ];
 
   const critical = checks.filter((check) => check.severity === "critical");
@@ -176,6 +256,8 @@ export function buildReadiness() {
     security,
     billing,
     deployment,
+    legalContent,
+    pricingContent,
   };
 }
 

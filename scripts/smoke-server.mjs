@@ -117,33 +117,41 @@ async function runSmoke() {
     expectSecurityHeaders(landingResponse, { production: isProductionSmoke });
     await expectTextRoute(baseUrl, "/Pagina%20Luenio", "Luenio Agency");
     await expectTextRoute(baseUrl, "/demo", "Descubre dónde estás perdiendo clientes hoy.");
-    await expectTextRoute(baseUrl, "/demo/restaurants", "Live Demo Mode");
-    await expectTextRoute(baseUrl, "/demo/real-estate", "Live Demo Mode");
-    await expectTextRoute(baseUrl, "/demo/gym", "Live Demo Mode");
-    await expectTextRoute(baseUrl, "/demo/ecommerce", "Live Demo Mode");
-    await expectTextRoute(baseUrl, "/demo/agencies", "Live Demo Mode");
-    await expectTextRoute(baseUrl, "/gym", "You're losing customers right now without noticing.");
+    await expectTextRoute(baseUrl, "/demo/restaurants", "Ejecutar Demo en Vivo");
+    await expectTextRoute(baseUrl, "/demo/real-estate", "Ejecutar Demo en Vivo");
+    await expectTextRoute(baseUrl, "/demo/gym", "Ejecutar Demo en Vivo");
+    await expectTextRoute(baseUrl, "/demo/ecommerce", "Ejecutar Demo en Vivo");
+    await expectTextRoute(baseUrl, "/demo/agencies", "Ejecutar Demo en Vivo");
+    await expectTextRoute(
+      baseUrl,
+      "/gym",
+      "Estás perdiendo clientes ahora mismo sin darte cuenta.",
+    );
     await expectTextRoute(
       baseUrl,
       "/restaurants",
-      "You're losing customers right now without noticing.",
+      "Estás perdiendo clientes ahora mismo sin darte cuenta.",
     );
     await expectTextRoute(
       baseUrl,
       "/real-estate",
-      "You're losing customers right now without noticing.",
+      "Estás perdiendo clientes ahora mismo sin darte cuenta.",
     );
     await expectTextRoute(
       baseUrl,
       "/ecommerce",
-      "You're losing customers right now without noticing.",
+      "Estás perdiendo clientes ahora mismo sin darte cuenta.",
     );
     await expectTextRoute(
       baseUrl,
       "/agencies",
-      "You're losing customers right now without noticing.",
+      "Estás perdiendo clientes ahora mismo sin darte cuenta.",
     );
     await expectTextRoute(baseUrl, "/login", "Accede a tu CRM de automatización.");
+    await expectTextRoute(baseUrl, "/terminos", "Términos de Servicio");
+    await expectTextRoute(baseUrl, "/privacidad", "Política de Privacidad");
+    await expectTextRoute(baseUrl, "/reembolsos", "Política de Reembolsos");
+    await expectTextRoute(baseUrl, "/precios", "Starter");
     await expectOkRoute(baseUrl, "/favicon.svg", "image/svg+xml");
     const faviconHead = await fetch(`${baseUrl}/favicon.svg`, { method: "HEAD" });
     assert(faviconHead.ok, "HEAD /favicon.svg must return 200.");
