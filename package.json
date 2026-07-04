@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "dev": "node server.js",
     "dev:vite": "vite",
@@ -37,6 +40,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
+  "dependencies": {},
   "devDependencies": {
     "vite": "^8.1.0",
     "eslint": "^9.19.0",

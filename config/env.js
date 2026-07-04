@@ -35,7 +35,7 @@ export function getServerConfig() {
 
 export function getSecurityConfig() {
   return {
-    authSecret: getEnv("AUTH_SECRET") || getEnv("SESSION_SECRET"),
+    authSecret: getEnv("AUTH_SECRET"),
     cookieSecure: isProduction() || getBooleanEnv("COOKIE_SECURE", false),
     nodeEnv: getEnv("NODE_ENV", "development"),
     requireSupabase: getBooleanEnv("REQUIRE_SUPABASE", false),
