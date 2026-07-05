@@ -45,12 +45,14 @@ Corrige cualquier fallo antes de continuar.
 ## 4. Llevar el código al VPS
 
 Opción A — repo remoto (recomendado si ya tienes GitHub/GitLab):
+
 ```bash
 git clone <url-del-remoto> luenio-app
 cd luenio-app
 ```
 
 Opción B — sin remoto, copiar directamente:
+
 ```bash
 rsync -avz --exclude node_modules --exclude dist --exclude .git ./ user@vps:/opt/luenio-app/
 ```
@@ -84,12 +86,15 @@ docker compose logs -f app
 ## 7. Reverse proxy y TLS
 
 **Opción recomendada — Caddy incluido**: edita el dominio en `Caddyfile`, luego:
+
 ```bash
 docker compose up -d caddy
 ```
+
 Caddy emite y renueva el certificado Let's Encrypt automáticamente vía ACME HTTP-01 (requiere DNS ya apuntado y puertos 80/443 abiertos).
 
 **Alternativa — Nginx + Certbot en el host**: publica el puerto de `app` (`127.0.0.1:4180:4180` en `docker-compose.yml`, descomentando esa línea) y usa un bloque mínimo:
+
 ```nginx
 server {
     listen 80;
@@ -102,6 +107,7 @@ server {
     }
 }
 ```
+
 luego `sudo certbot --nginx -d tu-dominio-real.com`.
 
 **Crítico en cualquier caso**: el proxy debe reenviar sin modificar los headers `Host`, `X-Forwarded-For` y `X-Forwarded-Proto` — `server.js` usa `x-forwarded-for` para el rate-limit por IP y `Host` para la validación de mismo origen. Un proxy mal configurado hace que todos los visitantes compartan el mismo bucket de rate-limit o que fallen los checks de origen.
@@ -111,6 +117,7 @@ luego `sudo certbot --nginx -d tu-dominio-real.com`.
 ```bash
 curl https://tu-dominio-real.com/api/health
 ```
+
 Debe mostrar `storage.mode: "supabase"` y `readiness.criticalReady: true`. Verifica manualmente `/`, `/login`, `/dashboard`, `/precios`, `/terminos`, `/privacidad`, `/reembolsos`.
 
 ## 9. Actualizar / redeploy
@@ -121,11 +128,13 @@ docker compose build app
 docker compose up -d app
 docker image prune -f
 ```
+
 (Caddy no necesita reiniciarse salvo que cambies el `Caddyfile`.)
 
 ## 10. Backups
 
 Supabase gestiona los backups de Postgres (revisa tu plan para point-in-time recovery). Si en algún momento usas el fallback local JSON en producción (no recomendado), respalda el volumen:
+
 ```bash
 docker run --rm -v luenio_db:/data -v $(pwd):/backup alpine tar czf /backup/leads-db-backup.tgz /data
 ```

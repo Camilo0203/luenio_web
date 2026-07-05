@@ -42,7 +42,7 @@ async function sendIntegration(url, payload, label) {
       status: response.ok ? "sent" : "failed",
       httpStatus: response.status,
     };
-  } catch (error) {
+  } catch {
     return {
       label,
       status: "failed",

@@ -752,10 +752,9 @@ body[data-auth-mode="login"] .auth-register-only {
 
 .lead-table-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(110px, 0.7fr) minmax(
-      110px,
-      0.7fr
-    ) minmax(140px, 0.8fr);
+  grid-template-columns:
+    minmax(180px, 1.4fr) minmax(140px, 1fr) minmax(110px, 0.7fr) minmax(110px, 0.7fr)
+    minmax(140px, 0.8fr);
   gap: var(--s-3);
   align-items: center;
   width: 100%;

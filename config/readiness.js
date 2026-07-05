@@ -41,7 +41,8 @@ function readPublicPage(relativePath, serveDist) {
 export function evaluateLegalContent(pages) {
   const missing = pages.some((content) => content === null);
   const hasPlaceholder = pages.some(
-    (content) => content !== null && LEGAL_PLACEHOLDER_TOKENS.some((token) => content.includes(token)),
+    (content) =>
+      content !== null && LEGAL_PLACEHOLDER_TOKENS.some((token) => content.includes(token)),
   );
 
   return {
