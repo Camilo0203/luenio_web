@@ -124,11 +124,11 @@ assert(
     `${type} demo must expose the full five-step automation loop.`,
   );
   [
-    "Lead received",
-    "Analyzing intent",
-    "Lead scored",
-    "Sent to CRM",
-    "Automation triggered",
+    "Lead recibido",
+    "Analizando intención",
+    "Lead calificado",
+    "Enviado al CRM",
+    "Automatización activada",
   ].forEach((stepLabel) => {
     assert(
       scenario.steps.some((step) => step.label.includes(stepLabel)),
@@ -136,7 +136,7 @@ assert(
     );
   });
   assert(
-    scenario.steps.some((step) => step.label.includes("HOT 🔥")),
+    scenario.steps.some((step) => step.label.includes("CALIENTE 🔥")),
     `${type} demo must show hot scoring with visual urgency.`,
   );
 
@@ -222,7 +222,7 @@ assert(
 );
 const demoSelectorSource = readText("apps/web/pages/demo/index.html");
 assert(
-  demoSelectorSource.includes("Try your industry demo"),
+  demoSelectorSource.includes("Prueba la demo de tu industria"),
   "Demo selector must clearly invite users to try an industry demo.",
 );
 assert(
@@ -230,7 +230,7 @@ assert(
   "Demo selector must frame demos around loss awareness.",
 );
 assert(
-  demoSelectorSource.includes("Recover abandoned chats"),
+  demoSelectorSource.includes("mira cómo Luenio recupera consultas"),
   "Demo selector must use high-intent demo CTAs.",
 );
 
@@ -255,15 +255,15 @@ assert(
 const restaurantDemoHtml = readText("apps/web/pages/demo/restaurants/index.html");
 const restaurantDemoSource = readText("apps/web/pages/demo/restaurants/restaurant-demo.js");
 assert(
-  restaurantDemoHtml.includes("Chat simulation UI"),
+  restaurantDemoHtml.includes("Interfaz de simulación de chat"),
   "Restaurant demo must expose a chat simulation UI.",
 );
 assert(
-  restaurantDemoHtml.includes("CRM side panel"),
+  restaurantDemoHtml.includes("Panel lateral de CRM"),
   "Restaurant demo must expose a CRM side panel.",
 );
 assert(
-  restaurantDemoHtml.includes("Live Demo Mode"),
+  restaurantDemoHtml.includes("Ejecutar Demo en Vivo"),
   "Restaurant demo must expose a Live Demo Mode indicator/control.",
 );
 assert(
@@ -291,11 +291,11 @@ assert(
   "Restaurant demo must show captured order feedback.",
 );
 assert(
-  restaurantDemoSource.includes("Lead scored:"),
+  restaurantDemoSource.includes("Lead calificado:"),
   "Restaurant demo must show scoring feedback.",
 );
 assert(
-  restaurantDemoSource.includes("Cliente movido al pipeline HOT"),
+  restaurantDemoSource.includes("Cliente movido al pipeline CALIENTE"),
   "Restaurant demo must show CRM HOT pipeline movement.",
 );
 
@@ -303,19 +303,19 @@ const realEstateDemoHtml = readText("apps/web/pages/demo/real-estate/index.html"
 const realEstateDemoSource = readText("apps/web/pages/demo/real-estate/real-estate-demo.js");
 const realEstateScenario = createDemoScenario("real-estate");
 assert(
-  realEstateDemoHtml.includes("Buyer chat simulation"),
+  realEstateDemoHtml.includes("Simulación de chat de comprador"),
   "Real estate demo must expose a buyer chat simulation.",
 );
 assert(
-  realEstateDemoHtml.includes("Property match panel"),
+  realEstateDemoHtml.includes("Panel de coincidencia de propiedades"),
   "Real estate demo must expose property matching.",
 );
 assert(
-  realEstateDemoHtml.includes("CRM visualization"),
+  realEstateDemoHtml.includes("Visualización de CRM"),
   "Real estate demo must expose CRM visualization.",
 );
 assert(
-  realEstateDemoHtml.includes("Live Demo Mode"),
+  realEstateDemoHtml.includes("Ejecutar Demo en Vivo"),
   "Real estate demo must expose a Live Demo Mode control.",
 );
 assert(
@@ -335,11 +335,11 @@ assert(
   "Real estate demo must not own timer orchestration.",
 );
 assert(
-  realEstateDemoSource.includes("Buyer Pipeline"),
+  realEstateDemoSource.includes("Pipeline de compradores"),
   "Real estate demo must move buyers into the buyer pipeline.",
 );
 assert(
-  realEstateDemoSource.includes("Lead scored:"),
+  realEstateDemoSource.includes("Lead calificado:"),
   "Real estate demo must show scoring feedback.",
 );
 assert(
@@ -347,7 +347,7 @@ assert(
   "Real estate demo must classify qualified buyers as HOT.",
 );
 assert(
-  realEstateScenario.crmStage === "Buyer Pipeline",
+  realEstateScenario.crmStage === "Pipeline de compradores",
   "Real estate demo must target the buyer pipeline CRM stage.",
 );
 assert(
@@ -358,13 +358,19 @@ assert(
 const gymDemoHtml = readText("apps/web/pages/demo/gym/index.html");
 const gymDemoSource = readText("apps/web/pages/demo/gym/gym-demo.js");
 const gymScenario = createDemoScenario("gym");
-assert(gymDemoHtml.includes("Pricing cards"), "Gym demo must expose pricing cards.");
+assert(gymDemoHtml.includes("Tarjetas de precios"), "Gym demo must expose pricing cards.");
 assert(
-  gymDemoHtml.includes("Gym chat simulation"),
+  gymDemoHtml.includes("Simulación de chat de gimnasio"),
   "Gym demo must expose a WhatsApp-style chat simulation.",
 );
-assert(gymDemoHtml.includes("CRM update animation"), "Gym demo must expose CRM update animation.");
-assert(gymDemoHtml.includes("Live Demo Mode"), "Gym demo must expose a Live Demo Mode control.");
+assert(
+  gymDemoHtml.includes("Animación de actualización de CRM"),
+  "Gym demo must expose CRM update animation.",
+);
+assert(
+  gymDemoHtml.includes("Ejecutar Demo en Vivo"),
+  "Gym demo must expose a Live Demo Mode control.",
+);
 assert(
   gymDemoHtml.includes("Convierte preguntas por precio"),
   "Gym demo must focus on price inquiries becoming memberships.",
@@ -380,16 +386,16 @@ assert(
 );
 assert(!gymDemoSource.includes("window.setTimeout"), "Gym demo must not own timer orchestration.");
 assert(
-  gymDemoSource.includes("Interested Leads"),
+  gymDemoSource.includes("Leads interesados"),
   "Gym demo must move leads into Interested Leads.",
 );
 assert(
-  gymDemoSource.includes("Follow-up automation triggered"),
+  gymDemoSource.includes("Automatización de seguimiento activada"),
   "Gym demo must trigger a follow-up automation.",
 );
-assert(gymDemoSource.includes("Lead scored:"), "Gym demo must show HOT lead scoring feedback.");
+assert(gymDemoSource.includes("Lead calificado:"), "Gym demo must show HOT lead scoring feedback.");
 assert(
-  gymDemoSource.includes("Lead añadido a Interested Leads"),
+  gymDemoSource.includes("Lead añadido a Leads interesados"),
   "Gym demo must show CRM movement feedback.",
 );
 assert(
@@ -402,11 +408,11 @@ assert(
   "Gym demo must classify price or visit inquiries as HOT.",
 );
 assert(
-  gymScenario.crmStage === "Interested Leads",
+  gymScenario.crmStage === "Leads interesados",
   "Gym demo must target the Interested Leads CRM stage.",
 );
 assert(
-  gymScenario.automation.some((step) => step.toLowerCase().includes("follow-up")),
+  gymScenario.automation.some((step) => step.toLowerCase().includes("seguimiento")),
   "Gym demo must include follow-up automation.",
 );
 
@@ -414,19 +420,19 @@ const ecommerceDemoHtml = readText("apps/web/pages/demo/ecommerce/index.html");
 const ecommerceDemoSource = readText("apps/web/pages/demo/ecommerce/ecommerce-demo.js");
 const ecommerceScenario = createDemoScenario("ecommerce");
 assert(
-  ecommerceDemoHtml.includes("Product chat simulation"),
+  ecommerceDemoHtml.includes("Simulación de chat de producto"),
   "Ecommerce demo must expose a product chat simulation.",
 );
 assert(
-  ecommerceDemoHtml.includes("Inventory response style"),
+  ecommerceDemoHtml.includes("Estilo de respuesta de inventario"),
   "Ecommerce demo must expose inventory response UI.",
 );
 assert(
-  ecommerceDemoHtml.includes("Conversion tracking"),
+  ecommerceDemoHtml.includes("Seguimiento de conversión"),
   "Ecommerce demo must expose conversion tracking.",
 );
 assert(
-  ecommerceDemoHtml.includes("Live Demo Mode"),
+  ecommerceDemoHtml.includes("Ejecutar Demo en Vivo"),
   "Ecommerce demo must expose a Live Demo Mode control.",
 );
 assert(
@@ -450,19 +456,19 @@ assert(
   "Ecommerce demo must not own timer orchestration.",
 );
 assert(
-  ecommerceDemoSource.includes("Tracking purchase intent"),
+  ecommerceDemoSource.includes("Rastreando intención de compra"),
   "Ecommerce demo must track purchase intent.",
 );
 assert(
-  ecommerceDemoSource.includes("Sales Pipeline"),
+  ecommerceDemoSource.includes("Pipeline de ventas"),
   "Ecommerce demo must move buyers into the sales pipeline.",
 );
 assert(
-  ecommerceDemoSource.includes("Lead scored:"),
+  ecommerceDemoSource.includes("Lead calificado:"),
   "Ecommerce demo must show HOT lead scoring feedback.",
 );
 assert(
-  ecommerceDemoSource.includes("Conversion automation triggered"),
+  ecommerceDemoSource.includes("Automatización de conversión activada"),
   "Ecommerce demo must trigger conversion automation.",
 );
 assert(
@@ -475,7 +481,7 @@ assert(
   "Ecommerce demo must classify purchase intent as HOT.",
 );
 assert(
-  ecommerceScenario.crmStage === "Sales Pipeline",
+  ecommerceScenario.crmStage === "Pipeline de ventas",
   "Ecommerce demo must target the sales pipeline CRM stage.",
 );
 assert(
@@ -483,7 +489,7 @@ assert(
   "Ecommerce demo must include inventory and alternative product responses.",
 );
 assert(
-  ecommerceScenario.automation.some((step) => step.toLowerCase().includes("sales pipeline")),
+  ecommerceScenario.automation.some((step) => step.toLowerCase().includes("pipeline de ventas")),
   "Ecommerce demo must include sales pipeline automation.",
 );
 
@@ -491,16 +497,16 @@ const agencyDemoHtml = readText("apps/web/pages/demo/agencies/index.html");
 const agencyDemoSource = readText("apps/web/pages/demo/agencies/agency-demo.js");
 const agencyScenario = createDemoScenario("agencies");
 assert(
-  agencyDemoHtml.includes("Multi-client dashboard feel"),
+  agencyDemoHtml.includes("Panel multicliente"),
   "Agency demo must expose a multi-client dashboard feel.",
 );
-assert(agencyDemoHtml.includes("Pipeline view"), "Agency demo must expose a pipeline view.");
+assert(agencyDemoHtml.includes("Vista de pipeline"), "Agency demo must expose a pipeline view.");
 assert(
-  agencyDemoHtml.includes("Automation triggers"),
+  agencyDemoHtml.includes("Disparadores de automatización"),
   "Agency demo must expose automation triggers.",
 );
 assert(
-  agencyDemoHtml.includes("Live Demo Mode"),
+  agencyDemoHtml.includes("Ejecutar Demo en Vivo"),
   "Agency demo must expose a Live Demo Mode control.",
 );
 assert(
@@ -523,17 +529,17 @@ assert(
   !agencyDemoSource.includes("window.setTimeout"),
   "Agency demo must not own timer orchestration.",
 );
-assert(agencyDemoSource.includes("Analyzing intent"), "Agency demo must show intent analysis.");
+assert(agencyDemoSource.includes("Analizando intención"), "Agency demo must show intent analysis.");
 assert(
-  agencyDemoSource.includes("High-value client"),
+  agencyDemoSource.includes("Cliente de alto valor"),
   "Agency demo must tag the lead as a high-value client.",
 );
 assert(
-  agencyDemoSource.includes("Agency Pipeline"),
+  agencyDemoSource.includes("Pipeline de agencia"),
   "Agency demo must move the lead into the agency pipeline.",
 );
 assert(
-  agencyDemoSource.includes("Resell automation triggered"),
+  agencyDemoSource.includes("Automatización de reventa activada"),
   "Agency demo must trigger resale automation.",
 );
 assert(
@@ -547,12 +553,12 @@ assert(
   "Agency demo must classify the qualified agency lead as HOT.",
 );
 assert(
-  agencyScenario.crmStage === "Agency Pipeline",
+  agencyScenario.crmStage === "Pipeline de agencia",
   "Agency demo must target the agency CRM pipeline stage.",
 );
 assert(agencyScenario.clients.length >= 3, "Agency demo must include multi-client dashboard data.");
 assert(
-  agencyScenario.automation.some((step) => step.toLowerCase().includes("high-value")),
+  agencyScenario.automation.some((step) => step.toLowerCase().includes("alto valor")),
   "Agency demo must include high-value client tagging.",
 );
 

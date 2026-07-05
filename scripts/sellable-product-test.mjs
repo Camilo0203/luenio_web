@@ -61,7 +61,7 @@ const adminCss = readText("apps/admin/src/admin.css");
 [
   [
     "Live Demo Mode button",
-    adminHtml.includes('id="startLiveDemo"') && adminHtml.includes("Live Demo Mode"),
+    adminHtml.includes('id="startLiveDemo"') && adminHtml.includes("Ejecutar Demo en Vivo"),
   ],
   [
     "visible system states container",
@@ -77,17 +77,20 @@ const adminCss = readText("apps/admin/src/admin.css");
     adminHtml.includes('id="pipelineBoard"') && adminCss.includes(".pipeline-column"),
   ],
   ["lead detail panel", adminHtml.includes('id="leadDetail"') && adminCss.includes(".lead-detail")],
-  ["actions history", adminCss.includes(".actions-history") && adminJs.includes("Actions history")],
+  [
+    "actions history",
+    adminCss.includes(".actions-history") && adminJs.includes("Historial de acciones"),
+  ],
 ].forEach(([label, passed]) => {
   assert(passed, `Sellable dashboard must preserve ${label}.`);
 });
 
 [
-  "Lead received...",
-  "Analyzing intent...",
-  "Lead scored: HOT / WARM / COLD",
-  "Sent to CRM",
-  "Automation triggered",
+  "Lead recibido...",
+  "Analizando intención...",
+  "Lead calificado: CALIENTE / TIBIO / FRÍO",
+  "Enviado al CRM",
+  "Automatización activada",
 ].forEach((systemState) => {
   assert(adminJs.includes(systemState), `Live demo must show system state: ${systemState}`);
 });
@@ -96,7 +99,7 @@ const adminCss = readText("apps/admin/src/admin.css");
   'classification: "hot"',
   'classification: "warm"',
   'classification: "cold"',
-  "activeLead.classification.toUpperCase()",
+  "classificationLabel(activeLead.classification)",
 ].forEach((scoringSignal) => {
   assert(
     adminJs.includes(scoringSignal),

@@ -16,40 +16,55 @@ const pages = [
     slug: "gym",
     demo: "/demo/gym",
     hook: "Estás perdiendo membresías",
-    primaryCta: "See how many sales you're missing",
+    navCta: "Deja de perder membresías",
+    primaryCta: "Mira cuántos leads pierdes diariamente",
+    liveSystemCta: "Ver cómo el sistema captura este lead",
+    finalCta: "Activar para mi gimnasio",
     niche: ["membresías", "WhatsApp", "visita"],
   },
   {
     slug: "restaurants",
     demo: "/demo/restaurants",
     hook: "pedido perdido",
-    primaryCta: "See how many sales you're missing",
+    navCta: "Deja de perder pedidos",
+    primaryCta: "Mira cuántas ventas te estás perdiendo",
+    liveSystemCta: "Ver cómo el sistema recupera este pedido",
+    finalCta: "Activar para mi negocio",
     niche: ["pedidos", "reservas", "menú"],
   },
   {
     slug: "real-estate",
     demo: "/demo/real-estate",
     hook: "asesores pierden tiempo",
-    primaryCta: "See how many sales you're missing",
+    navCta: "Deja de perder compradores",
+    primaryCta: "Mira cuántas ventas pierdes por lentitud",
+    liveSystemCta: "Ver cómo el sistema califica este comprador",
+    finalCta: "Activar para mi inmobiliaria",
     niche: ["compradores", "presupuesto", "asesor"],
   },
   {
     slug: "ecommerce",
     demo: "/demo/ecommerce",
     hook: "chats que parecían simples preguntas",
-    primaryCta: "See how many sales you're missing",
+    navCta: "Deja de perder ventas",
+    primaryCta: "Mira cuántas ventas pierdes por falta de respuesta",
+    liveSystemCta: "Ver cómo el sistema completa esta venta",
+    finalCta: "Activar para mi tienda",
     niche: ["abandonados", "producto", "checkout"],
   },
   {
     slug: "agencies",
     demo: "/demo/agencies",
     hook: "puede vender la solución",
-    primaryCta: "See how many sales you're missing",
+    navCta: "Deja de perder clientes",
+    primaryCta: "Mira cuántos proyectos pierdes por lentitud",
+    liveSystemCta: "Ver cómo el sistema califica estos leads",
+    finalCta: "Activar para mi agencia",
     niche: ["clientes", "revender", "servicio recurrente"],
   },
 ];
 
-pages.forEach(({ slug, demo, hook, primaryCta, niche }) => {
+pages.forEach(({ slug, demo, hook, navCta, primaryCta, liveSystemCta, finalCta, niche }) => {
   const pagePath = `apps/web/pages/${slug}/index.html`;
   assert(fs.existsSync(path.join(root, pagePath)), `Missing niche landing page: ${pagePath}`);
 
@@ -57,19 +72,15 @@ pages.forEach(({ slug, demo, hook, primaryCta, niche }) => {
   assert(html.includes("niche-page"), `${slug} page must use the niche landing design system.`);
   assert(html.includes(hook), `${slug} page must open with an industry-specific emotional hook.`);
   assert(
-    html.includes("You're losing customers right now without noticing."),
+    html.includes("Estás perdiendo clientes ahora mismo sin darte cuenta."),
     `${slug} page must create immediate urgency and loss awareness.`,
   );
   assert(html.includes(primaryCta), `${slug} page must include an action-oriented primary CTA.`);
-  assert(
-    html.includes("See the live system"),
-    `${slug} page must include a live-system demo preview CTA.`,
-  );
-  assert(
-    html.includes("Activate this for my business"),
-    `${slug} page must include the final conversion CTA.`,
-  );
-  assert(!html.includes("Ver demo en vivo"), `${slug} page must not use passive view-demo CTAs.`);
+  assert(html.includes(liveSystemCta), `${slug} page must include a live-system demo preview CTA.`);
+  assert(html.includes(finalCta), `${slug} page must include the final conversion CTA.`);
+  // The nav CTA must use the urgency-driven pattern, which also structurally guarantees the old
+  // passive "Ver demo en vivo" phrasing is gone (since it's been replaced by navCta below).
+  assert(html.includes(navCta), `${slug} page must not use passive view-demo CTAs.`);
   assert(
     !html.includes("Ver cómo funciona"),
     `${slug} page must not use passive exploration CTAs.`,
@@ -84,7 +95,7 @@ pages.forEach(({ slug, demo, hook, primaryCta, niche }) => {
     html.includes("niche-demo-preview"),
     `${slug} page must include a live demo preview section.`,
   );
-  assert(html.includes("HOT 🔥"), `${slug} page must show lead scoring visualization.`);
+  assert(html.includes("CALIENTE 🔥"), `${slug} page must show lead scoring visualization.`);
   assert(html.includes("Prueba social"), `${slug} page must include social proof.`);
   assert(
     html.includes("Resultado ejemplo"),
