@@ -3,6 +3,7 @@ const envKeys = [
   "LUENIO_CRM_WEBHOOK_URL",
   "LUENIO_WHATSAPP_WEBHOOK_URL",
   "LUENIO_EMAIL_WEBHOOK_URL",
+  "AUTOMATION_WEBHOOK_TOKEN",
 ];
 const previousEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
 const previousFetch = globalThis.fetch;
@@ -11,6 +12,7 @@ process.env.LUENIO_WEBHOOK_URL = "https://internal.example/webhook/main";
 process.env.LUENIO_CRM_WEBHOOK_URL = "https://internal.example/webhook/crm";
 process.env.LUENIO_WHATSAPP_WEBHOOK_URL = "https://internal.example/webhook/whatsapp";
 process.env.LUENIO_EMAIL_WEBHOOK_URL = "https://internal.example/webhook/email";
+process.env.AUTOMATION_WEBHOOK_TOKEN = "automation-test-token";
 
 const { normalizeLead } = await import("../core/engine.js");
 const { runAutomationEngine } = await import("../api/services/automation-service.js");
@@ -21,8 +23,10 @@ function assert(condition, message) {
 
 try {
   const deliveredUrls = [];
-  globalThis.fetch = async (url) => {
+  const deliveredAuthorizations = [];
+  globalThis.fetch = async (url, options) => {
     deliveredUrls.push(url);
+    deliveredAuthorizations.push(options?.headers?.Authorization);
     return {
       ok: false,
       status: 502,
@@ -42,6 +46,10 @@ try {
   assert(
     deliveredUrls.includes(process.env.LUENIO_WEBHOOK_URL),
     "Configured webhook must be invoked internally.",
+  );
+  assert(
+    deliveredAuthorizations.every((value) => value === "Bearer automation-test-token"),
+    "Every automation delivery must use its configured bearer token.",
   );
   assert(
     deliveredUrls.includes(process.env.LUENIO_CRM_WEBHOOK_URL),

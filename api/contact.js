@@ -3,6 +3,8 @@ import {
   PublicInquiryValidationError,
 } from "./services/contact-service.js";
 import { sendApiError } from "./services/http-response.js";
+import { logInfo } from "./services/logger.js";
+import { PublicInquirySecurityError } from "./services/turnstile-service.js";
 
 export default async function handler(request, response) {
   if (request.method !== "POST") {
@@ -11,15 +13,25 @@ export default async function handler(request, response) {
   }
 
   try {
-    const stored = await capturePublicInquiryFromBody(request.body || {});
-    console.info("[Luenio Contact] Inquiry stored", {
+    const stored = await capturePublicInquiryFromBody(request.body || {}, {
+      headers: request.headers,
+      clientIp: request.clientIp,
+    });
+    logInfo("contact.inquiry.stored", {
+      requestId: request.requestId,
       inquiryId: stored.inquiry.id,
-      storage: stored.storage,
-      webhook: stored.webhook?.status,
+      notificationDelivered: stored.webhook?.status === "sent",
     });
 
     return response.status(200).json(stored.publicResponse);
   } catch (error) {
+    if (error instanceof PublicInquirySecurityError) {
+      return response.status(error.statusCode).json({
+        ok: false,
+        error: "Security verification failed",
+        code: error.code,
+      });
+    }
     if (error instanceof PublicInquiryValidationError) {
       return response.status(error.statusCode).json({
         ok: false,
@@ -29,6 +41,6 @@ export default async function handler(request, response) {
     }
 
     console.error("[Luenio Contact] POST /api/contact failed", error);
-    return sendApiError(response, error, { includeStorage: true });
+    return sendApiError(response, error);
   }
 }

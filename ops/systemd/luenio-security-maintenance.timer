@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Luenio security cleanup daily
+
+[Timer]
+OnCalendar=*-*-* 03:20:00 America/Bogota
+RandomizedDelaySec=20m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

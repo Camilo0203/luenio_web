@@ -1,0 +1,67 @@
+{
+  "name": "Luenio Daily Digest Email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luenio-digest",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-digest",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0],
+      "webhookId": "luenio-digest"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.headers.authorization || $json.headers.Authorization }}",
+              "operation": "notEmpty"
+            }
+          ]
+        }
+      },
+      "id": "auth-check",
+      "name": "Has Authorization",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@luenio.com",
+        "toEmail": "={{ $json.body.recipient || 'contacto@luenio.com' }}",
+        "subject": "Luenio digest — {{ $json.body.digest.totals.leads || 0 }} leads",
+        "text": "=Resumen CRM\nLeads: {{ $json.body.digest.totals.leads }}\nCalientes: {{ $json.body.digest.totals.hot }}\nVencen hoy: {{ $json.body.digest.totals.dueToday }}\nCalientes sin tocar: {{ $json.body.digest.totals.staleHot }}\nSin contacto: {{ $json.body.digest.totals.noContact }}\n",
+        "options": {}
+      },
+      "id": "email-digest",
+      "name": "Send Digest Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [460, -40]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Has Authorization", "type": "main", "index": 0 }]]
+    },
+    "Has Authorization": {
+      "main": [[{ "node": "Send Digest Email", "type": "main", "index": 0 }], []]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

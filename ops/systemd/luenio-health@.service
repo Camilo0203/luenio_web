@@ -1,0 +1,16 @@
+[Unit]
+Description=Check Luenio %i application health
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/luenio/monitor.env
+EnvironmentFile=/etc/luenio/%i.env
+User=luenio-monitor
+Group=luenio-monitor
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ExecStart=/opt/luenio/ops/monitor-health.sh

@@ -1,0 +1,65 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "apps/web/src/sector-worlds.css",
+          "apps/web/src/simulation-worlds.css"
+        ],
+        "createdAt": "2026-07-28T06:43:23.833Z",
+        "reason": "Paletas sectoriales intencionales y aisladas, documentadas en DESIGN.md"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "apps/web/src/sector-worlds.css",
+          "apps/web/src/simulation-worlds.css"
+        ],
+        "createdAt": "2026-07-28T06:43:26.611Z",
+        "reason": "Geometria sectorial intencional y aislada, documentada en DESIGN.md"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "*",
+        "files": [
+          "apps/web/src/sector-worlds.css",
+          "apps/web/src/simulation-worlds.css"
+        ],
+        "createdAt": "2026-07-28T06:43:29.098Z",
+        "reason": "Escalas tipograficas sectoriales intencionales y aisladas, documentadas en DESIGN.md"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-07-28T06:43:31.382Z",
+        "reason": "Inter es la familia de cuerpo global aprobada en DESIGN.md"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          "apps/web/pages/agencies/index.html",
+          "apps/web/pages/demo/agencies/index.html",
+          "apps/web/pages/demo/ecommerce/index.html",
+          "apps/web/pages/ecommerce/index.html"
+        ],
+        "createdAt": "2026-07-28T06:44:28.969Z",
+        "reason": "Inter es la familia corporal aprobada; el detector no extrae el valor desde este enlace de Google Fonts"
+      },
+      {
+        "rule": "codex-grid-background",
+        "value": "*",
+        "files": [
+          "apps/web/src/simulation-worlds.css"
+        ],
+        "createdAt": "2026-07-28T06:44:30.739Z",
+        "reason": "La cuadricula pertenece al tablero de rendimiento del gimnasio y funciona como superficie de medicion"
+      }
+    ]
+  }
+}

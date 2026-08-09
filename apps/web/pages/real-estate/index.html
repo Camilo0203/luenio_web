@@ -1,166 +1,455 @@
 <!doctype html>
 <html lang="es">
+  <!--
+    THESIS: La inmobiliaria empieza por entender la vida que busca el comprador; evita abrir con una cuadrícula de inmuebles.
+    OWN-WORLD: Concierge privado en azul tinta, papel marfil, cobre sobrio y fotografía residencial amplia.
+    STORY: El visitante define zona e intención, recibe una shortlist ilustrativa y agenda una conversación.
+    FIRST VIEWPORT: Residencia a sangre, promesa contenida y ficha de concierge anclada en la esquina inferior.
+    FORM: Shortlist privada, estructura asignada 7. Seed f9c9b503.
+  -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio para Inmobiliarias | Califica compradores automáticamente</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Hogar Prime | Inmobiliaria de lujo en Colombia</title>
     <meta
       name="description"
-      content="Filtra compradores, detecta presupuesto y ahorra tiempo a asesores inmobiliarios con automatización IA."
+      content="Landing demo inmobiliaria con propiedades seleccionadas y una ruta clara de asesoría privada en Colombia."
     />
-    <meta
-      name="keywords"
-      content="automatización inmobiliaria, CRM para inmobiliarias, calificación de compradores IA, chatbot inmobiliario, leads inmobiliarios"
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="author" content="Luenio" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=Source+Serif+4:wght@400..700&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
     />
-    <meta name="author" content="Luenio Agency" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/real-estate" />
-    <meta name="theme-color" content="#07111f" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta
-      property="og:title"
-      content="Luenio para Inmobiliarias | Califica compradores automáticamente"
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400..700&family=Source+Serif+4:wght@400..700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/demo-premium/real-estate-hero-960.webp"
+      imagesrcset="
+        /assets/demo-premium/real-estate-hero-480.webp  480w,
+        /assets/demo-premium/real-estate-hero-960.webp  960w,
+        /assets/demo-premium/real-estate-hero.webp     1672w
+      "
+      imagesizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+      type="image/webp"
+      fetchpriority="high"
     />
-    <meta
-      property="og:description"
-      content="Filtra compradores, detecta presupuesto y ahorra tiempo a asesores inmobiliarios con automatización IA."
-    />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/real-estate" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="Luenio para Inmobiliarias | Califica compradores automáticamente"
-    />
-    <meta
-      name="twitter:description"
-      content="Filtra compradores, detecta presupuesto y ahorra tiempo a asesores inmobiliarios con automatización IA."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-showcase.css" />
+    <link rel="stylesheet" href="/apps/web/src/industry-demos.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-worlds.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-redesign.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
+    <script type="module" src="/apps/web/src/niche-landing.js"></script>
+    <script type="module" src="/apps/web/src/industry-demos.js"></script>
   </head>
-  <body>
-    <main class="niche-page niche-real-estate">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a
-        ><a class="button button-primary button-small" href="/demo/real-estate"
-          >Deja de perder compradores</a
+  <body
+    class="demo-page demo-real-estate sector-v2"
+    data-demo-name="Hogar Prime"
+    data-demo-type="inmobiliaria"
+    data-demo-goal="Quiero una landing para mi inmobiliaria"
+  >
+    <header class="demo-header">
+      <div class="demo-shell demo-header__inner">
+        <a class="demo-brand" href="#inicio">Hogar Prime</a>
+        <nav class="demo-nav" id="real-estate-navigation" data-navigation data-open="false">
+          <a href="#propiedades">Propiedades</a><a href="#servicios">Asesoría</a
+          ><a href="#preguntas">Preguntas</a><a href="#contacto">Contacto</a>
+        </nav>
+        <a class="demo-button" href="#contacto">Solicitar asesoría</a>
+        <button
+          class="demo-menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="real-estate-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
         >
-      </nav>
-      <section class="niche-hero">
-        <p class="eyebrow">Luenio para inmobiliarias</p>
-        <p class="niche-loss-line">Estás perdiendo clientes ahora mismo sin darte cuenta.</p>
-        <h1>Tus asesores pierden tiempo con leads que nunca iban a comprar.</h1>
-        <p>
-          Luenio filtra presupuesto, zona e intención antes de que el asesor llame, para priorizar
-          compradores reales.
-        </p>
-        <div class="niche-actions">
-          <a class="button button-primary" href="/demo/real-estate"
-            >Mira cuántas ventas pierdes por lentitud</a
-          ><a class="button" href="#como-funciona">Descubre cómo recuperarlas</a>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="demo-hero" id="inicio">
+        <div class="demo-hero__media">
+          <img
+            decoding="async"
+            width="1672"
+            height="941"
+            src="/assets/demo-premium/real-estate-hero.webp"
+            srcset="
+              /assets/demo-premium/real-estate-hero-480.webp  480w,
+              /assets/demo-premium/real-estate-hero-960.webp  960w,
+              /assets/demo-premium/real-estate-hero.webp     1672w
+            "
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="Residencia contemporánea de lujo en Colombia"
+            fetchpriority="high"
+          />
         </div>
-      </section>
-      <section class="niche-section niche-problem">
-        <div class="section-head">
-          <p class="eyebrow">Dolor real</p>
-          <h2>El problema no es tener leads. Es no saber cuáles valen una llamada.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <span>01</span>
-            <h3>Compradores sin presupuesto</h3>
-            <p>Tu equipo invierte llamadas en personas que aún no están listas.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Leads calientes esperan</h3>
-            <p>Un comprador con presupuesto claro puede irse si no recibe respuesta rápida.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Transferencia sin contexto</h3>
-            <p>El asesor llama sin saber zona, urgencia, presupuesto ni tipo de inmueble.</p>
-          </article>
-        </div>
-      </section>
-      <section class="niche-section" id="como-funciona">
-        <div class="section-head">
-          <p class="eyebrow">Solución</p>
-          <h2>Luenio detecta compradores listos y los manda al asesor correcto.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <h3>Filtro automático</h3>
-            <p>Pregunta presupuesto, zona, tipo de inmueble y urgencia sin fricción.</p>
-          </article>
-          <article>
-            <h3>Score CALIENTE/TIBIO/FRÍO</h3>
-            <p>Priorizamos compradores con presupuesto claro y alta intención.</p>
-          </article>
-          <article>
-            <h3>CRM con contexto</h3>
-            <p>El asesor recibe el lead con datos listos para agendar visita.</p>
-          </article>
-        </div>
-      </section>
-      <section class="niche-section niche-demo-preview">
-        <div class="section-head">
-          <p class="eyebrow">Vista previa en vivo</p>
-          <h2>Mira cómo un comprador se califica antes de pasar a ventas.</h2>
-        </div>
-        <div class="niche-preview-card">
-          <div class="preview-chat">
-            <strong>Chat del sitio</strong>
-            <p>
-              “Busco apartamento en el norte, máximo 320 mil dólares, y quiero visitar esta semana.”
-            </p>
-            <p class="ai">“Perfecto. Te asigno un asesor con dos propiedades que encajan.”</p>
+        <div class="demo-shell demo-hero__content">
+          <p class="demo-eyebrow">Propiedades seleccionadas · Bogotá y Sabana</p>
+          <h1>Encuentra un lugar que esté a la altura de tu historia.</h1>
+          <p>
+            Asesoría privada para comprar, vender o invertir en propiedades de alto valor con
+            información clara y acompañamiento experto.
+          </p>
+          <div class="demo-actions">
+            <a class="demo-button" href="#contacto">Solicitar asesoría</a
+            ><a class="demo-button demo-button--ghost" href="#propiedades">Ver propiedades</a>
           </div>
-          <div class="preview-crm">
-            <span>Score</span><strong>CALIENTE 🔥</strong>
-            <p>Pipeline de compradores + asesor asignado.</p>
+          <aside
+            class="property-concierge"
+            data-property-concierge
+            data-luenio-collision-zone
+            aria-label="Concierge de propiedades"
+          >
+            <div class="property-concierge__image">
+              <img
+                data-property-image
+                width="960"
+                height="640"
+                src="/assets/stitch/property-rosales-960.webp"
+                alt="Casa Rosales 88, recomendación inmobiliaria ilustrativa"
+              />
+            </div>
+            <div class="property-concierge__panel">
+              <span class="demo-lab-label">Tu shortlist privada</span>
+              <div class="property-concierge__group" data-demo-choice-group="zone">
+                <div class="demo-choice-row" aria-label="Elegir zona">
+                  <button
+                    class="demo-choice is-selected"
+                    type="button"
+                    data-demo-choice="Rosales"
+                    aria-pressed="true"
+                  >
+                    Rosales
+                  </button>
+                  <button
+                    class="demo-choice"
+                    type="button"
+                    data-demo-choice="Chicó"
+                    aria-pressed="false"
+                  >
+                    Chicó
+                  </button>
+                  <button
+                    class="demo-choice"
+                    type="button"
+                    data-demo-choice="Sabana"
+                    aria-pressed="false"
+                  >
+                    Sabana
+                  </button>
+                </div>
+              </div>
+              <div class="property-concierge__group" data-demo-choice-group="intent">
+                <div class="demo-choice-row" aria-label="Elegir intención">
+                  <button
+                    class="demo-choice is-selected"
+                    type="button"
+                    data-demo-choice="Familiar"
+                    aria-pressed="true"
+                  >
+                    Para vivir
+                  </button>
+                  <button
+                    class="demo-choice"
+                    type="button"
+                    data-demo-choice="Inversión"
+                    aria-pressed="false"
+                  >
+                    Para invertir
+                  </button>
+                </div>
+              </div>
+              <div class="property-concierge__result" aria-live="polite">
+                <header>
+                  <strong data-property-title>Casa Rosales 88</strong>
+                  <span data-property-code>HP-RO-FA</span>
+                </header>
+                <p data-property-meta>4 hab · terraza · 312 m²</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="demo-section demo-section--surface" id="propiedades">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Selección privada</p>
+              <h2>Propiedades que merecen ser visitadas.</h2>
+            </div>
+            <p>
+              Catálogo demostrativo con información útil desde la primera vista: precio, área y
+              características principales.
+            </p>
+          </div>
+          <div class="demo-grid demo-grid--3">
+            <article class="property-card">
+              <img
+                decoding="async"
+                width="1400"
+                height="933"
+                src="/assets/stitch/property-rosales.webp"
+                srcset="
+                  /assets/stitch/property-rosales-480.webp  480w,
+                  /assets/stitch/property-rosales-960.webp  960w,
+                  /assets/stitch/property-rosales.webp     1400w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Penthouse en Rosales"
+                loading="lazy"
+              />
+              <div class="property-card__body">
+                <h3>Penthouse en Rosales</h3>
+                <span class="property-card__location">Rosales · Bogotá</span
+                ><strong class="property-card__price">$2.850.000.000 COP</strong>
+                <div class="property-card__meta">
+                  <span>284 m²</span><span>3 hab.</span><span>4 parq.</span>
+                </div>
+              </div>
+            </article>
+            <article class="property-card">
+              <img
+                decoding="async"
+                width="1400"
+                height="933"
+                src="/assets/stitch/property-chia.webp"
+                srcset="
+                  /assets/stitch/property-chia-480.webp  480w,
+                  /assets/stitch/property-chia-960.webp  960w,
+                  /assets/stitch/property-chia.webp     1400w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Casa campestre en Chía"
+                loading="lazy"
+              />
+              <div class="property-card__body">
+                <h3>Casa campestre en Chía</h3>
+                <span class="property-card__location">Yerbabonita · Chía</span
+                ><strong class="property-card__price">$3.400.000.000 COP</strong>
+                <div class="property-card__meta">
+                  <span>510 m²</span><span>5 hab.</span><span>6 parq.</span>
+                </div>
+              </div>
+            </article>
+            <article class="property-card">
+              <img
+                decoding="async"
+                width="1400"
+                height="933"
+                src="/assets/stitch/property-virrey.webp"
+                srcset="
+                  /assets/stitch/property-virrey-480.webp  480w,
+                  /assets/stitch/property-virrey-960.webp  960w,
+                  /assets/stitch/property-virrey.webp     1400w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Apartamento en El Virrey"
+                loading="lazy"
+              />
+              <div class="property-card__body">
+                <h3>Apartamento en El Virrey</h3>
+                <span class="property-card__location">El Virrey · Bogotá</span
+                ><strong class="property-card__price">$1.680.000.000 COP</strong>
+                <div class="property-card__meta">
+                  <span>192 m²</span><span>3 hab.</span><span>3 parq.</span>
+                </div>
+              </div>
+            </article>
           </div>
         </div>
-        <a class="button button-primary" href="/demo/real-estate"
-          >Ver cómo el sistema califica este comprador</a
-        >
       </section>
-      <section class="niche-section">
-        <div class="section-head">
-          <p class="eyebrow">Prueba social</p>
-          <h2>Más tiempo para compradores reales.</h2>
+
+      <section class="demo-section" id="servicios">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Asesoría de principio a fin</p>
+              <h2>De la búsqueda a la firma, sin pasos opacos.</h2>
+            </div>
+            <p>Una persona coordina la selección, la validación y el cierre de cada operación.</p>
+          </div>
+          <div class="demo-grid demo-grid--3">
+            <article class="demo-card">
+              <span class="demo-number">01 · PERFIL</span>
+              <h3>Seleccionar</h3>
+              <p>Objetivo, presupuesto y zona se convierten en una lista breve de opciones.</p>
+            </article>
+            <article class="demo-card">
+              <span class="demo-number">02 · VALIDACIÓN</span>
+              <h3>Comparar</h3>
+              <p>Precio, documentos, estado y riesgos se revisan antes de presentar una oferta.</p>
+            </article>
+            <article class="demo-card">
+              <span class="demo-number">03 · CIERRE</span>
+              <h3>Negociar y cerrar</h3>
+              <p>
+                Oferta, promesa, escritura y entrega siguen una ruta visible para todas las partes.
+              </p>
+            </article>
+          </div>
         </div>
-        <div class="proof-grid">
-          <article>
-            <span>Resultado ejemplo</span><strong>-60%</strong>
-            <p>menos tiempo en llamadas sin presupuesto definido.</p>
-          </article>
-          <article>
-            <span>Ventas</span><strong>+30%</strong>
-            <p>más leads priorizados por intención de visita y presupuesto.</p>
-          </article>
-          <article>
-            <p>
-              “Los asesores reciben leads con contexto. Ya no arrancan cada llamada desde cero.”
+      </section>
+
+      <section class="demo-section demo-section--surface" id="preguntas">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Preguntas frecuentes</p>
+              <h2>Información antes de la primera visita.</h2>
+            </div>
+          </div>
+          <div class="demo-faq">
+            <details>
+              <summary>¿Las propiedades están verificadas?</summary>
+              <p>
+                En una inmobiliaria real, cada inmueble se revisaría documentalmente antes de
+                publicarse.
+              </p>
+            </details>
+            <details>
+              <summary>¿Pueden acompañar una compra desde otra ciudad?</summary>
+              <p>
+                Sí. Las visitas iniciales, documentos y reuniones pueden organizarse de manera
+                remota.
+              </p>
+            </details>
+            <details>
+              <summary>¿Cómo se define el valor de una propiedad?</summary>
+              <p>
+                Se comparan ubicación, área, estado, atributos diferenciales y operaciones
+                recientes.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <aside class="sector-sales" aria-labelledby="property-sales-title">
+        <div class="demo-shell sector-sales__grid">
+          <div>
+            <p class="demo-eyebrow">Una experiencia así para tu inmobiliaria</p>
+            <h2 id="property-sales-title">
+              Tus propiedades, presentadas como una selección privada.
+            </h2>
+          </div>
+          <ul class="sector-sales__list">
+            <li>Catálogo y filtros adaptados a tu inventario</li>
+            <li>Shortlist, formularios y WhatsApp conectados</li>
+            <li>Analítica y seguimiento comercial opcional</li>
+          </ul>
+          <div class="sector-sales__actions">
+            <button class="demo-button" type="button" data-luenio-open>
+              Cotizar esta experiencia
+            </button>
+            <a class="demo-button demo-button--ghost" href="#contacto">Probar la asesoría</a>
+          </div>
+        </div>
+      </aside>
+
+      <section class="demo-section demo-section--surface" id="contacto">
+        <div class="demo-shell demo-grid demo-grid--2">
+          <div>
+            <p class="demo-eyebrow">Asesoría privada</p>
+            <h2>Conversemos sobre la propiedad que estás buscando.</h2>
+            <p class="demo-section-copy">
+              Puedes probar esta solicitud: no envía datos. En una inmobiliaria real llegaría al
+              asesor con tu zona e intención ya definidas.
             </p>
-            <strong>Testimonio de muestra</strong
-            ><span>Directora comercial, inmobiliaria boutique</span>
-          </article>
+          </div>
+          <form
+            class="demo-form"
+            data-demo-form
+            data-demo-success="Solicitud de asesoría simulada. No se enviaron datos; en una inmobiliaria real un asesor continuaría el contacto."
+          >
+            <label>Nombre<input name="name" autocomplete="name" required /></label
+            ><label
+              >Correo electrónico<input
+                type="email"
+                name="email"
+                autocomplete="email"
+                placeholder="nombre@correo.com"
+                required /></label
+            ><label
+              >Zona<select name="zone" data-property-zone>
+                <option>Rosales</option>
+                <option>Chicó</option>
+                <option>Sabana</option>
+              </select></label
+            ><label
+              >Interés<select name="intent" data-property-intent>
+                <option>Familiar</option>
+                <option>Inversión</option>
+              </select></label
+            ><button class="demo-button demo-form__wide" type="submit">
+              Probar solicitud de asesoría
+            </button>
+            <p
+              class="demo-form-status"
+              role="status"
+              aria-live="polite"
+              data-demo-status
+              hidden
+            ></p>
+          </form>
         </div>
       </section>
-      <section class="niche-final-cta">
-        <p class="eyebrow">Prioriza compradores</p>
-        <h2>No dejes que un comprador listo espere mientras tu equipo filtra curiosos.</h2>
-        <a class="button button-primary" href="/demo/real-estate">Activar para mi inmobiliaria</a>
-      </section>
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
     </main>
+
+    <footer class="demo-footer">
+      <div class="demo-shell">
+        <div class="demo-footer__main">
+          <div>
+            <h2>Hogar Prime</h2>
+            <p>Propiedades seleccionadas y asesoría inmobiliaria privada en Colombia.</p>
+          </div>
+          <div>
+            <h3>Explorar</h3>
+            <nav>
+              <a href="#propiedades">Propiedades</a><a href="#servicios">Asesoría</a
+              ><a href="#preguntas">Preguntas</a>
+            </nav>
+          </div>
+          <div>
+            <h3>Oficina</h3>
+            <p>Chicó Reservado<br />Bogotá, Colombia</p>
+          </div>
+          <div>
+            <h3>Atención</h3>
+            <p>Lunes a viernes<br />Con cita previa</p>
+          </div>
+        </div>
+        <div class="demo-footer__legal">
+          <strong
+            ><a href="/"
+              >© 2026 Luenio. Diseño y desarrollo de esta landing demostrativa. Todos los derechos
+              reservados por Luenio.</a
+            ></strong
+          ><span
+            >Hogar Prime es una marca demostrativa. Las propiedades y precios son ejemplos y no
+            corresponden a listados inmobiliarios vigentes.</span
+          >
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

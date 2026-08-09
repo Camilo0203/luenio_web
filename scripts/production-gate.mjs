@@ -1,33 +1,36 @@
 import { spawn } from "node:child_process";
 import net from "node:net";
-import fs from "node:fs";
-import path from "node:path";
 
-// Load .env into this process (same semantics as server.js's loadEnvFile) so
-// that both the server we spawn and the e2e client we spawn inherit the SAME
-// configuration -- in particular STRIPE_WEBHOOK_SECRET, which the e2e test uses
-// to sign a webhook the server must then verify. Without this, the server would
-// read the secret from .env while the e2e client would see it as undefined, and
-// their signatures would never match.
-function loadEnvFile() {
-  const envPath = path.join(process.cwd(), ".env");
-  if (!fs.existsSync(envPath)) return;
-
-  const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
-  lines.forEach((line) => {
-    const trimmedLine = line.trim();
-    if (!trimmedLine || trimmedLine.startsWith("#") || !trimmedLine.includes("=")) return;
-    const [key, ...valueParts] = trimmedLine.split("=");
-    if (!process.env[key]) {
-      process.env[key] = valueParts
-        .join("=")
-        .trim()
-        .replace(/^["']|["']$/g, "");
-    }
-  });
-}
-
-loadEnvFile();
+const isolatedTestEnv = {
+  LUENIO_SKIP_ENV_FILE: "true",
+  SUPABASE_URL: "",
+  SUPABASE_SERVICE_ROLE_KEY: "",
+  REQUIRE_SUPABASE: "false",
+  DATABASE_URL: "",
+  NEON_DATABASE_URL: "",
+  LUENIO_WEBHOOK_URL: "",
+  LUENIO_CRM_WEBHOOK_URL: "",
+  LUENIO_WHATSAPP_WEBHOOK_URL: "",
+  LUENIO_EMAIL_WEBHOOK_URL: "",
+  CONTACT_WEBHOOK_URL: "",
+  CONTACT_WEBHOOK_TOKEN: "",
+  INVITATION_WEBHOOK_URL: "",
+  INVITATION_WEBHOOK_TOKEN: "",
+  AUTH_MFA_WEBHOOK_URL: "",
+  AUTH_MFA_WEBHOOK_TOKEN: "",
+  AUTOMATION_WEBHOOK_TOKEN: "",
+  TURNSTILE_REQUIRED: "false",
+  TURNSTILE_SITE_KEY: "",
+  TURNSTILE_SECRET_KEY: "",
+  ADMIN_MFA_REQUIRED: "false",
+  ENABLE_PUBLIC_BILLING: "false",
+  CONTACT_DELIVERY_WORKER_ENABLED: "false",
+  STRIPE_SECRET_KEY: "",
+  STRIPE_WEBHOOK_SECRET: "whsec_luenio_local_test_secret",
+  STRIPE_STARTER_PRICE_ID: "",
+  STRIPE_PRO_PRICE_ID: "",
+  STRIPE_AGENCY_PRICE_ID: "",
+};
 
 const npmCliPath = process.env.npm_execpath || null;
 
@@ -35,7 +38,7 @@ function run(command, args, options = {}) {
   return new Promise((resolve, reject) => {
     const child = spawn(command, args, {
       cwd: process.cwd(),
-      env: { ...process.env, ...(options.env || {}) },
+      env: { ...process.env, ...isolatedTestEnv, ...(options.env || {}) },
       stdio: options.stdio || "inherit",
       windowsHide: true,
     });
@@ -88,9 +91,18 @@ async function waitForServer(baseUrl, timeoutMs = 10_000) {
 async function runE2EWithServer() {
   const port = await getFreePort();
   const baseUrl = `http://127.0.0.1:${port}`;
+  const e2eHealthcheckToken = "luenio-e2e-healthcheck-token-at-least-32-chars";
   const server = spawn(process.execPath, ["server.js"], {
     cwd: process.cwd(),
-    env: { ...process.env, HOST: "127.0.0.1", PORT: String(port) },
+    env: {
+      ...process.env,
+      ...isolatedTestEnv,
+      NODE_ENV: "test",
+      HOST: "127.0.0.1",
+      PORT: String(port),
+      HEALTHCHECK_TOKEN: e2eHealthcheckToken,
+      ENABLE_PUBLIC_BILLING: "true",
+    },
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
   });
@@ -111,6 +123,8 @@ async function runE2EWithServer() {
     await runNpmScript("test:e2e", {
       env: {
         E2E_BASE_URL: baseUrl,
+        HEALTHCHECK_TOKEN: e2eHealthcheckToken,
+        ENABLE_PUBLIC_BILLING: "true",
       },
     });
   } catch (error) {
@@ -133,8 +147,12 @@ const steps = [
   ["Billing checkout guard", () => runNpmScript("test:billing")],
   ["Contact public response privacy", () => runNpmScript("test:contact")],
   ["Core trust boundary", () => runNpmScript("test:core")],
+  ["Work queue and digest", () => runNpmScript("test:work-queue")],
+  ["CRM bulk and import", () => runNpmScript("test:crm-bulk")],
+  ["CRM reports", () => runNpmScript("test:crm-reports")],
   ["Data hygiene", () => runNpmScript("test:data")],
   ["Production readiness", () => runNpmScript("test:readiness")],
+  ["Shared VPS deployment configuration", () => runNpmScript("test:deployment")],
   ["Development port fallback", () => runNpmScript("test:dev-port")],
   ["Industry demo system", () => runNpmScript("test:demo-system")],
   ["Niche landing conversion pages", () => runNpmScript("test:niche-landings")],
@@ -147,6 +165,9 @@ const steps = [
   ["Storage boundary", () => runNpmScript("test:storage")],
   ["Production server smoke", () => runNpmScript("test:smoke:prod")],
   ["Full SaaS E2E", runE2EWithServer],
+  ["UI hardening", () => runNpmScript("test:ui-hardening")],
+  ["Browser E2E + a11y", () => runNpmScript("test:browser")],
+  ["Visual regression", () => runNpmScript("test:visual")],
 ];
 
 const results = [];

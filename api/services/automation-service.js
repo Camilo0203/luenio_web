@@ -1,6 +1,7 @@
 import { buildAutomationPlan, buildWorkflow } from "../../core/engine.js";
 import { filterActionsByPlan } from "../../config/billing.js";
-import { getAutomationEnv } from "../../config/env.js";
+import { getAutomationEnv, isProduction } from "../../config/env.js";
+import { fetchWithTimeout, getSecureOutboundUrl } from "./outbound-request.js";
 
 const integrationTargets = {
   send_webhook: {
@@ -21,7 +22,7 @@ const integrationTargets = {
   },
 };
 
-async function sendIntegration(url, payload, label) {
+async function sendIntegration(url, payload, label, webhookToken) {
   if (!url) {
     return {
       label,
@@ -29,11 +30,21 @@ async function sendIntegration(url, payload, label) {
       message: "Configure the environment variable to send this action externally.",
     };
   }
+  if (isProduction() && !webhookToken) {
+    return {
+      label,
+      status: "failed",
+      message: "Authenticated integration delivery is not configured.",
+    };
+  }
 
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(getSecureOutboundUrl(url, `${label} URL`), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(webhookToken ? { Authorization: `Bearer ${webhookToken}` } : {}),
+      },
       body: JSON.stringify(payload),
     });
 
@@ -62,7 +73,12 @@ export async function runAutomationEngine(lead, options = {}) {
     const target = integrationTargets[action];
     if (!target) continue;
     integrationResults.push(
-      await sendIntegration(automation[target.configKey], plan.payload, target.label),
+      await sendIntegration(
+        automation[target.configKey],
+        plan.payload,
+        target.label,
+        automation.webhookToken,
+      ),
     );
   }
 

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Luenio · Agencia</title>
+    <link rel="stylesheet" href="/styles/design-tokens.css" />
+    <link rel="stylesheet" href="/styles/globals.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+      #crm-root {
+        min-height: 100vh;
+      }
+      .crm-boot {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        background: var(--color-canvas);
+        color: var(--color-mute);
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="crm-root">
+      <div class="crm-boot" id="crm-boot">Cargando CRM…</div>
+    </div>
+    <script type="module" src="/apps/admin/crm/bootstrap.js"></script>
+    <!-- impeccable-live-start -->
+    <!-- impeccable-live-end -->
+  </body>
+</html>

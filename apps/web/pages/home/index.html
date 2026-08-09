@@ -1,390 +1,787 @@
 <!doctype html>
+<!--
+THESIS: Luenio convierte una necesidad comercial en una solución digital visible; rechaza el hero de SaaS lleno de paneles y promesas abstractas.
+OWN-WORLD: lienzo blanco azulado, tinta naval, un azul vivo, marcos de demo amplios y un recorrido luminoso que conecta las acciones.
+STORY: el visitante entiende qué hacemos, comprueba posibilidades en siete demos ficticias, descubre cómo conectamos web y automatización, y conversa por WhatsApp.
+FIRST VIEWPORT: navegación mínima, titular centrado, dos acciones y una única ventana de demo ocupando la mayor parte del ancho; los sectores viven debajo.
+FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; recorrido Web → WhatsApp → Automatización → Seguimiento; dirección fijada por el usuario tras la semilla 0edd06f0.
+-->
+<!-- impeccable-disable single-font -- Manrope sostiene deliberadamente toda la jerarquía sobria de la dirección aprobada. -->
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio Agency | Automatización con IA para Negocios</title>
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <title>Luenio | Páginas web y automatizaciones hechas a medida</title>
     <meta
       name="description"
-      content="Automatizamos WhatsApp, leads y seguimiento comercial con IA para que tu negocio responda rápido, ordene clientes y venda más."
+      content="Diseñamos páginas web, automatizaciones comerciales e integraciones con WhatsApp para la forma en que funciona tu negocio."
     />
-    <meta
-      name="keywords"
-      content="automatización con IA, chatbot WhatsApp, agencia de inteligencia artificial, CRM automatizado, automatización de negocios"
-    />
-    <meta name="author" content="Luenio Agency" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/" />
-    <meta name="theme-color" content="#07111f" />
+    <meta name="theme-color" content="#f6f8fc" data-theme-color />
+    <script src="/theme-boot.js"></script>
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Luenio Agency | Automatización con IA para Negocios" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:title" content="Luenio | Soluciones digitales hechas a medida" />
     <meta
       property="og:description"
-      content="Automatización confiable para responder leads, ordenar clientes y vender más por WhatsApp."
+      content="Páginas web, automatizaciones y acompañamiento para mover tu operación comercial."
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Luenio Agency | Automatización con IA para Negocios" />
-    <meta
-      name="twitter:description"
-      content="Implementamos IA para negocios que venden por WhatsApp, web y redes."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" as="image" href="/luenio-logo.png" />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <link rel="canonical" href="https://luenio.com/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      data-font-stylesheet
     />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/previews/agency-desktop.avif"
+      type="image/avif"
+      fetchpriority="high"
+    />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+    <link rel="stylesheet" href="/apps/web/src/home-clarity.css" />
+    <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
-  <body>
-    <header class="topbar">
-      <a class="brand" href="#inicio" aria-label="Luenio Agency">
-        <img
-          class="brand-logo"
-          src="/luenio-logo.png"
-          width="256"
-          height="256"
-          alt=""
-          decoding="async"
-          fetchpriority="high"
-          loading="eager"
-        />
-        <span class="brand-fallback" aria-hidden="true">L</span>
-      </a>
+  <body
+    data-public-demo="true"
+    class="home-clarity"
+    data-schema="organization"
+    data-page-context="Página principal de Luenio"
+    data-whatsapp-widget="true"
+  >
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-      <nav class="topnav" aria-label="Navegación principal">
-        <a href="#confianza">Qué hacemos</a>
-        <a href="#problema">Problema</a>
-        <a href="#proceso">Cómo funciona</a>
-        <a href="#casos">Casos de uso</a>
-        <a href="/precios">Precios</a>
-        <a href="#contacto">Contacto</a>
-      </nav>
+    <header class="hc-header" data-home-header>
+      <div class="hc-container hc-header__inner">
+        <a class="hc-brand" href="/" aria-label="Luenio, inicio">
+          <span class="hc-brand__viewport hc-brand__viewport--primary">
+            <img
+              class="hc-brand__logo"
+              src="/brand/logotipo.svg"
+              width="1536"
+              height="1024"
+              alt="Luenio"
+            />
+          </span>
+          <span class="hc-brand__viewport hc-brand__viewport--light" aria-hidden="true">
+            <img
+              class="hc-brand__logo"
+              src="/brand/logotipo-blanco.svg"
+              width="1536"
+              height="1024"
+              alt=""
+            />
+          </span>
+        </a>
 
-      <a class="button button-primary button-small" href="#contacto">Automatizar mi negocio</a>
+        <nav class="hc-nav" aria-label="Navegación principal" data-navigation data-open="false">
+          <a href="#demos">Demos</a>
+          <a href="#soluciones">Soluciones</a>
+          <a href="#proceso">Proceso</a>
+          <a href="#preguntas">Preguntas</a>
+          <a class="hc-nav__access" href="/login" data-client-access>
+            <span class="signed-out-copy">Acceso clientes</span>
+            <span class="signed-in-copy">Ir a mi espacio</span>
+          </a>
+        </nav>
+
+        <div class="hc-header__actions">
+          <button
+            class="hc-theme-toggle"
+            type="button"
+            data-theme-toggle
+            aria-label="Activar modo oscuro"
+            title="Activar modo oscuro"
+          >
+            <span class="hc-theme-toggle__track" aria-hidden="true">
+              <svg class="hc-theme-toggle__sun" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="3.25"></circle>
+                <path
+                  d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"
+                ></path>
+              </svg>
+              <svg class="hc-theme-toggle__moon" viewBox="0 0 24 24">
+                <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.25 8.25 0 1 0 11.2 11.2Z"></path>
+              </svg>
+              <i></i>
+            </span>
+          </button>
+          <button
+            class="hc-menu"
+            type="button"
+            data-menu-toggle
+            aria-label="Abrir menú"
+            aria-expanded="false"
+          >
+            <span></span><span></span>
+          </button>
+        </div>
+      </div>
     </header>
 
-    <main id="inicio">
-      <section class="hero trust-hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Automatización con IA para ventas por WhatsApp</p>
-          <h1>Convierte más clientes sin responder cada mensaje manualmente.</h1>
-          <p>
-            Luenio crea automatizaciones confiables para responder rápido, calificar leads y ordenar
-            oportunidades antes de que se pierdan.
-          </p>
-          <a class="button button-primary hero-cta" href="#contacto">Automatizar mi negocio</a>
-          <div class="trust-signals" aria-label="Señales de confianza">
-            <span>Empresas reales</span>
-            <span>Automatización en WhatsApp</span>
-            <span>Soporte humano</span>
+    <main id="contenido">
+      <section class="hc-hero" id="inicio" data-motion-scene>
+        <div class="hc-hero__glow" aria-hidden="true"></div>
+        <div class="hc-container hc-hero__inner">
+          <div class="hc-hero__copy">
+            <h1>
+              <span class="hc-visually-hidden">
+                Tu próxima solución digital: funcionando, vendiendo y creciendo.
+              </span>
+              <span class="hc-hero__promise" aria-hidden="true">
+                <span class="hc-hero__promise-prefix">Tu próxima solución</span>
+                <span class="hc-hero__promise-line">
+                  <span>digital,</span>
+                  <span class="hc-promise-motion">
+                    <i data-typewriter data-words="funcionando.|vendiendo.|creciendo.">
+                      funcionando.
+                    </i>
+                  </span>
+                </span>
+              </span>
+            </h1>
+            <p class="hc-hero__lead">
+              Creamos páginas web y automatizaciones para la forma en que vendes, atiendes y haces
+              seguimiento.
+            </p>
+            <div class="hc-actions">
+              <a class="hc-button hc-button--primary" href="#demos">
+                Explorar demos
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M4 10h11M11 6l4 4-4 4" />
+                </svg>
+              </a>
+              <button
+                class="hc-button hc-button--whatsapp"
+                type="button"
+                data-wa-open
+                data-source="hero"
+              >
+                <svg class="hc-whatsapp-mark" viewBox="0 0 32 32" aria-hidden="true">
+                  <path
+                    d="M16.04 3A12.9 12.9 0 0 0 5.1 22.75L3.38 29l6.4-1.68A12.96 12.96 0 1 0 16.04 3Zm0 23.58c-2.02 0-3.98-.55-5.7-1.6l-.41-.24-3.8 1 1.02-3.7-.27-.43A10.55 10.55 0 1 1 16.04 26.58Zm5.79-7.91c-.32-.16-1.87-.92-2.16-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57a9.57 9.57 0 0 1-1.77-2.2c-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.55-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.54-.71-.55h-.61c-.21 0-.55.08-.84.4-.29.32-1.11 1.08-1.11 2.64 0 1.56 1.13 3.06 1.29 3.27.16.21 2.23 3.4 5.4 4.77.75.32 1.34.52 1.8.66.76.24 1.45.21 2 .13.61-.09 1.87-.76 2.13-1.5.26-.74.26-1.37.18-1.5-.08-.14-.29-.21-.61-.37Z"
+                  />
+                </svg>
+                Cotizar por WhatsApp
+              </button>
+            </div>
+          </div>
+
+          <div class="hc-stage-wrap" data-hero-stage>
+            <div class="hc-stage-aura" aria-hidden="true"></div>
+            <article class="hc-browser" aria-label="Vista previa de una demo ficticia">
+              <div class="hc-browser__bar">
+                <div class="hc-browser__lights" aria-hidden="true"><i></i><i></i><i></i></div>
+                <div class="hc-browser__address">
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M6.5 9V7a3.5 3.5 0 0 1 7 0v2M5 9h10v7H5z" />
+                  </svg>
+                  demo.luenio.com
+                </div>
+                <a
+                  class="hc-browser__open"
+                  href="/agencias"
+                  data-active-demo-link
+                  data-demo-case="impulso-digital"
+                >
+                  Abrir demo
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M7 5h8v8M15 5l-9 9" />
+                  </svg>
+                </a>
+              </div>
+              <div class="hc-browser__viewport">
+                <picture>
+                  <source srcset="/assets/previews/agency-desktop.avif" type="image/avif" />
+                  <img
+                    class="hc-demo-shot is-active"
+                    src="/assets/previews/agency-desktop.webp"
+                    alt="Captura de la demo ficticia para agencias"
+                    width="1440"
+                    height="900"
+                    fetchpriority="high"
+                    data-demo-shot="agencias"
+                  />
+                </picture>
+                <img
+                  class="hc-demo-shot"
+                  alt="Captura de la demo ficticia para ecommerce"
+                  width="1440"
+                  height="900"
+                  data-src="/assets/previews/ecommerce-desktop.avif"
+                  data-fallback-src="/assets/previews/ecommerce-desktop.webp"
+                  data-demo-shot="ecommerce"
+                />
+                <img
+                  class="hc-demo-shot"
+                  alt="Captura de la demo ficticia para gimnasios"
+                  width="1440"
+                  height="900"
+                  data-src="/assets/previews/gym-desktop.avif"
+                  data-fallback-src="/assets/previews/gym-desktop.webp"
+                  data-demo-shot="gimnasios"
+                />
+                <img
+                  class="hc-demo-shot"
+                  alt="Captura de la demo ficticia para inmobiliarias"
+                  width="1440"
+                  height="900"
+                  data-src="/assets/previews/real-estate-desktop.avif"
+                  data-fallback-src="/assets/previews/real-estate-desktop.webp"
+                  data-demo-shot="inmobiliarias"
+                />
+                <img
+                  class="hc-demo-shot"
+                  alt="Captura de la demo ficticia para restaurantes"
+                  width="1440"
+                  height="900"
+                  data-src="/assets/previews/restaurants-desktop.avif"
+                  data-fallback-src="/assets/previews/restaurants-desktop.webp"
+                  data-demo-shot="restaurantes"
+                />
+                <img
+                  class="hc-demo-shot"
+                  alt="Captura de la demo ficticia para veterinarias"
+                  width="1440"
+                  height="1000"
+                  data-src="/assets/previews/veterinary-desktop.avif"
+                  data-fallback-src="/assets/previews/veterinary-desktop.webp"
+                  data-demo-shot="veterinarias"
+                />
+                <img
+                  class="hc-demo-shot"
+                  alt="Captura de la demo ficticia para centros de estética"
+                  width="1440"
+                  height="1000"
+                  data-src="/assets/previews/aesthetics-desktop.avif"
+                  data-fallback-src="/assets/previews/aesthetics-desktop.webp"
+                  data-demo-shot="esteticas"
+                />
+              </div>
+            </article>
+
+            <div class="hc-demo-switcher" aria-label="Explorar demos ficticias por sector">
+              <button
+                class="is-active"
+                type="button"
+                data-demo-target="agencias"
+                data-demo-href="/agencias"
+                data-demo-case-id="impulso-digital"
+                aria-pressed="true"
+              >
+                Agencias
+              </button>
+              <button
+                type="button"
+                data-demo-target="ecommerce"
+                data-demo-href="/tiendas-online"
+                data-demo-case-id="novastore"
+                aria-pressed="false"
+              >
+                Ecommerce
+              </button>
+              <button
+                type="button"
+                data-demo-target="gimnasios"
+                data-demo-href="/gimnasios"
+                data-demo-case-id="titan-fitness"
+                aria-pressed="false"
+              >
+                Gimnasios
+              </button>
+              <button
+                type="button"
+                data-demo-target="inmobiliarias"
+                data-demo-href="/inmobiliarias"
+                data-demo-case-id="hogar-prime"
+                aria-pressed="false"
+              >
+                Inmobiliarias
+              </button>
+              <button
+                type="button"
+                data-demo-target="restaurantes"
+                data-demo-href="/restaurantes"
+                data-demo-case-id="sabor-fuego"
+                aria-pressed="false"
+              >
+                Restaurantes
+              </button>
+              <button
+                type="button"
+                data-demo-target="veterinarias"
+                data-demo-href="/veterinarias"
+                data-demo-case-id="huella-veterinaria"
+                aria-pressed="false"
+              >
+                Veterinarias
+              </button>
+              <button
+                type="button"
+                data-demo-target="esteticas"
+                data-demo-href="/esteticas"
+                data-demo-case-id="aura-estetica"
+                aria-pressed="false"
+              >
+                Estéticas
+              </button>
+            </div>
+            <p class="hc-demo-note">
+              Demos ficticias para explorar posibilidades. No representan clientes reales.
+            </p>
           </div>
         </div>
       </section>
 
-      <section class="trust-section" id="confianza">
-        <div class="section-head">
-          <p class="eyebrow">Qué hacemos</p>
-          <h2>
-            Implementamos IA para que tu negocio responda, filtre y dé seguimiento sin depender del
-            caos del chat.
-          </h2>
-        </div>
-        <div class="benefit-grid trust-benefits">
-          <article>
-            <span>01</span>
-            <h3>Respuesta inmediata</h3>
-            <p>
-              Tus clientes reciben una respuesta clara aunque tu equipo esté ocupado, fuera de
-              horario o atendiendo otras ventas.
-            </p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Leads mejor calificados</h3>
-            <p>
-              La IA identifica qué necesita cada persona, qué tan urgente es y qué siguiente paso
-              conviene tomar.
-            </p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Seguimiento ordenado</h3>
-            <p>
-              Cada oportunidad queda registrada con contexto para que ventas trabaje con prioridad,
-              no con mensajes sueltos.
-            </p>
-          </article>
-          <article>
-            <span>04</span>
-            <h3>Implementación guiada</h3>
-            <p>
-              No necesitas saber tecnología. Te acompañamos desde el diagnóstico hasta el
-              lanzamiento y ajustes iniciales.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="problem-section" id="problema">
-        <div class="section-head">
-          <p class="eyebrow">Problema</p>
-          <h2>Cuando respondes tarde, el cliente ya está comparando opciones.</h2>
-        </div>
-        <div class="problem-grid">
-          <article>
-            <h3>Clientes sin respuesta</h3>
-            <p>Una conversación pendiente se convierte rápido en una venta para otra empresa.</p>
-          </article>
-          <article>
-            <h3>Leads desordenados</h3>
-            <p>
-              Los clientes listos para comprar se mezclan con dudas simples y conversaciones
-              repetidas.
-            </p>
-          </article>
-          <article>
-            <h3>Seguimiento inconsistente</h3>
-            <p>
-              Sin un flujo claro, el equipo olvida contactos, responde tarde y pierde oportunidades
-              valiosas.
-            </p>
-          </article>
-        </div>
-        <p class="section-note">
-          La solución no es trabajar más. Es tener un sistema que atienda primero y entregue mejores
-          oportunidades a tu equipo.
-        </p>
-      </section>
-
-      <section class="proof-section" id="resultados">
-        <div class="section-head">
-          <p class="eyebrow">Confianza</p>
-          <h2>Resultados realistas para negocios que venden por conversación.</h2>
-        </div>
-        <div class="proof-grid" aria-label="Métricas de confianza">
-          <article>
-            <span>Respuesta</span>
-            <strong>-60%</strong>
-            <p>
-              menos tiempo en primera respuesta al automatizar preguntas frecuentes y calificación
-              inicial.
-            </p>
-          </article>
-          <article>
-            <span>Conversión</span>
-            <strong>+30%</strong>
-            <p>
-              mejor aprovechamiento de oportunidades al responder antes y priorizar clientes con
-              intención real.
-            </p>
-          </article>
-          <article>
-            <span>Operación</span>
-            <strong>24/7</strong>
-            <p>captura y seguimiento inicial incluso cuando el equipo no está disponible.</p>
-          </article>
-        </div>
-        <div class="testimonial-grid" aria-label="Testimonios">
-          <article>
-            <p>
-              “Antes se nos quedaban conversaciones sin contestar. Ahora cada lead llega ordenado y
-              el equipo sabe a quién llamar primero.”
-            </p>
-            <strong>Laura Méndez</strong>
-            <span>Directora comercial, inmobiliaria boutique</span>
-          </article>
-          <article>
-            <p>
-              “Luenio convirtió WhatsApp en un canal más serio de ventas. La implementación fue
-              clara y no tuvimos que cargar al equipo técnico.”
-            </p>
-            <strong>Daniel Rojas</strong>
-            <span>Fundador, ecommerce de productos premium</span>
-          </article>
-        </div>
-      </section>
-
-      <section class="process-section" id="proceso">
-        <div class="section-head">
-          <p class="eyebrow">Cómo funciona</p>
-          <h2>Un flujo simple para responder mejor y vender con más orden.</h2>
-        </div>
-        <div class="flow">
-          <article>
-            <span>1</span>
-            <h3>Recibes leads</h3>
-            <p>Desde WhatsApp, web, redes o formularios.</p>
-          </article>
-          <article>
-            <span>2</span>
-            <h3>IA responde automáticamente</h3>
-            <p>Con tono de marca, preguntas útiles y mensajes aprobados.</p>
-          </article>
-          <article>
-            <span>3</span>
-            <h3>Cliente calificado se guarda en CRM</h3>
-            <p>Con datos, necesidad, urgencia y siguiente paso.</p>
-          </article>
-          <article>
-            <span>4</span>
-            <h3>Tú solo cierras ventas</h3>
-            <p>Tu equipo recibe oportunidades mejor preparadas.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="use-cases-section" id="casos">
-        <div class="section-head">
-          <p class="eyebrow">Casos de uso</p>
-          <h2>Automatización para negocios donde cada respuesta cuenta.</h2>
-        </div>
-        <div class="case-grid">
-          <article>
-            <h3>Ecommerce</h3>
-            <p>
-              Responde dudas de productos, disponibilidad, envíos y recuperación de compradores
-              interesados.
-            </p>
-          </article>
-          <article>
-            <h3>Servicios</h3>
-            <p>
-              Filtra prospectos, agenda conversaciones y mantiene seguimiento sin perseguir chats
-              manualmente.
-            </p>
-          </article>
-          <article>
-            <h3>Inmobiliaria</h3>
-            <p>
-              Califica por presupuesto, zona, tipo de inmueble y nivel de urgencia antes de pasar al
-              asesor.
-            </p>
-          </article>
-          <article>
-            <h3>Educación</h3>
-            <p>
-              Atiende interesados, explica programas, captura datos y activa recordatorios de
-              inscripción.
-            </p>
-          </article>
-        </div>
-      </section>
-
-      <section class="contact-section" id="contacto">
-        <div class="contact-copy">
-          <p class="eyebrow">Contacto</p>
-          <h2>Empieza a automatizar tu negocio hoy.</h2>
-          <p>
-            Cuéntanos qué vendes, dónde recibes leads y qué parte del seguimiento te consume más
-            tiempo. Te orientamos con el primer flujo de mayor impacto.
-          </p>
-          <div class="assurance-list" aria-label="Garantías de acompañamiento">
-            <span>Sin configuraciones complicadas</span>
-            <span>Proceso guiado</span>
-            <span>Soporte humano</span>
+      <section class="hc-flow" aria-labelledby="flow-title">
+        <div class="hc-container">
+          <div class="hc-flow__intro" data-reveal>
+            <p id="flow-title">Una solución completa, no piezas sueltas.</p>
+            <span>Todo conectado alrededor de tu proceso comercial.</span>
+          </div>
+          <div class="hc-flow__track" data-flow-track>
+            <span class="hc-flow__line" aria-hidden="true"><i></i></span>
+            <article>
+              <span class="hc-flow__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 5h16v12H4zM8 21h8M12 17v4" /></svg>
+              </span>
+              <h2>Web</h2>
+              <p>Una experiencia clara que convierte interés en conversaciones.</p>
+            </article>
+            <article>
+              <span class="hc-flow__icon hc-flow__icon--wa" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 3a8.5 8.5 0 0 0-7.2 13L4 20l4.1-.8A8.5 8.5 0 1 0 12 3Z" />
+                </svg>
+              </span>
+              <h2>WhatsApp</h2>
+              <p>El canal directo donde atiendes, calificas y cotizas.</p>
+            </article>
+            <article>
+              <span class="hc-flow__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M8 4h8v5h4v7h-4v4H8v-4H4V9h4zM9 10h6v4H9z" />
+                </svg>
+              </span>
+              <h2>Automatización</h2>
+              <p>Respuestas, alertas y tareas que avanzan sin trabajo repetido.</p>
+            </article>
+            <article>
+              <span class="hc-flow__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path d="M4 18V9M10 18V5M16 18v-7M22 18H2" />
+                </svg>
+              </span>
+              <h2>Seguimiento</h2>
+              <p>Información organizada para saber qué oportunidad sigue.</p>
+            </article>
           </div>
         </div>
-
-        <form class="contact-form" id="contactForm" novalidate>
-          <label
-            >Nombre<input
-              name="name"
-              type="text"
-              placeholder="Tu nombre"
-              autocomplete="name"
-              required
-          /></label>
-          <label
-            >Negocio<input
-              name="business"
-              type="text"
-              placeholder="Nombre del negocio"
-              autocomplete="organization"
-              required
-          /></label>
-          <label
-            >WhatsApp<input
-              name="phone"
-              type="tel"
-              placeholder="+57 300 000 0000"
-              autocomplete="tel"
-              required
-          /></label>
-          <label>
-            Servicio
-            <select name="service" required>
-              <option value="">Selecciona una opción</option>
-              <option>Automatización de WhatsApp</option>
-              <option>Chatbot IA para ventas</option>
-              <option>CRM automatizado</option>
-              <option>Automatización completa de leads</option>
-            </select>
-          </label>
-          <label class="wide"
-            >Mensaje<textarea
-              name="message"
-              rows="4"
-              placeholder="Qué quieres automatizar o qué problema quieres resolver"
-            ></textarea>
-          </label>
-          <button class="button button-primary wide" type="submit">Automatizar mi negocio</button>
-          <p class="form-status wide" role="status" aria-live="polite" hidden></p>
-        </form>
       </section>
 
-      <section class="final-cta-section">
-        <div>
-          <p class="eyebrow">Siguiente paso</p>
-          <h2>Empieza a automatizar tu negocio hoy.</h2>
-          <p>Sin configuraciones complicadas. Te guiamos en todo el proceso.</p>
+      <section class="hc-gallery" id="demos" aria-labelledby="gallery-title">
+        <div class="hc-container">
+          <header class="hc-gallery__head" data-reveal>
+            <div>
+              <p class="hc-kicker">Demos ficticias para explorar posibilidades</p>
+              <h2 id="gallery-title">Encuentra una idea cercana a tu negocio.</h2>
+            </div>
+            <p>
+              Cada demo muestra una dirección de diseño distinta. Son ejercicios demostrativos, no
+              proyectos de clientes.
+            </p>
+          </header>
+
+          <div class="hc-gallery__grid">
+            <a
+              class="hc-demo-card hc-demo-card--agency"
+              href="/agencias"
+              data-demo-case="impulso-digital"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/agency-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/agency-desktop.webp"
+                    alt="Captura de la demo ficticia Impulso Digital"
+                    width="1440"
+                    height="900"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Agencias</small><strong>Impulso Digital</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+
+            <a
+              class="hc-demo-card hc-demo-card--ecommerce"
+              href="/tiendas-online"
+              data-demo-case="novastore"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/ecommerce-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/ecommerce-desktop.webp"
+                    alt="Captura de la demo ficticia NovaStore"
+                    width="1440"
+                    height="900"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Ecommerce</small><strong>NovaStore</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+
+            <a
+              class="hc-demo-card hc-demo-card--gym"
+              href="/gimnasios"
+              data-demo-case="titan-fitness"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/gym-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/gym-desktop.webp"
+                    alt="Captura de la demo ficticia Titan Fitness Club"
+                    width="1440"
+                    height="900"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Gimnasios</small><strong>Titan Fitness Club</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+
+            <a
+              class="hc-demo-card hc-demo-card--real-estate"
+              href="/inmobiliarias"
+              data-demo-case="hogar-prime"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/real-estate-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/real-estate-desktop.webp"
+                    alt="Captura de la demo ficticia Hogar Prime"
+                    width="1440"
+                    height="900"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Inmobiliarias</small><strong>Hogar Prime</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+
+            <a
+              class="hc-demo-card hc-demo-card--restaurant"
+              href="/restaurantes"
+              data-demo-case="sabor-fuego"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/restaurants-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/restaurants-desktop.webp"
+                    alt="Captura de la demo ficticia Sabor y Fuego"
+                    width="1440"
+                    height="900"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Restaurantes</small><strong>Sabor y Fuego</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+
+            <a
+              class="hc-demo-card hc-demo-card--veterinary"
+              href="/veterinarias"
+              data-demo-case="huella-veterinaria"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/veterinary-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/veterinary-desktop.webp"
+                    alt="Captura de la demo ficticia Huella Veterinaria"
+                    width="1440"
+                    height="1000"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Veterinarias</small><strong>Huella Veterinaria</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+
+            <a
+              class="hc-demo-card hc-demo-card--aesthetics"
+              href="/esteticas"
+              data-demo-case="aura-estetica"
+              data-reveal
+            >
+              <span class="hc-demo-card__visual">
+                <picture>
+                  <source srcset="/assets/previews/aesthetics-desktop.avif" type="image/avif" />
+                  <img
+                    src="/assets/previews/aesthetics-desktop.webp"
+                    alt="Captura de la demo ficticia Aura Estética"
+                    width="1440"
+                    height="1000"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+              </span>
+              <span class="hc-demo-card__meta">
+                <span><small>Estética</small><strong>Aura Estética</strong></span>
+                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
+              </span>
+            </a>
+          </div>
         </div>
-        <a class="button button-primary" href="#contacto">Automatizar mi negocio</a>
+      </section>
+
+      <section class="hc-solutions" id="soluciones">
+        <div class="hc-container">
+          <header class="hc-section-head" data-reveal>
+            <p class="hc-kicker">Lo que construimos</p>
+            <h2>Diseño que se ve.<br />Automatización que se siente.</h2>
+            <p>Una sola implementación, adaptada a tu negocio y acompañada de principio a fin.</p>
+          </header>
+
+          <article class="hc-solution hc-solution--web" data-reveal>
+            <div class="hc-solution__copy">
+              <span class="hc-solution__label">Páginas web</span>
+              <h3>Una presencia digital preparada para vender.</h3>
+              <p>
+                Diseñamos el mensaje, la experiencia y los puntos de contacto para que cada visita
+                tenga un siguiente paso claro.
+              </p>
+              <ul>
+                <li>Diseño a medida y responsive</li>
+                <li>Captura de oportunidades</li>
+                <li>Rendimiento y accesibilidad</li>
+              </ul>
+              <a href="#demos">Ver demos de páginas web</a>
+            </div>
+            <div class="hc-solution__visual hc-web-stack" aria-hidden="true">
+              <div class="hc-web-stack__back"></div>
+              <div class="hc-web-stack__middle"></div>
+              <div class="hc-web-stack__front">
+                <span class="hc-mini-nav"></span>
+                <strong>Tu negocio merece<br />una web que avance.</strong>
+                <span class="hc-mini-button"></span>
+                <div class="hc-mini-image"></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="hc-solution hc-solution--automation" data-reveal data-motion-scene>
+            <div class="hc-solution__copy">
+              <span class="hc-solution__label">Automatizaciones</span>
+              <h3>Menos tareas repetidas. Más continuidad comercial.</h3>
+              <p>
+                Conectamos formularios, WhatsApp, correo y seguimiento para que la información
+                llegue a la persona correcta en el momento indicado.
+              </p>
+              <ul>
+                <li>Flujos adaptados a tu operación</li>
+                <li>Integraciones con tus herramientas</li>
+                <li>Acompañamiento durante la adopción</li>
+              </ul>
+              <button
+                type="button"
+                data-wa-open
+                data-source="soluciones"
+                data-service="Automatización de WhatsApp"
+                data-goal="Quiero automatizar tareas comerciales y dar continuidad al seguimiento."
+              >
+                Cuéntanos qué quieres automatizar
+              </button>
+            </div>
+            <div class="hc-solution__visual hc-automation-map" aria-hidden="true">
+              <svg viewBox="0 0 620 420">
+                <path class="hc-map-path hc-map-path--one" d="M74 92C170 92 155 210 272 210" />
+                <path class="hc-map-path hc-map-path--two" d="M272 210C392 210 384 92 542 92" />
+                <path class="hc-map-path hc-map-path--three" d="M272 210C392 210 390 334 542 334" />
+              </svg>
+              <span class="hc-map-node hc-map-node--lead">Nuevo contacto</span>
+              <span class="hc-map-node hc-map-node--center">Luenio</span>
+              <span class="hc-map-node hc-map-node--wa">WhatsApp</span>
+              <span class="hc-map-node hc-map-node--follow">Seguimiento</span>
+              <i class="hc-map-pulse hc-map-pulse--one"></i>
+              <i class="hc-map-pulse hc-map-pulse--two"></i>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="hc-process" id="proceso">
+        <div class="hc-container">
+          <header class="hc-process__head" data-reveal>
+            <p class="hc-kicker">Cómo trabajamos</p>
+            <h2>De la primera conversación a una solución funcionando.</h2>
+          </header>
+          <div class="hc-process__steps">
+            <article data-reveal>
+              <span>Entendemos</span>
+              <h3>Primero escuchamos tu operación.</h3>
+              <p>
+                Definimos qué necesita mejorar, qué herramientas ya usas y cuál es la prioridad.
+              </p>
+            </article>
+            <article data-reveal>
+              <span>Construimos</span>
+              <h3>Diseñamos y conectamos la solución.</h3>
+              <p>Trabajamos página, automatización e integraciones como un mismo sistema.</p>
+            </article>
+            <article data-reveal>
+              <span>Acompañamos</span>
+              <h3>La ponemos en marcha contigo.</h3>
+              <p>Validamos el flujo, ajustamos detalles y te acompañamos durante la adopción.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="hc-questions" id="preguntas">
+        <div class="hc-container hc-questions__grid">
+          <header data-reveal>
+            <p class="hc-kicker">Preguntas frecuentes</p>
+            <h2>Lo importante, antes de empezar.</h2>
+            <p>Si tu caso es diferente, conversemos. La cotización se prepara por WhatsApp.</p>
+          </header>
+          <div class="hc-accordion" data-reveal>
+            <details>
+              <summary>¿Trabajan con plantillas?</summary>
+              <p>
+                Podemos reutilizar componentes técnicos probados, pero la estructura, el diseño y
+                las automatizaciones se adaptan a tu negocio.
+              </p>
+            </details>
+            <details>
+              <summary>¿Cuánto tarda una implementación?</summary>
+              <p>
+                Depende del alcance y de las integraciones necesarias. En la conversación inicial
+                definimos prioridades y una ruta de implementación realista.
+              </p>
+            </details>
+            <details>
+              <summary>¿Las demos pertenecen a clientes?</summary>
+              <p>
+                No. Son experiencias ficticias creadas para mostrar posibilidades de diseño en
+                distintos sectores. No representan resultados ni clientes reales.
+              </p>
+            </details>
+            <details>
+              <summary>¿También acompañan después de publicar?</summary>
+              <p>
+                Sí. El acompañamiento forma parte de nuestra manera de trabajar y se define según
+                las necesidades de cada implementación.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="hc-close" id="contacto">
+        <div class="hc-container">
+          <div class="hc-close__panel" data-reveal>
+            <span class="hc-close__orb" aria-hidden="true"></span>
+            <p class="hc-kicker">Tu proyecto puede empezar aquí</p>
+            <h2>Cuéntanos qué quieres mejorar.</h2>
+            <p>
+              Revisamos tu necesidad y preparamos una cotización personalizada directamente por
+              WhatsApp.
+            </p>
+            <div class="hc-actions">
+              <button
+                class="hc-button hc-button--light"
+                type="button"
+                data-wa-open
+                data-source="cierre"
+              >
+                Escribir por WhatsApp
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M4 10h11M11 6l4 4-4 4" />
+                </svg>
+              </button>
+              <a class="hc-close__mail" href="mailto:contacto@luenio.com">contacto@luenio.com</a>
+            </div>
+          </div>
+        </div>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="footer-brand">
-        <a class="brand footer-logo" href="#inicio" aria-label="Luenio Agency">
-          <img
-            class="brand-logo"
-            src="/luenio-logo.png"
-            width="256"
-            height="256"
-            alt=""
-            decoding="async"
-            loading="lazy"
-          />
-          <span class="brand-fallback" aria-hidden="true">L</span>
+    <footer class="hc-footer">
+      <div class="hc-container hc-footer__inner">
+        <a class="hc-brand" href="/" aria-label="Luenio, inicio">
+          <span class="hc-brand__viewport hc-brand__viewport--light">
+            <img
+              class="hc-brand__logo"
+              src="/brand/logotipo-blanco.svg"
+              width="1536"
+              height="1024"
+              alt="Luenio"
+            />
+          </span>
         </a>
-        <div>
-          <strong>Luenio Agency</strong>
-          <p>Automatización con IA para WhatsApp, CRM y seguimiento comercial.</p>
-        </div>
-      </div>
-      <div class="footer-nav-groups">
-        <nav class="footer-links" aria-label="Pie de página">
-          <a href="#confianza">Qué hacemos</a>
-          <a href="#proceso">Cómo funciona</a>
-          <a href="/precios">Precios</a>
-          <a href="#contacto">Contacto</a>
-        </nav>
-        <nav class="footer-links footer-legal-links" aria-label="Legal">
-          <a href="/terminos">Términos de Servicio</a>
-          <a href="/privacidad">Política de Privacidad</a>
-          <a href="/reembolsos">Política de Reembolsos</a>
+        <p>Soluciones digitales hechas a medida en Colombia.</p>
+        <nav aria-label="Enlaces legales">
+          <a href="/login" data-client-access>
+            <span class="signed-out-copy">Acceso clientes</span>
+            <span class="signed-in-copy">Ir a mi espacio</span>
+          </a>
+          <a href="/terminos">Términos</a>
+          <a href="/privacidad">Privacidad</a>
         </nav>
       </div>
     </footer>
 
-    <script type="module" src="/apps/web/src/main.js"></script>
+    <script type="module" src="/apps/web/src/public-site.js"></script>
+    <script type="module" src="/apps/web/src/home-clarity.js"></script>
   </body>
 </html>

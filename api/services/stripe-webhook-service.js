@@ -3,6 +3,7 @@ import { plans } from "../../config/billing.js";
 import { getStripeEnv, isProduction } from "../../config/env.js";
 import { buildSubscriptionUpdatedEvent } from "../../core/events.js";
 import { updateUserSubscription } from "../../db/storage.js";
+import { findUserById } from "./auth-service.js";
 
 const STRIPE_SIGNATURE_TOLERANCE_SECONDS = 300;
 const SUBSCRIPTION_EVENTS = new Set([
@@ -21,6 +22,9 @@ export class StripeWebhookError extends Error {
 }
 
 function getWebhookSecret() {
+  if (!getStripeEnv().publicBillingEnabled) {
+    throw new StripeWebhookError("Billing endpoint is disabled.", 404);
+  }
   const secret =
     getStripeEnv().webhookSecret || (isProduction() ? "" : "whsec_luenio_local_test_secret");
 
@@ -92,6 +96,7 @@ function buildSubscriptionUpdate({
   stripeCustomerId,
   stripeSubscriptionId,
   currentPeriodEnd,
+  tenantId = userId,
 }) {
   const subscription = {
     id: stripeSubscriptionId || `subscription_${userId}`,
@@ -106,7 +111,7 @@ function buildSubscriptionUpdate({
 
   return {
     subscription,
-    event: buildSubscriptionUpdatedEvent({ userId, subscription }),
+    event: buildSubscriptionUpdatedEvent({ userId: tenantId, subscription }),
   };
 }
 
@@ -115,6 +120,7 @@ async function handleSubscriptionObject(subscription = {}) {
   if (!userId) return { ignored: true, reason: "Missing user_id metadata" };
 
   const plan = normalizePlan(subscription.metadata?.plan);
+  const user = await findUserById(userId);
   const update = buildSubscriptionUpdate({
     userId,
     plan,
@@ -122,9 +128,12 @@ async function handleSubscriptionObject(subscription = {}) {
     stripeCustomerId: subscription.customer,
     stripeSubscriptionId: subscription.id,
     currentPeriodEnd: timestampToIso(subscription.current_period_end),
+    tenantId: user?.businessId || userId,
   });
 
-  return updateUserSubscription(update.subscription, update.event);
+  return updateUserSubscription(update.subscription, update.event, {
+    workspaceId: user?.businessId || userId,
+  });
 }
 
 async function handleCheckoutSession(session = {}) {
@@ -132,6 +141,7 @@ async function handleCheckoutSession(session = {}) {
   if (!userId) return { ignored: true, reason: "Missing user_id metadata" };
 
   const plan = normalizePlan(session.metadata?.plan);
+  const user = await findUserById(userId);
   const update = buildSubscriptionUpdate({
     userId,
     plan,
@@ -139,9 +149,12 @@ async function handleCheckoutSession(session = {}) {
     stripeCustomerId: session.customer,
     stripeSubscriptionId: session.subscription,
     currentPeriodEnd: null,
+    tenantId: user?.businessId || userId,
   });
 
-  return updateUserSubscription(update.subscription, update.event);
+  return updateUserSubscription(update.subscription, update.event, {
+    workspaceId: user?.businessId || userId,
+  });
 }
 
 async function dispatchStripeEvent(event) {

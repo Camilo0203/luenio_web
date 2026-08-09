@@ -3,156 +3,229 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Términos de Servicio | Luenio Agency</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Términos de Servicio | Luenio</title>
     <meta
       name="description"
-      content="Términos y condiciones de uso del CRM y las automatizaciones de Luenio Agency."
+      content="Términos para contratar landing pages, desarrollo web y automatizaciones con IA de Luenio."
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/terminos" />
-    <meta name="theme-color" content="#07111f" />
+    <link rel="canonical" href="https://luenio.com/terminos" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Términos de Servicio | Luenio Agency" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Términos de Servicio | Luenio" />
     <meta
       property="og:description"
-      content="Términos y condiciones de uso del CRM y las automatizaciones de Luenio Agency."
+      content="Condiciones de uso y contratación de los servicios de Luenio."
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/terminos" />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/terminos" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Términos de Servicio | Luenio Agency" />
-    <meta
-      name="twitter:description"
-      content="Términos y condiciones de uso del CRM y las automatizaciones de Luenio Agency."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+    <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
-  <body>
-    <!-- ⚠️ Placeholders marcados con [ ]: reemplazar antes de producción y validar con asesoría legal. -->
-    <main class="niche-page legal-page">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a>
-        <a class="button button-primary button-small" href="/precios">Ver planes</a>
-      </nav>
-
-      <section class="legal-header">
-        <p class="eyebrow">Legal</p>
-        <h1>Términos de Servicio</h1>
-        <p class="legal-updated">Última actualización: [FECHA]</p>
+  <body data-whatsapp-widget="false">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand-lockup" href="/"
+          ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+        >
+        <nav
+          class="site-nav"
+          id="site-navigation"
+          data-navigation
+          data-open="false"
+          aria-label="Navegación principal"
+        >
+          <a href="/#servicios">Servicios</a><a href="/#proceso">Proceso</a
+          ><a href="/#casos">Casos</a><a href="/cotizacion">Cotización</a
+          ><a href="/login" data-client-access
+            ><span class="access-label--guest">Acceso</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+        </nav>
+        <div class="site-header__actions">
+          <a
+            class="button button--outline button--small site-header__access"
+            href="/login"
+            data-client-access
+            ><span class="access-label--guest">Acceso clientes</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+          <a class="button button--primary button--small site-header__cta" href="/cotizacion"
+            >Solicitar cotización gratis</a
+          >
+        </div>
+        <button
+          class="menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span>
+        </button>
+      </div>
+    </header>
+    <main id="contenido">
+      <section class="legal-hero">
+        <div class="legal-hero__inner">
+          <p class="eyebrow">Información legal</p>
+          <h1>Términos de Servicio</h1>
+          <p class="legal-date">Última actualización: 10 de julio de 2026</p>
+          <p>
+            Estas condiciones regulan el uso de luenio.com y la contratación de servicios de Luenio.
+          </p>
+        </div>
       </section>
-
-      <nav class="legal-crosslinks" aria-label="Documentos legales">
-        <a href="/terminos" class="active">Términos de Servicio</a>
-        <a href="/privacidad">Política de Privacidad</a>
-        <a href="/reembolsos">Política de Reembolsos</a>
-      </nav>
-
-      <article class="legal-content">
-        <h2>1. Aceptación de los Términos</h2>
-        <p>
-          Al registrarte o usar la plataforma Luenio ("el Servicio"), operada por [TU RAZÓN SOCIAL],
-          aceptas estos Términos de Servicio en su totalidad. Si no estás de acuerdo, no debes usar
-          el Servicio.
-        </p>
-
-        <h2>2. Descripción del Servicio</h2>
-        <p>
-          Luenio es un CRM SaaS multi-tenant que captura leads, calcula un puntaje (score) y
-          clasificación de intención, organiza un pipeline de ventas y ejecuta automatizaciones
-          (CRM, WhatsApp, email y webhooks) para negocios que venden por conversación.
-        </p>
-
-        <h2>3. Registro de Cuenta y Elegibilidad</h2>
-        <p>
-          Debes proporcionar información veraz al registrarte y eres responsable de mantener la
-          confidencialidad de tus credenciales de acceso. Debes tener capacidad legal para contratar
-          en tu jurisdicción.
-        </p>
-
-        <h2>4. Planes, Precios y Facturación</h2>
-        <p>
-          El Servicio se ofrece bajo los planes Starter, Pro y Agency descritos en
-          <a href="/precios">nuestra página de precios</a>, cada uno con un límite mensual de leads.
-          La facturación es mensual y recurrente, procesada por Stripe. La suscripción se renueva
-          automáticamente al final de cada periodo salvo que la canceles antes de esa fecha.
-        </p>
-
-        <h2>5. Cancelación y Reembolsos</h2>
-        <p>
-          Puedes cancelar tu suscripción en cualquier momento desde el panel de facturación. Las
-          condiciones de cancelación y reembolso se detallan en nuestra
-          <a href="/reembolsos">Política de Reembolsos</a>.
-        </p>
-
-        <h2>6. Uso Aceptable</h2>
-        <p>No está permitido usar el Servicio para:</p>
-        <ul>
-          <li>
-            Enviar spam o comunicaciones no solicitadas que violen las políticas de WhatsApp/Meta u
-            otros proveedores de mensajería integrados.
-          </li>
-          <li>Recopilar datos de terceros sin base legal o consentimiento adecuado.</li>
-          <li>
-            Intentar vulnerar la seguridad, el aislamiento entre cuentas (tenants) o los límites de
-            uso de la plataforma.
-          </li>
-          <li>Usar el Servicio con fines ilegales o fraudulentos.</li>
-        </ul>
-
-        <h2>7. Propiedad Intelectual</h2>
-        <p>
-          El software, marca, diseño e interfaz de Luenio son propiedad de [TU RAZÓN SOCIAL]. Tú
-          conservas la propiedad de los datos de tus leads y clientes que ingreses al Servicio.
-        </p>
-
-        <h2>8. Datos del Cliente y Privacidad</h2>
-        <p>
-          El tratamiento de datos personales se describe en nuestra
-          <a href="/privacidad">Política de Privacidad</a>, que forma parte integral de estos
-          Términos.
-        </p>
-
-        <h2>9. Disponibilidad del Servicio y Limitación de Responsabilidad</h2>
-        <p>
-          Hacemos esfuerzos razonables para mantener el Servicio disponible, pero no garantizamos
-          disponibilidad ininterrumpida. En la máxima medida permitida por la ley, Luenio no será
-          responsable por daños indirectos, pérdida de ingresos o de datos derivados del uso o la
-          imposibilidad de uso del Servicio.
-        </p>
-
-        <h2>10. Terminación de Cuenta</h2>
-        <p>
-          Podemos suspender o terminar tu acceso si incumples estos Términos, incluyendo impago o
-          uso fraudulento. Puedes solicitar la eliminación de tu cuenta en cualquier momento
-          contactándonos.
-        </p>
-
-        <h2>11. Modificaciones a los Términos</h2>
-        <p>
-          Podemos actualizar estos Términos periódicamente. Notificaremos cambios importantes por
-          email o dentro del panel. El uso continuado del Servicio tras una actualización implica la
-          aceptación de los nuevos Términos.
-        </p>
-
-        <h2>12. Ley Aplicable y Jurisdicción</h2>
-        <p>Estos Términos se rigen por las leyes de [PAÍS/JURISDICCIÓN].</p>
-
-        <h2>13. Contacto</h2>
-        <p>
-          [TU RAZÓN SOCIAL] — [TU DIRECCIÓN]<br />
-          Para consultas sobre estos Términos, escríbenos a [TU EMAIL DE SOPORTE].
-        </p>
-      </article>
-
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
+      <div class="section-shell legal-layout">
+        <nav class="legal-toc" aria-label="Contenido">
+          <strong>Contenido</strong><a href="#aceptacion">1. Aceptación</a
+          ><a href="#servicios">2. Servicios</a><a href="#propuesta">3. Propuesta</a
+          ><a href="#cliente">4. Responsabilidades</a><a href="#cambios">5. Cambios</a
+          ><a href="#propiedad">6. Propiedad</a><a href="#datos">7. Datos</a
+          ><a href="#terceros">8. Terceros</a><a href="#resultados">9. Resultados</a
+          ><a href="#contacto-legal">10. Contacto</a>
+        </nav>
+        <article class="legal-article">
+          <section id="aceptacion">
+            <h2>1. Aceptación</h2>
+            <p>
+              Al usar esta web, enviar una solicitud, aceptar una propuesta o contratar a Luenio,
+              aceptas estos términos. Si actúas por una empresa, confirmas que cuentas con
+              autorización para representarla.
+            </p>
+          </section>
+          <section id="servicios">
+            <h2>2. Servicios</h2>
+            <p>
+              Luenio diseña y desarrolla landing pages, sitios web orientados a conversión,
+              formularios, integraciones y automatizaciones con inteligencia artificial. Estas
+              últimas pueden incluir WhatsApp, chatbots, asistentes, CRM, calificación de leads y
+              seguimiento comercial.
+            </p>
+            <p>
+              El alcance exacto se define por escrito para cada proyecto. Una demostración o
+              conversación inicial no constituye una promesa de entregables.
+            </p>
+          </section>
+          <section id="propuesta">
+            <h2>3. Diagnóstico, propuesta y pagos</h2>
+            <p>
+              El diagnóstico y la cotización inicial ofrecidos desde la web son gratuitos. Cada
+              propuesta indica alcance, entregables, tiempos, precio, forma de pago, dependencias y
+              soporte incluido. El proyecto comienza después de la aceptación y del pago inicial
+              definido.
+            </p>
+          </section>
+          <section id="cliente">
+            <h2>4. Responsabilidades del cliente</h2>
+            <p>
+              El cliente debe entregar información, contenidos, aprobaciones, accesos y credenciales
+              necesarios de forma oportuna. También debe garantizar que posee derechos sobre marcas,
+              imágenes, textos, bases de datos y materiales suministrados.
+            </p>
+            <p>
+              Los retrasos en contenidos, accesos o aprobaciones pueden modificar el calendario sin
+              constituir incumplimiento de Luenio.
+            </p>
+          </section>
+          <section id="cambios">
+            <h2>5. Cambios de alcance</h2>
+            <p>
+              Las solicitudes fuera del alcance aprobado pueden requerir una fase o cotización
+              adicional. Luenio informará el impacto en costo y tiempo antes de ejecutar cambios
+              relevantes.
+            </p>
+          </section>
+          <section id="propiedad">
+            <h2>6. Propiedad intelectual</h2>
+            <p>
+              El cliente conserva su marca, datos y contenidos. Una vez cumplidos los pagos, recibe
+              los derechos de uso acordados sobre los entregables finales. Luenio conserva la
+              propiedad de metodologías, herramientas internas, componentes reutilizables y
+              conocimiento previo, sin apropiarse de información confidencial del cliente.
+            </p>
+            <p>
+              Salvo acuerdo escrito, Luenio puede mostrar el trabajo publicado como portafolio. El
+              cliente puede solicitar confidencialidad antes del inicio.
+            </p>
+          </section>
+          <section id="datos">
+            <h2>7. Datos, privacidad y uso aceptable</h2>
+            <p>
+              El tratamiento de datos se describe en la
+              <a href="/privacidad">Política de Privacidad</a>. El cliente debe contar con
+              autorización para tratar y contactar a sus propios leads. No se permite usar las
+              soluciones para spam, fraude, suplantación, discriminación ilegal o actividades
+              contrarias a políticas de plataformas conectadas.
+            </p>
+          </section>
+          <section id="terceros">
+            <h2>8. Servicios de terceros</h2>
+            <p>
+              Hosting, dominios, WhatsApp, Meta, CRM, correo, automatización, analítica y otros
+              proveedores tienen sus propias condiciones y disponibilidad. Luenio no controla
+              interrupciones, cambios de API, bloqueos o costos impuestos por terceros.
+            </p>
+          </section>
+          <section id="resultados">
+            <h2>9. Resultados y responsabilidad</h2>
+            <p>
+              Luenio trabaja para mejorar presentación, captación, velocidad y organización
+              comercial, pero no garantiza ventas, ingresos o conversiones específicos. Los
+              resultados dependen de oferta, tráfico, mercado, precios, operación y seguimiento del
+              cliente.
+            </p>
+            <p>
+              En la medida permitida por la ley, Luenio no responde por daños indirectos, pérdida de
+              ingresos o interrupciones originadas en proveedores externos.
+            </p>
+          </section>
+          <section id="contacto-legal">
+            <h2>10. Cambios y contacto</h2>
+            <p>
+              Podemos actualizar estos términos cuando cambien los servicios o requisitos
+              aplicables. La versión vigente estará publicada aquí.
+            </p>
+            <div class="legal-contact">
+              <strong>Luenio</strong><br /><a href="mailto:contacto@luenio.com"
+                >contacto@luenio.com</a
+              ><br />+57 319 320 3702<br />Bogotá D.C., Colombia
+            </div>
+          </section>
+        </article>
+      </div>
     </main>
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__intro">
+          <a class="brand-lockup" href="/"
+            ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+          >
+          <p>Landings y automatizaciones con IA diseñadas alrededor de negocios reales.</p>
+        </div>
+        <nav class="footer-group" aria-label="Legal">
+          <strong>Documentos</strong><a href="/terminos" aria-current="page">Términos</a
+          ><a href="/privacidad">Privacidad</a><a href="/reembolsos">Reembolsos</a
+          ><a href="/cotizacion">Cotización</a>
+        </nav>
+        <div class="footer-group">
+          <strong>Contacto</strong><a href="mailto:contacto@luenio.com">contacto@luenio.com</a
+          ><span>+57 319 320 3702</span><span>Bogotá D.C., Colombia</span>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
+      </div>
+    </footer>
+    <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

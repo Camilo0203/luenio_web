@@ -3,20 +3,19 @@ import path from "node:path";
 import { getStorageHealth } from "../db/storage.js";
 import {
   getAutomationEnv,
+  getAnalyticsEnv,
+  getContactEnv,
+  getDigestEnv,
+  getLegalEnv,
+  getMfaEnv,
   getSecurityConfig,
+  getSentryEnv,
   getServerConfig,
   getStripeEnv,
+  getTurnstileEnv,
+  isDigestDeliveryConfigured,
   isProduction,
 } from "./env.js";
-
-const LEGAL_PLACEHOLDER_TOKENS = [
-  "[TU RAZÓN SOCIAL]",
-  "[TU DIRECCIÓN]",
-  "[TU EMAIL DE SOPORTE]",
-  "[PRECIO]",
-  "[FECHA]",
-  "[PAÍS/JURISDICCIÓN]",
-];
 
 const LEGAL_CONTENT_PAGES = [
   path.join("legal", "terminos", "index.html"),
@@ -40,10 +39,7 @@ function readPublicPage(relativePath, serveDist) {
 
 export function evaluateLegalContent(pages) {
   const missing = pages.some((content) => content === null);
-  const hasPlaceholder = pages.some(
-    (content) =>
-      content !== null && LEGAL_PLACEHOLDER_TOKENS.some((token) => content.includes(token)),
-  );
+  const hasPlaceholder = pages.some((content) => content !== null && /\[[^\]]+\]/.test(content));
 
   return {
     legalPagesFound: !missing,
@@ -70,26 +66,56 @@ export function getPricingContentStatus(serveDist = getServerConfig().serveDist)
 
 export function getIntegrationStatus() {
   const automation = getAutomationEnv();
+  const contact = getContactEnv();
   return {
     webhook: Boolean(automation.webhookUrl),
     crmWebhook: Boolean(automation.crmWebhookUrl),
     whatsapp: Boolean(automation.whatsappWebhookUrl),
     email: Boolean(automation.emailWebhookUrl),
+    contactWebhook: Boolean(contact.webhookUrl),
+    contactWebhookAuthenticated: Boolean(contact.webhookUrl && contact.webhookToken),
+    contactDeliveryRetries: Boolean(
+      contact.deliveryWorkerEnabled &&
+      Number.isInteger(contact.deliveryWorkerIntervalMs) &&
+      contact.deliveryWorkerIntervalMs >= 10_000 &&
+      contact.deliveryWorkerIntervalMs <= 300_000 &&
+      Number.isInteger(contact.deliveryWorkerBatchSize) &&
+      contact.deliveryWorkerBatchSize >= 1 &&
+      contact.deliveryWorkerBatchSize <= 50,
+    ),
+    automationWebhookAuthenticated: Boolean(
+      automation.webhookToken &&
+      (automation.webhookUrl ||
+        automation.crmWebhookUrl ||
+        automation.whatsappWebhookUrl ||
+        automation.emailWebhookUrl),
+    ),
   };
 }
 
 export function getSecurityStatus() {
   const security = getSecurityConfig();
+  const mfa = getMfaEnv();
   return {
     authSecretConfigured: Boolean(security.authSecret),
     cookieSecure: security.cookieSecure,
     nodeEnv: security.nodeEnv,
+    trustedProxyConfigured: Boolean(
+      security.requireTrustedProxy && security.trustedProxySecret.length >= 32,
+    ),
+    healthcheckProtected: security.healthcheckToken.length >= 32,
+    sessionTtlSeconds: security.sessionTtlSeconds,
+    passwordMinLength: security.passwordMinLength,
+    adminMfaConfigured: Boolean(
+      mfa.requiredForAdmins && mfa.webhookUrl && mfa.webhookToken.length >= 32,
+    ),
   };
 }
 
 export function getBillingStatus() {
   const stripe = getStripeEnv();
   return {
+    publicBillingEnabled: stripe.publicBillingEnabled,
     stripeSecretConfigured: Boolean(stripe.secretKey),
     stripeWebhookConfigured: Boolean(stripe.webhookSecret),
     starterPriceConfigured: Boolean(stripe.starterPriceId),
@@ -118,6 +144,7 @@ export function getDeploymentStatus() {
     rateLimitsConfigured: server.rateLimitMax > 0 && server.sensitiveRateLimitMax > 0,
     sensitiveRateLimitMax: server.sensitiveRateLimitMax,
     serveDist: server.serveDist,
+    allowedHostsConfigured: server.allowedHosts.length > 0,
   };
 }
 
@@ -126,9 +153,14 @@ export function buildReadiness() {
   const integrations = getIntegrationStatus();
   const security = getSecurityStatus();
   const billing = getBillingStatus();
+  const billingSeverity = billing.publicBillingEnabled ? "critical" : "recommended";
   const deployment = getDeploymentStatus();
   const legalContent = getLegalContentStatus(deployment.serveDist);
   const pricingContent = getPricingContentStatus(deployment.serveDist);
+  const turnstile = getTurnstileEnv();
+  const analytics = getAnalyticsEnv();
+  const sentry = getSentryEnv();
+  const legal = getLegalEnv();
 
   const checks = [
     {
@@ -197,11 +229,59 @@ export function buildReadiness() {
         : "Set COOKIE_SECURE=true or NODE_ENV=production for production cookies.",
     },
     {
+      id: "trusted_proxy",
+      label: "Trusted reverse proxy",
+      done: security.trustedProxyConfigured,
+      severity: "critical",
+      description: security.trustedProxyConfigured
+        ? "The application rejects traffic that did not pass through the trusted proxy."
+        : "Set REQUIRE_TRUSTED_PROXY=true and a random TRUSTED_PROXY_SECRET of at least 32 characters.",
+    },
+    {
+      id: "allowed_hosts",
+      label: "Allowed hosts",
+      done: deployment.allowedHostsConfigured,
+      severity: "critical",
+      description: deployment.allowedHostsConfigured
+        ? "Host header allowlisting is configured."
+        : "Set ALLOWED_HOSTS to the exact public hostnames.",
+    },
+    {
+      id: "private_healthcheck",
+      label: "Protected diagnostics",
+      done: security.healthcheckProtected,
+      severity: "critical",
+      description: security.healthcheckProtected
+        ? "Detailed health and readiness diagnostics require a private token."
+        : "Set HEALTHCHECK_TOKEN to a random value of at least 32 characters.",
+    },
+    {
+      id: "auth_policy",
+      label: "Authentication policy",
+      done: security.passwordMinLength >= 12 && security.sessionTtlSeconds <= 7 * 24 * 60 * 60,
+      severity: "critical",
+      description:
+        security.passwordMinLength >= 12 && security.sessionTtlSeconds <= 7 * 24 * 60 * 60
+          ? "Strong password and bounded session policies are configured."
+          : "Require at least 12-character passwords and sessions no longer than seven days.",
+    },
+    {
+      id: "admin_mfa",
+      label: "Administrator multi-factor authentication",
+      done: security.adminMfaConfigured,
+      severity: "critical",
+      description: security.adminMfaConfigured
+        ? "Administrator sign-in requires a one-time verification code."
+        : "Configure ADMIN_MFA_REQUIRED, AUTH_MFA_WEBHOOK_URL and AUTH_MFA_WEBHOOK_TOKEN.",
+    },
+    {
       id: "stripe",
       label: "Stripe billing",
       done: billing.stripeSecretConfigured && billing.stripeWebhookConfigured,
-      severity: "critical",
-      description: "Stripe checkout and webhook are required for subscription changes.",
+      severity: billingSeverity,
+      description: billing.publicBillingEnabled
+        ? "Stripe checkout and webhook are required because public billing is enabled."
+        : "Stripe is optional for the lead-gen launch because public billing is disabled.",
     },
     {
       id: "stripe_prices",
@@ -210,8 +290,10 @@ export function buildReadiness() {
         billing.starterPriceConfigured &&
         billing.proPriceConfigured &&
         billing.agencyPriceConfigured,
-      severity: "critical",
-      description: "Starter, Pro and Agency price IDs must be configured.",
+      severity: billingSeverity,
+      description: billing.publicBillingEnabled
+        ? "Starter, Pro and Agency price IDs must be configured because public billing is enabled."
+        : "Stripe price IDs are optional until public billing is enabled.",
     },
     {
       id: "automation_outputs",
@@ -225,13 +307,102 @@ export function buildReadiness() {
       description: "Configure CRM, WhatsApp, email or webhook outputs for live notifications.",
     },
     {
+      id: "automation_authentication",
+      label: "Authenticated automation delivery",
+      done:
+        !(
+          integrations.crmWebhook ||
+          integrations.whatsapp ||
+          integrations.email ||
+          integrations.webhook
+        ) || integrations.automationWebhookAuthenticated,
+      severity: "critical",
+      description: integrations.automationWebhookAuthenticated
+        ? "Automation deliveries use a bearer token."
+        : "Set AUTOMATION_WEBHOOK_TOKEN before enabling automation webhooks.",
+    },
+    {
+      id: "contact_security",
+      label: "Public form protection",
+      done: turnstile.required && Boolean(turnstile.siteKey && turnstile.secretKey),
+      severity: "critical",
+      description:
+        turnstile.required && turnstile.siteKey && turnstile.secretKey
+          ? "Turnstile, honeypot and submission timing checks protect public forms."
+          : "Configure TURNSTILE_SITE_KEY, TURNSTILE_SECRET_KEY and TURNSTILE_REQUIRED=true.",
+    },
+    {
+      id: "contact_delivery",
+      label: "Authenticated lead delivery",
+      done: integrations.contactWebhookAuthenticated,
+      severity: "critical",
+      description: integrations.contactWebhookAuthenticated
+        ? "Contact leads are delivered to an authenticated workflow after persistence."
+        : "Configure CONTACT_WEBHOOK_URL and CONTACT_WEBHOOK_TOKEN for n8n delivery.",
+    },
+    {
+      id: "contact_delivery_retries",
+      label: "Persistent lead delivery retries",
+      done: integrations.contactDeliveryRetries,
+      severity: "critical",
+      description: integrations.contactDeliveryRetries
+        ? "Failed notifications remain queued and are retried with bounded backoff."
+        : "Enable CONTACT_DELIVERY_WORKER_ENABLED with a safe interval and batch size.",
+    },
+    {
       id: "legal_placeholders_replaced",
       label: "Legal pages ready",
       done: legalContent.legalPagesFound && legalContent.legalPlaceholdersReplaced,
       severity: "critical",
       description: legalContent.legalPlaceholdersReplaced
         ? "Terms, Privacy, and Refund pages have no unreplaced [placeholder] tokens."
-        : "Replace the [placeholder] tokens in the Terms/Privacy/Refund pages and have them reviewed before launch.",
+        : "Replace every public [placeholder] token in Terms/Privacy/Refund pages and have the copy reviewed before launch.",
+    },
+    {
+      id: "legal_identity",
+      label: "Responsible legal identity",
+      done: legal.identityReady,
+      severity: "critical",
+      description: legal.identityReady
+        ? "The responsible legal identity has been reviewed and published."
+        : "Define and review the responsible legal identity before public launch.",
+    },
+    {
+      id: "analytics",
+      label: "Consent-based analytics",
+      done: Boolean(analytics.gaMeasurementId),
+      severity: "critical",
+      description: analytics.gaMeasurementId
+        ? "GA4 is configured and will load only after analytics consent."
+        : "Set GA_MEASUREMENT_ID before launch; analytics loads only after consent.",
+    },
+    {
+      id: "observability",
+      label: "Error observability",
+      done: sentry.configured,
+      severity: "critical",
+      description: sentry.configured
+        ? "Server and browser Sentry DSNs are configured."
+        : "Configure separate SENTRY_DSN_SERVER and SENTRY_DSN_PUBLIC values.",
+    },
+    {
+      id: "digest_delivery",
+      label: "Daily digest webhook (optional)",
+      done: (() => {
+        const digest = getDigestEnv();
+        if (!digest.cronEnabled) return true;
+        return isDigestDeliveryConfigured(digest);
+      })(),
+      severity: "recommended",
+      description: (() => {
+        const digest = getDigestEnv();
+        if (!digest.cronEnabled) {
+          return "Digest cron is disabled (DIGEST_CRON_ENABLED=false). Enable only with HTTPS webhook + token.";
+        }
+        return isDigestDeliveryConfigured(digest)
+          ? "Digest worker is configured with authenticated HTTPS webhook and safe intervals."
+          : "Set DIGEST_WEBHOOK_URL (HTTPS), DIGEST_WEBHOOK_TOKEN (≥32), and valid DIGEST_WORKER_INTERVAL_MS / DIGEST_MIN_HOURS_BETWEEN.";
+      })(),
     },
     {
       id: "pricing_visible",
@@ -239,8 +410,8 @@ export function buildReadiness() {
       done: pricingContent.pricingPageFound && pricingContent.pricingVisible,
       severity: "recommended",
       description: pricingContent.pricingVisible
-        ? "The public pricing page shows real prices."
-        : "Replace the [PRECIO] placeholder on the pricing page with real prices.",
+        ? "The public pricing page shows real pricing guidance or a clear consultation model."
+        : "Replace the [PRECIO] placeholder on the pricing page with real pricing guidance.",
     },
   ];
 
@@ -259,6 +430,12 @@ export function buildReadiness() {
     deployment,
     legalContent,
     pricingContent,
+    turnstile: {
+      required: turnstile.required,
+      configured: Boolean(turnstile.siteKey && turnstile.secretKey),
+    },
+    analytics: { configured: Boolean(analytics.gaMeasurementId) },
+    legal: { identityReady: legal.identityReady },
   };
 }
 

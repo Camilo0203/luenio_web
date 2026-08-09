@@ -1,0 +1,74 @@
+{
+  "name": "Luenio - Invitation and password reset email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luenio-invitation",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "access-webhook",
+      "name": "Authenticated access webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-480, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.body || $input.first().json;\nconst isReset = payload.type === 'password_reset';\nif (!payload.email || (isReset ? !payload.resetUrl : !payload.acceptanceUrl)) throw new Error('Invalid access payload');\nreturn [{ json: { ...payload, isReset } }];"
+      },
+      "id": "validate-access",
+      "name": "Validate access payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-240, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contacto@luenio.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "={{ $json.isReset ? 'Restablece tu acceso a Luenio' : 'Tu invitación a Luenio' }}",
+        "emailFormat": "text",
+        "text": "={{ $json.isReset ? 'Abre este enlace de un solo uso para cambiar tu contraseña: ' + $json.resetUrl : 'Has sido invitado al espacio ' + $json.businessName + '. Activa tu acceso aquí: ' + $json.acceptanceUrl }}\n\nEl enlace es privado, de un solo uso y tiene vencimiento. Si no solicitaste esta acción, ignora este mensaje.",
+        "options": {}
+      },
+      "id": "send-access-email",
+      "name": "Send access email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\":true}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "respond-access",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [240, 0]
+    }
+  ],
+  "connections": {
+    "Authenticated access webhook": {
+      "main": [[{ "node": "Validate access payload", "type": "main", "index": 0 }]]
+    },
+    "Validate access payload": {
+      "main": [[{ "node": "Send access email", "type": "main", "index": 0 }]]
+    },
+    "Send access email": {
+      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none"
+  },
+  "versionId": "e8c4f1b8-12cf-48c3-aee2-cf6f00bc52ce"
+}

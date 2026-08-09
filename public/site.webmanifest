@@ -1,0 +1,21 @@
+{
+  "name": "Luenio",
+  "short_name": "Luenio",
+  "description": "Landings y automatización con inteligencia artificial para negocios.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f7f9fc",
+  "theme_color": "#071a33",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

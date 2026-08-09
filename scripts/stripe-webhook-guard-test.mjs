@@ -1,8 +1,10 @@
 const previousNodeEnv = process.env.NODE_ENV;
 const previousWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+const previousBillingEnabled = process.env.ENABLE_PUBLIC_BILLING;
 import crypto from "node:crypto";
 
 process.env.NODE_ENV = "production";
+process.env.ENABLE_PUBLIC_BILLING = "true";
 delete process.env.STRIPE_WEBHOOK_SECRET;
 
 const { default: stripeWebhookHandler } = await import("../api/stripe-webhook.js");
@@ -132,5 +134,7 @@ else process.env.NODE_ENV = previousNodeEnv;
 
 if (previousWebhookSecret === undefined) delete process.env.STRIPE_WEBHOOK_SECRET;
 else process.env.STRIPE_WEBHOOK_SECRET = previousWebhookSecret;
+if (previousBillingEnabled === undefined) delete process.env.ENABLE_PUBLIC_BILLING;
+else process.env.ENABLE_PUBLIC_BILLING = previousBillingEnabled;
 
 console.info("Stripe webhook production guard passed");

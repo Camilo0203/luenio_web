@@ -1,148 +1,195 @@
-# Luenio — Despliegue en VPS con Docker
+# Despliegue seguro de Luenio
 
-Guía end-to-end para desplegar Luenio en un VPS propio usando Docker Compose (app + Caddy como reverse proxy con TLS automático). Ver `PRODUCTION.md` para la configuración a nivel de aplicación (variables de entorno, Supabase, Stripe, etc.) — esta guía cubre solo la infraestructura.
+Esta guía publica Luenio en un VPS compartido con aislamiento estricto entre staging y producción. Los recursos externos —Cloudflare, Supabase, Resend, GA4, Sentry, R2 y Better Stack— también deben estar separados por entorno cuando admitan datos o secretos.
 
-## 1. Overview
+## Arquitectura
 
-Un único VPS ejecuta dos contenedores vía Docker Compose:
+```text
+Cloudflare -> Caddy compartido (80/443)
+                 |-> app-production + n8n-production
+                 `-> app-staging + n8n-staging
 
-- `app`: la imagen de Luenio (Node.js, sin dependencias de runtime, sirve el build de Vite).
-- `caddy`: reverse proxy que obtiene y renueva automáticamente el certificado TLS (Let's Encrypt).
+app-production -> Supabase production
+app-staging    -> Supabase staging
+backups        -> Cloudflare R2 cifrado con age
+monitoreo      -> Better Stack + timers locales
+```
 
-Supabase es el backend gestionado de base de datos; Stripe procesa los pagos.
+Caddy es el único servicio con puertos públicos. Cada stack de aplicación tiene una red edge exclusiva y redes internas separadas para app y n8n. Los stacks no comparten archivos `.env`, secretos, proyectos Supabase, volúmenes n8n ni aliases Docker.
 
-## 2. Prerequisitos
+## 1. Preparar el VPS
 
-- VPS con Ubuntu 22.04/24.04 o Debian 12, IP pública.
-- Un dominio con registro A (y AAAA si aplica) apuntando a la IP del VPS.
-- Acceso SSH con un usuario con permisos sudo.
-- Firewall abierto solo para 22/80/443:
-  ```bash
-  sudo ufw allow OpenSSH
-  sudo ufw allow 80
-  sudo ufw allow 443
-  sudo ufw enable
-  ```
-- Docker Engine + Compose plugin:
-  ```bash
-  curl -fsSL https://get.docker.com | sh
-  sudo usermod -aG docker $USER
-  ```
-  (cierra sesión y vuelve a entrar para que el grupo `docker` tome efecto)
-- `git` instalado.
+- Ubuntu 24.04 LTS o Debian estable actualizado.
+- Al menos 4 GB RAM y espacio suficiente para dos stacks durante la promoción.
+- Docker Engine con Compose plugin, `age`, `rclone` y `curl`.
+- SSH con llave, root y contraseña deshabilitados, MFA en proveedores.
+- Repositorio en `/opt/luenio`.
 
-## 3. Pre-deploy gate — corre `npm test` ANTES de tocar el VPS
+Crea los archivos root-only:
 
-`scripts/production-gate.mjs` levanta su propio servidor temporal en un puerto libre, espera a `/api/health` y corre toda la batería de guardas (arquitectura, seguridad de auth, límites de tasa, schema, storage, webhook de Stripe, smoke dev/prod, e2e completo). Necesita un working tree escribible, un puerto disponible y tiempo real de ejecución — nada de eso pertenece dentro de una capa de `docker build`.
+```bash
+sudo install -d -m 700 /etc/luenio
+sudo cp .env.production.example /etc/luenio/production.env
+sudo cp .env.production.example /etc/luenio/staging.env
+sudo cp .env.edge.example /etc/luenio/edge.env
+sudo cp .env.backup.example /etc/luenio/backup.env
+sudo cp .env.monitor.example /etc/luenio/monitor.env
+sudo chmod 600 /etc/luenio/*.env
+```
+
+Genera cada secreto independientemente con `openssl rand -hex 32`. No reutilices secretos entre entornos ni entre webhooks.
+
+## 2. Contratos por entorno
+
+Producción:
+
+```dotenv
+LUENIO_IMAGE=luenio:<release-inmutable>
+LUENIO_ENV_FILE=/etc/luenio/production.env
+APP_HOST=luenio.com
+APP_EDGE_ALIAS=app-production
+N8N_EDGE_ALIAS=n8n-production
+EDGE_NETWORK=luenio-production-edge
+APP_URL=https://luenio.com
+ALLOWED_HOSTS=luenio.com,www.luenio.com
+TURNSTILE_ALLOWED_HOSTNAMES=luenio.com,www.luenio.com
+N8N_HOST=automation.luenio.com
+SENTRY_ENVIRONMENT=production
+```
+
+Staging:
+
+```dotenv
+LUENIO_IMAGE=luenio:<misma-release-inmutable>
+LUENIO_ENV_FILE=/etc/luenio/staging.env
+APP_HOST=staging.luenio.com
+APP_EDGE_ALIAS=app-staging
+N8N_EDGE_ALIAS=n8n-staging
+EDGE_NETWORK=luenio-staging-edge
+APP_URL=https://staging.luenio.com
+ALLOWED_HOSTS=staging.luenio.com
+TURNSTILE_ALLOWED_HOSTNAMES=staging.luenio.com
+N8N_HOST=automation-staging.luenio.com
+SENTRY_ENVIRONMENT=staging
+```
+
+Cada archivo debe tener su propio Supabase, Turnstile, `AUTH_SECRET`, proxy, health, tokens n8n, DSN de Sentry y Measurement ID de GA4. `REQUIRE_SUPABASE`, `TURNSTILE_REQUIRED`, `ADMIN_MFA_REQUIRED` y `LEGAL_IDENTITY_READY` deben ser `true` antes de publicar producción. `ENABLE_PUBLIC_BILLING` permanece `false`.
+
+El archivo edge usa secretos proxy distintos para ambos entornos. El secreto de cada bloque debe coincidir exactamente con su aplicación.
+
+## 3. Servicios administrados
+
+1. Crea proyectos Supabase separados. Ejecuta `supabase/schema.sql`, valida RLS con una clave anon y crea el primer admin manualmente.
+2. Configura Resend SMTP, verifica dominio, SPF, DKIM y DMARC. Crea credenciales separadas para staging y producción.
+3. Importa los workflows de `n8n/workflows/` en cada instancia. Usa una credencial Header Auth distinta por webhook y entorno.
+4. Crea propiedades o flujos GA4 separados; GA4 es parte del gate y solo carga después del consentimiento.
+5. Crea proyectos Sentry separados o entornos estrictamente filtrados. Configura DSN público y servidor, release y environment.
+6. Crea bucket R2 y remoto `rclone`; conserva la identidad privada de `age` fuera del VPS.
+7. Configura Better Stack para health público, TLS y alertas. No entregues `HEALTHCHECK_TOKEN` a un tercero sin almacén cifrado.
+
+Protege ambos editores n8n con Cloudflare Access y MFA. Los paths `/webhook/*` usan Service Auth o bypass limitado más su bearer token.
+
+## 4. Gate local
 
 ```bash
 npm ci
+npm audit --audit-level=high
 npm test
+npm run lint
+npm run format:check
+npm run build
 ```
 
-Corrige cualquier fallo antes de continuar.
-
-## 4. Llevar el código al VPS
-
-Opción A — repo remoto (recomendado si ya tienes GitHub/GitLab):
+En el VPS valida cada archivo real:
 
 ```bash
-git clone <url-del-remoto> luenio-app
-cd luenio-app
+set -a
+. /etc/luenio/staging.env
+set +a
+npm run preflight:production
+
+set -a
+. /etc/luenio/production.env
+set +a
+npm run preflight:production
+
+set -a
+. /etc/luenio/edge.env
+set +a
+npm run preflight:edge
 ```
 
-Opción B — sin remoto, copiar directamente:
+## 5. Desplegar y promover
+
+Construye una imagen inmutable en staging:
 
 ```bash
-rsync -avz --exclude node_modules --exclude dist --exclude .git ./ user@vps:/opt/luenio-app/
+sudo bash ops/deploy-environment.sh staging /etc/luenio/staging.env --build
+sudo bash ops/deploy-edge.sh /etc/luenio/edge.env
+docker compose -p luenio-staging --env-file /etc/luenio/staging.env ps
 ```
 
-## 5. Crear el `.env` de producción en el VPS
+Prueba staging completamente. Después copia el mismo valor `LUENIO_IMAGE` a producción y promueve sin reconstruir:
 
 ```bash
-cp .env.example .env
-nano .env
+sudo bash ops/deploy-environment.sh production /etc/luenio/production.env --no-build
+docker compose -p luenio-production --env-file /etc/luenio/production.env ps
 ```
 
-**⚠️ Importante**: borra (o corrige) las líneas `NODE_ENV`, `HOST` y `PORT` copiadas de `.env.example` (que trae valores de desarrollo local: `development`/`127.0.0.1`). La imagen Docker ya trae horneados los valores seguros de producción (`NODE_ENV=production`, `HOST=0.0.0.0`, `PORT=4180`) — si `env_file` los sobreescribe con los valores de desarrollo, se rompen tanto la seguridad de las cookies como el servido de archivos estáticos (el contenedor de runtime solo tiene `dist/`, no las fuentes de `apps/`).
+Nunca promociones un tag mutable como `latest`. Conserva la imagen anterior para rollback.
 
-Luego completa con valores reales:
+## 6. Cloudflare y bloqueo del origen
 
-- Genera `AUTH_SECRET`: `openssl rand -hex 32`.
-- Corre `supabase/schema.sql` en el editor SQL de tu proyecto Supabase, luego completa `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` y pon `REQUIRE_SUPABASE=true`.
-- Completa `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` (de un endpoint de webhook apuntando a `https://tu-dominio/api/stripe-webhook`) y los 3 `STRIPE_*_PRICE_ID`.
-- Pon `COOKIE_SECURE=true` y `APP_URL=https://tu-dominio-real.com` (debe ser HTTPS — `config/readiness.js` lo exige explícitamente para considerar el despliegue "listo").
-- `chmod 600 .env`.
-
-## 6. Construir y levantar
+Configura proxied DNS para `luenio.com`, `www`, `staging`, `automation` y `automation-staging`; TLS Full (strict), WAF, protección de bots y rate limits de `SECURITY.md`.
 
 ```bash
-docker compose build
-docker compose up -d
-docker compose ps
-docker compose logs -f app
+sudo ADMIN_IP_CIDR=TU_IP/32 sh ops/configure-origin-firewall.sh
+ORIGIN_IP=IP_VPS sh ops/verify-origin-lockdown.sh
 ```
 
-## 7. Reverse proxy y TLS
+No publiques mientras la conexión directa al origen tenga éxito.
 
-**Opción recomendada — Caddy incluido**: edita el dominio en `Caddyfile`, luego:
+## 7. Validación de staging
+
+- Formulario real y Turnstile.
+- Persistencia con n8n apagado y entrega al restaurarlo.
+- Resend recibido y autenticado.
+- Invitación, expiración, recuperación y MFA admin.
+- Aislamiento entre dos empresas y acceso anon denegado.
+- Eventos GA4 de navegación, CTA, WhatsApp, inicio y éxito/error de cotización.
+- Error deliberado visible en Sentry sin PII.
+- Responsive, teclado, 200% zoom y navegadores objetivo.
+- Alerta Better Stack y restauración de backup R2 cifrado.
+
+Staging y sus automatizaciones deben responder con `X-Robots-Tag: noindex, nofollow`.
+
+## 8. Health, timers y backups
 
 ```bash
-docker compose up -d caddy
+curl https://luenio.com/api/health
+curl -H "Authorization: Bearer $HEALTHCHECK_TOKEN" \
+  "https://luenio.com/api/health?details=1"
 ```
 
-Caddy emite y renueva el certificado Let's Encrypt automáticamente vía ACME HTTP-01 (requiere DNS ya apuntado y puertos 80/443 abiertos).
+El diagnóstico autenticado debe mostrar `criticalReady: true` y `storage.mode: "supabase"`.
 
-**Alternativa — Nginx + Certbot en el host**: publica el puerto de `app` (`127.0.0.1:4180:4180` en `docker-compose.yml`, descomentando esa línea) y usa un bloque mínimo:
-
-```nginx
-server {
-    listen 80;
-    server_name tu-dominio-real.com;
-    location / {
-        proxy_pass http://127.0.0.1:4180;
-        proxy_set_header Host $host;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
-
-luego `sudo certbot --nginx -d tu-dominio-real.com`.
-
-**Crítico en cualquier caso**: el proxy debe reenviar sin modificar los headers `Host`, `X-Forwarded-For` y `X-Forwarded-Proto` — `server.js` usa `x-forwarded-for` para el rate-limit por IP y `Host` para la validación de mismo origen. Un proxy mal configurado hace que todos los visitantes compartan el mismo bucket de rate-limit o que fallen los checks de origen.
-
-## 8. Verificar
+Instala las unidades de `ops/systemd/` y activa:
 
 ```bash
-curl https://tu-dominio-real.com/api/health
+sudo systemctl enable --now luenio-health@production.timer
+sudo systemctl enable --now luenio-health@staging.timer
+sudo systemctl enable --now luenio-backup.timer
+sudo systemctl enable --now luenio-security-maintenance.timer
 ```
 
-Debe mostrar `storage.mode: "supabase"` y `readiness.criticalReady: true`. Verifica manualmente `/`, `/login`, `/dashboard`, `/precios`, `/terminos`, `/privacidad`, `/reembolsos`.
+Prueba `ops/restore-volumes.sh` sobre un volumen vacío antes del lanzamiento y luego trimestralmente.
 
-## 9. Actualizar / redeploy
+## 9. Rollback
+
+Restaura el tag inmutable anterior en el `.env` del entorno y ejecuta:
 
 ```bash
-git pull
-docker compose build app
-docker compose up -d app
-docker image prune -f
+sudo bash ops/deploy-environment.sh production /etc/luenio/production.env --no-build
 ```
 
-(Caddy no necesita reiniciarse salvo que cambies el `Caddyfile`.)
-
-## 10. Backups
-
-Supabase gestiona los backups de Postgres (revisa tu plan para point-in-time recovery). Si en algún momento usas el fallback local JSON en producción (no recomendado), respalda el volumen:
-
-```bash
-docker run --rm -v luenio_db:/data -v $(pwd):/backup alpine tar czf /backup/leads-db-backup.tgz /data
-```
-
-## 11. Rollback
-
-```bash
-git checkout <commit-o-tag-anterior>
-docker compose build app
-docker compose up -d app
-```
+Un rollback de imagen no revierte migraciones. Las migraciones destructivas requieren backup y procedimiento probado en staging.

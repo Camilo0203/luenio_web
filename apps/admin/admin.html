@@ -3,154 +3,361 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio CRM | Leads y automatizaciones</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f4f3f0" />
+    <title>Luenio · Leads</title>
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="preload" as="image" href="/luenio-logo.png" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="preload" as="image" href="/brand/logotipo.svg" />
+    <!-- Solo admin CSS: style.css es dark del sitio público y rompe el CRM claro -->
+    <link rel="stylesheet" href="/styles/design-tokens.css" />
     <link rel="stylesheet" href="/apps/admin/src/admin.css" />
+    <link rel="stylesheet" href="/apps/admin/src/admin-light.css" />
   </head>
-  <body class="admin-body">
-    <header class="admin-shell">
-      <a class="brand" href="/" aria-label="Luenio Agency">
-        <img
-          class="brand-logo"
-          src="/luenio-logo.png"
-          width="256"
-          height="256"
-          alt=""
-          decoding="async"
-        />
-        <span class="brand-fallback" aria-hidden="true">L</span>
-      </a>
-      <div>
-        <p class="eyebrow">Luenio CRM</p>
-        <h1>Panel de automatización de ventas</h1>
-        <span class="storage-badge" id="storageBadge">Almacenamiento: verificando...</span>
-      </div>
-      <div class="admin-user" id="adminUser">
-        <span>Espacio de trabajo</span>
-        <strong>Verificando sesión</strong>
-      </div>
-      <div class="live-status" id="liveStatus" aria-live="polite">
-        <span></span>
-        Sincronización en vivo activa
-      </div>
-      <button class="button button-primary button-small" id="startLiveDemo" type="button">
-        Ejecutar Demo en Vivo
-      </button>
-      <button class="button button-primary button-small" id="refreshLeads" type="button">
-        Actualizar CRM
-      </button>
-      <button class="button button-small" id="logoutButton" type="button">Cerrar sesión</button>
-    </header>
-
-    <main class="admin-main">
-      <section class="admin-metrics" aria-label="Resumen CRM">
-        <article><span>Leads totales</span><strong id="metricTotal">0</strong></article>
-        <article><span>Caliente</span><strong id="metricHot">0</strong></article>
-        <article><span>Tibio</span><strong id="metricWarm">0</strong></article>
-        <article><span>Frío</span><strong id="metricCold">0</strong></article>
-      </section>
-
-      <section class="demo-console" id="demoConsole" aria-label="Ejecutar Demo en Vivo">
-        <div class="demo-copy">
-          <p class="eyebrow">Ejecutar Demo en Vivo</p>
-          <h2>Mira a Luenio calificar un lead en tiempo real</h2>
-          <p>
-            Ejecuta una demo segura que muestra recepción, análisis de intención, scoring,
-            sincronización con el CRM y activación de automatización sin tocar datos de producción.
-          </p>
+  <body class="admin-body admin-body--light admin-loading">
+    <div class="crm-app">
+      <header class="crm-header">
+        <div class="crm-header__brand">
+          <a class="crm-logo" href="/" aria-label="Luenio">
+            <img src="/brand/logotipo.svg" width="921" height="268" alt="Luenio" />
+          </a>
+          <div class="crm-header__title">
+            <span class="crm-header__eyebrow">Leads · producto</span>
+            <h1>Operaciones</h1>
+          </div>
         </div>
-        <div class="system-steps" id="systemSteps" aria-live="polite"></div>
-      </section>
 
-      <section class="onboarding-panel" aria-label="Configuración del espacio de trabajo">
-        <div>
-          <p class="eyebrow">Primeros pasos</p>
-          <h2>Lanza tu espacio de trabajo de ventas</h2>
-        </div>
-        <div class="onboarding-flow" id="onboardingFlow"></div>
-        <div class="checklist-grid" id="setupChecklist"></div>
-      </section>
+        <nav class="crm-nav" aria-label="Espacios de trabajo">
+          <a class="crm-nav__link crm-nav__link--hub" href="/app" title="Cambiar espacio"
+            >Espacios</a
+          >
+          <a
+            class="crm-nav__link is-active"
+            href="/dashboard"
+            aria-current="page"
+            data-workspace="leads"
+            >Leads</a
+          >
+          <a class="crm-nav__link" href="/crm" data-workspace="crm">Agencia</a>
+        </nav>
 
-      <section class="system-health" id="systemHealth" aria-label="Estado del sistema">
-        <div>
-          <p class="eyebrow">Estado del sistema</p>
-          <h2>Estado operativo</h2>
+        <div class="crm-header__meta">
+          <span class="storage-badge" id="storageBadge">Sincronizando datos</span>
+          <div class="live-status" id="liveStatus" aria-live="polite">
+            <span class="live-status__dot" aria-hidden="true"></span>
+            <span class="live-status__text" id="liveStatusText">En línea</span>
+          </div>
+          <div class="admin-user" id="adminUser">
+            <strong class="admin-user__email">Verificando sesión…</strong>
+            <span class="admin-user__meta">Espacio de trabajo</span>
+          </div>
+          <div class="crm-header__actions">
+            <button
+              class="button button-small"
+              id="startLiveDemo"
+              type="button"
+              aria-label="Ejecutar Demo en Vivo"
+              title="Ejecutar Demo en Vivo"
+            >
+              Demo
+            </button>
+            <button class="button button-primary button-small" id="refreshLeads" type="button">
+              Actualizar
+            </button>
+            <button class="button button-small" id="logoutButton" type="button">Salir</button>
+          </div>
         </div>
-        <div class="health-grid">
-          <article>
-            <span>Base de datos</span><strong id="healthDatabase">Verificando</strong>
+      </header>
+
+      <main class="admin-main">
+        <div class="onboarding-banner" id="onboardingBanner" hidden></div>
+
+        <p class="app-context-banner" role="note">
+          Estás en <strong>Leads</strong> (producto). Cambia a
+          <a href="/crm" data-workspace="crm">Agencia</a> o vuelve a
+          <a href="/app">todos los espacios</a>.
+        </p>
+
+        <section class="admin-metrics admin-metrics--dense" aria-label="Resumen">
+          <article class="metric">
+            <span class="metric__label">Total</span>
+            <strong id="metricTotal">0</strong>
           </article>
-          <article>
-            <span>Webhook de CRM</span><strong id="healthCrmWebhook">Verificando</strong>
+          <article class="metric metric--hot">
+            <span class="metric__label">Calientes</span>
+            <strong id="metricHot">0</strong>
           </article>
-          <article><span>WhatsApp</span><strong id="healthWhatsapp">Verificando</strong></article>
-          <article><span>Email</span><strong id="healthEmail">Verificando</strong></article>
-        </div>
-        <p id="healthNote">Validando conexión del sistema.</p>
-      </section>
+          <article class="metric metric--warm">
+            <span class="metric__label">Tibios</span>
+            <strong id="metricWarm">0</strong>
+          </article>
+          <article class="metric metric--cold">
+            <span class="metric__label">Fríos</span>
+            <strong id="metricCold">0</strong>
+          </article>
+          <article class="metric metric-due" id="metricDueCard">
+            <span class="metric__label">Vencen hoy</span>
+            <strong id="metricDueToday">0</strong>
+          </article>
+        </section>
 
-      <section class="billing-panel" aria-label="Facturación">
-        <div>
-          <p class="eyebrow">Facturación</p>
-          <h2>Plan y límites</h2>
-        </div>
-        <p class="billing-status" id="billingStatus" role="status" aria-live="polite" hidden></p>
-        <div class="billing-grid" id="billingGrid"></div>
-      </section>
+        <div class="admin-ops">
+          <div class="admin-ops__primary">
+            <section class="work-queue-panel" id="workQueue" aria-label="Cola de hoy">
+              <div class="panel-head">
+                <h2>Prioridades de hoy</h2>
+              </div>
+            </section>
 
-      <section class="activity-panel" aria-label="Actividad en vivo">
-        <div>
-          <p class="eyebrow">Actividad en vivo</p>
-          <h2>Eventos de automatización</h2>
-        </div>
-        <div class="activity-feed" id="activityFeed">
-          <p>Cargando eventos...</p>
-        </div>
-      </section>
+            <section class="admin-panel pipeline-panel" aria-label="Pipeline">
+              <div class="admin-toolbar admin-toolbar--dense">
+                <div class="toolbar-top">
+                  <div class="panel-head panel-head--inline">
+                    <div>
+                      <p class="panel-kicker">Embudo</p>
+                      <h2>Pipeline</h2>
+                    </div>
+                  </div>
+                  <div class="admin-search-export">
+                    <label class="lead-search-field">
+                      <span class="visually-hidden">Buscar</span>
+                      <input
+                        id="leadSearch"
+                        type="search"
+                        placeholder="Buscar leads…"
+                        autocomplete="off"
+                      />
+                    </label>
+                    <button class="button button-small" id="exportLeadsCsv" type="button">
+                      Exportar
+                    </button>
+                    <label class="button button-small import-csv-label">
+                      Importar
+                      <input id="importLeadsCsv" type="file" accept=".csv,text/csv" hidden />
+                    </label>
+                  </div>
+                </div>
 
-      <section class="admin-panel">
-        <div class="admin-toolbar">
-          <div>
-            <p class="eyebrow">Pipeline</p>
-            <h2>Leads capturados</h2>
+                <div class="toolbar-chips" aria-label="Filtros">
+                  <div class="admin-filters" aria-label="Temperatura">
+                    <button class="active" type="button" data-filter="all">Todos</button>
+                    <button type="button" data-filter="hot">Caliente</button>
+                    <button type="button" data-filter="warm">Tibio</button>
+                    <button type="button" data-filter="cold">Frío</button>
+                  </div>
+                  <div class="admin-filters" aria-label="Etapa">
+                    <button class="active" type="button" data-status-filter="all">Etapas</button>
+                    <button type="button" data-status-filter="new">Nuevo</button>
+                    <button type="button" data-status-filter="qualified">Calificado</button>
+                    <button type="button" data-status-filter="contacted">Contactado</button>
+                    <button type="button" data-status-filter="converted">Convertido</button>
+                  </div>
+                  <div class="admin-filters" aria-label="Vistas">
+                    <button class="active" type="button" data-smart-filter="all">Vista</button>
+                    <button type="button" data-smart-filter="mine">Míos</button>
+                    <button type="button" data-smart-filter="unassigned">Sin asignar</button>
+                    <button type="button" data-smart-filter="due_today">Vencen</button>
+                    <button type="button" data-smart-filter="stale_hot">Quietos</button>
+                    <button type="button" data-smart-filter="no_contact">Sin contacto</button>
+                    <button type="button" data-smart-filter="needs_followup">Seguimiento</button>
+                  </div>
+                </div>
+
+                <div class="bulk-actions-bar" id="bulkActionsBar" hidden>
+                  <span id="bulkSelectionCount">0 seleccionados</span>
+                  <label>
+                    <span class="visually-hidden">Etapa</span>
+                    <select id="bulkStageSelect" aria-label="Etapa masiva">
+                      <option value="">Etapa…</option>
+                      <option value="new">Nuevo</option>
+                      <option value="qualified">Calificado</option>
+                      <option value="contacted">Contactado</option>
+                      <option value="converted">Convertido</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span class="visually-hidden">Tag</span>
+                    <input id="bulkTagInput" type="text" maxlength="32" placeholder="Tag…" />
+                  </label>
+                  <label>
+                    <span class="visually-hidden">Asignar</span>
+                    <select id="bulkAssigneeSelect" aria-label="Asignar a">
+                      <option value="">Asignar…</option>
+                      <option value="__me__">A mí</option>
+                      <option value="__none__">Sin asignar</option>
+                    </select>
+                  </label>
+                  <button class="button button-primary button-small" id="bulkApply" type="button">
+                    Aplicar
+                  </button>
+                  <button class="button button-small" id="bulkClear" type="button">Limpiar</button>
+                </div>
+              </div>
+              <div class="pipeline-board" id="pipelineBoard"></div>
+            </section>
+
+            <section class="lead-table-panel" aria-label="Listado">
+              <div class="panel-head">
+                <div>
+                  <p class="panel-kicker">Tabla</p>
+                  <h2>Listado</h2>
+                </div>
+              </div>
+              <div class="lead-table" id="leadTable"></div>
+            </section>
           </div>
-          <div class="admin-filters" aria-label="Filtros">
-            <button class="active" type="button" data-filter="all">Todos</button>
-            <button type="button" data-filter="hot">Caliente</button>
-            <button type="button" data-filter="warm">Tibio</button>
-            <button type="button" data-filter="cold">Frío</button>
-          </div>
-          <div class="admin-filters" aria-label="Filtros de estado">
-            <button class="active" type="button" data-status-filter="all">Todas las etapas</button>
-            <button type="button" data-status-filter="new">Nuevo</button>
-            <button type="button" data-status-filter="qualified">Calificado</button>
-            <button type="button" data-status-filter="contacted">Contactado</button>
-            <button type="button" data-status-filter="converted">Convertido</button>
-          </div>
+
+          <aside class="lead-detail" id="leadDetail" aria-label="Detalle">
+            <p class="panel-kicker">Ficha</p>
+            <h2>Detalle</h2>
+            <div class="lead-detail__empty-state">
+              <p class="lead-detail__empty">Selecciona un lead del pipeline o de la cola.</p>
+              <ul class="lead-detail__checklist">
+                <li>Revisa calientes y vencen hoy</li>
+                <li>Define próxima acción</li>
+                <li>Mueve de etapa al contactar</li>
+              </ul>
+            </div>
+          </aside>
         </div>
 
-        <div class="pipeline-board" id="pipelineBoard"></div>
-      </section>
-
-      <aside class="lead-detail" id="leadDetail">
-        <p class="eyebrow">Detalle del lead</p>
-        <h2>Selecciona un lead</h2>
-        <p>Verás score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
-      </aside>
-
-      <section class="lead-table-panel" aria-label="Tabla de leads">
-        <div class="admin-toolbar">
-          <div>
-            <p class="eyebrow">Registros de CRM</p>
-            <h2>Tabla de leads</h2>
+        <section class="reports-panel" id="reports" aria-label="Reportes">
+          <div class="reports-panel__header">
+            <div>
+              <p class="panel-kicker">Analítica</p>
+              <h2>Rendimiento</h2>
+            </div>
+            <div class="admin-filters" aria-label="Periodo">
+              <button type="button" class="active" data-report-days="7">7 días</button>
+              <button type="button" data-report-days="30">30 días</button>
+            </div>
           </div>
-        </div>
-        <div class="lead-table" id="leadTable"></div>
-      </section>
-    </main>
+          <div class="reports-summary" id="reportsSummary"></div>
+          <div class="reports-grid">
+            <div class="reports-card">
+              <h3>Por fuente</h3>
+              <div class="report-bars" id="reportSources"></div>
+            </div>
+            <div class="reports-card">
+              <h3>Por etapa</h3>
+              <div class="report-bars" id="reportFunnel"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="admin-secondary" aria-label="Administración">
+          <p class="panel-kicker admin-secondary__kicker">Administración y sistema</p>
+
+          <details class="admin-fold" id="invitationPanelWrap" data-admin-panel="invitations">
+            <summary>
+              <span class="admin-fold__title">Invitaciones</span>
+              <span class="admin-fold__hint">Accesos de equipo</span>
+            </summary>
+            <section class="invitation-panel" id="invitationPanel" hidden>
+              <form class="invitation-form" id="invitationForm" novalidate>
+                <label
+                  >Empresa<input name="businessName" autocomplete="organization" required
+                /></label>
+                <label
+                  >Email<input name="email" type="email" autocomplete="email" required
+                /></label>
+                <label
+                  >Rol<select name="role">
+                    <option value="client">Cliente</option>
+                    <option value="admin">Administrador</option>
+                  </select></label
+                >
+                <button class="button button-primary" type="submit">Crear invitación</button>
+                <p
+                  class="form-status"
+                  data-invitation-status
+                  role="status"
+                  aria-live="polite"
+                  hidden
+                ></p>
+              </form>
+              <div class="invitation-result" data-invitation-result hidden></div>
+              <div class="invitation-list" id="invitationList"></div>
+            </section>
+          </details>
+
+          <details class="admin-fold" data-admin-panel="activity">
+            <summary>
+              <span class="admin-fold__title">Actividad</span>
+              <span class="admin-fold__hint">Eventos recientes</span>
+            </summary>
+            <section class="activity-panel">
+              <div class="activity-feed" id="activityFeed"><p>Cargando…</p></div>
+            </section>
+          </details>
+
+          <details class="admin-fold" data-admin-panel="billing">
+            <summary>
+              <span class="admin-fold__title">Plan y alcance</span>
+              <span class="admin-fold__hint">Billing</span>
+            </summary>
+            <section class="billing-panel">
+              <p
+                class="billing-status"
+                id="billingStatus"
+                role="status"
+                aria-live="polite"
+                hidden
+              ></p>
+              <div class="billing-grid" id="billingGrid"></div>
+            </section>
+          </details>
+
+          <details class="admin-fold" data-admin-panel="health">
+            <summary>
+              <span class="admin-fold__title">Sistema</span>
+              <span class="admin-fold__hint">Base de datos y webhooks</span>
+            </summary>
+            <section class="system-health" id="systemHealth">
+              <div class="health-grid">
+                <article><span>Base de datos</span><strong id="healthDatabase">…</strong></article>
+                <article><span>Webhook CRM</span><strong id="healthCrmWebhook">…</strong></article>
+                <article><span>WhatsApp</span><strong id="healthWhatsapp">…</strong></article>
+                <article><span>Email</span><strong id="healthEmail">…</strong></article>
+              </div>
+              <p id="healthNote">Validando…</p>
+              <div class="digest-actions">
+                <button class="button button-small" id="previewDigest" type="button">
+                  Vista previa digest
+                </button>
+                <div class="digest-preview" id="digestPreview" hidden></div>
+              </div>
+            </section>
+          </details>
+
+          <details class="admin-fold" data-admin-panel="setup">
+            <summary>
+              <span class="admin-fold__title">Configuración inicial</span>
+              <span class="admin-fold__hint">Checklist</span>
+            </summary>
+            <section class="onboarding-panel">
+              <div class="onboarding-flow" id="onboardingFlow"></div>
+              <div class="checklist-grid" id="setupChecklist"></div>
+            </section>
+          </details>
+
+          <details class="admin-fold" data-admin-panel="demo">
+            <summary>
+              <span class="admin-fold__title">Demo</span>
+              <span class="admin-fold__hint">Simulación sin datos reales</span>
+            </summary>
+            <section class="demo-console" id="demoConsole">
+              <p>Simulación de calificación. No modifica datos reales.</p>
+              <div class="system-steps" id="systemSteps" aria-live="polite"></div>
+            </section>
+          </details>
+        </section>
+      </main>
+    </div>
 
     <script type="module" src="/apps/admin/src/admin.js"></script>
+    <!-- impeccable-live-start -->
+    <!-- impeccable-live-end -->
   </body>
 </html>

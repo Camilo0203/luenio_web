@@ -104,6 +104,37 @@ export function buildPipelineUpdatedEvent({ userId, leadId, updates }) {
     payload: {
       status: updates.status,
       pipelineStage: updates.pipelineStage || updates.status,
+      notes: updates.notes,
+      tags: updates.tags,
+    },
+  });
+}
+
+export function buildLeadMetadataUpdatedEvent({ userId, leadId, updates }) {
+  const hasNotes = updates.notes !== undefined;
+  const hasTags = updates.tags !== undefined;
+  const hasNextAction = updates.nextAction !== undefined || updates.nextActionAt !== undefined;
+  const hasContact = updates.contactLog !== undefined || updates.lastContactedAt !== undefined;
+
+  let type = "lead.metadata_updated";
+  if (hasContact && !hasNotes && !hasTags && !hasNextAction) type = "lead.contact_logged";
+  else if (hasNextAction && !hasNotes && !hasTags && !hasContact) type = "lead.next_action_updated";
+  else if (hasNotes && !hasTags && !hasNextAction && !hasContact) type = "lead.notes_updated";
+  else if (hasTags && !hasNotes && !hasNextAction && !hasContact) type = "lead.tags_updated";
+
+  return createDomainEvent({
+    userId,
+    leadId,
+    type,
+    payload: {
+      notes: updates.notes,
+      tags: updates.tags,
+      nextAction: updates.nextAction,
+      nextActionAt: updates.nextActionAt,
+      lastContactedAt: updates.lastContactedAt,
+      contactLogCount: Array.isArray(updates.contactLog) ? updates.contactLog.length : undefined,
+      status: updates.status,
+      pipelineStage: updates.pipelineStage || updates.status,
     },
   });
 }

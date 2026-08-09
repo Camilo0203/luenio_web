@@ -59,6 +59,10 @@ const server = spawn(process.execPath, ["server.js"], {
     ...process.env,
     HOST: "127.0.0.1",
     PORT: String(port),
+    LUENIO_SKIP_ENV_FILE: "true",
+    SUPABASE_URL: "",
+    SUPABASE_SERVICE_ROLE_KEY: "",
+    REQUIRE_SUPABASE: "false",
     SENSITIVE_RATE_LIMIT_MAX: "2",
     RATE_LIMIT_MAX: "100",
   },
@@ -91,6 +95,11 @@ try {
   );
   assert(third.response.status === 429, "Third sensitive request must be rate limited.");
   assert(third.body.error === "Too many requests", "Rate limit response must be explicit.");
+  assert(Number(third.response.headers.get("retry-after")) > 0, "429 must include Retry-After.");
+  assert(
+    third.response.headers.get("ratelimit-remaining") === "0",
+    "Rate-limited responses must report zero remaining requests.",
+  );
 
   const health = await fetch(`${baseUrl}/api/health`);
   assert(health.ok, "Health endpoint must remain available after sensitive endpoint throttling.");

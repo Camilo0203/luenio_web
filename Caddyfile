@@ -1,3 +1,76 @@
-your-production-domain.com {
-    reverse_proxy app:4180
+{
+	admin off
+	email contacto@luenio.com
+
+	servers {
+		trusted_proxies static 173.245.48.0/20 103.21.244.0/22 103.22.200.0/22 103.31.4.0/22 141.101.64.0/18 108.162.192.0/18 190.93.240.0/20 188.114.96.0/20 197.234.240.0/22 198.41.128.0/17 162.158.0.0/15 104.16.0.0/13 104.24.0.0/14 172.64.0.0/13 131.0.72.0/22 2400:cb00::/32 2606:4700::/32 2803:f800::/32 2405:b500::/32 2405:8100::/32 2a06:98c0::/29 2c0f:f248::/32
+		client_ip_headers CF-Connecting-IP X-Forwarded-For
+		trusted_proxies_strict
+	}
+}
+
+(edge_headers) {
+	header {
+		-Server
+		?Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		?X-Content-Type-Options "nosniff"
+		?X-Frame-Options "DENY"
+		?Referrer-Policy "strict-origin-when-cross-origin"
+		?Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		?X-Permitted-Cross-Domain-Policies "none"
+	}
+}
+
+www.luenio.com {
+	import edge_headers
+	redir https://luenio.com{uri} permanent
+}
+
+luenio.com {
+	encode zstd gzip
+	import edge_headers
+	reverse_proxy app-production:4180 {
+		header_up X-Luenio-Proxy-Secret {$TRUSTED_PROXY_SECRET_PRODUCTION}
+		header_up X-Real-IP {client_ip}
+		header_up -CF-Connecting-IP
+	}
+}
+
+staging.luenio.com {
+	encode zstd gzip
+	import edge_headers
+	header X-Robots-Tag "noindex, nofollow"
+	reverse_proxy app-staging:4180 {
+		header_up X-Luenio-Proxy-Secret {$TRUSTED_PROXY_SECRET_STAGING}
+		header_up X-Real-IP {client_ip}
+		header_up -CF-Connecting-IP
+	}
+}
+
+automation.luenio.com {
+	encode zstd gzip
+	import edge_headers
+	header {
+		X-Robots-Tag "noindex, nofollow"
+		Referrer-Policy "no-referrer"
+	}
+	@editor not path /webhook/*
+	basic_auth @editor {
+		{$N8N_BASIC_AUTH_USER_PRODUCTION} {$N8N_BASIC_AUTH_HASH_PRODUCTION}
+	}
+	reverse_proxy n8n-production:5678
+}
+
+automation-staging.luenio.com {
+	encode zstd gzip
+	import edge_headers
+	header {
+		X-Robots-Tag "noindex, nofollow"
+		Referrer-Policy "no-referrer"
+	}
+	@editor not path /webhook/*
+	basic_auth @editor {
+		{$N8N_BASIC_AUTH_USER_STAGING} {$N8N_BASIC_AUTH_HASH_STAGING}
+	}
+	reverse_proxy n8n-staging:5678
 }

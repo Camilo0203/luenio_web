@@ -43,6 +43,56 @@ assert(
 );
 
 const serverSource = readText("server.js");
+const sentryServerSource = readText("lib/sentry.js");
+const sentryBrowserSource = readText("apps/admin/crm/sentry-client.js");
+assert(
+  sentryBrowserSource.includes('import("@sentry/browser")') &&
+    !sentryBrowserSource.includes("browser.sentry-cdn.com"),
+  "Browser Sentry must load on demand from the pinned package instead of a runtime CDN.",
+);
+assert(
+  sentryServerSource.includes("sendDefaultPii: false") &&
+    sentryBrowserSource.includes("sendDefaultPii: false") &&
+    sentryServerSource.includes("stripSensitiveServerData") &&
+    sentryBrowserSource.includes("stripSensitiveBrowserData"),
+  "Sentry must strip PII in both server and browser runtimes.",
+);
+assert(
+  !serverSource.includes("browser.sentry-cdn.com"),
+  "CSP must not allow the retired Sentry CDN.",
+);
+assert(
+  serverSource.indexOf("assertSecureProductionRuntime();") <
+    serverSource.indexOf('await import("./lib/sentry.js")'),
+  "Production security validation must run before loading Sentry and the API graph.",
+);
+assert(
+  serverSource.includes('"/demos": "index.html"'),
+  "The public demo catalog must support the /demos route.",
+);
+const productCss = readText("apps/web/src/style.css");
+assert(
+  /\.brand\s*\{[\s\S]*?border:\s*0;/.test(productCss),
+  "Private product branding must not render a square border around the supplied logo.",
+);
+assert(
+  /\.brand-logo\s*\{[\s\S]*?opacity:\s*1;/.test(productCss) &&
+    productCss.includes(".brand.logo-error .brand-fallback"),
+  "The supplied logo must be visible by default with an explicit load-error fallback.",
+);
+const adminCss = readText("apps/admin/src/admin.css");
+assert(
+  adminCss.includes('"brand heading heading user"') &&
+    adminCss.includes('"status status actions actions"') &&
+    adminCss.includes(".admin-header-actions"),
+  "The dashboard header must use a bounded tablet layout.",
+);
+assert(
+  /@media \(max-width: 1050px\)[\s\S]*?\.lead-table-row\s*\{[\s\S]*?repeat\(2, minmax\(0, 1fr\)\)/.test(
+    adminCss,
+  ),
+  "Dashboard lead rows must reflow before tablet widths overflow.",
+);
 [
   "./api/auth.js",
   "./api/billing.js",
@@ -190,14 +240,37 @@ assert(
   !authServiceSource.includes("function createId"),
   "Auth service must not keep a parallel user id generator.",
 );
+const invitationServiceSource = readText("api/services/invitation-service.js");
+const passwordResetServiceSource = readText("api/services/password-reset-service.js");
+assert(
+  invitationServiceSource.includes("/aceptar-invitacion#token=") &&
+    passwordResetServiceSource.includes("/restablecer-acceso#token=") &&
+    !invitationServiceSource.includes("?token=") &&
+    !passwordResetServiceSource.includes("?token="),
+  "One-time access tokens must remain in URL fragments and out of HTTP logs.",
+);
 const sessionTokenSource =
   authServiceSource.match(
-    /export function createSessionToken[\s\S]*?export function verifySessionToken/,
+    /export async function createSessionToken[\s\S]*?export async function verifySessionToken/,
   )?.[0] || "";
-["email:", "businessName:", "plan:"].forEach((forbiddenSessionPayloadField) => {
+assert(sessionTokenSource.includes("tokenHash"), "Sessions must persist only a bearer-token hash.");
+assert(
+  sessionTokenSource.includes("randomBytes(32)"),
+  "Session bearer secrets must contain at least 256 bits of randomness.",
+);
+assert(
+  !sessionTokenSource.includes("user.email") && !sessionTokenSource.includes("user.businessName"),
+  "Opaque session tokens must not include user PII.",
+);
+[
+  "MAX_PASSWORD_HASH_CONCURRENCY",
+  "MAX_PASSWORD_HASH_QUEUE",
+  "acquirePasswordHashSlot",
+  "Authentication service is temporarily busy.",
+].forEach((passwordBoundary) => {
   assert(
-    !sessionTokenSource.includes(forbiddenSessionPayloadField),
-    `Session token payload must not include ${forbiddenSessionPayloadField}`,
+    authServiceSource.includes(passwordBoundary),
+    `Password hashing must enforce ${passwordBoundary}.`,
   );
 });
 
@@ -367,8 +440,12 @@ assert(
 
 const authHandlerSource = readText("api/auth.js");
 assert(
-  authHandlerSource.includes("registerAuthSession"),
-  "api/auth.js must delegate registration flow to auth-flow-service.",
+  authHandlerSource.includes("Public registration is disabled"),
+  "api/auth.js must explicitly reject public registration.",
+);
+assert(
+  !authHandlerSource.includes("registerAuthSession"),
+  "api/auth.js must not expose the retired public registration flow.",
 );
 assert(
   authHandlerSource.includes("loginAuthSession"),
@@ -456,10 +533,23 @@ const buildLeadPayloadSource =
   );
 });
 
-const adminDashboardSource = readText("apps/admin/src/admin.js");
+const adminDashboardSource = listFiles("apps/admin/src")
+  .filter((filePath) => filePath.endsWith(".js"))
+  .map((filePath) => readText(filePath))
+  .join("\n");
+const adminFormatSource = readText("apps/admin/src/format.js");
+const adminEntrySource = readText("apps/admin/src/admin.js");
 assert(
-  adminDashboardSource.includes("function escapeHtml"),
+  adminFormatSource.includes("export function escapeHtml") &&
+    adminEntrySource.includes('from "./format.js"') &&
+    adminDashboardSource.includes("safeText"),
   "Admin dashboard must define an HTML escaping boundary for API-rendered data.",
+);
+assert(
+  adminEntrySource.includes('from "./state.js"') &&
+    adminEntrySource.includes('from "./lead-model.js"') &&
+    adminEntrySource.includes('from "./demo/live-demo.js"'),
+  "Admin entry must wire modular state, lead-model, and live-demo modules.",
 );
 [
   "${state.user.email}",
@@ -489,6 +579,129 @@ assert(
 assert(
   !adminDashboardSource.includes('style="'),
   "Admin dashboard must not render inline style attributes; keep CSP strict.",
+);
+
+[
+  "rejectUntrustedProxy",
+  "rejectUnknownHost",
+  "X-Request-ID",
+  "Cross-Origin-Opener-Policy",
+  "Cross-Origin-Resource-Policy",
+  "Refusing insecure production startup",
+  "server.maxConnections",
+].forEach((securityBoundary) => {
+  assert(serverSource.includes(securityBoundary), `Server must enforce ${securityBoundary}.`);
+});
+
+const composeSource = readText("docker-compose.yml");
+const edgeComposeSource = readText("ops/edge-compose.yml");
+[
+  "read_only: true",
+  "no-new-privileges:true",
+  "cap_drop:",
+  "pids_limit:",
+  "mem_limit:",
+  "app_internal",
+  "automation_internal",
+].forEach((containerBoundary) => {
+  assert(
+    composeSource.includes(containerBoundary),
+    `Docker Compose must enforce ${containerBoundary}.`,
+  );
+});
+assert(
+  edgeComposeSource.includes("caddy:2.11.4-alpine") &&
+    edgeComposeSource.includes("read_only: true") &&
+    edgeComposeSource.includes("no-new-privileges:true"),
+  "The shared Caddy edge must use the pinned hardened container.",
+);
+assert(!composeSource.includes(":latest"), "Production containers must not use latest tags.");
+
+const dockerfileSource = readText("Dockerfile");
+assert(
+  (dockerfileSource.match(/node:22\.23\.1-alpine3\.24/g) || []).length === 2,
+  "Builder and runtime Node images must be pinned to the reviewed LTS patch.",
+);
+assert(dockerfileSource.includes("USER node"), "Runtime container must run as a non-root user.");
+
+const caddySource = readText("Caddyfile");
+[
+  "trusted_proxies static",
+  "trusted_proxies_strict",
+  "CF-Connecting-IP",
+  "X-Luenio-Proxy-Secret",
+  "X-Real-IP {client_ip}",
+  "Strict-Transport-Security",
+  "X-Permitted-Cross-Domain-Policies",
+].forEach((proxyBoundary) => {
+  assert(caddySource.includes(proxyBoundary), `Caddy must enforce ${proxyBoundary}.`);
+});
+assert(
+  caddySource.includes("@editor not path /webhook/*") &&
+    !caddySource.includes("@editor not path /webhook/* /webhook-test/*"),
+  "n8n test webhooks must stay behind editor authentication.",
+);
+assert(caddySource.includes("basic_auth @editor"), "The n8n editor must require authentication.");
+assert(
+  caddySource.includes('?Referrer-Policy "strict-origin-when-cross-origin"'),
+  "Caddy must preserve stricter no-referrer headers on one-time token pages.",
+);
+
+const securityMaintenanceSource = readText("ops/security-maintenance.sh");
+assert(
+  securityMaintenanceSource.includes("https://*") &&
+    securityMaintenanceSource.includes("luenio_security_maintenance") &&
+    securityMaintenanceSource.includes("umask 077"),
+  "Security maintenance must require HTTPS and protect the service-role credential.",
+);
+const securityMaintenanceUnit = readText("ops/systemd/luenio-security-maintenance.service");
+[
+  "DynamicUser=true",
+  "NoNewPrivileges=true",
+  "ProtectSystem=strict",
+  "CapabilityBoundingSet=",
+].forEach((boundary) => {
+  assert(
+    securityMaintenanceUnit.includes(boundary),
+    `Security maintenance service must enforce ${boundary}.`,
+  );
+});
+
+const backupSource = readText("ops/backup-volumes.sh");
+assert(
+  backupSource.includes('"${production_compose[@]}" stop n8n') &&
+    backupSource.includes('"${staging_compose[@]}" stop n8n') &&
+    !backupSource.includes("stop caddy"),
+  "Backups must keep the public Caddy edge online.",
+);
+assert(
+  backupSource.includes("node:22.23.1-alpine3.24") && !backupSource.includes(" alpine "),
+  "Backup helpers must use a reviewed versioned image.",
+);
+const healthMonitorSource = readText("ops/monitor-health.sh");
+assert(
+  healthMonitorSource.includes('"deliveryQueue":{"healthy":true'),
+  "Protected monitoring must detect a degraded contact delivery queue.",
+);
+
+const settingsServiceSource = readText("api/services/settings-service.js");
+assert(
+  !settingsServiceSource.includes("buildReadiness") &&
+    !settingsServiceSource.includes("getStorageHealth"),
+  "Client settings must not expose deployment or storage topology.",
+);
+
+const contactServiceSource = readText("api/services/contact-service.js");
+assert(
+  contactServiceSource.includes("CONTACT_WEBHOOK_TIMEOUT_MS = 3_000"),
+  "Initial contact delivery must have a short bounded timeout.",
+);
+const publicContactResponseSource =
+  contactServiceSource.match(/function buildPublicInquiryResponse[\s\S]*?\n}/)?.[0] || "";
+assert(
+  !publicContactResponseSource.includes("storage") &&
+    !publicContactResponseSource.includes("webhook"),
+  "Public contact responses must not expose storage or webhook internals.",
 );
 
 console.info("Architecture boundaries passed");

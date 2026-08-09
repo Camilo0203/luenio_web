@@ -41,14 +41,14 @@ const paidLimitError = new Error("Lead limit reached for Starter. Upgrade your p
 paidLimitError.statusCode = 402;
 paidLimitError.usage = { used: 100, limit: 100, plan: "starter" };
 const response = createMockResponse();
-sendApiError(response, paidLimitError, { includeStorage: true });
+sendApiError(response, paidLimitError);
 assert(response.statusCode === 402, "sendApiError must preserve operational status codes.");
 assert(
   response.body.error === paidLimitError.message,
   "sendApiError must preserve 4xx operational messages.",
 );
 assert(response.body.usage?.used === 100, "sendApiError must preserve billing usage context.");
-assert(response.body.storage, "sendApiError must optionally include storage mode.");
+assert(!response.body.storage, "API errors must never expose storage infrastructure.");
 
 const unsafeResponse = createMockResponse();
 sendApiError(unsafeResponse, internalError);

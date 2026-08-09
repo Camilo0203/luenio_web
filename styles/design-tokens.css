@@ -1,0 +1,109 @@
+/**
+ * Luenio visual primitives.
+ *
+ * Keep these values aligned with the normative frontmatter in /DESIGN.md.
+ * Surface styles map their local semantic aliases to these primitives so
+ * public Persuade screens and private Operate screens stay intentionally distinct.
+ */
+:root {
+  --luenio-font-public: "Manrope", Inter, ui-sans-serif, system-ui, sans-serif;
+  --luenio-font-operate: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --luenio-public-ink: #10213d;
+  --luenio-action: #176bff;
+  --luenio-action-deep: #0b4fd8;
+  --luenio-action-soft: #dce9ff;
+  --luenio-public-canvas: #f6f8fc;
+  --luenio-surface: #fff;
+  --luenio-mist: #eaf0f8;
+  --luenio-public-muted: #61708a;
+  --luenio-public-line: #d9e2ef;
+  --luenio-whatsapp: #0f743f;
+  --luenio-night-section: #0b1b33;
+  --luenio-night-footer: #08162b;
+
+  --luenio-operate-canvas: #f4f3f0;
+  --luenio-operate-surface-soft: #faf9f7;
+  --luenio-operate-surface-deep: #f1efeb;
+  --luenio-operate-text: #1c1917;
+  --luenio-operate-text-soft: #44403c;
+  --luenio-operate-muted: #78716c;
+  --luenio-operate-accent: #0f3d56;
+  --luenio-operate-accent-soft: #e8f1f6;
+  --luenio-operate-line: #e7e5e4;
+  --luenio-operate-line-strong: #d6d3d1;
+  --luenio-operate-line-control: #a8a29e;
+
+  --luenio-success: #15803d;
+  --luenio-warning: #b45309;
+  --luenio-danger: #b91c1c;
+  --luenio-success-soft: #f0fdf4;
+  --luenio-warning-soft: #fffbeb;
+  --luenio-danger-soft: #fef2f2;
+
+  --luenio-dark-canvas: #080d16;
+  --luenio-dark-surface: #0e1524;
+  --luenio-dark-surface-soft: #131c2e;
+  --luenio-dark-surface-deep: #0a101c;
+  --luenio-dark-text: #f1f5f9;
+  --luenio-dark-text-soft: #7c8aa0;
+  --luenio-dark-muted: #8c99ad;
+  --luenio-dark-accent: #d4a574;
+
+  --luenio-radius-micro: 5px;
+  --luenio-radius-operate-control: 6px;
+  --luenio-radius-operate-card: 8px;
+  --luenio-radius-operate-panel: 10px;
+  --luenio-radius-public-control: 12px;
+  --luenio-radius-public-feature: 16px;
+  --luenio-radius-public-card: 22px;
+  --luenio-radius-pill: 999px;
+
+  --luenio-space-1: 4px;
+  --luenio-space-2: 8px;
+  --luenio-space-3: 12px;
+  --luenio-space-4: 16px;
+  --luenio-space-5: 20px;
+  --luenio-space-6: 24px;
+  --luenio-space-8: 32px;
+  --luenio-space-12: 48px;
+  --luenio-space-16: 64px;
+  --luenio-space-18: 72px;
+  --luenio-space-28: 112px;
+
+  --luenio-type-public-display: clamp(3.25rem, 7vw, 6rem);
+  --luenio-type-public-headline: clamp(2.4rem, 4.5vw, 4.8rem);
+  --luenio-type-public-title: clamp(1.2rem, 2vw, 1.65rem);
+  --luenio-type-public-body: 1rem;
+  --luenio-type-public-label: 0.75rem;
+  --luenio-leading-public-display: 0.98;
+  --luenio-leading-public-headline: 1.02;
+  --luenio-leading-public-title: 1.18;
+  --luenio-leading-public-body: 1.65;
+
+  --luenio-type-operate-view-title: 1.25rem;
+  --luenio-type-operate-section-title: 1rem;
+  --luenio-type-operate-body: 0.875rem;
+  --luenio-type-operate-control: 0.8125rem;
+  --luenio-type-operate-label: 0.75rem;
+  --luenio-type-operate-metric: 1.5rem;
+  --luenio-leading-operate-body: 1.5;
+  --luenio-leading-operate-dense: 1.35;
+
+  --luenio-public-container: 1200px;
+  --luenio-touch-target: 44px;
+  --luenio-public-control-height: 52px;
+
+  --luenio-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --luenio-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --luenio-duration-fast: 140ms;
+  --luenio-duration-normal: 220ms;
+  --luenio-duration-spatial: 420ms;
+  --luenio-motion-distance: 10px;
+
+  --luenio-shadow-demo: 0 42px 90px -44px rgba(28, 68, 128, 0.55);
+  --luenio-shadow-public-low: 0 18px 50px rgba(7, 26, 51, 0.08);
+  --luenio-shadow-public-panel: 0 30px 80px -38px rgba(31, 71, 133, 0.42);
+  --luenio-shadow-operate-low: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --luenio-shadow-operate-medium: 0 4px 12px rgba(28, 25, 23, 0.06);
+}

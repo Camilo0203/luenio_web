@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <script src="/theme-boot.js"></script>
+    <title>Luenio Demo | Estéticas</title>
+    <meta name="description" content="Demo de respuestas y agenda para estéticas." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
+    <link rel="stylesheet" href="/apps/web/src/industry-simulations.css" />
+    <link rel="stylesheet" href="/apps/web/src/simulation-worlds.css" />
+  </head>
+  <body class="simulation-page simulation-aesthetics">
+    <main class="demo-page gym-demo" data-demo-type="aesthetics">
+      <nav class="demo-nav">
+        <div class="simulation-nav__brand">
+          <a href="/">Luenio</a><span aria-hidden="true">/</span
+          ><a href="/demos/aesthetics">Aura Estética</a>
+        </div>
+        <div id="industryLinks"></div>
+      </nav>
+      <section class="gym-hero">
+        <div>
+          <p class="eyebrow">Demo en vivo · Estéticas</p>
+          <h1>Lleva cada consulta de belleza hasta la agenda.</h1>
+          <p id="aestheticPain">
+            Una respuesta clara convierte la curiosidad en una valoración con hora y nombre.
+          </p>
+          <button class="button button-primary" id="runAestheticDemo" type="button">
+            Ejecutar Demo en Vivo
+          </button>
+        </div>
+        <aside class="gym-live-card">
+          <span></span><strong id="aestheticLiveStatus">Esperando consulta de valoración</strong
+          ><small>Flujo demostrativo · no conecta datos reales</small>
+        </aside>
+      </section>
+      <section class="gym-workspace aesthetic-workspace">
+        <article class="gym-chat" aria-label="Simulación de chat de estética">
+          <div class="gym-chat-head"><span>Instagram</span><strong>Aura Estética</strong></div>
+          <div class="chat-thread" id="aestheticChatThread">
+            <p class="chat-empty">Presiona Ejecutar Demo en Vivo para simular una consulta.</p>
+          </div>
+        </article>
+        <section class="gym-pricing-panel aesthetic-services" aria-label="Servicios sugeridos">
+          <p class="eyebrow">Recomendación asistida</p>
+          <h2>Una respuesta que orienta</h2>
+          <div class="gym-pricing-cards" id="aestheticServices">
+            <p class="simulation-loading">Preparando servicios de muestra…</p>
+          </div>
+        </section>
+        <aside class="gym-crm-panel" aria-label="Actualización de CRM">
+          <p class="eyebrow">CRM · Agenda</p>
+          <h2>Valoraciones nuevas</h2>
+          <div class="gym-crm-card">
+            <span>Cliente</span><strong id="aestheticLeadName">Esperando consulta</strong>
+          </div>
+          <div class="gym-crm-card">
+            <span>Intención</span><strong id="aestheticLeadScore">--</strong>
+          </div>
+          <div class="gym-pipeline" id="aestheticPipeline">
+            <article class="active"><span>Nuevo</span><strong>Instagram</strong></article>
+            <article><span>Caliente</span><strong>Valoración</strong></article>
+            <article><span>Seguimiento</span><strong>Rutina</strong></article>
+          </div>
+          <div class="gym-events" id="aestheticEvents">
+            <p class="simulation-loading">La actividad aparecerá al ejecutar la demo.</p>
+          </div>
+        </aside>
+      </section>
+      <section class="final-cta-section">
+        <div>
+          <p class="eyebrow">Conversión con intención</p>
+          <h2>Más valoraciones confirmadas. Menos chats olvidados.</h2>
+          <p>
+            Luenio entiende la necesidad, sugiere el siguiente paso y deja la agenda lista para tu
+            equipo.
+          </p>
+        </div>
+        <a class="button button-primary" href="/#contacto">Activar para mi estética</a>
+      </section>
+      <footer class="legal-bar">
+        <a href="/terminos">Términos</a><a href="/privacidad">Privacidad</a
+        ><a href="/reembolsos">Reembolsos</a>
+      </footer>
+    </main>
+    <script type="module" src="/apps/web/pages/demo/aesthetics/aesthetics-demo.js"></script>
+    <script type="module" src="/apps/web/src/industry-simulations.js"></script>
+    <script type="module" src="/apps/web/src/theme-control-entry.js"></script>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+[Unit]
+Description=Verify Luenio Cloudflare origin allowlists
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+Environment=PROJECT_DIR=/opt/luenio
+ExecStart=/opt/luenio/ops/verify-cloudflare-ranges.sh
+DynamicUser=true
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+CapabilityBoundingSet=
+

@@ -1,46 +1,109 @@
 services:
   app:
+    image: ${LUENIO_IMAGE:-luenio-app:local}
     build:
       context: .
       dockerfile: Dockerfile
-    image: luenio-crm:latest
-    container_name: luenio-app
     restart: unless-stopped
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 200
+    mem_limit: 512m
+    cpus: 1.0
+    stop_grace_period: 20s
     env_file:
-      - .env
+      - ${LUENIO_ENV_FILE:?Set LUENIO_ENV_FILE to the staging or production env file}
     expose:
       - "4180"
-    # Uncomment only if you are NOT using the bundled Caddy service below,
-    # and instead terminate TLS with a proxy installed directly on the host:
-    # ports:
-    #   - "127.0.0.1:4180:4180"
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:4180/api/health"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget --quiet --tries=1 --spider --header='Host: ${APP_HOST:?Set APP_HOST}' --header='X-Luenio-Proxy-Secret: '$$TRUSTED_PROXY_SECRET http://127.0.0.1:4180/api/health",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3
       start_period: 10s
-    volumes:
-      # Only needed if REQUIRE_SUPABASE=false and you intentionally rely on
-      # the local JSON fallback in production (Supabase is the supported
-      # path). Persists db/leads-db.json across container recreation.
-      - luenio_db:/app/db
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=64m
+    networks:
+      edge:
+        aliases:
+          - ${APP_EDGE_ALIAS:?Set APP_EDGE_ALIAS}
+      app_internal: {}
 
-  caddy:
-    image: caddy:2-alpine
-    container_name: luenio-caddy
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:${N8N_VERSION:-2.25.7}
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
+    init: true
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 400
+    mem_limit: 1536m
+    cpus: 1.5
+    stop_grace_period: 30s
+    expose:
+      - "5678"
+    environment:
+      N8N_HOST: ${N8N_HOST:?Set N8N_HOST}
+      N8N_PROTOCOL: https
+      N8N_PORT: 5678
+      WEBHOOK_URL: https://${N8N_HOST}/
+      N8N_EDITOR_BASE_URL: https://${N8N_HOST}/
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?Set N8N_ENCRYPTION_KEY}
+      TZ: America/Bogota
+      GENERIC_TIMEZONE: America/Bogota
+      N8N_SECURE_COOKIE: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "true"
+      N8N_BLOCK_FILE_ACCESS_TO_N8N_FILES: "true"
+      N8N_COMMUNITY_PACKAGES_ENABLED: "false"
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "false"
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - app
+      - n8n_data:/home/node/.n8n
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=128m
+      - /home/node/.cache:rw,noexec,nosuid,size=64m,uid=1000,gid=1000
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:5678/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+    networks:
+      edge:
+        aliases:
+          - ${N8N_EDGE_ALIAS:?Set N8N_EDGE_ALIAS}
+      automation_internal: {}
 
 volumes:
-  luenio_db:
-  caddy_data:
-  caddy_config:
+  n8n_data:
+
+networks:
+  edge:
+    external: true
+    name: ${EDGE_NETWORK:?Set EDGE_NETWORK}
+  app_internal:
+    internal: true
+  automation_internal:
+    internal: true

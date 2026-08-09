@@ -1,0 +1,800 @@
+/*
+  THESIS: The automation is the hero; refuse five identical dashboard screenshots.
+  OWN-WORLD: each runtime becomes the sector's native working surface and material.
+  STORY: run one realistic inquiry, watch it travel, understand the operational handoff.
+  FIRST VIEWPORT: a concise promise opens directly into a distinctive live instrument.
+  FORM: interaction-first direction C; asymmetrical workspaces preserve every real control.
+*/
+
+body.simulation-page {
+  background: var(--sim-bg) !important;
+}
+
+body.simulation-page::before {
+  display: none;
+}
+
+body.simulation-page .demo-page {
+  width: min(1440px, calc(100% - 40px));
+}
+
+body.simulation-page .demo-nav {
+  min-height: 80px;
+  padding-right: 62px;
+}
+
+body.simulation-page .demo-nav a {
+  border-radius: 2px;
+}
+
+body.simulation-page
+  .demo-page
+  > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero) {
+  min-height: 680px;
+  margin-top: 18px;
+  padding: 70px 54px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.simulation-page
+  .demo-page
+  > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero)::after {
+  border-radius: 0;
+}
+
+body.simulation-page
+  :is(
+    .agency-hero h1,
+    .ecommerce-hero h1,
+    .gym-hero h1,
+    .real-estate-hero h1,
+    .restaurant-hero h1
+  ) {
+  max-width: 11ch;
+  font-size: clamp(4rem, 7.2vw, 6rem);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+}
+
+body.simulation-page
+  :is(
+    .agency-workspace,
+    .ecommerce-workspace,
+    .gym-workspace,
+    .real-estate-workspace,
+    .restaurant-workspace
+  ) {
+  gap: 8px;
+  margin-top: 8px;
+  margin-bottom: 96px;
+  padding-top: 8px;
+}
+
+body.simulation-page
+  .demo-page
+  :is(
+    .agency-client-panel,
+    .agency-pipeline-panel,
+    .agency-trigger-panel,
+    .ecommerce-chat,
+    .ecommerce-inventory-panel,
+    .ecommerce-crm-panel,
+    .gym-chat,
+    .gym-pricing-panel,
+    .gym-crm-panel,
+    .real-estate-chat,
+    .real-estate-match-panel,
+    .real-estate-crm-panel,
+    .restaurant-chat,
+    .restaurant-crm-panel
+  ) {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.simulation-page .final-cta-section {
+  margin-bottom: 48px;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* AGENCY SIMULATION — modular campaign desk */
+html[data-theme] body.simulation-agency {
+  --sim-bg: #07060b;
+  --sim-bg-soft: #0e0c14;
+  --sim-panel: #12101a;
+  --sim-panel-strong: #1b1628;
+  --sim-text: #faf6ff;
+  --sim-soft: #d6cce2;
+  --sim-muted: #a99db8;
+  --sim-line: rgb(241 231 255 / 0.16);
+  --sim-accent: #c8ff45;
+  --sim-accent-ink: #111507;
+  --sim-secondary: #855cff;
+}
+
+body.simulation-agency .demo-page {
+  width: min(1500px, calc(100% - 34px));
+}
+
+html[data-theme] body.simulation-agency .agency-hero {
+  grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
+  align-items: end;
+  overflow: visible !important;
+  background:
+    linear-gradient(90deg, #07060b 0 41%, rgb(7 6 11 / 0.42) 70%),
+    url("/assets/stitch/agency-hero.webp") 72% center / cover !important;
+}
+
+body.simulation-agency .agency-hero::after {
+  right: 4% !important;
+  bottom: 6% !important;
+  width: 45% !important;
+  height: 62% !important;
+  border: 1px solid rgb(200 255 69 / 0.32) !important;
+  background:
+    linear-gradient(rgb(133 92 255 / 0.14), transparent),
+    linear-gradient(90deg, rgb(200 255 69 / 0.12) 1px, transparent 1px);
+  background-size:
+    auto,
+    18% 100%;
+  opacity: 1 !important;
+  transform: rotate(1deg);
+}
+
+body.simulation-agency .agency-hero > div {
+  align-self: end;
+  max-width: 720px;
+  padding-bottom: 24px;
+}
+
+body.simulation-agency .agency-hero h1 {
+  max-width: 10.5ch;
+  font-size: clamp(3.6rem, 5.6vw, 4.8rem);
+}
+
+body.simulation-agency .agency-live-card {
+  align-self: end;
+  min-height: 250px;
+  margin: 0 24px 24px 0;
+  padding: 30px;
+  color: #15101e;
+  background: #d8c8ff;
+  border-radius: 0;
+  box-shadow: 15px 18px 0 #c8ff45;
+  transform: rotate(-1deg);
+}
+
+body.simulation-agency .agency-live-card small {
+  color: #51445e;
+}
+
+body.simulation-agency .agency-workspace {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  background: #855cff;
+}
+
+body.simulation-agency .agency-client-panel {
+  grid-column: span 3;
+  min-height: 640px;
+  background: #d8c8ff !important;
+  color: #17131f;
+}
+
+body.simulation-agency .agency-client-panel :is(h2, strong) {
+  color: #17131f !important;
+}
+
+body.simulation-agency .agency-client-panel :is(.eyebrow, span, p) {
+  color: #554a61 !important;
+}
+
+body.simulation-agency .agency-client-list article {
+  background: #eee6ff !important;
+  border-color: rgb(23 19 31 / 0.2) !important;
+}
+
+body.simulation-agency .agency-pipeline-panel {
+  grid-column: span 5;
+  min-height: 720px;
+  padding: 34px;
+  background: #12101a;
+}
+
+body.simulation-agency .agency-trigger-panel {
+  grid-column: span 4;
+  min-height: 590px;
+  margin-top: 84px;
+  background: #1b1628;
+}
+
+body.simulation-agency .agency-pipeline-panel blockquote {
+  padding: 24px;
+  color: #17131f;
+  background: #c8ff45;
+  border: 0;
+  border-radius: 0;
+  font-size: 18px;
+}
+
+body.simulation-agency .agency-triggers {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.simulation-agency .agency-triggers article {
+  min-height: 126px;
+}
+
+/* ECOMMERCE SIMULATION — bright product response bench */
+html[data-theme] body.simulation-ecommerce {
+  --sim-bg: #dbeaff;
+  --sim-bg-soft: #c8ddf8;
+  --sim-panel: #f8fbff;
+  --sim-panel-strong: #e4efff;
+  --sim-text: #071e45;
+  --sim-soft: #365578;
+  --sim-muted: #3f5a78;
+  --sim-line: rgb(7 30 69 / 0.17);
+  --sim-accent: #ffea3b;
+  --sim-accent-label: #1237f5;
+  --sim-accent-ink: #071e45;
+  --sim-secondary: #1237f5;
+  --sim-heading: Chivo, "Aptos Display", "Segoe UI Variable Display", Inter, sans-serif;
+}
+
+body.simulation-ecommerce .demo-nav a {
+  background: rgb(248 251 255 / 0.74);
+}
+
+html[data-theme] body.simulation-ecommerce .ecommerce-hero {
+  grid-template-columns: minmax(0, 0.75fr) minmax(380px, 0.6fr);
+  align-items: center;
+  background:
+    linear-gradient(90deg, #f8fbff 0 45%, transparent 45%),
+    url("/assets/stitch/ecommerce-01.jpg") 82% center / 44% auto no-repeat,
+    #cfe3fc !important;
+}
+
+body.simulation-ecommerce .ecommerce-hero::after {
+  right: 10% !important;
+  bottom: 8% !important;
+  width: 35% !important;
+  height: 72% !important;
+  border: 1px solid rgb(18 55 245 / 0.26) !important;
+  background: rgb(255 255 255 / 0.26);
+  opacity: 1 !important;
+  transform: perspective(900px) rotateX(64deg);
+}
+
+body.simulation-ecommerce .ecommerce-conversion-card {
+  align-self: end;
+  min-height: 180px;
+  margin: 0 0 32px;
+  color: #071e45;
+  background: #ffea3b;
+  border-radius: 0;
+  box-shadow: 12px 14px 0 #1237f5;
+}
+
+body.simulation-ecommerce .ecommerce-conversion-card small {
+  color: #30445d;
+}
+
+body.simulation-ecommerce .ecommerce-workspace {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: stretch;
+  padding: 8px;
+  background: #1237f5;
+}
+
+body.simulation-ecommerce .ecommerce-chat {
+  grid-column: span 4;
+  grid-row: span 2;
+  background: #f8fbff;
+}
+
+body.simulation-ecommerce .ecommerce-inventory-panel {
+  grid-column: span 8;
+  min-height: 310px;
+  background: #e4efff;
+}
+
+body.simulation-ecommerce .ecommerce-inventory-list {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body.simulation-ecommerce .ecommerce-inventory-list article {
+  min-height: 190px;
+  background: #f8fbff !important;
+}
+
+body.simulation-ecommerce .ecommerce-crm-panel {
+  grid-column: span 8;
+  min-height: 360px;
+  background: #f8fbff;
+}
+
+body.simulation-ecommerce .ecommerce-pipeline {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body.simulation-ecommerce .chat-thread {
+  min-height: 600px;
+  background: #dbeaff;
+}
+
+/* GYM SIMULATION — timing wall */
+html[data-theme] body.simulation-gym {
+  --sim-bg: #060806;
+  --sim-bg-soft: #0c100d;
+  --sim-panel: #101511;
+  --sim-panel-strong: #181f19;
+  --sim-text: #f7f9f3;
+  --sim-soft: #c3cbbf;
+  --sim-muted: #8e998b;
+  --sim-line: rgb(239 247 230 / 0.16);
+  --sim-accent: #c8ff2f;
+  --sim-accent-ink: #0d1207;
+  --sim-secondary: #f6a91a;
+}
+
+html[data-theme] body.simulation-gym .gym-hero {
+  grid-template-columns: minmax(0, 1fr) 390px;
+  background:
+    linear-gradient(90deg, #060806 0 46%, rgb(6 8 6 / 0.18) 72%),
+    url("/assets/stitch/gym-01.jpg") right center / cover !important;
+}
+
+body.simulation-gym .gym-hero::after {
+  right: 5% !important;
+  bottom: 7% !important;
+  width: 390px !important;
+  height: 330px !important;
+  border: 1px solid rgb(200 255 47 / 0.46) !important;
+  background:
+    linear-gradient(90deg, rgb(200 255 47 / 0.12) 1px, transparent 1px),
+    linear-gradient(rgb(200 255 47 / 0.12) 1px, transparent 1px);
+  background-size: 48px 48px;
+  opacity: 1 !important;
+}
+
+body.simulation-gym .gym-hero h1 {
+  max-width: 10ch;
+  font-size: clamp(3.75rem, 5.8vw, 5.2rem);
+  text-transform: uppercase;
+}
+
+body.simulation-gym .gym-live-card {
+  min-height: 240px;
+  align-self: end;
+  margin-bottom: 28px;
+  border: 1px solid #c8ff2f;
+  border-radius: 0;
+  background: rgb(6 8 6 / 0.82);
+  box-shadow: 12px 14px 0 rgb(246 169 26 / 0.64);
+}
+
+body.simulation-gym .gym-live-card strong {
+  font-size: 30px;
+  text-transform: uppercase;
+}
+
+body.simulation-gym .gym-workspace {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  border: 1px solid rgb(200 255 47 / 0.22);
+  background: #060806;
+}
+
+body.simulation-gym .gym-chat {
+  grid-column: span 4;
+  min-height: 690px;
+}
+
+body.simulation-gym .gym-pricing-panel {
+  grid-column: span 5;
+  min-height: 760px;
+  background: #c8ff2f !important;
+  color: #0d1207;
+}
+
+body.simulation-gym .gym-pricing-panel :is(h2, strong) {
+  color: #0d1207 !important;
+}
+
+body.simulation-gym .gym-pricing-panel :is(.eyebrow, span, p) {
+  color: #354114 !important;
+}
+
+body.simulation-gym .gym-pricing-cards article {
+  min-height: 150px;
+  border-color: rgb(13 18 7 / 0.22) !important;
+  background: #dcff78 !important;
+}
+
+body.simulation-gym .gym-crm-panel {
+  grid-column: span 3;
+  min-height: 600px;
+  margin-top: 92px;
+}
+
+body.simulation-gym .chat-thread {
+  min-height: 620px;
+}
+
+/* REAL ESTATE SIMULATION — property atlas */
+html[data-theme] body.simulation-real-estate {
+  --sim-bg: #06182c;
+  --sim-bg-soft: #0a213c;
+  --sim-panel: #0d2847;
+  --sim-panel-strong: #153758;
+  --sim-text: #f6f0e4;
+  --sim-soft: #d2dbe4;
+  --sim-muted: #9fb0c0;
+  --sim-line: rgb(232 218 191 / 0.2);
+  --sim-accent: #d39a62;
+  --sim-accent-ink: #102238;
+  --sim-secondary: #f3efe6;
+}
+
+html[data-theme] body.simulation-real-estate .real-estate-hero {
+  grid-template-columns: minmax(0, 0.72fr) minmax(420px, 0.8fr);
+  align-items: end;
+  background:
+    linear-gradient(90deg, #06182c 0 43%, transparent 68%),
+    url("/assets/stitch/property-rosales.webp") right center / cover !important;
+}
+
+body.simulation-real-estate .real-estate-hero::after {
+  right: 5% !important;
+  bottom: 5% !important;
+  width: 48% !important;
+  height: 35% !important;
+  border: 0 !important;
+  border-top: 1px solid rgb(211 154 98 / 0.62) !important;
+  border-bottom: 1px solid rgb(211 154 98 / 0.62) !important;
+  background: rgb(6 24 44 / 0.54);
+  opacity: 1 !important;
+}
+
+body.simulation-real-estate .real-estate-live-card {
+  min-height: 210px;
+  margin: 0 22px 22px 0;
+  color: #102238;
+  background: #f3efe6;
+  border-radius: 0;
+  box-shadow: 14px 16px 0 rgb(211 154 98 / 0.72);
+}
+
+body.simulation-real-estate .real-estate-live-card small {
+  color: #526271;
+}
+
+body.simulation-real-estate .real-estate-workspace {
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  background: #d39a62;
+}
+
+body.simulation-real-estate .real-estate-chat {
+  grid-column: span 3;
+  min-height: 680px;
+}
+
+body.simulation-real-estate .real-estate-match-panel {
+  grid-column: span 6;
+  min-height: 760px;
+  color: #102238;
+  background: #f3efe6 !important;
+}
+
+body.simulation-real-estate .real-estate-match-panel :is(h2, strong) {
+  color: #102238 !important;
+}
+
+body.simulation-real-estate .real-estate-match-panel :is(.eyebrow, span, p) {
+  color: #435568 !important;
+}
+
+body.simulation-real-estate .real-estate-property-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body.simulation-real-estate .real-estate-property-list article {
+  min-height: 210px;
+  border-color: rgb(16 34 56 / 0.19) !important;
+  background: #e5ded1 !important;
+}
+
+body.simulation-real-estate .real-estate-crm-panel {
+  grid-column: span 3;
+  min-height: 610px;
+  margin-top: 88px;
+}
+
+body.simulation-real-estate .chat-thread {
+  min-height: 610px;
+}
+
+/* RESTAURANT SIMULATION — active kitchen pass */
+html[data-theme] body.simulation-restaurant {
+  --sim-bg: #0d0a08;
+  --sim-bg-soft: #15100d;
+  --sim-panel: #1b1410;
+  --sim-panel-strong: #2a1b15;
+  --sim-text: #fff6e8;
+  --sim-soft: #d8c8b4;
+  --sim-muted: #ad9d8b;
+  --sim-line: rgb(255 238 215 / 0.18);
+  --sim-accent: #b93622;
+  --sim-accent-ink: #fff;
+  --sim-secondary: #f0a63d;
+}
+
+html[data-theme] body.simulation-restaurant .restaurant-hero {
+  grid-template-columns: minmax(0, 0.76fr) minmax(400px, 0.7fr);
+  align-items: end;
+  background:
+    linear-gradient(90deg, #0d0a08 0 41%, rgb(13 10 8 / 0.2) 70%),
+    url("/assets/stitch/restaurants-01.jpg") right center / cover !important;
+}
+
+body.simulation-restaurant .restaurant-hero h1 {
+  max-width: 12ch;
+  font-size: clamp(3.7rem, 5.7vw, 4.9rem);
+}
+
+body.simulation-restaurant .restaurant-hero::after {
+  right: 5% !important;
+  bottom: 6% !important;
+  width: 42% !important;
+  height: 48% !important;
+  border: 1px solid rgb(240 166 61 / 0.35) !important;
+  background: rgb(13 10 8 / 0.46);
+  opacity: 1 !important;
+}
+
+body.simulation-restaurant .restaurant-live-indicator {
+  min-height: 230px;
+  margin: 0 18px 22px 0;
+  color: #2b1c12;
+  background: #f3e7d5;
+  border-radius: 0;
+  box-shadow: 13px 16px 0 #8d2b22;
+  transform: rotate(-0.6deg);
+}
+
+body.simulation-restaurant .restaurant-live-indicator small {
+  color: #665344;
+}
+
+body.simulation-restaurant .restaurant-workspace {
+  grid-template-columns: 0.76fr 1.24fr;
+  align-items: stretch;
+  padding: 8px;
+  background: #8d2b22;
+}
+
+body.simulation-restaurant .restaurant-chat {
+  min-height: 760px;
+  background: #f3e7d5 !important;
+  color: #2b1c12;
+}
+
+body.simulation-restaurant .restaurant-phone-head {
+  border-color: rgb(43 28 18 / 0.22);
+  background: #e8d8c2;
+}
+
+body.simulation-restaurant .restaurant-phone-head strong {
+  color: #2b1c12;
+}
+
+body.simulation-restaurant .restaurant-phone-head span {
+  color: #8d2b22;
+}
+
+body.simulation-restaurant .restaurant-chat .chat-thread {
+  min-height: 680px;
+  background: #f3e7d5 !important;
+}
+
+body.simulation-restaurant .restaurant-chat .chat-empty {
+  color: #6d5a49;
+}
+
+body.simulation-restaurant .restaurant-crm-panel {
+  min-height: 760px;
+  padding: 36px;
+  background:
+    linear-gradient(rgb(27 20 16 / 0.94), rgb(27 20 16 / 0.94)),
+    url("/assets/stitch/restaurants-04.jpg") center / cover;
+}
+
+body.simulation-restaurant .restaurant-pipeline {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+body.simulation-restaurant .restaurant-pipeline article {
+  min-height: 118px;
+}
+
+body.simulation-restaurant .restaurant-events {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 980px) {
+  html[data-theme]
+    body.simulation-page
+    .demo-page
+    > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero) {
+    min-height: 650px;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-content: end;
+    padding: 42px 30px;
+  }
+
+  body.simulation-page
+    :is(
+      .agency-hero h1,
+      .ecommerce-hero h1,
+      .gym-hero h1,
+      .real-estate-hero h1,
+      .restaurant-hero h1
+    ) {
+    max-width: 12ch;
+  }
+
+  body.simulation-page
+    :is(
+      .agency-live-card,
+      .ecommerce-conversion-card,
+      .gym-live-card,
+      .real-estate-live-card,
+      .restaurant-live-indicator
+    ) {
+    width: min(100%, 520px);
+    margin: 0;
+  }
+
+  body.simulation-page
+    :is(.agency-workspace, .ecommerce-workspace, .gym-workspace, .real-estate-workspace) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.simulation-page
+    :is(
+      .agency-client-panel,
+      .agency-pipeline-panel,
+      .agency-trigger-panel,
+      .ecommerce-chat,
+      .ecommerce-inventory-panel,
+      .ecommerce-crm-panel,
+      .gym-chat,
+      .gym-pricing-panel,
+      .gym-crm-panel,
+      .real-estate-chat,
+      .real-estate-match-panel,
+      .real-estate-crm-panel
+    ) {
+    grid-column: auto;
+    min-height: auto;
+    margin-top: 0;
+  }
+
+  body.simulation-page
+    :is(.agency-pipeline-panel, .ecommerce-chat, .gym-pricing-panel, .real-estate-match-panel) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  body.simulation-page .demo-page {
+    width: min(100% - 20px, 1500px);
+  }
+
+  body.simulation-page .demo-nav {
+    min-height: auto;
+    overflow: hidden;
+  }
+
+  body.simulation-page #industryLinks {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  html[data-theme]
+    body.simulation-page
+    .demo-page
+    > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero) {
+    min-height: 700px;
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 36px 18px 24px;
+    background-position: center;
+    background-size: cover;
+  }
+
+  body.simulation-page
+    :is(
+      .agency-hero h1,
+      .ecommerce-hero h1,
+      .gym-hero h1,
+      .real-estate-hero h1,
+      .restaurant-hero h1
+    ) {
+    max-width: none;
+    font-size: clamp(3rem, 14vw, 4.5rem);
+  }
+
+  body.simulation-page
+    :is(
+      .agency-workspace,
+      .ecommerce-workspace,
+      .gym-workspace,
+      .real-estate-workspace,
+      .restaurant-workspace
+    ) {
+    grid-template-columns: 1fr;
+  }
+
+  body.simulation-page
+    :is(
+      .agency-client-panel,
+      .agency-pipeline-panel,
+      .agency-trigger-panel,
+      .ecommerce-chat,
+      .ecommerce-inventory-panel,
+      .ecommerce-crm-panel,
+      .gym-chat,
+      .gym-pricing-panel,
+      .gym-crm-panel,
+      .real-estate-chat,
+      .real-estate-match-panel,
+      .real-estate-crm-panel
+    ) {
+    grid-column: 1;
+  }
+
+  body.simulation-page
+    :is(.ecommerce-inventory-list, .real-estate-property-list, .restaurant-events) {
+    grid-template-columns: 1fr;
+  }
+
+  body.simulation-page .restaurant-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  body.simulation-page .restaurant-chat,
+  body.simulation-page .restaurant-crm-panel {
+    min-height: auto;
+  }
+
+  body.simulation-agency .agency-live-card {
+    max-width: 100%;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  body.simulation-page
+    .demo-page.is-running
+    :is(
+      .agency-live-card,
+      .ecommerce-conversion-card,
+      .gym-live-card,
+      .real-estate-live-card,
+      .restaurant-live-indicator
+    ) {
+    animation: live-instrument-pulse 900ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes live-instrument-pulse {
+  45% {
+    translate: 0 -6px;
+    filter: brightness(1.08);
+  }
+}

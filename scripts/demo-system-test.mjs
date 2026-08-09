@@ -19,6 +19,8 @@ function readText(filePath) {
   "apps/web/pages/demo/gym",
   "apps/web/pages/demo/ecommerce",
   "apps/web/pages/demo/agencies",
+  "apps/web/pages/demo/veterinary",
+  "apps/web/pages/demo/aesthetics",
   "apps/web/components",
   "apps/web/src/demo-engine",
   "apps/web/demo-engine",
@@ -44,6 +46,7 @@ function readText(filePath) {
 const webDemoEngineSource = readText("apps/web/src/demo-engine/index.js");
 const compatibilityDemoEngineSource = readText("apps/web/demo-engine/index.js");
 const industryDemoRuntimeSource = readText("apps/web/src/demo-engine/industry-demo-runtime.js");
+const industrySimulationSource = readText("apps/web/src/industry-simulations.js");
 const coreDemoEngineSource = readText("core/demo-simulator/index.js");
 assert(
   webDemoEngineSource.includes("../../../../core/demo-simulator/index.js"),
@@ -77,6 +80,20 @@ assert(
   industryDemoRuntimeSource.includes("industry_demo_"),
   "Industry demo runtime must preserve industry source attribution.",
 );
+[
+  "simulation_start",
+  "simulation_complete",
+  "simulation_abandon",
+  "simulation_quote_click",
+  "simulation_whatsapp_click",
+  "generate_lead",
+  "buildQuoteUrl",
+].forEach((term) =>
+  assert(
+    industrySimulationSource.includes(term),
+    `Industry simulations must include the conversion contract: ${term}.`,
+  ),
+);
 assert(
   industryDemoRuntimeSource.includes("autoStart"),
   "Industry demo runtime must auto-start demos for a live-system first impression.",
@@ -104,6 +121,8 @@ assert(
   ["real-estate", "real-estate"],
   ["gym", "gym"],
   ["ecommerce", "ecommerce"],
+  ["veterinaria", "veterinary"],
+  ["estetica", "aesthetics"],
 ].forEach(([input, expected]) => {
   assert(
     normalizeDemoType(input) === expected,
@@ -115,70 +134,86 @@ assert(
   );
 });
 
-["restaurants", "real-estate", "gym", "ecommerce", "agencies"].forEach((type) => {
-  assert(demoTypes.includes(type), `Demo engine must register ${type}.`);
-  const scenario = createDemoScenario(type);
-  assert(scenario.type === type, `Scenario type must stay ${type}.`);
-  assert(
-    scenario.steps.length === 5,
-    `${type} demo must expose the full five-step automation loop.`,
-  );
-  [
-    "Lead recibido",
-    "Analizando intención",
-    "Lead calificado",
-    "Enviado al CRM",
-    "Automatización activada",
-  ].forEach((stepLabel) => {
+["restaurants", "real-estate", "gym", "ecommerce", "agencies", "veterinary", "aesthetics"].forEach(
+  (type) => {
+    assert(demoTypes.includes(type), `Demo engine must register ${type}.`);
+    const scenario = createDemoScenario(type);
+    assert(scenario.type === type, `Scenario type must stay ${type}.`);
     assert(
-      scenario.steps.some((step) => step.label.includes(stepLabel)),
-      `${type} demo must include ${stepLabel}.`,
+      scenario.steps.length === 5,
+      `${type} demo must expose the full five-step automation loop.`,
     );
-  });
-  assert(
-    scenario.steps.some((step) => step.label.includes("CALIENTE 🔥")),
-    `${type} demo must show hot scoring with visual urgency.`,
-  );
+    [
+      "Lead recibido",
+      "Analizando intención",
+      "Lead calificado",
+      "Enviado al CRM",
+      "Automatización activada",
+    ].forEach((stepLabel) => {
+      assert(
+        scenario.steps.some((step) => step.label.includes(stepLabel)),
+        `${type} demo must include ${stepLabel}.`,
+      );
+    });
+    assert(
+      scenario.steps.some((step) => step.label.includes("CALIENTE 🔥")),
+      `${type} demo must show hot scoring with visual urgency.`,
+    );
 
-  const pagePath = `apps/web/pages/demo/${type}/index.html`;
-  const html = readText(pagePath);
-  assert(
-    html.includes(`data-demo-type="${type}"`),
-    `${pagePath} must only configure its demo type.`,
-  );
-  if (type === "restaurants") {
+    const pagePath = `apps/web/pages/demo/${type}/index.html`;
+    const html = readText(pagePath);
     assert(
-      html.includes("/apps/web/pages/demo/restaurants/restaurant-demo.js"),
-      `${pagePath} must use the restaurant demo UI script.`,
+      html.includes('content="noindex, nofollow"'),
+      `${pagePath} must stay noindex while demos are campaign/internal assets.`,
     );
-  } else if (type === "real-estate") {
     assert(
-      html.includes("/apps/web/pages/demo/real-estate/real-estate-demo.js"),
-      `${pagePath} must use the real estate demo UI script.`,
+      html.includes(`data-demo-type="${type}"`),
+      `${pagePath} must only configure its demo type.`,
     );
-  } else if (type === "gym") {
-    assert(
-      html.includes("/apps/web/pages/demo/gym/gym-demo.js"),
-      `${pagePath} must use the gym demo UI script.`,
-    );
-  } else if (type === "ecommerce") {
-    assert(
-      html.includes("/apps/web/pages/demo/ecommerce/ecommerce-demo.js"),
-      `${pagePath} must use the ecommerce demo UI script.`,
-    );
-  } else if (type === "agencies") {
-    assert(
-      html.includes("/apps/web/pages/demo/agencies/agency-demo.js"),
-      `${pagePath} must use the agency demo UI script.`,
-    );
-  } else {
-    assert(
-      html.includes("/apps/web/pages/demo/demo-page.js"),
-      `${pagePath} must use the shared demo page script.`,
-    );
-  }
-  assert(!html.includes("createDemoScenario("), `${pagePath} must not inline demo logic.`);
-});
+    if (type === "restaurants") {
+      assert(
+        html.includes("/apps/web/pages/demo/restaurants/restaurant-demo.js"),
+        `${pagePath} must use the restaurant demo UI script.`,
+      );
+    } else if (type === "real-estate") {
+      assert(
+        html.includes("/apps/web/pages/demo/real-estate/real-estate-demo.js"),
+        `${pagePath} must use the real estate demo UI script.`,
+      );
+    } else if (type === "gym") {
+      assert(
+        html.includes("/apps/web/pages/demo/gym/gym-demo.js"),
+        `${pagePath} must use the gym demo UI script.`,
+      );
+    } else if (type === "ecommerce") {
+      assert(
+        html.includes("/apps/web/pages/demo/ecommerce/ecommerce-demo.js"),
+        `${pagePath} must use the ecommerce demo UI script.`,
+      );
+    } else if (type === "agencies") {
+      assert(
+        html.includes("/apps/web/pages/demo/agencies/agency-demo.js"),
+        `${pagePath} must use the agency demo UI script.`,
+      );
+    } else if (type === "veterinary") {
+      assert(
+        html.includes("/apps/web/pages/demo/veterinary/veterinary-demo.js"),
+        `${pagePath} must use the veterinary demo UI script.`,
+      );
+    } else if (type === "aesthetics") {
+      assert(
+        html.includes("/apps/web/pages/demo/aesthetics/aesthetics-demo.js"),
+        `${pagePath} must use the aesthetics demo UI script.`,
+      );
+    } else {
+      assert(
+        html.includes("/apps/web/pages/demo/demo-page.js"),
+        `${pagePath} must use the shared demo page script.`,
+      );
+    }
+    assert(!html.includes("createDemoScenario("), `${pagePath} must not inline demo logic.`);
+  },
+);
 
 const serverSource = readText("server.js");
 [
@@ -188,24 +223,32 @@ const serverSource = readText("server.js");
   "/demo/gym",
   "/demo/ecommerce",
   "/demo/agencies",
+  "/demo/veterinary",
+  "/demo/aesthetics",
 ].forEach((route) => {
   assert(serverSource.includes(route), `Server must route ${route}.`);
 });
 
 const viteSource = readText("vite.config.js");
-["demoRestaurants", "demoRealEstate", "demoGym", "demoEcommerce", "demoAgencies"].forEach(
-  (entryName) => {
-    assert(viteSource.includes(entryName), `Vite build must include ${entryName}.`);
-  },
-);
+[
+  "demoRestaurants",
+  "demoRealEstate",
+  "demoGym",
+  "demoEcommerce",
+  "demoAgencies",
+  "demoVeterinary",
+  "demoAesthetics",
+].forEach((entryName) => {
+  assert(viteSource.includes(entryName), `Vite build must include ${entryName}.`);
+});
 
 const landingSource = readText("apps/web/pages/home/index.html");
 assert(
-  landingSource.includes("Convierte más clientes sin responder cada mensaje manualmente."),
+  landingSource.includes("Tu próxima solución digital") && landingSource.includes("funcionando."),
   "Landing must open with a clear trust-first value proposition.",
 );
 assert(
-  landingSource.includes("Automatizar mi negocio"),
+  landingSource.includes("Cotizar por WhatsApp"),
   "Landing must use the required primary CTA.",
 );
 assert(
@@ -222,8 +265,16 @@ assert(
 );
 const demoSelectorSource = readText("apps/web/pages/demo/index.html");
 assert(
+  demoSelectorSource.includes('content="noindex, nofollow"'),
+  "Demo selector must stay noindex for the lead-gen launch.",
+);
+assert(
   demoSelectorSource.includes("Prueba la demo de tu industria"),
   "Demo selector must clearly invite users to try an industry demo.",
+);
+assert(
+  demoSelectorSource.includes("Revisar flujo") && !demoSelectorSource.includes("Ver demo"),
+  "Demo selector must avoid weak public 'Ver demo' CTAs.",
 );
 assert(
   demoSelectorSource.includes("Descubre dónde estás perdiendo clientes hoy."),

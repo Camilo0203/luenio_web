@@ -1,5 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
+import sharp from "sharp";
+import { buildQuoteUrl, readJourneyContext } from "../apps/web/src/journey-context.js";
 
 const root = process.cwd();
 
@@ -11,126 +13,318 @@ function readText(filePath) {
   return fs.readFileSync(path.join(root, filePath), "utf8");
 }
 
+const legalNotice =
+  "© 2026 Luenio. Diseño y desarrollo de esta landing demostrativa. Todos los derechos reservados por Luenio.";
+const disclaimer =
+  "Las marcas, nombres, testimonios y datos mostrados son ficticios y se presentan únicamente con fines demostrativos.";
+
 const pages = [
   {
     slug: "gym",
-    demo: "/demo/gym",
-    hook: "Estás perdiendo membresías",
-    navCta: "Deja de perder membresías",
-    primaryCta: "Mira cuántos leads pierdes diariamente",
-    liveSystemCta: "Ver cómo el sistema captura este lead",
-    finalCta: "Activar para mi gimnasio",
-    niche: ["membresías", "WhatsApp", "visita"],
+    className: "gym-board",
+    brand: "Titan Fitness Club",
+    hero: "Construye tu ruta.",
+    minSections: 5,
+    ids: ["constructor", "itinerario", "clases", "zonas", "entrenadores"],
+    terms: ["Ruta ilustrativa", "Reserva simulada", "Demo ficticia creada por Luenio"],
+    primaryCta: "Crear mi ruta",
+    conversionTarget: "constructor",
+    asset: "/assets/stitch/gym-05.jpg",
+    heroAsset: "/assets/demo-premium/gym-hero.webp",
+    css: "/apps/web/pages/gym/gym-board.css",
+    legalNotice: "Demo ficticia creada por Luenio.",
+    disclaimer: "Esta demo no representa un cliente ni resultados reales.",
   },
   {
     slug: "restaurants",
-    demo: "/demo/restaurants",
-    hook: "pedido perdido",
-    navCta: "Deja de perder pedidos",
-    primaryCta: "Mira cuántas ventas te estás perdiendo",
-    liveSystemCta: "Ver cómo el sistema recupera este pedido",
-    finalCta: "Activar para mi negocio",
-    niche: ["pedidos", "reservas", "menú"],
+    className: "demo-restaurant",
+    brand: "Sabor &amp; Fuego",
+    hero: "El fuego transforma cada ingrediente.",
+    minSections: 10,
+    ids: ["historia", "carta", "experiencia", "chef", "reservas", "ubicacion"],
+    terms: ["$245.000", "Chapinero Alto", "Preguntas frecuentes"],
+    primaryCta: "Solicitar reserva",
+    conversionTarget: "reservas",
+    successMessage: "Solicitud de reserva simulada.",
+    asset: "/assets/demo-premium/restaurant-hero.webp",
+    heroAsset: "/assets/demo-premium/restaurant-hero.webp",
   },
   {
     slug: "real-estate",
-    demo: "/demo/real-estate",
-    hook: "asesores pierden tiempo",
-    navCta: "Deja de perder compradores",
-    primaryCta: "Mira cuántas ventas pierdes por lentitud",
-    liveSystemCta: "Ver cómo el sistema califica este comprador",
-    finalCta: "Activar para mi inmobiliaria",
-    niche: ["compradores", "presupuesto", "asesor"],
+    className: "demo-real-estate",
+    brand: "Hogar Prime",
+    hero: "Encuentra un lugar que esté a la altura de tu historia.",
+    minSections: 5,
+    maxSections: 5,
+    ids: ["propiedades", "servicios", "preguntas", "contacto"],
+    terms: ["Penthouse en Rosales", "$2.850.000.000 COP", "Asesoría de principio a fin"],
+    primaryCta: "Solicitar asesoría",
+    conversionTarget: "contacto",
+    successMessage: "Solicitud de asesoría simulada.",
+    asset: "/assets/stitch/property-rosales.webp",
+    heroAsset: "/assets/demo-premium/real-estate-hero.webp",
+    disclaimer:
+      "Hogar Prime es una marca demostrativa. Las propiedades y precios son ejemplos y no corresponden a listados inmobiliarios vigentes.",
   },
   {
     slug: "ecommerce",
-    demo: "/demo/ecommerce",
-    hook: "chats que parecían simples preguntas",
-    navCta: "Deja de perder ventas",
-    primaryCta: "Mira cuántas ventas pierdes por falta de respuesta",
-    liveSystemCta: "Ver cómo el sistema completa esta venta",
-    finalCta: "Activar para mi tienda",
-    niche: ["abandonados", "producto", "checkout"],
+    className: "demo-ecommerce",
+    brand: "NovaStore",
+    hero: "Potencia extraordinaria. Diseño esencial.",
+    minSections: 9,
+    ids: [
+      "productos",
+      "producto-destacado",
+      "coleccion",
+      "beneficios",
+      "opiniones",
+      "ayuda",
+      "consulta",
+    ],
+    terms: ["Nova X1", "$3.899.000 COP", "Consulta de producto"],
+    primaryCta: "Consultar producto",
+    conversionTarget: "consulta",
+    successMessage: "Consulta de producto simulada.",
+    asset: "/assets/stitch/ecommerce-01.jpg",
+    heroAsset: "/assets/demo-premium/ecommerce-hero.webp",
   },
   {
     slug: "agencies",
-    demo: "/demo/agencies",
-    hook: "puede vender la solución",
-    navCta: "Deja de perder clientes",
-    primaryCta: "Mira cuántos proyectos pierdes por lentitud",
-    liveSystemCta: "Ver cómo el sistema califica estos leads",
-    finalCta: "Activar para mi agencia",
-    niche: ["clientes", "revender", "servicio recurrente"],
+    className: "demo-agency",
+    brand: "Impulso Digital",
+    hero: "Construimos marcas digitales que avanzan.",
+    minSections: 7,
+    maxSections: 7,
+    ids: ["servicios", "casos", "proceso", "planes", "propuesta"],
+    terms: ["Mapa de posicionamiento", "Desde $12.500.000", "Lanzar y transferir"],
+    primaryCta: "Solicitar propuesta",
+    conversionTarget: "propuesta",
+    successMessage: "Solicitud de propuesta simulada.",
+    forbiddenTerms: [
+      "Nexo Pay",
+      "Habitat 72",
+      "+31%",
+      "Testimonios de muestra",
+      "Directora ficticia",
+    ],
+    asset: "/assets/demo-premium/agency-hero.webp",
+    heroAsset: "/assets/demo-premium/agency-hero.webp",
+    disclaimer:
+      "Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son ejemplos y no representan proyectos ni resultados de clientes reales.",
+  },
+  {
+    slug: "veterinary",
+    className: "care-landing veterinary",
+    brand: "Huella Veterinaria",
+    hero: "Su bienestar empieza con una conversación.",
+    minSections: 4,
+    ids: ["servicios", "agenda", "equipo", "contacto"],
+    terms: ["Consulta general", "Vacunas y prevención", "Agenda ilustrativa"],
+    primaryCta: "Agendar consulta",
+    conversionTarget: "agenda",
+    legalNotice: "Demo ficticia creada por Luenio",
+    disclaimer: "Información y disponibilidad ilustrativas",
+    css: "/apps/web/src/care-landings.css",
+  },
+  {
+    slug: "aesthetics",
+    className: "care-landing aesthetics",
+    brand: "Aura Estética",
+    hero: "Tu piel no necesita prisa. Necesita atención.",
+    minSections: 4,
+    ids: ["tratamientos", "agenda", "filosofia", "contacto"],
+    terms: ["Valoración facial", "Limpieza profunda", "Agenda ilustrativa"],
+    primaryCta: "Reservar valoración",
+    conversionTarget: "agenda",
+    legalNotice: "Demo ficticia creada por Luenio",
+    disclaimer: "Tratamientos y horarios ilustrativos",
+    css: "/apps/web/src/care-landings.css",
   },
 ];
 
-pages.forEach(({ slug, demo, hook, navCta, primaryCta, liveSystemCta, finalCta, niche }) => {
-  const pagePath = `apps/web/pages/${slug}/index.html`;
-  assert(fs.existsSync(path.join(root, pagePath)), `Missing niche landing page: ${pagePath}`);
-
+for (const page of pages) {
+  const pagePath = `apps/web/pages/${page.slug}/index.html`;
+  assert(fs.existsSync(path.join(root, pagePath)), `Missing niche landing: ${page.slug}`);
   const html = readText(pagePath);
-  assert(html.includes("niche-page"), `${slug} page must use the niche landing design system.`);
-  assert(html.includes(hook), `${slug} page must open with an industry-specific emotional hook.`);
+  const normalizedHtml = html.replace(/\s+/g, " ");
+
+  assert(html.includes('content="noindex, nofollow"'), `${page.slug} must stay noindex.`);
+  assert(html.includes(page.className), `${page.slug} must use its own visual identity.`);
+  assert(html.includes(page.brand), `${page.slug} must present its sample brand.`);
+  assert(html.includes(page.hero), `${page.slug} must include its final hero.`);
+  if (page.asset) {
+    assert(html.includes(page.asset), `${page.slug} must use a local visual asset.`);
+  }
+  if (page.heroAsset) {
+    assert(html.includes(page.heroAsset), `${page.slug} must use its premium hero asset.`);
+  }
   assert(
-    html.includes("Estás perdiendo clientes ahora mismo sin darte cuenta."),
-    `${slug} page must create immediate urgency and loss awareness.`,
-  );
-  assert(html.includes(primaryCta), `${slug} page must include an action-oriented primary CTA.`);
-  assert(html.includes(liveSystemCta), `${slug} page must include a live-system demo preview CTA.`);
-  assert(html.includes(finalCta), `${slug} page must include the final conversion CTA.`);
-  // The nav CTA must use the urgency-driven pattern, which also structurally guarantees the old
-  // passive "Ver demo en vivo" phrasing is gone (since it's been replaced by navCta below).
-  assert(html.includes(navCta), `${slug} page must not use passive view-demo CTAs.`);
-  assert(
-    !html.includes("Ver cómo funciona"),
-    `${slug} page must not use passive exploration CTAs.`,
-  );
-  assert(html.includes(`href="${demo}"`), `${slug} page must link directly to ${demo}.`);
-  assert(
-    html.includes("niche-problem"),
-    `${slug} page must include a pain-focused problem section.`,
-  );
-  assert(html.includes("Solución"), `${slug} page must include a Luenio value section.`);
-  assert(
-    html.includes("niche-demo-preview"),
-    `${slug} page must include a live demo preview section.`,
-  );
-  assert(html.includes("CALIENTE 🔥"), `${slug} page must show lead scoring visualization.`);
-  assert(html.includes("Prueba social"), `${slug} page must include social proof.`);
-  assert(
-    html.includes("Resultado ejemplo"),
-    `${slug} page must mark sample outcome metrics clearly.`,
+    (html.match(/<section\b/g) || []).length >= page.minSections,
+    `${page.slug} is incomplete.`,
   );
   assert(
-    html.includes("Testimonio de muestra"),
-    `${slug} page must mark sample testimonials clearly.`,
+    !page.maxSections || (html.match(/<section\b/g) || []).length <= page.maxSections,
+    `${page.slug} must preserve its distilled section count.`,
   );
   assert(
-    niche.every((term) => html.toLowerCase().includes(term.toLowerCase())),
-    `${slug} page must include niche-specific sales language.`,
+    page.ids.every((id) => html.includes(`id="${id}"`)),
+    `${page.slug} is missing required sections.`,
   );
+  assert(
+    page.terms.every((term) => html.toLowerCase().includes(term.toLowerCase())),
+    `${page.slug} is missing niche-specific commercial content.`,
+  );
+  assert(
+    html.includes(page.primaryCta) && html.includes(`href="#${page.conversionTarget}"`),
+    `${page.slug} must expose a clear primary conversion path.`,
+  );
+  assert(
+    !page.successMessage || html.includes(`data-demo-success="${page.successMessage}`),
+    `${page.slug} must explain the outcome of its demo conversion.`,
+  );
+  assert(
+    (page.forbiddenTerms || []).every((term) => !html.toLowerCase().includes(term.toLowerCase())),
+    `${page.slug} must not rely on fictional proof.`,
+  );
+  assert(
+    normalizedHtml.includes(page.legalNotice || legalNotice),
+    `${page.slug} must reserve the design to Luenio.`,
+  );
+  assert(
+    normalizedHtml.includes(page.disclaimer || disclaimer),
+    `${page.slug} must disclose fictional demo content.`,
+  );
+  assert(html.includes('href="/"'), `${page.slug} legal signature must link to Luenio.`);
+  assert(
+    html.includes(page.css || "/apps/web/src/niche-showcase.css"),
+    `${page.slug} must use local CSS.`,
+  );
+  assert(html.includes("/apps/web/src/niche-landing.js"), `${page.slug} must use shared runtime.`);
+  assert(!html.includes('href="#"'), `${page.slug} must not contain dead hash links.`);
+  const images = [...html.matchAll(/<img\b[^>]*>/gs)].map((match) => match[0]);
+  assert(
+    images.every((image) => /\bwidth="\d+"/.test(image) && /\bheight="\d+"/.test(image)),
+    `${page.slug} images must reserve intrinsic layout space.`,
+  );
+  if (images.length > 0) {
+    const priorityImages = images.filter((image) => /\bfetchpriority="high"/.test(image));
+    assert(
+      priorityImages.length >= 1 &&
+        priorityImages.every((image) => !/\bloading="lazy"/.test(image)),
+      `${page.slug} must prioritize its above-the-fold visual.`,
+    );
+  }
+  assert(
+    /fonts\.googleapis\.com\/css2\?[^"]*wght@\d+\.\.\d+/.test(html),
+    `${page.slug} must request variable font ranges instead of separate static weights.`,
+  );
+  assert(
+    !/aida-public|cdn\.tailwindcss|tailwind-config/.test(html),
+    `${page.slug} must be self-hosted.`,
+  );
+}
+
+for (const page of pages) {
+  if (!page.heroAsset) continue;
+  const heroPath = path.join(root, "public", page.heroAsset.replace(/^\//, ""));
+  const metadata = await sharp(heroPath).metadata();
+  assert(
+    metadata.format === "webp" && metadata.width >= 1600,
+    `${page.slug} premium hero must be WebP and at least 1600px wide.`,
+  );
+  for (const width of [480, 960]) {
+    const responsivePath = heroPath.replace(/\.webp$/, `-${width}.webp`);
+    const responsiveMetadata = await sharp(responsivePath).metadata();
+    assert(
+      responsiveMetadata.format === "webp" && responsiveMetadata.width === width,
+      `${page.slug} must include its ${width}px responsive hero.`,
+    );
+  }
+}
+
+const runtime = readText("apps/web/src/niche-landing.js");
+[
+  "demo_cta_click",
+  "luenio_widget_open",
+  "whatsapp_submit",
+  "quote_form_open",
+  "data-quote-link",
+  "data-menu-toggle",
+  "Escape",
+].forEach((term) => assert(runtime.includes(term), `Shared niche runtime must include ${term}.`));
+
+const contextualQuoteUrl = buildQuoteUrl({
+  sector: "agencia",
+  demo: "Impulso Digital",
+  service: "Landing page de conversión",
+  goal: "Quiero una landing para mi agencia",
+  source: "demo_agencia",
 });
+const contextualQuote = readJourneyContext(contextualQuoteUrl.split("?")[1]);
+assert(
+  contextualQuoteUrl.startsWith("/cotizacion?") &&
+    contextualQuote.sector === "agencia" &&
+    contextualQuote.demo === "Impulso Digital" &&
+    contextualQuote.service === "Landing page de conversión" &&
+    contextualQuote.source === "demo_agencia",
+  "Demo-to-quote context must round-trip through the shared contract.",
+);
+assert(
+  !buildQuoteUrl({
+    sector: "<script>",
+    demo: "Cliente inventado",
+    service: "Servicio arbitrario",
+  }).includes("script"),
+  "Quote context must reject unknown public values.",
+);
+
+const css = readText("apps/web/src/niche-showcase.css");
+[".demo-gym", ".demo-restaurant", ".demo-real-estate", ".demo-ecommerce", ".demo-agency"].forEach(
+  (selector) => assert(css.includes(selector), `Niche design system must include ${selector}.`),
+);
+assert(css.includes("prefers-reduced-motion"), "Niche pages must respect reduced motion.");
+assert(
+  css.includes("content-visibility: auto") && css.includes("contain-intrinsic-size"),
+  "Long niche pages must defer offscreen rendering without layout collapse.",
+);
+assert(!/min\(100%\s*-/.test(css), "Niche responsive widths must use valid calc() syntax.");
+const gymCss = readText("apps/web/pages/gym/gym-board.css");
+assert(
+  gymCss.includes("content-visibility: auto") && gymCss.includes("contain-intrinsic-size"),
+  "The custom gym landing must defer offscreen rendering.",
+);
+const themeControl = readText("apps/web/src/theme-control.js");
+assert(
+  themeControl.includes('getPropertyValue("--page")'),
+  "Theme color must follow each landing's own visual surface.",
+);
+const widgetCss = readText("apps/web/src/niche-widget.css");
+assert(
+  widgetCss.includes("--luenio-trigger-lift") &&
+    widgetCss.includes(".luenio-wa__trigger.is-collision-hidden"),
+  "The shared WhatsApp trigger must avoid covering landing controls.",
+);
+assert(widgetCss.includes("100dvh"), "Niche modal must support dynamic mobile viewports.");
+assert(
+  widgetCss.includes("safe-area-inset-bottom"),
+  "Niche widget must respect device safe areas.",
+);
+
+const publicSources = [
+  ...pages.map((page) => readText(`apps/web/pages/${page.slug}/index.html`)),
+  readText("apps/web/pages/home/index.html"),
+  readText("apps/web/pages/pricing/index.html"),
+  runtime,
+].join("\n");
+assert(!publicSources.includes("Luenio Agency"), "The retired public brand must not return.");
 
 const serverSource = readText("server.js");
 const viteSource = readText("vite.config.js");
-["/gym", "/restaurants", "/real-estate", "/ecommerce", "/agencies"].forEach((route) => {
-  assert(serverSource.includes(route), `Server must route ${route}.`);
-});
-["nicheGym", "nicheRestaurants", "nicheRealEstate", "nicheEcommerce", "nicheAgencies"].forEach(
-  (entryName) => {
-    assert(viteSource.includes(entryName), `Vite build must include ${entryName}.`);
-  },
+["/gym", "/restaurants", "/real-estate", "/ecommerce", "/agencies"].forEach((route) =>
+  assert(serverSource.includes(route), `Server must route ${route}.`),
 );
-
-const css = readText("apps/web/src/style.css");
-[
-  ".niche-page",
-  ".niche-hero",
-  ".niche-loss-line",
-  ".niche-preview-card",
-  ".niche-final-cta",
-].forEach((selector) => {
-  assert(css.includes(selector), `Niche landing design system must include ${selector}.`);
-});
+["nicheGym", "nicheRestaurants", "nicheRealEstate", "nicheEcommerce", "nicheAgencies"].forEach(
+  (entry) => assert(viteSource.includes(entry), `Vite must build ${entry}.`),
+);
 
 console.info("Niche landing conversion guard passed");

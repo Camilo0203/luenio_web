@@ -1,0 +1,98 @@
+{
+  "name": "Luenio - Contact inquiry notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luenio-contact",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "contact-webhook",
+      "name": "Authenticated contact webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-520, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.first().json;\nconst lead = item.body || item;\nif (!lead.id || !lead.name || !lead.business || !lead.phone || !lead.service) throw new Error('Invalid inquiry payload');\nconst store = $getWorkflowStaticData('global');\nstore.delivered = store.delivered || {};\nconst duplicate = Boolean(store.delivered[lead.id]);\nif (!duplicate) store.delivered[lead.id] = new Date().toISOString();\nconst cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;\nfor (const [id, deliveredAt] of Object.entries(store.delivered)) if (new Date(deliveredAt).getTime() < cutoff) delete store.delivered[id];\nreturn [{ json: { ...lead, duplicate } }];"
+      },
+      "id": "validate-dedupe",
+      "name": "Validate and deduplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-280, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.duplicate }}",
+              "rightValue": false,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "new-inquiry",
+      "name": "New inquiry?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-40, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contacto@luenio.com",
+        "toEmail": "contacto@luenio.com",
+        "subject": "=Nuevo lead Luenio: {{ $json.business }}",
+        "emailFormat": "text",
+        "text": "=ID: {{ $json.id }}\nNombre: {{ $json.name }}\nNegocio: {{ $json.business }}\nWhatsApp: {{ $json.phone }}\nServicio: {{ $json.service }}\nOrigen: {{ $json.source }}\nMensaje: {{ $json.message || 'Sin mensaje' }}\nFecha: {{ $json.timestamp }}",
+        "options": {}
+      },
+      "id": "send-email",
+      "name": "Notify Luenio by email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [200, -80]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\":true,\"inquiryId\":\"{{ $json.id }}\",\"duplicate\":{{ $json.duplicate || false }}}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "respond",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [460, 0]
+    }
+  ],
+  "connections": {
+    "Authenticated contact webhook": {
+      "main": [[{ "node": "Validate and deduplicate", "type": "main", "index": 0 }]]
+    },
+    "Validate and deduplicate": {
+      "main": [[{ "node": "New inquiry?", "type": "main", "index": 0 }]]
+    },
+    "New inquiry?": {
+      "main": [
+        [{ "node": "Notify Luenio by email", "type": "main", "index": 0 }],
+        [{ "node": "Respond 200", "type": "main", "index": 0 }]
+      ]
+    },
+    "Notify Luenio by email": { "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none"
+  },
+  "versionId": "adca7b11-5294-4cca-a5f0-8a6bd28a1990"
+}

@@ -1,0 +1,877 @@
+/*
+  Visual bridge between each fictional landing and its automation simulation.
+  The shared runtime stays intact; each industry owns its palette, type and material.
+*/
+
+body.simulation-page {
+  --sim-bg: #07111f;
+  --sim-bg-soft: #0a1422;
+  --sim-panel: #101c2b;
+  --sim-panel-strong: #142437;
+  --sim-text: #f8fafc;
+  --sim-soft: #cbd5e1;
+  --sim-muted: #94a3b8;
+  --sim-line: rgb(226 232 240 / 0.13);
+  --sim-accent: #67e8f9;
+  --sim-accent-ink: #06131f;
+  --sim-accent-label: color-mix(in srgb, var(--sim-accent) 72%, var(--sim-text));
+  --sim-secondary: #176bff;
+  --sim-radius: 14px;
+  --sim-heading: Inter, system-ui, sans-serif;
+  --sim-body: Inter, system-ui, sans-serif;
+  --sim-shadow: 12px 18px 48px -28px rgb(1 7 16 / 0.7);
+  --bg: var(--sim-bg);
+  --bg-soft: var(--sim-bg-soft);
+  --surface: var(--sim-panel);
+  --surface-strong: var(--sim-panel-strong);
+  --border: var(--sim-line);
+  --border-soft: var(--sim-line);
+  --border-strong: color-mix(in srgb, var(--sim-text) 24%, transparent);
+  --text: var(--sim-text);
+  --text-soft: var(--sim-soft);
+  --muted: var(--sim-muted);
+  --accent: var(--sim-accent);
+  --accent-strong: var(--sim-secondary);
+  --shadow: var(--sim-shadow);
+  color: var(--sim-text);
+  background:
+    radial-gradient(
+      circle at 78% 8%,
+      color-mix(in srgb, var(--sim-accent) 13%, transparent),
+      transparent 29%
+    ),
+    var(--sim-bg);
+  font-family: var(--sim-body);
+}
+
+body.simulation-page::before {
+  opacity: 0.22;
+  background: linear-gradient(
+    105deg,
+    transparent 0 58%,
+    color-mix(in srgb, var(--sim-accent) 6%, transparent) 58% 58.12%,
+    transparent 58.12%
+  );
+  background-size: auto;
+  mask-image: linear-gradient(to bottom, #000, transparent 82%);
+}
+
+body.simulation-agency {
+  --sim-bg: #090812;
+  --sim-bg-soft: #11101c;
+  --sim-panel: #151225;
+  --sim-panel-strong: #1b1730;
+  --sim-text: #fbf8ff;
+  --sim-soft: #cbc3dc;
+  --sim-muted: #a69db9;
+  --sim-line: rgb(232 222 255 / 0.15);
+  --sim-accent: #b8ff5a;
+  --sim-accent-ink: #10150a;
+  --sim-secondary: #aa8dff;
+  --sim-radius: 3px;
+  --sim-heading: Sora, Inter, system-ui, sans-serif;
+  --sim-shadow: 12px 14px 0 -5px rgb(184 255 90 / 0.5);
+}
+
+body.simulation-ecommerce {
+  --sim-bg: #0a1220;
+  --sim-bg-soft: #101c30;
+  --sim-panel: #122039;
+  --sim-panel-strong: #172946;
+  --sim-text: #f5f8ff;
+  --sim-soft: #c5d0e2;
+  --sim-muted: #9cabc2;
+  --sim-line: rgb(216 230 255 / 0.14);
+  --sim-accent: #ffcc33;
+  --sim-accent-ink: #18170d;
+  --sim-secondary: #5a8dff;
+  --sim-radius: 16px;
+  --sim-heading: Inter, system-ui, sans-serif;
+}
+
+body.simulation-gym {
+  --sim-bg: #0c0e0d;
+  --sim-bg-soft: #131715;
+  --sim-panel: #171c19;
+  --sim-panel-strong: #202721;
+  --sim-text: #f5f6f2;
+  --sim-soft: #c7cec6;
+  --sim-muted: #9da69d;
+  --sim-line: rgb(242 246 237 / 0.15);
+  --sim-accent: #d2ff32;
+  --sim-accent-ink: #11150b;
+  --sim-secondary: #e4a83a;
+  --sim-radius: 4px;
+  --sim-heading: Oswald, "Arial Narrow", sans-serif;
+  --sim-body: "Archivo Narrow", Arial, sans-serif;
+}
+
+body.simulation-real-estate {
+  --sim-bg: #091629;
+  --sim-bg-soft: #0e1e33;
+  --sim-panel: #10233d;
+  --sim-panel-strong: #172e4d;
+  --sim-text: #f6f2e9;
+  --sim-soft: #d4d8dc;
+  --sim-muted: #aab5c1;
+  --sim-line: rgb(228 219 199 / 0.17);
+  --sim-accent: #d4aa57;
+  --sim-accent-ink: #1d2a37;
+  --sim-secondary: #b87b39;
+  --sim-radius: 2px;
+  --sim-heading: "Source Serif 4", Georgia, serif;
+  --sim-body: "Hanken Grotesk", system-ui, sans-serif;
+}
+
+body.simulation-restaurant {
+  --sim-bg: #150f0b;
+  --sim-bg-soft: #1c1410;
+  --sim-panel: #211813;
+  --sim-panel-strong: #2b1f18;
+  --sim-text: #fff7e9;
+  --sim-soft: #dbcdbb;
+  --sim-muted: #b9a995;
+  --sim-line: rgb(255 235 207 / 0.17);
+  --sim-accent: #f4b942;
+  --sim-accent-ink: #241708;
+  --sim-secondary: #8d3426;
+  --sim-radius: 3px;
+  --sim-heading: "EB Garamond", Georgia, serif;
+  --sim-body: "Hanken Grotesk", system-ui, sans-serif;
+}
+
+html[data-theme="light"] body.simulation-agency {
+  --sim-bg: #f7f5fb;
+  --sim-bg-soft: #ede9f5;
+  --sim-panel: #ffffff;
+  --sim-panel-strong: #f0ebfa;
+  --sim-text: #17131f;
+  --sim-soft: #4f4859;
+  --sim-muted: #6b6377;
+  --sim-line: rgb(23 19 31 / 0.14);
+  --sim-accent: #6d45cc;
+  --sim-accent-ink: #ffffff;
+  --sim-secondary: #526600;
+  --sim-shadow: 10px 12px 0 -5px rgb(109 69 204 / 0.26);
+}
+
+html[data-theme="light"] body.simulation-ecommerce {
+  --sim-bg: #eef4ff;
+  --sim-bg-soft: #dce8fb;
+  --sim-panel: #ffffff;
+  --sim-panel-strong: #e4edff;
+  --sim-text: #101c35;
+  --sim-soft: #40516e;
+  --sim-muted: #5b6b84;
+  --sim-line: rgb(16 28 53 / 0.14);
+  --sim-accent: #ffd044;
+  --sim-accent-ink: #1a1a10;
+  --sim-accent-label: #765300;
+  --sim-secondary: #285fcf;
+}
+
+html[data-theme="light"] body.simulation-gym {
+  --sim-bg: #f1f3ed;
+  --sim-bg-soft: #e3e7dd;
+  --sim-panel: #ffffff;
+  --sim-panel-strong: #e9ede5;
+  --sim-text: #141a12;
+  --sim-soft: #465144;
+  --sim-muted: #596557;
+  --sim-line: rgb(20 26 18 / 0.15);
+  --sim-accent: #526900;
+  --sim-accent-ink: #ffffff;
+  --sim-secondary: #9b6414;
+}
+
+html[data-theme="light"] body.simulation-real-estate {
+  --sim-bg: #f4f0e8;
+  --sim-bg-soft: #e8e2d7;
+  --sim-panel: #fffdf8;
+  --sim-panel-strong: #eee7dc;
+  --sim-text: #142b42;
+  --sim-soft: #42566a;
+  --sim-muted: #526270;
+  --sim-line: rgb(20 43 66 / 0.16);
+  --sim-accent: #805d1c;
+  --sim-accent-ink: #ffffff;
+  --sim-secondary: #9a5f28;
+}
+
+html[data-theme="light"] body.simulation-restaurant {
+  --sim-bg: #f6f0e7;
+  --sim-bg-soft: #eae0d3;
+  --sim-panel: #fffaf2;
+  --sim-panel-strong: #f0e1ce;
+  --sim-text: #2b1c12;
+  --sim-soft: #604d3d;
+  --sim-muted: #746150;
+  --sim-line: rgb(43 28 18 / 0.17);
+  --sim-accent: #81580d;
+  --sim-accent-ink: #ffffff;
+  --sim-secondary: #7a2e22;
+}
+
+body.simulation-page .demo-page {
+  width: min(1280px, calc(100% - 48px));
+  padding-top: 12px;
+}
+
+body.simulation-page .demo-nav {
+  position: relative;
+  z-index: 5;
+  min-height: 74px;
+  padding-right: 64px;
+  border-bottom: 1px solid var(--sim-line);
+}
+
+.simulation-nav__brand {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+}
+
+body.simulation-page .simulation-nav__brand a {
+  min-height: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.simulation-nav__brand a:first-child {
+  color: var(--sim-muted);
+  font-size: 12px;
+}
+
+.simulation-nav__brand a:last-child {
+  color: var(--sim-text);
+  font-family: var(--sim-heading);
+  font-size: 18px;
+}
+
+.simulation-nav__brand span {
+  color: var(--sim-muted);
+}
+
+body.simulation-page #industryLinks {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline proximity;
+  scrollbar-width: none;
+}
+
+body.simulation-page #industryLinks a {
+  flex: 0 0 auto;
+  scroll-snap-align: center;
+}
+
+body.simulation-page #industryLinks::-webkit-scrollbar {
+  display: none;
+}
+
+.simulation-loading {
+  margin: 0;
+  color: var(--sim-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+body.simulation-page .demo-nav a {
+  color: var(--sim-muted);
+  border-color: var(--sim-line);
+  background: color-mix(in srgb, var(--sim-panel) 72%, transparent);
+}
+
+body.simulation-page .demo-nav a:hover,
+body.simulation-page .demo-nav a:focus-visible {
+  color: var(--sim-text);
+}
+
+body.simulation-page .demo-nav a.active {
+  color: var(--sim-accent-ink);
+  background: var(--sim-accent);
+  border-color: var(--sim-accent);
+}
+
+body.simulation-page
+  .demo-page
+  > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero) {
+  position: relative;
+  min-height: 510px;
+  align-items: center;
+  margin-top: 24px;
+  overflow: hidden;
+  padding: 70px 48px;
+  background: linear-gradient(
+    112deg,
+    color-mix(in srgb, var(--sim-panel) 98%, transparent) 0 58%,
+    color-mix(in srgb, var(--sim-accent) 10%, var(--sim-panel-strong)) 58% 100%
+  );
+  border-radius: var(--sim-radius);
+  box-shadow: var(--sim-shadow);
+}
+
+body.simulation-page
+  .demo-page
+  > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero)::after {
+  position: absolute;
+  right: 26%;
+  bottom: -24%;
+  width: 290px;
+  height: 290px;
+  border: 1px solid color-mix(in srgb, var(--sim-accent) 38%, transparent);
+  border-radius: 50%;
+  content: "";
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+body.simulation-page
+  .demo-page
+  > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero)
+  > * {
+  position: relative;
+  z-index: 1;
+}
+
+body.simulation-page
+  :is(
+    .agency-hero h1,
+    .ecommerce-hero h1,
+    .gym-hero h1,
+    .real-estate-hero h1,
+    .restaurant-hero h1
+  ) {
+  max-width: 860px;
+  font-family: var(--sim-heading);
+  font-size: clamp(3.5rem, 6vw, 6rem);
+  font-weight: 650;
+  color: var(--sim-text);
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+body.simulation-page
+  :is(.agency-hero p, .ecommerce-hero p, .gym-hero p, .real-estate-hero p, .restaurant-hero p) {
+  max-width: 64ch;
+  color: var(--sim-soft);
+}
+
+body.simulation-page .eyebrow {
+  color: var(--sim-accent-label);
+}
+
+body.simulation-page .button-primary {
+  color: var(--sim-accent-ink);
+  background: var(--sim-accent);
+  border-color: var(--sim-accent);
+}
+
+body.simulation-page .button-primary:hover {
+  box-shadow: 0 12px 28px -18px color-mix(in srgb, var(--sim-accent) 80%, transparent);
+}
+
+body.simulation-page .button-primary:disabled {
+  color: var(--sim-soft);
+  background: var(--sim-panel-strong);
+  border-color: var(--sim-line);
+}
+
+body.simulation-page
+  :is(
+    .agency-live-card,
+    .ecommerce-conversion-card,
+    .gym-live-card,
+    .real-estate-live-card,
+    .restaurant-live-indicator
+  ) {
+  min-height: 210px;
+  align-content: end;
+  border: 0;
+  border-radius: var(--sim-radius);
+  padding: 28px;
+  color: var(--sim-text);
+  background: color-mix(in srgb, var(--sim-accent) 13%, var(--sim-panel-strong));
+  box-shadow: 7px 9px 0 color-mix(in srgb, var(--sim-secondary) 42%, transparent);
+}
+
+body.simulation-page
+  :is(
+    .agency-live-card,
+    .ecommerce-conversion-card,
+    .gym-live-card,
+    .real-estate-live-card,
+    .restaurant-live-indicator
+  )
+  span {
+  background: var(--sim-accent);
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--sim-accent) 15%, transparent);
+}
+
+body.simulation-page
+  :is(
+    .agency-live-card,
+    .ecommerce-conversion-card,
+    .gym-live-card,
+    .real-estate-live-card,
+    .restaurant-live-indicator
+  )
+  strong {
+  font-family: var(--sim-heading);
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+body.simulation-page
+  :is(
+    .agency-live-card,
+    .ecommerce-conversion-card,
+    .gym-live-card,
+    .real-estate-live-card,
+    .restaurant-live-indicator
+  )
+  small {
+  color: var(--sim-soft);
+}
+
+body.simulation-page
+  :is(
+    .agency-workspace,
+    .ecommerce-workspace,
+    .gym-workspace,
+    .real-estate-workspace,
+    .restaurant-workspace
+  ) {
+  position: relative;
+  gap: 16px;
+  margin-top: 28px;
+  overflow: hidden;
+  padding-top: 5px;
+}
+
+body.simulation-page
+  :is(
+    .agency-workspace,
+    .ecommerce-workspace,
+    .gym-workspace,
+    .real-estate-workspace,
+    .restaurant-workspace
+  )::before {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: -34%;
+  width: 34%;
+  height: 3px;
+  background: var(--sim-accent);
+  content: "";
+  opacity: 0;
+  transform: translateX(0);
+}
+
+body.simulation-page
+  .demo-page.is-running
+  :is(
+    .agency-workspace,
+    .ecommerce-workspace,
+    .gym-workspace,
+    .real-estate-workspace,
+    .restaurant-workspace
+  )::before {
+  opacity: 1;
+  animation: simulation-scan 4.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+body.simulation-page
+  .demo-page
+  :is(
+    .agency-client-panel,
+    .agency-pipeline-panel,
+    .agency-trigger-panel,
+    .ecommerce-chat,
+    .ecommerce-inventory-panel,
+    .ecommerce-crm-panel,
+    .gym-chat,
+    .gym-pricing-panel,
+    .gym-crm-panel,
+    .real-estate-chat,
+    .real-estate-match-panel,
+    .real-estate-crm-panel,
+    .restaurant-chat,
+    .restaurant-crm-panel
+  ) {
+  border-color: var(--sim-line);
+  border-radius: var(--sim-radius);
+  color: var(--sim-text);
+  background: var(--sim-panel);
+  box-shadow: var(--sim-shadow);
+}
+
+body.simulation-page
+  .demo-page
+  :is(
+    .agency-client-list article,
+    .agency-crm-card,
+    .agency-pipeline article,
+    .agency-triggers article,
+    .agency-events article,
+    .ecommerce-inventory-list article,
+    .ecommerce-crm-card,
+    .ecommerce-pipeline article,
+    .ecommerce-events article,
+    .gym-pricing-cards article,
+    .gym-crm-card,
+    .gym-pipeline article,
+    .gym-events article,
+    .real-estate-property-list article,
+    .real-estate-crm-card,
+    .real-estate-pipeline article,
+    .real-estate-events article,
+    .restaurant-crm-card,
+    .restaurant-pipeline article,
+    .restaurant-events article
+  ) {
+  border-color: var(--sim-line);
+  border-radius: max(2px, calc(var(--sim-radius) - 4px));
+  color: var(--sim-text);
+  background: color-mix(in srgb, var(--sim-panel-strong) 80%, transparent);
+}
+
+body.simulation-page
+  .demo-page
+  :is(
+    .agency-pipeline article.active,
+    .agency-triggers article.active,
+    .ecommerce-pipeline article.active,
+    .gym-pipeline article.active,
+    .real-estate-pipeline article.active,
+    .restaurant-pipeline article.active
+  ) {
+  color: var(--sim-accent-ink);
+  border-color: var(--sim-accent);
+  background: var(--sim-accent);
+}
+
+body.simulation-page
+  .demo-page
+  :is(
+    .agency-pipeline article.active,
+    .agency-triggers article.active,
+    .ecommerce-pipeline article.active,
+    .gym-pipeline article.active,
+    .real-estate-pipeline article.active,
+    .restaurant-pipeline article.active
+  )
+  :is(span, strong) {
+  color: inherit;
+}
+
+body.simulation-page .chat-thread {
+  min-height: 480px;
+  background: color-mix(in srgb, var(--sim-bg-soft) 72%, transparent);
+}
+
+body.simulation-page .chat-bubble.customer {
+  color: var(--sim-text);
+  background: var(--sim-panel-strong);
+}
+
+body.simulation-page .chat-bubble.ai {
+  color: var(--sim-accent-ink);
+  border-color: var(--sim-accent);
+  background: var(--sim-accent);
+}
+
+body.simulation-page
+  :is(
+    .restaurant-phone-head span,
+    .gym-chat-head span,
+    .ecommerce-chat-head span,
+    .real-estate-chat-head span
+  ) {
+  color: var(--sim-accent-label);
+}
+
+body.simulation-page .final-cta-section {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(420px, 1.2fr);
+  align-items: start;
+  border-color: var(--sim-line);
+  border-radius: var(--sim-radius);
+  color: var(--sim-text);
+  background: var(--sim-panel-strong);
+  box-shadow: var(--sim-shadow);
+}
+
+body.simulation-page .final-cta-section > div {
+  grid-column: 1;
+}
+
+body.simulation-page .final-cta-section > a {
+  grid-column: 1;
+  justify-self: start;
+}
+
+body.simulation-page .final-cta-section > a + a {
+  margin-top: -8px;
+}
+
+body.simulation-page .simulation-whatsapp-cta {
+  color: #fff;
+  border-color: #0f743f;
+  background: #0f743f;
+}
+
+body.simulation-page .simulation-whatsapp-cta:hover,
+body.simulation-page .simulation-whatsapp-cta:focus-visible {
+  color: #fff;
+  border-color: #0b6134;
+  background: #0b6134;
+}
+
+body.simulation-page .final-cta-section .demo-capture-form {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  width: 100%;
+  min-width: 0;
+  border-color: var(--sim-line);
+  border-radius: max(2px, calc(var(--sim-radius) - 2px));
+  background: var(--sim-panel);
+}
+
+body.simulation-page .demo-capture-form input,
+body.simulation-page .demo-capture-form textarea {
+  color: var(--sim-text);
+  border-color: var(--sim-line);
+  background: var(--sim-bg-soft);
+}
+
+body.simulation-page .demo-capture-form input::placeholder,
+body.simulation-page .demo-capture-form textarea::placeholder {
+  color: var(--sim-muted);
+}
+
+body.simulation-page .legal-bar {
+  border-color: var(--sim-line);
+  color: var(--sim-muted);
+}
+
+body.simulation-page :focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sim-accent) 65%, white);
+  outline-offset: 3px;
+}
+
+@keyframes simulation-scan {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(395%);
+  }
+}
+
+@media (max-width: 900px) {
+  body.simulation-page .demo-page {
+    width: min(100% - 28px, 1280px);
+  }
+
+  body.simulation-page .demo-nav {
+    display: grid;
+    gap: 14px;
+    padding-block: 16px;
+    padding-right: 58px;
+  }
+
+  body.simulation-page #industryLinks {
+    justify-content: flex-start;
+    padding-inline: 2px;
+  }
+
+  body.simulation-page
+    .demo-page
+    > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero) {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    padding: 52px 32px;
+  }
+
+  body.simulation-page
+    :is(
+      .agency-live-card,
+      .ecommerce-conversion-card,
+      .gym-live-card,
+      .real-estate-live-card,
+      .restaurant-live-indicator
+    ) {
+    min-height: 150px;
+  }
+
+  body.simulation-page .final-cta-section {
+    grid-template-columns: 1fr;
+  }
+
+  body.simulation-page .final-cta-section > div,
+  body.simulation-page .final-cta-section > a,
+  body.simulation-page .final-cta-section .demo-capture-form {
+    grid-row: auto;
+    grid-column: 1;
+  }
+}
+
+@media (max-width: 560px) {
+  body.simulation-page .demo-page {
+    width: min(100% - 20px, 1280px);
+  }
+
+  .simulation-nav__brand a:first-child,
+  .simulation-nav__brand span {
+    display: none;
+  }
+
+  body.simulation-page .demo-nav a {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  body.simulation-page
+    .demo-page
+    > :is(.agency-hero, .ecommerce-hero, .gym-hero, .real-estate-hero, .restaurant-hero) {
+    margin-top: 14px;
+    padding: 42px 20px 24px;
+  }
+
+  body.simulation-page
+    :is(
+      .agency-hero h1,
+      .ecommerce-hero h1,
+      .gym-hero h1,
+      .real-estate-hero h1,
+      .restaurant-hero h1
+    ) {
+    font-size: clamp(2.7rem, 13vw, 4rem);
+  }
+
+  body.simulation-page .final-cta-section {
+    padding: 24px 18px;
+  }
+
+  body.simulation-page .demo-capture-form {
+    grid-template-columns: 1fr;
+  }
+
+  body.simulation-page .demo-capture-form > * {
+    grid-column: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.simulation-page
+    .demo-page.is-running
+    :is(
+      .agency-workspace,
+      .ecommerce-workspace,
+      .gym-workspace,
+      .real-estate-workspace,
+      .restaurant-workspace
+    )::before {
+    display: none;
+    animation: none;
+  }
+}
+
+/* New sector worlds: care and appointment-led, with their own material language. */
+body.simulation-veterinary {
+  --sim-bg: #071b1c;
+  --sim-bg-soft: #0b2828;
+  --sim-panel: #103434;
+  --sim-panel-strong: #174343;
+  --sim-text: #effcf6;
+  --sim-soft: #c0ded4;
+  --sim-muted: #8fb9ad;
+  --sim-accent: #74e0b5;
+  --sim-accent-ink: #082019;
+  --sim-secondary: #e9b65a;
+  --sim-radius: 18px;
+  --sim-heading: "Manrope", Inter, sans-serif;
+}
+
+body.simulation-veterinary .gym-hero {
+  background: linear-gradient(130deg, #0f3030 0 58%, #194d49 58% 100%);
+}
+
+body.simulation-veterinary .gym-hero::before {
+  position: absolute;
+  right: 10%;
+  top: 13%;
+  width: 180px;
+  height: 180px;
+  border: 2px solid color-mix(in srgb, var(--sim-accent) 55%, transparent);
+  border-radius: 48% 52% 42% 58%;
+  content: "✦";
+  display: grid;
+  place-items: center;
+  color: var(--sim-accent);
+  font-size: 62px;
+  transform: rotate(-16deg);
+}
+
+body.simulation-veterinary .vet-services {
+  background: #133d3a;
+}
+
+body.simulation-veterinary .gym-pricing-cards article strong {
+  color: var(--sim-accent);
+}
+
+body.simulation-aesthetics {
+  --sim-bg: #21131c;
+  --sim-bg-soft: #301b29;
+  --sim-panel: #432437;
+  --sim-panel-strong: #583047;
+  --sim-text: #fff6fb;
+  --sim-soft: #e8cad9;
+  --sim-muted: #d5b1c3;
+  --sim-accent: #f1a7c8;
+  --sim-accent-ink: #351526;
+  --sim-secondary: #d7be79;
+  --sim-radius: 26px;
+  --sim-heading: "Manrope", Inter, sans-serif;
+}
+
+body.simulation-aesthetics .gym-hero {
+  background: linear-gradient(124deg, #432437 0 57%, #75435c 57% 100%);
+}
+
+body.simulation-aesthetics .gym-hero::before {
+  position: absolute;
+  right: 10%;
+  top: 11%;
+  width: 210px;
+  height: 270px;
+  border: 1px solid color-mix(in srgb, var(--sim-accent) 66%, transparent);
+  border-radius: 55% 45% 58% 42%;
+  content: "";
+  transform: rotate(28deg);
+  box-shadow: inset 0 0 0 16px color-mix(in srgb, var(--sim-accent) 8%, transparent);
+}
+
+body.simulation-aesthetics .aesthetic-services {
+  background: #4b293d;
+}
+
+body.simulation-aesthetics .gym-pricing-cards article strong {
+  color: var(--sim-accent);
+}
+
+@media (max-width: 900px) {
+  body.simulation-veterinary .gym-hero::before,
+  body.simulation-aesthetics .gym-hero::before {
+    opacity: 0.3;
+    right: 8%;
+    top: 7%;
+  }
+}

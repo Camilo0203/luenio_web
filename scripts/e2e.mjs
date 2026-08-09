@@ -10,6 +10,8 @@ let cookie = "";
 
 process.env.STRIPE_WEBHOOK_SECRET =
   process.env.STRIPE_WEBHOOK_SECRET || "whsec_luenio_local_test_secret";
+process.env.HEALTHCHECK_TOKEN =
+  process.env.HEALTHCHECK_TOKEN || "luenio-e2e-healthcheck-token-at-least-32-chars";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -92,43 +94,84 @@ function seedStarterLimitLeads(userId, existingLeadId) {
   );
 }
 
+function seedInvitation(email, businessName) {
+  const database = fs.existsSync(localDbPath)
+    ? JSON.parse(fs.readFileSync(localDbPath, "utf8"))
+    : {};
+  const token = crypto.randomBytes(32).toString("base64url");
+  const now = new Date();
+  const businessId = `business_e2e_${crypto.randomBytes(8).toString("hex")}`;
+  const invitation = {
+    id: `invite_e2e_${crypto.randomBytes(8).toString("hex")}`,
+    email,
+    businessId,
+    businessName,
+    role: "client",
+    tokenHash: crypto.createHash("sha256").update(token).digest("hex"),
+    status: "pending",
+    expiresAt: new Date(now.getTime() + 72 * 60 * 60 * 1000).toISOString(),
+    invitedBy: "e2e_seed",
+    createdAt: now.toISOString(),
+  };
+  fs.writeFileSync(
+    localDbPath,
+    JSON.stringify(
+      {
+        ...database,
+        businesses: [
+          { id: businessId, name: businessName, createdAt: now.toISOString() },
+          ...(database.businesses || []),
+        ],
+        invitations: [invitation, ...(database.invitations || [])],
+      },
+      null,
+      2,
+    ),
+  );
+  return token;
+}
+
 try {
+  if (shouldRestoreLocalDb && fs.existsSync(localDbPath)) {
+    const isolatedState = JSON.parse(fs.readFileSync(localDbPath, "utf8"));
+    fs.writeFileSync(
+      localDbPath,
+      JSON.stringify({ ...isolatedState, contactDeliveries: [] }, null, 2),
+    );
+  }
+
   const landing = await unauthenticatedRequest("/");
   assert(landing.response.ok, "Landing route must load from /.");
-  assert(landing.body.includes("Luenio Agency"), "Landing route must render the public SaaS page.");
+  assert(landing.body.includes(">Luenio</span>"), "Landing route must render the public site.");
 
   const legacyFolderRoute = await unauthenticatedRequest("/Pagina%20Luenio");
   assert(legacyFolderRoute.response.ok, "Legacy /Pagina Luenio route must not return Cannot GET.");
   assert(
-    legacyFolderRoute.body.includes("Luenio Agency"),
-    "Legacy folder route must render the public SaaS page.",
+    legacyFolderRoute.body.includes(">Luenio</span>"),
+    "Legacy folder route must render the public site.",
   );
 
   const health = await request("/api/health");
   assert(health.response.ok, `Health check failed: ${JSON.stringify(health.body)}`);
   assertNoStore(health.response, "Health API response");
-  assert(health.body.storage?.mode, "Health response must include storage mode.");
+  assert(health.body.status === "available", "Public health must expose liveness only.");
   assert(
-    Array.isArray(health.body.readiness?.checks),
-    "Health response must include production readiness checks.",
+    !health.body.storage && !health.body.integrations && !health.body.readiness,
+    "Public health must not expose infrastructure diagnostics.",
   );
+
+  const systemHealth = await request("/api/health?details=1", {
+    headers: { Authorization: `Bearer ${process.env.HEALTHCHECK_TOKEN}` },
+  });
+  assert(systemHealth.response.ok, "Protected health diagnostics must be available to monitors.");
   assert(
-    typeof health.body.readiness?.criticalReady === "boolean",
+    typeof systemHealth.body.readiness?.criticalReady === "boolean",
     "Readiness must expose criticalReady boolean.",
   );
   assert(
-    !health.body.storage.missing,
-    "Public health must not expose detailed missing environment variables.",
+    systemHealth.body.storage?.mode,
+    "Protected health diagnostics must include storage mode.",
   );
-  assert(
-    !health.body.readiness.security,
-    "Public health must not expose security configuration details.",
-  );
-  assert(
-    !health.body.readiness.billing,
-    "Public health must not expose billing configuration details.",
-  );
-  assert(!health.body.readiness.deployment, "Public health must not expose deployment internals.");
 
   const unknownApi = await unauthenticatedRequest("/api/not-a-real-route");
   assert(unknownApi.response.status === 404, "Unknown API routes must return 404.");
@@ -137,6 +180,17 @@ try {
     unknownApi.body.error === "API route not found.",
     "Unknown API routes must return a JSON error.",
   );
+  for (const protectedPath of ["/api/leads", "/api/settings", "/api/billing", "/api/invitations"]) {
+    const protectedResponse = await unauthenticatedRequest(protectedPath);
+    assert(
+      protectedResponse.response.status === 401,
+      `${protectedPath} must reject unauthenticated requests.`,
+    );
+    assert(
+      !protectedResponse.body.storage && !protectedResponse.body.integrations,
+      `${protectedPath} authentication errors must not expose infrastructure.`,
+    );
+  }
 
   const invalidJson = await unauthenticatedRequest("/api/contact", {
     method: "POST",
@@ -207,18 +261,8 @@ try {
     publicInquiry.body.inquiryId.startsWith("inquiry_"),
     "Public inquiry ids must use the inquiry prefix.",
   );
-  assert(
-    publicInquiry.body.webhook?.status === "not_configured",
-    "Public contact capture must report webhook delivery status.",
-  );
-  assert(
-    !("destination" in (publicInquiry.body.webhook || {})),
-    "Public contact response must not expose webhook destination URLs.",
-  );
-  assert(
-    !("error" in (publicInquiry.body.webhook || {})),
-    "Public contact response must not expose internal webhook errors.",
-  );
+  assert(!("storage" in publicInquiry.body), "Public contact must hide storage infrastructure.");
+  assert(!("webhook" in publicInquiry.body), "Public contact must hide delivery infrastructure.");
 
   const duplicatePublicInquiry = await unauthenticatedRequest("/api/contact", {
     method: "POST",
@@ -305,10 +349,15 @@ try {
   const authPage = await unauthenticatedRequest("/auth.html");
   assert(authPage.response.ok, "Auth page must load for unauthenticated users.");
   assert(
-    authPage.body.includes("Accede a tu CRM de automatización."),
+    authPage.body.includes("Bienvenido de nuevo."),
     "Auth page must render UTF-8 copy correctly.",
   );
-  assert(authPage.body.includes("auth-trust"), "Auth page must render workspace trust signals.");
+  assert(
+    authPage.body.includes("auth-side__security") &&
+      authPage.body.includes("Canal cifrado") &&
+      authPage.body.includes("Sesión privada"),
+    "Auth page must render workspace trust signals.",
+  );
   assert(
     authPage.response.headers.get("x-frame-options") === "DENY",
     "Auth page must deny framing.",
@@ -324,10 +373,7 @@ try {
 
   const loginPage = await unauthenticatedRequest("/login");
   assert(loginPage.response.ok, "Clean /login route must load for unauthenticated users.");
-  assert(
-    loginPage.body.includes("Accede a tu CRM de automatización."),
-    "Login route must render the auth page.",
-  );
+  assert(loginPage.body.includes("Bienvenido de nuevo."), "Login route must render the auth page.");
   assert(
     loginPage.response.headers.get("cache-control") === "no-store",
     "Login route must not be cached.",
@@ -336,8 +382,8 @@ try {
   const protectedAdmin = await unauthenticatedRequest("/admin.html", { redirect: "manual" });
   assert(protectedAdmin.response.status === 302, "Admin HTML must redirect when unauthenticated.");
   assert(
-    protectedAdmin.response.headers.get("location") === "/login",
-    "Unauthenticated admin redirect must target /login.",
+    protectedAdmin.response.headers.get("location") === "/login?next=%2Fadmin.html",
+    "Unauthenticated admin redirect must preserve its safe return path.",
   );
   assert(
     protectedAdmin.response.headers.get("cache-control") === "no-store",
@@ -350,8 +396,8 @@ try {
     "Dashboard route must redirect when unauthenticated.",
   );
   assert(
-    protectedDashboard.response.headers.get("location") === "/login",
-    "Unauthenticated dashboard redirect must target /login.",
+    protectedDashboard.response.headers.get("location") === "/login?next=%2Fdashboard",
+    "Unauthenticated dashboard redirect must preserve its safe return path.",
   );
 
   const protectedApis = [
@@ -385,39 +431,40 @@ try {
       plan: "enterprise_free_forever",
     }),
   });
+  assert(invalidPlanRegistration.response.status === 403, "Public registration must be disabled.");
   assert(
-    invalidPlanRegistration.response.status === 400,
-    "Registration must reject unknown plans.",
-  );
-  assert(
-    invalidPlanRegistration.body.error === "Unknown plan.",
-    "Unknown plan registration must return clear error.",
+    invalidPlanRegistration.body.error.includes("invitation"),
+    "Disabled registration must direct users to invitation access.",
   );
 
   const authEmail = `e2e-${Date.now()}@luenio.test`;
-  const registered = await request("/api/auth", {
+  const authToken = seedInvitation(authEmail, "Luenio E2E Workspace");
+  const registered = await request("/api/invitations/accept", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "register",
-      email: authEmail,
+      token: authToken,
       password: "super-secret-123",
-      businessName: "Luenio E2E Workspace",
-      plan: "starter",
     }),
   });
-  assert(registered.response.ok, `Registration failed: ${JSON.stringify(registered.body)}`);
-  assertNoStore(registered.response, "Auth registration API response");
-  assert(registered.body.user?.id, "Registered user must include id.");
+  assert(
+    registered.response.ok,
+    `Invitation acceptance failed: ${JSON.stringify(registered.body)}`,
+  );
+  assertNoStore(registered.response, "Invitation acceptance API response");
+  assert(registered.body.user?.id, "Invited user must include id.");
   const sessionCookie = registered.response.headers.get("set-cookie") || "";
   assert(sessionCookie.includes("HttpOnly"), "Session cookie must be HttpOnly.");
-  assert(sessionCookie.includes("SameSite=Lax"), "Session cookie must use SameSite=Lax.");
+  assert(sessionCookie.includes("SameSite=Strict"), "Session cookie must use SameSite=Strict.");
   assert(sessionCookie.includes("Max-Age="), "Session cookie must include Max-Age.");
   const primaryCookie = cookie;
 
   const session = await request("/api/auth");
   assertNoStore(session.response, "Auth session API response");
-  assert(session.body.authenticated === true, "Session must be authenticated after registration.");
+  assert(
+    session.body.authenticated === true,
+    "Session must be authenticated after invitation acceptance.",
+  );
 
   const leadPayload = {
     id: "client_owned_crm_lead_id",
@@ -529,7 +576,8 @@ try {
   const storedLead = list.body.leads.find((lead) => lead.id === created.body.leadId);
   assert(storedLead, "Created lead must be retrievable from /api/leads.");
   assert(
-    storedLead.userId === registered.body.user.id || storedLead.user_id === registered.body.user.id,
+    storedLead.userId === registered.body.user.businessId ||
+      storedLead.user_id === registered.body.user.businessId,
     "Lead must persist inside current tenant.",
   );
   assert(storedLead.source === "hero", "Source tracking must persist.");
@@ -586,20 +634,19 @@ try {
     "Restricted automation actions must persist for upgrade prompts.",
   );
 
-  const secondRegistered = await request("/api/auth", {
+  const secondEmail = `tenant-${Date.now()}@luenio.test`;
+  const secondToken = seedInvitation(secondEmail, "Tenant Isolation Workspace");
+  const secondRegistered = await request("/api/invitations/accept", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      action: "register",
-      email: `tenant-${Date.now()}@luenio.test`,
+      token: secondToken,
       password: "tenant-secret-123",
-      businessName: "Tenant Isolation Workspace",
-      plan: "starter",
     }),
   });
   assert(
     secondRegistered.response.ok,
-    `Second tenant registration failed: ${JSON.stringify(secondRegistered.body)}`,
+    `Second tenant invitation failed: ${JSON.stringify(secondRegistered.body)}`,
   );
 
   const secondTenantLeads = await request("/api/leads");
@@ -751,8 +798,8 @@ try {
     "Lead processing must normalize invalid pipeline stages.",
   );
 
-  if (health.body.storage.mode === "json_fallback") {
-    seedStarterLimitLeads(registered.body.user.id, created.body.leadId);
+  if (systemHealth.body.storage.mode === "json_fallback") {
+    seedStarterLimitLeads(registered.body.user.businessId, created.body.leadId);
     const blockedProcessLead = await request("/api/process", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -781,26 +828,9 @@ try {
     settings.body.checklist?.length >= 2,
     "Settings checklist must include workspace readiness items.",
   );
-  assert(
-    settings.body.readiness?.checks?.length >= 6,
-    "Settings must include production readiness checks.",
-  );
-  assert(
-    settings.body.readiness.checks.some((check) => check.id === "stripe_prices"),
-    "Readiness must check Stripe price IDs.",
-  );
-  assert(
-    settings.body.readiness.security,
-    "Authenticated settings must include security readiness details.",
-  );
-  assert(
-    settings.body.readiness.billing,
-    "Authenticated settings must include billing readiness details.",
-  );
-  assert(
-    settings.body.readiness.deployment,
-    "Authenticated settings must include deployment readiness details.",
-  );
+  assert(!settings.body.readiness, "Client settings must not expose deployment readiness.");
+  assert(!settings.body.storage, "Client settings must not expose storage infrastructure.");
+  assert(!settings.body.integrations, "Client settings must not expose integration topology.");
 
   const stripeEvent = {
     id: `evt_${Date.now()}`,
@@ -870,7 +900,7 @@ try {
   assert(adminAfterLogout.response.status === 302, "Admin must redirect after logout.");
 
   console.info("Luenio SaaS e2e passed", {
-    storage: health.body.storage.mode,
+    storage: systemHealth.body.storage.mode,
     leadId: created.body.leadId,
     score: created.body.score,
     classification: created.body.classification,

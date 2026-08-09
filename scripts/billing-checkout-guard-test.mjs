@@ -1,4 +1,10 @@
-const envKeys = ["NODE_ENV", "APP_URL", "STRIPE_SECRET_KEY", "STRIPE_STARTER_PRICE_ID"];
+const envKeys = [
+  "NODE_ENV",
+  "APP_URL",
+  "STRIPE_SECRET_KEY",
+  "STRIPE_STARTER_PRICE_ID",
+  "ENABLE_PUBLIC_BILLING",
+];
 const previousEnv = Object.fromEntries(envKeys.map((key) => [key, process.env[key]]));
 const previousFetch = globalThis.fetch;
 
@@ -6,7 +12,8 @@ process.env.NODE_ENV = "production";
 process.env.STRIPE_SECRET_KEY = "sk_test_checkout_guard";
 process.env.STRIPE_STARTER_PRICE_ID = "price_checkout_guard";
 
-const { createStripeCheckout } = await import("../api/services/billing-service.js");
+const { createBillingCheckout, createStripeCheckout } =
+  await import("../api/services/billing-service.js");
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -37,6 +44,15 @@ const request = {
 };
 
 try {
+  process.env.ENABLE_PUBLIC_BILLING = "false";
+  let disabledCheckoutRejected = false;
+  try {
+    await createBillingCheckout({ user, planId: "starter", request });
+  } catch (error) {
+    disabledCheckoutRejected = error.statusCode === 403;
+  }
+  assert(disabledCheckoutRejected, "Checkout must fail closed while public billing is disabled.");
+
   delete process.env.APP_URL;
   await assertRejectsWith(
     () => createStripeCheckout({ user, planId: "starter", request }),

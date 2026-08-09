@@ -11,6 +11,7 @@ export default [
       "config/**/*.{js,mjs}",
       "core/**/*.{js,mjs}",
       "db/**/*.{js,mjs}",
+      "lib/**/*.{js,mjs}",
       "scripts/**/*.{js,mjs}",
       "server.js",
       "vite.config.js",
@@ -19,7 +20,7 @@ export default [
     languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.node } },
   },
   {
-    files: ["apps/web/**/*.js", "apps/admin/**/*.js"],
+    files: ["apps/web/**/*.js", "apps/admin/**/*.js", "components/**/*.js"],
     languageOptions: { ecmaVersion: 2023, sourceType: "module", globals: { ...globals.browser } },
   },
   {
@@ -27,6 +28,10 @@ export default [
       "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       eqeqeq: ["warn", "smart"],
       "no-console": "off",
+      // Preserve the established lint contract while adopting ESLint 10 security fixes.
+      "no-useless-assignment": "off",
+      "preserve-caught-error": "off",
+      "no-redeclare": ["error", { builtinGlobals: false }],
     },
   },
   prettierConfig,

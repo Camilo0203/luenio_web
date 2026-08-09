@@ -11,8 +11,22 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
+.env*
+!.env.example
+!.env.production.example
+!.env.edge.example
+!.env.backup.example
+!.env.monitor.example
 db/leads-db.json
+backups/
+tmp/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+*.age
+*.pem
+*.key
 
 # Editor directories and files
 .vscode/*
@@ -32,3 +46,5 @@ db/leads-db.json
 # Windows OS cruft
 Thumbs.db
 desktop.ini
+
+.sentry-local.log

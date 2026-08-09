@@ -1,0 +1,11 @@
+[Unit]
+Description=Monitor Luenio %i every five minutes
+
+[Timer]
+OnBootSec=2m
+OnUnitActiveSec=5m
+Persistent=true
+Unit=luenio-health@%i.service
+
+[Install]
+WantedBy=timers.target

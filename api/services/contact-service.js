@@ -1,6 +1,12 @@
-import { storePublicInquiry } from "../../db/storage.js";
-import { getContactEnv } from "../../config/env.js";
+import {
+  claimContactDeliveries,
+  completeContactDelivery,
+  storePublicInquiry,
+} from "../../db/storage.js";
+import { getContactEnv, isProduction } from "../../config/env.js";
 import { generateRecordId, leadFieldLimits, normalizeTextField } from "../../core/engine.js";
+import { validatePublicInquirySecurity } from "./turnstile-service.js";
+import { fetchWithTimeout, getSecureOutboundUrl } from "./outbound-request.js";
 
 export class PublicInquiryValidationError extends Error {
   constructor(missingFields) {
@@ -11,6 +17,8 @@ export class PublicInquiryValidationError extends Error {
     this.missingFields = missingFields;
   }
 }
+
+const CONTACT_WEBHOOK_TIMEOUT_MS = 3_000;
 
 function normalizeInquiry(body = {}) {
   return {
@@ -34,40 +42,38 @@ function validateInquiry(inquiry) {
   return missingFields;
 }
 
-function sanitizeWebhookResult(webhook) {
-  if (!webhook) return { status: "unknown" };
-
-  return {
-    status: webhook.status || "unknown",
-    ...(webhook.httpStatus ? { httpStatus: webhook.httpStatus } : {}),
-  };
-}
-
 function buildPublicInquiryResponse(stored) {
   return {
     ok: true,
     inquiryId: stored.inquiry.id,
-    storage: stored.storage,
-    webhook: sanitizeWebhookResult(stored.webhook),
   };
 }
 
 async function sendContactWebhook(inquiry) {
-  const webhookUrl = getContactEnv().webhookUrl;
+  const { webhookUrl, webhookToken } = getContactEnv();
   if (!webhookUrl) {
     return {
       status: "not_configured",
       destination: null,
     };
   }
+  if (isProduction() && !webhookToken) {
+    return { status: "failed", destination: null };
+  }
 
   try {
-    const webhookResponse = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(inquiry),
-    });
-
+    const webhookResponse = await fetchWithTimeout(
+      getSecureOutboundUrl(webhookUrl, "Contact webhook URL"),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(webhookToken ? { Authorization: `Bearer ${webhookToken}` } : {}),
+        },
+        body: JSON.stringify(inquiry),
+      },
+      CONTACT_WEBHOOK_TIMEOUT_MS,
+    );
     return {
       status: webhookResponse.ok ? "sent" : "failed",
       destination: webhookUrl,
@@ -82,9 +88,37 @@ async function sendContactWebhook(inquiry) {
   }
 }
 
+export async function deliverQueuedContactInquiries({ limit = 10, inquiryId = null } = {}) {
+  const claims = await claimContactDeliveries({ limit, inquiryId });
+  const results = [];
+  for (const claim of claims) {
+    const webhook = await sendContactWebhook(claim.inquiry);
+    const succeeded = webhook.status === "sent";
+    await completeContactDelivery({
+      deliveryId: claim.deliveryId,
+      succeeded,
+      httpStatus: webhook.httpStatus || null,
+    });
+    results.push({
+      deliveryId: claim.deliveryId,
+      status: succeeded ? "sent" : "queued",
+    });
+  }
+  return results;
+}
+
 export async function capturePublicInquiry(inquiry) {
   const stored = await storePublicInquiry(inquiry);
-  const webhook = await sendContactWebhook(stored.inquiry);
+  let webhook = { status: "queued" };
+  try {
+    const [delivery] = await deliverQueuedContactInquiries({
+      limit: 1,
+      inquiryId: stored.inquiry.id,
+    });
+    if (delivery?.status === "sent") webhook = { status: "sent" };
+  } catch {
+    // Persistence has already succeeded; the worker will retry delivery.
+  }
 
   return {
     ...stored,
@@ -92,7 +126,11 @@ export async function capturePublicInquiry(inquiry) {
   };
 }
 
-export async function capturePublicInquiryFromBody(body = {}) {
+export async function capturePublicInquiryFromBody(body = {}, context = {}) {
+  await validatePublicInquirySecurity({
+    body,
+    clientIp: context.clientIp,
+  });
   const inquiry = normalizeInquiry(body);
   const missingFields = validateInquiry(inquiry);
 

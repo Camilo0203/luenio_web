@@ -1,5 +1,9 @@
 import { buildPublicReadiness, buildReadiness } from "../../config/readiness.js";
-import { getStorageHealth, testStorageConnection } from "../../db/storage.js";
+import {
+  getContactDeliveryHealth,
+  getStorageHealth,
+  testStorageConnection,
+} from "../../db/storage.js";
 
 function publicStorageHealth(storage) {
   return {
@@ -9,7 +13,7 @@ function publicStorageHealth(storage) {
   };
 }
 
-function buildHealthPayload({ ok, connection = null, error = null }) {
+function buildHealthPayload({ ok, connection = null, deliveryQueue = null, error = null }) {
   const storage = getStorageHealth();
   const readiness = buildReadiness();
 
@@ -18,6 +22,7 @@ function buildHealthPayload({ ok, connection = null, error = null }) {
     app: "luenio-saas-crm",
     storage: publicStorageHealth(storage),
     ...(connection ? { connection } : {}),
+    ...(deliveryQueue ? { deliveryQueue } : {}),
     integrations: readiness.integrations,
     readiness: buildPublicReadiness(readiness),
     ...(error ? { error } : {}),
@@ -26,11 +31,29 @@ function buildHealthPayload({ ok, connection = null, error = null }) {
 }
 
 export async function getPublicHealth() {
+  return {
+    status: 200,
+    body: {
+      ok: true,
+      status: "available",
+      timestamp: new Date().toISOString(),
+    },
+  };
+}
+
+export async function getDetailedHealth() {
   try {
     const connection = await testStorageConnection();
+    const deliveryQueue = await getContactDeliveryHealth();
+    const ok = deliveryQueue.healthy;
     return {
-      status: 200,
-      body: buildHealthPayload({ ok: true, connection }),
+      status: ok ? 200 : 503,
+      body: buildHealthPayload({
+        ok,
+        connection,
+        deliveryQueue,
+        error: ok ? null : "Contact delivery queue is degraded.",
+      }),
     };
   } catch {
     return {

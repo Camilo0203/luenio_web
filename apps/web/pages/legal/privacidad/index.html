@@ -3,160 +3,215 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Política de Privacidad | Luenio Agency</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Política de Privacidad | Luenio</title>
     <meta
       name="description"
-      content="Cómo Luenio Agency recopila, usa y protege los datos de tu cuenta y de tus leads."
+      content="Cómo Luenio recopila, usa y protege datos de formularios, proyectos web y automatizaciones."
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/privacidad" />
-    <meta name="theme-color" content="#07111f" />
+    <link rel="canonical" href="https://luenio.com/privacidad" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Política de Privacidad | Luenio Agency" />
-    <meta
-      property="og:description"
-      content="Cómo Luenio Agency recopila, usa y protege los datos de tu cuenta y de tus leads."
-    />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/privacidad" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Política de Privacidad | Luenio" />
+    <meta property="og:description" content="Tratamiento de datos personales por Luenio." />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/privacidad" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Política de Privacidad | Luenio Agency" />
-    <meta
-      name="twitter:description"
-      content="Cómo Luenio Agency recopila, usa y protege los datos de tu cuenta y de tus leads."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+    <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
-  <body>
-    <!-- ⚠️ Placeholders marcados con [ ]: reemplazar antes de producción y validar con asesoría legal. -->
-    <main class="niche-page legal-page">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a>
-        <a class="button button-primary button-small" href="/precios">Ver planes</a>
-      </nav>
-
-      <section class="legal-header">
-        <p class="eyebrow">Legal</p>
-        <h1>Política de Privacidad</h1>
-        <p class="legal-updated">Última actualización: [FECHA]</p>
+  <body data-whatsapp-widget="false">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand-lockup" href="/"
+          ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+        >
+        <nav
+          class="site-nav"
+          id="site-navigation"
+          data-navigation
+          data-open="false"
+          aria-label="Navegación principal"
+        >
+          <a href="/#servicios">Servicios</a><a href="/#proceso">Proceso</a
+          ><a href="/#casos">Casos</a><a href="/cotizacion">Cotización</a
+          ><a href="/login" data-client-access
+            ><span class="access-label--guest">Acceso</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+        </nav>
+        <div class="site-header__actions">
+          <a
+            class="button button--outline button--small site-header__access"
+            href="/login"
+            data-client-access
+            ><span class="access-label--guest">Acceso clientes</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+          <a class="button button--primary button--small site-header__cta" href="/cotizacion"
+            >Solicitar cotización gratis</a
+          >
+        </div>
+        <button
+          class="menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span>
+        </button>
+      </div>
+    </header>
+    <main id="contenido">
+      <section class="legal-hero">
+        <div class="legal-hero__inner">
+          <p class="eyebrow">Información legal</p>
+          <h1>Política de Privacidad</h1>
+          <p class="legal-date">Última actualización: 10 de julio de 2026</p>
+          <p>
+            Esta política explica cómo Luenio recopila, utiliza, almacena y protege datos
+            personales.
+          </p>
+        </div>
       </section>
-
-      <nav class="legal-crosslinks" aria-label="Documentos legales">
-        <a href="/terminos">Términos de Servicio</a>
-        <a href="/privacidad" class="active">Política de Privacidad</a>
-        <a href="/reembolsos">Política de Reembolsos</a>
-      </nav>
-
-      <article class="legal-content">
-        <h2>1. Responsable del Tratamiento</h2>
-        <p>
-          [TU RAZÓN SOCIAL], con domicilio en [TU DIRECCIÓN], es responsable del tratamiento de los
-          datos personales descritos en esta política. Puedes contactarnos en [TU EMAIL DE SOPORTE].
-        </p>
-
-        <h2>2. Datos que Recopilamos</h2>
-        <p>Recopilamos las siguientes categorías de datos:</p>
-        <ul>
-          <li>
-            <strong>Datos de cuenta:</strong> email, nombre del negocio y contraseña (almacenada
-            como hash, nunca en texto plano).
-          </li>
-          <li>
-            <strong>Datos de leads:</strong> nombre, negocio, teléfono, mensaje y servicio de
-            interés que tú o tus clientes ingresan al CRM.
-          </li>
-          <li>
-            <strong>Datos de pago:</strong> gestionados directamente por Stripe. Luenio no almacena
-            números de tarjeta ni datos sensibles de pago.
-          </li>
-        </ul>
-
-        <h2>3. Cómo Usamos los Datos</h2>
-        <p>
-          Usamos los datos para operar el CRM (scoring, pipeline, automatizaciones), procesar pagos,
-          brindar soporte, mejorar el Servicio y cumplir obligaciones legales.
-        </p>
-
-        <h2>4. Base Legal y Consentimiento</h2>
-        <p>
-          Tratamos tus datos con base en la ejecución del contrato de servicio, tu consentimiento al
-          registrarte y aceptar estos Términos, y nuestro interés legítimo en operar y mejorar la
-          plataforma.
-        </p>
-
-        <h2>5. Compartición con Terceros</h2>
-        <p>Compartimos datos únicamente con:</p>
-        <ul>
-          <li>Stripe, para procesar pagos y suscripciones.</li>
-          <li>
-            Los servicios de automatización (CRM, WhatsApp, email) que tú mismo configuras con tus
-            propias credenciales de webhook.
-          </li>
-        </ul>
-        <p>No vendemos ni alquilamos datos personales a terceros.</p>
-
-        <h2>6. Cookies</h2>
-        <p>
-          Usamos una única cookie técnica de sesión (<code>luenio_session</code>), marcada
-          <code>HttpOnly</code> y <code>Secure</code> en producción, necesaria para mantener tu
-          sesión iniciada. No usamos cookies de rastreo publicitario.
-        </p>
-
-        <h2>7. Seguridad de los Datos</h2>
-        <p>
-          Aplicamos medidas técnicas y organizativas razonables (cifrado en tránsito, aislamiento
-          por cuenta/tenant, límites de tasa por IP) para proteger tus datos frente a accesos no
-          autorizados.
-        </p>
-
-        <h2>8. Retención</h2>
-        <p>
-          Conservamos los datos mientras tu cuenta esté activa y durante el periodo adicional
-          necesario para cumplir obligaciones legales o resolver disputas.
-        </p>
-
-        <h2>9. Derechos del Usuario</h2>
-        <p>
-          Puedes solicitar acceso, rectificación, eliminación o portabilidad de tus datos
-          escribiendo a [TU EMAIL DE SOPORTE]. Responderemos dentro de los plazos exigidos por la
-          normativa aplicable.
-        </p>
-
-        <h2>10. Transferencias Internacionales</h2>
-        <p>
-          Algunos proveedores (como Supabase y Stripe) pueden procesar datos fuera de tu país. En
-          ese caso, exigimos que cumplan estándares adecuados de protección de datos. [DETALLE
-          ESPECÍFICO DE TRANSFERENCIAS SI APLICA]
-        </p>
-
-        <h2>11. Menores de Edad</h2>
-        <p>
-          El Servicio no está dirigido a menores de edad y no recopilamos datos de menores a
-          sabiendas.
-        </p>
-
-        <h2>12. Cambios a esta Política</h2>
-        <p>
-          Podemos actualizar esta política periódicamente. Publicaremos la fecha de la última
-          actualización al inicio de este documento.
-        </p>
-
-        <h2>13. Contacto</h2>
-        <p>
-          [TU RAZÓN SOCIAL] — [TU DIRECCIÓN]<br />
-          Para ejercer tus derechos o resolver dudas, escríbenos a [TU EMAIL DE SOPORTE].
-        </p>
-      </article>
-
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
+      <div class="section-shell legal-layout">
+        <nav class="legal-toc" aria-label="Contenido">
+          <strong>Contenido</strong><a href="#responsable">1. Responsable</a
+          ><a href="#datos">2. Datos</a><a href="#uso">3. Uso</a><a href="#base">4. Base legal</a
+          ><a href="#proveedores">5. Proveedores</a><a href="#seguridad">6. Seguridad</a
+          ><a href="#retencion">7. Retención</a><a href="#derechos">8. Derechos</a
+          ><a href="#cookies">9. Cookies</a><a href="#contacto-legal">10. Contacto</a>
+        </nav>
+        <article class="legal-article">
+          <section id="responsable">
+            <h2>1. Responsable</h2>
+            <p>
+              Luenio, con operación en Bogotá D.C., Colombia, es responsable de los datos enviados
+              directamente mediante luenio.com y sus canales comerciales.
+            </p>
+          </section>
+          <section id="datos">
+            <h2>2. Datos que recopilamos</h2>
+            <p>Podemos recopilar:</p>
+            <ul>
+              <li>Nombre, negocio, correo y número de WhatsApp.</li>
+              <li>Servicio de interés, objetivos, mensajes y fuente de contacto.</li>
+              <li>Información comercial y operativa compartida para diagnosticar un proyecto.</li>
+              <li>Eventos técnicos básicos necesarios para seguridad y medición de formularios.</li>
+              <li>
+                Datos de leads o conversaciones cuando una empresa contrata una automatización,
+                según el alcance acordado.
+              </li>
+            </ul>
+          </section>
+          <section id="uso">
+            <h2>3. Cómo usamos la información</h2>
+            <p>
+              Usamos los datos para responder solicitudes, preparar diagnósticos y propuestas,
+              desarrollar landings, implementar automatizaciones, prestar soporte, proteger los
+              servicios y cumplir obligaciones legales.
+            </p>
+            <p>No vendemos datos personales.</p>
+          </section>
+          <section id="base">
+            <h2>4. Base legal</h2>
+            <p>
+              Tratamos datos con base en tu solicitud, medidas precontractuales, ejecución de un
+              contrato, consentimiento cuando corresponda y el interés legítimo de operar y proteger
+              nuestros servicios.
+            </p>
+          </section>
+          <section id="proveedores">
+            <h2>5. Proveedores y transferencias</h2>
+            <p>
+              Podemos usar proveedores de hosting, base de datos, mensajería, automatización,
+              correo, CRM, analítica y seguridad. Compartimos únicamente la información necesaria
+              para prestar el servicio y procuramos utilizar proveedores con medidas razonables de
+              protección.
+            </p>
+            <p>
+              Algunos proveedores pueden procesar información fuera de Colombia conforme a sus
+              términos y mecanismos legales.
+            </p>
+          </section>
+          <section id="seguridad">
+            <h2>6. Seguridad</h2>
+            <p>
+              Aplicamos cifrado en tránsito, controles de acceso, límites de exposición, protección
+              de endpoints y separación de datos operativos. Ningún sistema es completamente
+              infalible, pero trabajamos para prevenir accesos no autorizados y reducir riesgos.
+            </p>
+          </section>
+          <section id="retencion">
+            <h2>7. Retención</h2>
+            <p>
+              Conservamos los datos durante el tiempo necesario para atender solicitudes, ejecutar
+              proyectos, mantener soporte, resolver disputas y cumplir obligaciones. Después podemos
+              eliminarlos o anonimizarlos.
+            </p>
+          </section>
+          <section id="derechos">
+            <h2>8. Derechos</h2>
+            <p>
+              Puedes solicitar acceso, actualización, corrección, eliminación o información sobre el
+              uso de tus datos. También puedes retirar un consentimiento cuando aplique.
+              Responderemos conforme a la normativa colombiana aplicable.
+            </p>
+          </section>
+          <section id="cookies">
+            <h2>9. Cookies y almacenamiento técnico</h2>
+            <p>
+              La web puede utilizar almacenamiento local para registrar eventos básicos de
+              conversión y cookies técnicas en áreas autenticadas. No usamos estos mecanismos para
+              vender perfiles personales.
+            </p>
+          </section>
+          <section id="contacto-legal">
+            <h2>10. Cambios y contacto</h2>
+            <p>
+              Podemos actualizar esta política cuando cambien nuestras prácticas o requisitos
+              legales. Publicaremos aquí la versión vigente.
+            </p>
+            <div class="legal-contact">
+              <strong>Consultas sobre privacidad</strong><br /><a href="mailto:contacto@luenio.com"
+                >contacto@luenio.com</a
+              ><br />+57 319 320 3702<br />Bogotá D.C., Colombia
+            </div>
+          </section>
+        </article>
+      </div>
     </main>
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__intro">
+          <a class="brand-lockup" href="/"
+            ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+          >
+          <p>Landings y automatizaciones con IA diseñadas alrededor de negocios reales.</p>
+        </div>
+        <nav class="footer-group" aria-label="Legal">
+          <strong>Documentos</strong><a href="/terminos">Términos</a
+          ><a href="/privacidad" aria-current="page">Privacidad</a
+          ><a href="/reembolsos">Reembolsos</a><a href="/cotizacion">Cotización</a>
+        </nav>
+        <div class="footer-group">
+          <strong>Contacto</strong><a href="mailto:contacto@luenio.com">contacto@luenio.com</a
+          ><span>+57 319 320 3702</span><span>Bogotá D.C., Colombia</span>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
+      </div>
+    </footer>
+    <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

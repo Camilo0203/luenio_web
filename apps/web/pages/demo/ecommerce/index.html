@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
     <title>Luenio Demo | Ecommerce</title>
     <meta
       name="description"
@@ -12,34 +17,51 @@
       name="keywords"
       content="demo IA ecommerce, demo chat recuperación de ventas, automatización ecommerce"
     />
-    <meta name="author" content="Luenio Agency" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/demo/ecommerce" />
-    <meta name="theme-color" content="#07111f" />
+    <meta name="author" content="Luenio" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="https://luenio.com/demos/ecommerce" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
+    <meta property="og:site_name" content="Luenio" />
     <meta property="og:title" content="Luenio Demo | Ecommerce" />
     <meta
       property="og:description"
       content="Demo de WhatsApp y web chat IA para ecommerce que recupera ventas de chats abandonados."
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/demo/ecommerce" />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/demos/ecommerce" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Luenio Demo | Ecommerce" />
     <meta
       name="twitter:description"
       content="Demo de WhatsApp y web chat IA para ecommerce que recupera ventas de chats abandonados."
     />
-    <meta name="twitter:image" content="/luenio-logo.png" />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
+    />
     <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/industry-simulations.css" />
+    <link rel="stylesheet" href="/apps/web/src/simulation-worlds.css" />
   </head>
-  <body>
+  <body class="simulation-page simulation-ecommerce">
     <main class="demo-page ecommerce-demo" data-demo-type="ecommerce">
       <nav class="demo-nav">
-        <a href="/">Luenio</a>
-        <div id="industryLinks"></div>
+        <div class="simulation-nav__brand">
+          <a href="/">Luenio</a><span aria-hidden="true">/</span
+          ><a href="/tiendas-online">NovaStore</a>
+        </div>
+        <div id="industryLinks">
+          <a href="/demo/restaurants">Restaurantes</a><a href="/demo/real-estate">Inmobiliarias</a
+          ><a href="/demo/gym">Gimnasios</a
+          ><a class="active" href="/demo/ecommerce" aria-current="page">Ecommerce</a
+          ><a href="/demo/agencies">Agencias</a>
+        </div>
       </nav>
 
       <section class="ecommerce-hero">
@@ -77,7 +99,9 @@
         <section class="ecommerce-inventory-panel" aria-label="Estilo de respuesta de inventario">
           <p class="eyebrow">IA de inventario</p>
           <h2>Respuesta de inventario</h2>
-          <div class="ecommerce-inventory-list" id="ecommerceInventoryList"></div>
+          <div class="ecommerce-inventory-list" id="ecommerceInventoryList">
+            <p class="simulation-loading">Preparando inventario de muestra…</p>
+          </div>
         </section>
 
         <aside class="ecommerce-crm-panel" aria-label="Seguimiento de conversión">
@@ -94,7 +118,9 @@
             <article><span>CALIENTE</span><strong>Pipeline de ventas</strong></article>
             <article><span>Conversión</span><strong>Link de compra</strong></article>
           </div>
-          <div class="ecommerce-events" id="ecommerceEvents"></div>
+          <div class="ecommerce-events" id="ecommerceEvents">
+            <p class="simulation-loading">La actividad aparecerá al ejecutar la demo.</p>
+          </div>
         </aside>
       </section>
 
@@ -117,5 +143,7 @@
     </main>
 
     <script type="module" src="/apps/web/pages/demo/ecommerce/ecommerce-demo.js"></script>
+    <script type="module" src="/apps/web/src/industry-simulations.js"></script>
+    <script type="module" src="/apps/web/src/theme-control-entry.js"></script>
   </body>
 </html>

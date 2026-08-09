@@ -5,6 +5,15 @@
   "actions": [],
   "notifications": [],
   "subscriptions": [],
-  "updatedAt": null,
-  "inquiries": []
+  "inquiries": [],
+  "contactDeliveries": [],
+  "businesses": [],
+  "memberships": [],
+  "invitations": [],
+  "auditLogs": [],
+  "passwordResets": [],
+  "sessions": [],
+  "authThrottles": [],
+  "authChallenges": [],
+  "updatedAt": null
 }

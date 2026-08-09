@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <script src="/theme-boot.js"></script>
+    <title>Luenio Demo | Veterinarias</title>
+    <meta name="description" content="Demo de atención y agenda para veterinarias." />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
+    <link rel="stylesheet" href="/apps/web/src/industry-simulations.css" />
+    <link rel="stylesheet" href="/apps/web/src/simulation-worlds.css" />
+  </head>
+  <body class="simulation-page simulation-veterinary">
+    <main class="demo-page gym-demo" data-demo-type="veterinary">
+      <nav class="demo-nav">
+        <div class="simulation-nav__brand">
+          <a href="/">Luenio</a><span aria-hidden="true">/</span
+          ><a href="/demos/veterinary">Huella Veterinaria</a>
+        </div>
+        <div id="industryLinks"></div>
+      </nav>
+      <section class="gym-hero">
+        <div>
+          <p class="eyebrow">Demo en vivo · Veterinarias</p>
+          <h1>Convierte consultas de mascotas en citas atendidas.</h1>
+          <p id="vetPain">La velocidad de respuesta también cuida la relación con cada familia.</p>
+          <button class="button button-primary" id="runVetDemo" type="button">
+            Ejecutar Demo en Vivo
+          </button>
+        </div>
+        <aside class="gym-live-card">
+          <span></span><strong id="vetLiveStatus">Esperando consulta de mascota</strong
+          ><small>Flujo demostrativo · no conecta datos reales</small>
+        </aside>
+      </section>
+      <section class="gym-workspace vet-workspace">
+        <article class="gym-chat" aria-label="Simulación de chat veterinario">
+          <div class="gym-chat-head"><span>WhatsApp</span><strong>Huella Veterinaria</strong></div>
+          <div class="chat-thread" id="vetChatThread">
+            <p class="chat-empty">Presiona Ejecutar Demo en Vivo para simular una consulta.</p>
+          </div>
+        </article>
+        <section class="gym-pricing-panel vet-services" aria-label="Servicios sugeridos">
+          <p class="eyebrow">Respuesta asistida</p>
+          <h2>La atención llega con contexto</h2>
+          <div class="gym-pricing-cards" id="vetServices">
+            <p class="simulation-loading">Preparando servicios de muestra…</p>
+          </div>
+        </section>
+        <aside class="gym-crm-panel" aria-label="Actualización de CRM">
+          <p class="eyebrow">CRM · Citas</p>
+          <h2>Citas por confirmar</h2>
+          <div class="gym-crm-card">
+            <span>Familia</span><strong id="vetLeadName">Esperando consulta</strong>
+          </div>
+          <div class="gym-crm-card">
+            <span>Prioridad</span><strong id="vetLeadScore">--</strong>
+          </div>
+          <div class="gym-pipeline" id="vetPipeline">
+            <article class="active"><span>Nuevo</span><strong>WhatsApp</strong></article>
+            <article><span>Caliente</span><strong>Cita</strong></article>
+            <article><span>Seguimiento</span><strong>Recordatorio</strong></article>
+          </div>
+          <div class="gym-events" id="vetEvents">
+            <p class="simulation-loading">La actividad aparecerá al ejecutar la demo.</p>
+          </div>
+        </aside>
+      </section>
+      <section class="final-cta-section">
+        <div>
+          <p class="eyebrow">Conversión con cuidado</p>
+          <h2>Más citas atendidas. Menos familias esperando.</h2>
+          <p>
+            Luenio detecta urgencia, propone horario, crea el registro y deja listo el seguimiento.
+          </p>
+        </div>
+        <a class="button button-primary" href="/#contacto">Activar para mi veterinaria</a>
+      </section>
+      <footer class="legal-bar">
+        <a href="/terminos">Términos</a><a href="/privacidad">Privacidad</a
+        ><a href="/reembolsos">Reembolsos</a>
+      </footer>
+    </main>
+    <script type="module" src="/apps/web/pages/demo/veterinary/veterinary-demo.js"></script>
+    <script type="module" src="/apps/web/src/industry-simulations.js"></script>
+    <script type="module" src="/apps/web/src/theme-control-entry.js"></script>
+  </body>
+</html>

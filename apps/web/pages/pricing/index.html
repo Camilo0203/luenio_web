@@ -3,132 +3,332 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Precios de Luenio | Planes Starter, Pro y Agency</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Cotización gratuita | Luenio</title>
     <meta
       name="description"
-      content="Conoce los planes de Luenio: CRM, scoring de leads y automatización con IA para negocios que venden por WhatsApp."
+      content="Solicita un diagnóstico y una cotización gratuita para tu landing page o automatización con IA. Cada solución de Luenio es personalizada."
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/precios" />
-    <meta name="theme-color" content="#07111f" />
+    <link rel="canonical" href="https://luenio.com/cotizacion" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Precios de Luenio | Planes Starter, Pro y Agency" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Cotización gratuita | Luenio" />
     <meta
       property="og:description"
-      content="Conoce los planes de Luenio: CRM, scoring de leads y automatización con IA para negocios que venden por WhatsApp."
+      content="Una solución diseñada alrededor de tu negocio, con alcance y cotización personalizados."
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/precios" />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/cotizacion" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Precios de Luenio | Planes Starter, Pro y Agency" />
+    <meta name="twitter:title" content="Cotización gratuita | Luenio" />
     <meta
       name="twitter:description"
-      content="Conoce los planes de Luenio: CRM, scoring de leads y automatización con IA para negocios que venden por WhatsApp."
+      content="Diagnóstico gratuito para landings y automatización con IA."
     />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+    <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
-  <body>
-    <main class="niche-page">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a>
-        <a class="button button-primary button-small" href="/login">Crear cuenta</a>
-      </nav>
+  <body
+    class="quote-page"
+    data-page-context="Página de cotización personalizada"
+    data-whatsapp-widget="true"
+  >
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
+          <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+          <span>Luenio</span>
+        </a>
+        <nav
+          class="site-nav"
+          id="site-navigation"
+          data-navigation
+          data-open="false"
+          aria-label="Navegación principal"
+        >
+          <a href="/#servicios">Servicios</a>
+          <a href="/#proceso">Proceso</a>
+          <a href="/#casos">Casos</a>
+          <a href="/#preguntas">Preguntas</a>
+          <a href="/cotizacion" aria-current="page">Cotización</a>
+          <a href="/login" data-client-access
+            ><span class="access-label--guest">Acceso</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+        </nav>
+        <div class="site-header__actions">
+          <a
+            class="button button--outline button--small site-header__access"
+            href="/login"
+            data-client-access
+            ><span class="access-label--guest">Acceso clientes</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+          <button
+            class="button button--primary button--small site-header__cta"
+            type="button"
+            data-wa-open
+            data-source="quote_header"
+          >
+            Escribir por WhatsApp
+          </button>
+        </div>
+        <button
+          class="menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span>
+        </button>
+      </div>
+    </header>
 
-      <section class="legal-header">
-        <p class="eyebrow">Precios</p>
-        <h1>Un plan para cada etapa de tu negocio.</h1>
-        <p class="legal-updated">
-          Sin contratos forzosos. Cambia o cancela tu plan cuando quieras desde el panel de
-          facturación.
-        </p>
-      </section>
-
-      <section class="niche-section">
-        <div class="pricing-grid">
-          <article>
-            <p class="eyebrow">Starter</p>
-            <span class="pricing-price">[PRECIO]/mes</span>
-            <p class="pricing-limit">100 leads al mes</p>
-            <ul class="pricing-features">
-              <li>CRM incluido</li>
-              <li>Scoring de leads (CALIENTE/TIBIO/FRÍO)</li>
-              <li>Notificaciones por email</li>
-            </ul>
-            <a class="button button-primary wide" href="/login?plan=starter">Empezar con Starter</a>
-          </article>
-          <article class="featured">
-            <p class="eyebrow">Pro</p>
-            <span class="pricing-price">[PRECIO]/mes</span>
-            <p class="pricing-limit">1.000 leads al mes</p>
-            <ul class="pricing-features">
-              <li>CRM incluido</li>
-              <li>Scoring de leads (CALIENTE/TIBIO/FRÍO)</li>
-              <li>Notificaciones por email</li>
-              <li>Notificaciones por WhatsApp</li>
-              <li>Webhooks personalizados</li>
-            </ul>
-            <a class="button button-primary wide" href="/login?plan=pro">Empezar con Pro</a>
-          </article>
-          <article>
-            <p class="eyebrow">Agency</p>
-            <span class="pricing-price">[PRECIO]/mes</span>
-            <p class="pricing-limit">10.000 leads al mes</p>
-            <ul class="pricing-features">
-              <li>CRM incluido</li>
-              <li>Scoring de leads (CALIENTE/TIBIO/FRÍO)</li>
-              <li>Notificaciones por email</li>
-              <li>Notificaciones por WhatsApp</li>
-              <li>Webhooks personalizados</li>
-              <li>Multi-workspace</li>
-            </ul>
-            <a class="button button-primary wide" href="/login?plan=agency">Empezar con Agency</a>
-          </article>
+    <main id="contenido">
+      <section class="quote-hero">
+        <div class="quote-hero__inner">
+          <p class="eyebrow">Diagnóstico y cotización sin costo</p>
+          <h1>Una solución diseñada alrededor de tu negocio.</h1>
+          <p>
+            No vendemos paquetes genéricos. Primero entendemos cómo captas clientes, qué quieres
+            mejorar y qué herramientas utilizas. Después definimos un alcance 100% personalizado.
+          </p>
+          <div class="quote-confidence" aria-label="Condiciones de la cotización">
+            <span>Diagnóstico 100% gratuito</span>
+            <span>Alcance y tiempos claros</span>
+            <span>Acompañamiento humano</span>
+          </div>
         </div>
       </section>
 
-      <section class="niche-section">
-        <div class="section-head">
+      <section class="section-shell quote-layout">
+        <div>
+          <div class="section-heading">
+            <p class="eyebrow">Qué ocurre después</p>
+            <h2>Una conversación breve antes de recomendar tecnología.</h2>
+          </div>
+          <div class="quote-steps">
+            <article class="quote-step">
+              <span>01</span>
+              <div>
+                <h3>Revisamos tu solicitud</h3>
+                <p>
+                  Entendemos el negocio, el objetivo y el punto del proceso que quieres mejorar.
+                </p>
+              </div>
+            </article>
+            <article class="quote-step">
+              <span>02</span>
+              <div>
+                <h3>Conversamos contigo</h3>
+                <p>Confirmamos necesidades, contenido, canales, integraciones y prioridades.</p>
+              </div>
+            </article>
+            <article class="quote-step">
+              <span>03</span>
+              <div>
+                <h3>Diseñamos el alcance</h3>
+                <p>Definimos entregables, fases, tiempos y responsabilidades de cada parte.</p>
+              </div>
+            </article>
+            <article class="quote-step">
+              <span>04</span>
+              <div>
+                <h3>Recibes tu propuesta</h3>
+                <p>Te entregamos una cotización única para decidir con información clara.</p>
+              </div>
+            </article>
+          </div>
+          <aside class="quote-projects">
+            <h3>Podemos ayudarte con</h3>
+            <ul class="clean-list">
+              <li>Landing pages para campañas, servicios o productos</li>
+              <li>Rediseño de una presencia digital que no convierte</li>
+              <li>Automatización de WhatsApp y preguntas frecuentes</li>
+              <li>Chatbots, asistentes IA y calificación de leads</li>
+              <li>CRM, seguimiento e integraciones comerciales</li>
+              <li>Una solución completa de landing + automatización</li>
+            </ul>
+          </aside>
+        </div>
+
+        <form
+          class="lead-form quote-form"
+          data-lead-form
+          data-source="cotizacion"
+          aria-labelledby="quote-form-title"
+          novalidate
+        >
+          <div class="quote-form__intro wide">
+            <div>
+              <p class="quote-form__step">Cuéntanos lo esencial</p>
+              <h2 id="quote-form-title">Empecemos por tu negocio.</h2>
+            </div>
+            <span>1–2 min</span>
+          </div>
+          <p class="quote-form__lead wide">
+            Con este contexto podremos preparar mejor la primera conversación.
+          </p>
+          <div class="quote-context wide" data-quote-context hidden>
+            <span aria-hidden="true"></span>
+            <p data-quote-context-copy></p>
+            <a href="/cotizacion">Quitar contexto</a>
+          </div>
+          <label
+            >Nombre<input name="name" autocomplete="name" placeholder="Tu nombre" required
+          /></label>
+          <label
+            >Negocio<input
+              name="business"
+              autocomplete="organization"
+              placeholder="Nombre del negocio"
+              required
+          /></label>
+          <label
+            >WhatsApp<input
+              name="phone"
+              type="tel"
+              inputmode="tel"
+              autocomplete="tel"
+              placeholder="+57 300 000 0000"
+              required
+          /></label>
+          <label
+            >Servicio<select name="service" required>
+              <option value="">Selecciona una opción</option>
+              <option>Landing page de conversión</option>
+              <option>Automatización de WhatsApp</option>
+              <option>Chatbot o asistente IA</option>
+              <option>CRM y seguimiento</option>
+              <option>Landing + automatización completa</option>
+            </select></label
+          >
+          <label class="wide"
+            ><span>Objetivo <small>Opcional</small></span
+            ><textarea
+              name="message"
+              rows="6"
+              placeholder="Cuéntanos qué vendes, cómo recibes leads y qué quieres mejorar"
+            ></textarea>
+          </label>
+          <button class="button button--primary wide" type="submit">
+            <span>Solicitar cotización gratis</span>
+          </button>
+          <p class="form-reassurance wide">
+            La solicitud es gratuita y no genera obligación de compra. Usaremos tus datos únicamente
+            para responderte, según nuestra <a href="/privacidad">política de privacidad</a>.
+          </p>
+          <button
+            class="whatsapp-alternative wide"
+            type="button"
+            data-wa-open
+            data-source="quote_form"
+          >
+            Prefiero continuar por WhatsApp
+          </button>
+          <p
+            class="form-status wide"
+            data-form-status
+            role="status"
+            aria-live="polite"
+            tabindex="-1"
+            hidden
+          ></p>
+        </form>
+      </section>
+
+      <section class="section-shell" id="preguntas">
+        <div class="section-heading">
           <p class="eyebrow">Preguntas frecuentes</p>
-          <h2>Lo que necesitas saber antes de suscribirte.</h2>
+          <h2>Antes de solicitar tu cotización.</h2>
         </div>
-        <div class="niche-grid">
-          <article>
-            <h3>¿Puedo cancelar cuando quiera?</h3>
-            <p>
-              Sí. Puedes cancelar en cualquier momento desde el panel; conservas acceso hasta el
-              final del periodo ya pagado. Revisa nuestra
-              <a href="/reembolsos">Política de Reembolsos</a>.
-            </p>
-          </article>
-          <article>
-            <h3>¿Qué pasa si supero mi límite mensual?</h3>
-            <p>
-              Te avisamos desde el panel y te pedimos actualizar de plan para seguir capturando
-              leads sin interrupciones.
-            </p>
-          </article>
-          <article>
-            <h3>¿Cómo se procesa el pago?</h3>
-            <p>Todos los pagos se procesan de forma segura a través de Stripe con tarjeta.</p>
-          </article>
+        <div class="faq-grid">
+          <div>
+            <details>
+              <summary>¿El diagnóstico es realmente gratuito?</summary>
+              <p>
+                Sí. Revisamos tu necesidad inicial y preparamos una cotización sin cobrarte ni
+                obligarte a contratar.
+              </p>
+            </details>
+            <details>
+              <summary>¿Por qué no publican precios?</summary>
+              <p>
+                Una landing sencilla y una solución con IA, CRM e integraciones requieren alcances
+                muy diferentes. Preferimos cotizar solo lo que necesitas.
+              </p>
+            </details>
+            <details>
+              <summary>¿Qué incluye la primera conversación?</summary>
+              <p>
+                Objetivo, audiencia, oferta, canales, herramientas actuales, contenido disponible y
+                prioridad del proyecto.
+              </p>
+            </details>
+          </div>
+          <div>
+            <details>
+              <summary>¿Cuándo recibiré la propuesta?</summary>
+              <p>
+                Te indicaremos el tiempo después de revisar el alcance. Los proyectos más complejos
+                pueden requerir una sesión adicional.
+              </p>
+            </details>
+            <details>
+              <summary>¿Debo tener conocimientos técnicos?</summary>
+              <p>
+                No. Traducimos las decisiones técnicas a un proceso claro y te guiamos durante cada
+                etapa.
+              </p>
+            </details>
+            <details>
+              <summary>¿Trabajan fuera de Bogotá?</summary>
+              <p>
+                Sí. Podemos desarrollar proyectos de forma remota para negocios en Colombia y otros
+                mercados.
+              </p>
+            </details>
+          </div>
         </div>
       </section>
-
-      <section class="niche-final-cta">
-        <p class="eyebrow">Siguiente paso</p>
-        <h2>Elige tu plan y automatiza tu negocio hoy.</h2>
-        <a class="button button-primary" href="/login">Crear cuenta</a>
-      </section>
-
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
     </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__intro">
+          <a class="brand-lockup" href="/"
+            ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+          >
+          <p>Cada negocio es diferente. Cada propuesta de Luenio también.</p>
+        </div>
+        <nav class="footer-group" aria-label="Navegación">
+          <strong>Explorar</strong><a href="/#servicios">Servicios</a
+          ><a href="/#casos">Casos demostrativos</a><a href="/cotizacion">Cotización</a>
+        </nav>
+        <nav class="footer-group" aria-label="Contacto y legal">
+          <strong>Contacto</strong><a href="mailto:contacto@luenio.com">contacto@luenio.com</a
+          ><span>+57 319 320 3702</span><span>Bogotá D.C., Colombia</span
+          ><a href="/login" data-client-access
+            ><span class="access-label--guest">Acceso clientes</span
+            ><span class="access-label--user">Mi espacio</span></a
+          ><a href="/terminos">Términos</a><a href="/privacidad">Privacidad</a
+          ><a href="/reembolsos">Reembolsos</a>
+        </nav>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
+      </div>
+    </footer>
+    <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

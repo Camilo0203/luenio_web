@@ -1,5 +1,12 @@
 import { advanceScenario, createDemoScenario, demoTypes } from "./index.js";
 import { submitPublicInquiry } from "../api-client.js";
+import { protectContactForm } from "../contact-security.js";
+import { initThemeControl } from "../theme-control.js";
+
+const fontStylesheet = document.querySelector("[data-font-stylesheet]");
+if (fontStylesheet?.media === "print") {
+  fontStylesheet.media = "all";
+}
 
 function escapeHtml(value) {
   return String(value ?? "").replace(
@@ -30,9 +37,22 @@ function renderIndustryLinks(activeType, selector = "#industryLinks") {
     .map((type) => {
       const href = `/demo/${type}`;
       const active = type === activeType;
-      return `<a class="${active ? "active" : ""}" href="${href}">${escapeHtml(createDemoScenario(type).label)}</a>`;
+      return `<a class="${active ? "active" : ""}" href="${href}"${active ? ' aria-current="page"' : ""}>${escapeHtml(createDemoScenario(type).label)}</a>`;
     })
     .join("");
+
+  const activeLink = nav.querySelector('[aria-current="page"]');
+  if (activeLink && globalThis.matchMedia("(max-width: 560px)").matches) {
+    const centerActiveLink = () => {
+      const navBounds = nav.getBoundingClientRect();
+      const linkBounds = activeLink.getBoundingClientRect();
+      const centeredOffset =
+        linkBounds.left + linkBounds.width / 2 - (navBounds.left + navBounds.width / 2);
+      nav.scrollLeft = Math.max(0, nav.scrollLeft + centeredOffset);
+    };
+    centerActiveLink();
+    globalThis.requestAnimationFrame(centerActiveLink);
+  }
 }
 
 function renderCards(selector, items, template) {
@@ -137,10 +157,15 @@ function renderLeadCapture(config, state) {
   `,
   );
 
-  cta.querySelector("#demoCaptureForm")?.addEventListener("submit", async (event) => {
+  const captureForm = cta.querySelector("#demoCaptureForm");
+  const securityPromise = protectContactForm(captureForm);
+  captureForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const payload = getCapturePayload(form, state.scenario);
+    const payload = {
+      ...getCapturePayload(form, state.scenario),
+      ...(await securityPromise).payload(),
+    };
 
     if (
       payload.name.length < 2 ||
@@ -160,6 +185,7 @@ function renderLeadCapture(config, state) {
         "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.",
       );
       form.reset();
+      (await securityPromise).reset();
     } catch {
       setCaptureStatus(
         form,
@@ -171,6 +197,7 @@ function renderLeadCapture(config, state) {
 }
 
 export function mountIndustryDemo(config) {
+  initThemeControl();
   const state = {
     scenario: createDemoScenario(config.type),
     events: [],
@@ -216,6 +243,16 @@ export function mountIndustryDemo(config) {
     config.resetFields?.forEach(({ selector, value }) => setText(selector, value));
     applyCrm(config.initialCrm || { stageIndex: 0, activeSequence: -1 });
   }
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState !== "hidden") return;
+    clearTimers(state);
+    const runButton = document.querySelector(config.selectors.button);
+    if (runButton) {
+      runButton.disabled = false;
+      runButton.textContent = config.runLabel || "Ejecutar demo interactiva";
+    }
+  });
 
   function runDemo() {
     clearTimers(state);

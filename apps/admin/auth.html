@@ -2,91 +2,158 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio | Acceso SaaS CRM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f4f7fb" />
+    <title>Luenio | Acceso seguro</title>
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="preload" as="image" href="/luenio-logo.png" />
+    <link rel="preload" as="image" href="/brand/isotipo.svg" />
     <link rel="stylesheet" href="/apps/web/src/style.css" />
     <link rel="stylesheet" href="/apps/admin/src/admin.css" />
   </head>
-  <body class="auth-body">
-    <main class="auth-shell">
-      <section class="auth-panel">
-        <a class="brand" href="/" aria-label="Luenio Agency">
-          <img
-            class="brand-logo"
-            src="/luenio-logo.png"
-            width="256"
-            height="256"
-            alt=""
-            decoding="async"
-          />
-          <span class="brand-fallback" aria-hidden="true">L</span>
-        </a>
-        <p class="eyebrow">Luenio SaaS</p>
-        <h1>Accede a tu CRM de automatización.</h1>
-        <p>
-          Registra tu negocio, captura leads, mide intención y gestiona tu pipeline desde un espacio
-          de trabajo privado.
-        </p>
-
-        <div class="auth-trust" aria-label="Seguridad del espacio de trabajo">
-          <span>Sesión protegida</span>
-          <span>Espacio de trabajo privado</span>
-          <span>Límites de plan activos</span>
+  <body class="auth-body auth-body--secure">
+    <main class="auth-shell auth-shell--split">
+      <aside class="auth-side" aria-label="Tu espacio de trabajo Luenio">
+        <div class="auth-side__brand" aria-hidden="true">
+          <span class="auth-side__brand-mark">L</span>
+          <span>Workspace</span>
         </div>
 
-        <div class="auth-tabs" role="tablist" aria-label="Modo de acceso">
-          <button class="active" type="button" data-auth-mode="login">Iniciar sesión</button>
-          <button type="button" data-auth-mode="register">Registrarse</button>
+        <div class="auth-side__story">
+          <p class="auth-side__eyebrow">Claridad en movimiento</p>
+          <h2 class="auth-side__title">Todo el seguimiento, sin perder el hilo.</h2>
+          <p class="auth-side__copy">
+            Vuelve a tus conversaciones, oportunidades y próximos pasos desde un solo lugar.
+          </p>
+
+          <div class="auth-flow" aria-label="Flujo de trabajo: entrada, conversación y seguimiento">
+            <div class="auth-flow__line" aria-hidden="true"><span></span></div>
+            <div class="auth-flow__steps">
+              <span><i aria-hidden="true"></i>Entrada</span>
+              <span><i aria-hidden="true"></i>Conversación</span>
+              <span><i aria-hidden="true"></i>Seguimiento</span>
+            </div>
+          </div>
         </div>
 
-        <form class="contact-form auth-form" id="authForm" novalidate>
-          <label class="wide auth-register-only"
-            >Negocio<input
-              name="businessName"
-              type="text"
-              placeholder="Nombre del negocio"
-              autocomplete="organization"
-          /></label>
-          <label class="wide"
-            >Email<input
-              name="email"
-              type="email"
-              placeholder="equipo@empresa.com"
-              autocomplete="email"
-              required
-          /></label>
-          <label class="wide"
-            >Contraseña<input
-              name="password"
-              type="password"
-              placeholder="Mínimo 8 caracteres"
-              autocomplete="current-password"
-              required
-          /></label>
-          <label class="wide auth-register-only">
-            Plan
-            <select name="plan">
-              <option value="starter">Starter</option>
-              <option value="pro">Pro</option>
-              <option value="agency">Agency</option>
-            </select>
-          </label>
-          <label class="wide auth-register-only auth-consent">
-            <input type="checkbox" name="acceptedTerms" />
-            <span
-              >Acepto los
-              <a href="/terminos" target="_blank" rel="noopener">Términos de Servicio</a> y la
-              <a href="/privacidad" target="_blank" rel="noopener">Política de Privacidad</a>.</span
+        <div class="auth-side__security">
+          <p>Acceso protegido</p>
+          <ul class="auth-live" id="authLive" aria-live="polite">
+            <li data-check="tls"><span class="dot"></span> Canal cifrado</li>
+            <li data-check="guard"><span class="dot"></span> Verificación humana</li>
+            <li data-check="session"><span class="dot"></span> Sesión privada</li>
+          </ul>
+          <div class="auth-device" id="authDevice">
+            <span class="auth-device__label">Este dispositivo</span>
+            <strong id="authDeviceText">Detectando…</strong>
+          </div>
+        </div>
+      </aside>
+
+      <section class="auth-panel auth-panel--main">
+        <header class="auth-panel__top">
+          <a class="auth-wordmark" href="/" aria-label="Volver a Luenio">
+            <span class="auth-wordmark__mark" aria-hidden="true">L</span>
+            <span>Luenio</span>
+          </a>
+          <span class="auth-private-badge"><i aria-hidden="true"></i> Acceso privado</span>
+        </header>
+
+        <div class="auth-panel__content">
+          <div class="auth-heading">
+            <p class="eyebrow">Workspace Luenio</p>
+            <h1>Bienvenido de nuevo.</h1>
+            <p data-auth-lead>Continúa donde dejaste tus conversaciones y oportunidades.</p>
+          </div>
+
+          <ol class="auth-steps" id="authSteps" aria-label="Progreso del acceso">
+            <li class="is-active" data-step="1"><span>1</span> Datos</li>
+            <li data-step="2"><span>2</span> Verificación</li>
+            <li data-step="3"><span>3</span> Listo</li>
+          </ol>
+
+          <form class="contact-form auth-form" id="authForm" novalidate>
+            <label class="wide" data-login-field
+              >Email<input
+                name="email"
+                type="email"
+                placeholder="equipo@empresa.com"
+                autocomplete="username"
+                required
+            /></label>
+
+            <label class="wide auth-password-field" data-login-field
+              >Contraseña
+              <span class="auth-password-wrap">
+                <input
+                  name="password"
+                  type="password"
+                  placeholder="Mínimo 12 caracteres"
+                  minlength="12"
+                  autocomplete="current-password"
+                  required
+                />
+                <button
+                  type="button"
+                  class="auth-password-toggle"
+                  id="togglePassword"
+                  aria-label="Mostrar contraseña"
+                >
+                  Ver
+                </button>
+              </span>
+            </label>
+            <p class="auth-caps" id="capsHint" hidden>Bloq Mayús activado</p>
+
+            <label class="wide" data-mfa-field hidden
+              >Código de verificación
+              <input
+                name="code"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]{6}"
+                maxlength="6"
+                autocomplete="one-time-code"
+                placeholder="000000"
+              />
+            </label>
+
+            <label class="wide auth-remember" data-remember-device hidden>
+              <input name="rememberDevice" type="checkbox" value="1" />
+              Confiar en este dispositivo 30 días (omite MFA)
+            </label>
+
+            <div
+              class="wide auth-bot-mount"
+              data-bot-mount
+              data-login-field
+              role="status"
+              aria-live="polite"
             >
-          </label>
-          <button class="button button-primary wide" type="submit">Entrar al dashboard</button>
-          <p class="form-status wide" role="status" aria-live="polite" hidden></p>
-        </form>
+              <p class="auth-bot-loading">Preparando verificación segura…</p>
+            </div>
+
+            <button class="button button-primary wide" type="submit" id="authSubmit">
+              Entrar al workspace
+            </button>
+            <button class="button button-secondary wide" type="button" id="authBack" hidden>
+              Volver al login
+            </button>
+            <p class="form-status wide" role="status" aria-live="polite" hidden></p>
+          </form>
+
+          <div class="auth-panel__footer" data-login-only>
+            <a class="auth-recovery-link" href="/restablecer-acceso">Olvidé mi contraseña</a>
+            <p class="auth-invite-note">Acceso solo por invitación</p>
+          </div>
+        </div>
       </section>
     </main>
 
     <script type="module" src="/apps/admin/src/auth.js"></script>
+    <!-- impeccable-live-start -->
+    <!-- impeccable-live-end -->
   </body>
 </html>

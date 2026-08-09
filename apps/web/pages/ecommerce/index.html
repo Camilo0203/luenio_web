@@ -1,164 +1,622 @@
 <!doctype html>
 <html lang="es">
+  <!--
+    THESIS: La tienda ayuda a elegir antes de empujar a comprar; rechaza el catálogo infinito como primera impresión.
+    OWN-WORLD: Mesa azul hielo, producto aislado a gran escala, controles amarillos y superficies blancas precisas.
+    STORY: El visitante declara su uso, recibe una recomendación ilustrativa, compara el catálogo y pide ayuda.
+    FIRST VIEWPORT: Promesa corta a la izquierda; producto protagonista y selector de uso a la derecha.
+    FORM: Mesa de comparación, estructura asignada 3. Seed 4e69e438.
+  -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio para Ecommerce | Recupera chats abandonados</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>NovaStore | Tecnología premium en Colombia</title>
     <meta
       name="description"
-      content="Recupera ventas perdidas por dudas de producto, disponibilidad y chats abandonados con IA para ecommerce."
+      content="Landing ecommerce demo para una tienda de tecnología premium con productos, beneficios y precios en COP."
     />
-    <meta
-      name="keywords"
-      content="automatización ecommerce, recuperar chats abandonados, chatbot IA tienda online, CRM para ecommerce, ventas por WhatsApp ecommerce"
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="author" content="Luenio" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Chivo:wght@600..900&family=Inter:wght@400..800&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
     />
-    <meta name="author" content="Luenio Agency" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/ecommerce" />
-    <meta name="theme-color" content="#07111f" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Luenio para Ecommerce | Recupera chats abandonados" />
-    <meta
-      property="og:description"
-      content="Recupera ventas perdidas por dudas de producto, disponibilidad y chats abandonados con IA para ecommerce."
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Chivo:wght@600..900&family=Inter:wght@400..800&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/demo-premium/ecommerce-hero-960.webp"
+      imagesrcset="
+        /assets/demo-premium/ecommerce-hero-480.webp  480w,
+        /assets/demo-premium/ecommerce-hero-960.webp  960w,
+        /assets/demo-premium/ecommerce-hero.webp     1698w
+      "
+      imagesizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+      type="image/webp"
+      fetchpriority="high"
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/ecommerce" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Luenio para Ecommerce | Recupera chats abandonados" />
-    <meta
-      name="twitter:description"
-      content="Recupera ventas perdidas por dudas de producto, disponibilidad y chats abandonados con IA para ecommerce."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-showcase.css" />
+    <link rel="stylesheet" href="/apps/web/src/industry-demos.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-worlds.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-redesign.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
+    <script type="module" src="/apps/web/src/niche-landing.js"></script>
+    <script type="module" src="/apps/web/src/industry-demos.js"></script>
   </head>
-  <body>
-    <main class="niche-page niche-ecommerce">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a
-        ><a class="button button-primary button-small" href="/demo/ecommerce"
-          >Deja de perder ventas</a
+  <body
+    class="demo-page demo-ecommerce sector-v2"
+    data-demo-name="NovaStore"
+    data-demo-type="tienda online"
+    data-demo-goal="Quiero una landing para mi tienda online"
+  >
+    <header class="demo-header">
+      <div class="demo-shell demo-header__inner">
+        <a class="demo-brand" href="#inicio">NovaStore</a>
+        <nav class="demo-nav" id="ecommerce-navigation" data-navigation data-open="false">
+          <a href="#productos">Productos</a><a href="#coleccion">Colección Pro</a
+          ><a href="#beneficios">Beneficios</a><a href="#opiniones">Opiniones</a
+          ><a href="#ayuda">Ayuda</a>
+        </nav>
+        <a class="demo-button" href="#consulta">Consultar producto</a>
+        <button
+          class="demo-menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="ecommerce-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
         >
-      </nav>
-      <section class="niche-hero">
-        <p class="eyebrow">Luenio para ecommerce</p>
-        <p class="niche-loss-line">Estás perdiendo clientes ahora mismo sin darte cuenta.</p>
-        <h1>Estás perdiendo ventas en chats que parecían simples preguntas.</h1>
-        <p>
-          Cuando alguien pregunta disponibilidad, envío o talla, ya está cerca de comprar. Si
-          espera, abandona el chat.
-        </p>
-        <div class="niche-actions">
-          <a class="button button-primary" href="/demo/ecommerce"
-            >Mira cuántas ventas pierdes por falta de respuesta</a
-          ><a class="button" href="#como-funciona">Descubre cómo recuperarlas</a>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="demo-hero" id="inicio">
+        <div class="demo-hero__media">
+          <img
+            data-commerce-image
+            decoding="async"
+            width="1698"
+            height="926"
+            src="/assets/demo-premium/ecommerce-hero.webp"
+            srcset="
+              /assets/demo-premium/ecommerce-hero-480.webp  480w,
+              /assets/demo-premium/ecommerce-hero-960.webp  960w,
+              /assets/demo-premium/ecommerce-hero.webp     1698w
+            "
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="Nova X1, celular premium"
+            fetchpriority="high"
+          />
+        </div>
+        <div class="demo-shell demo-hero__content">
+          <p class="demo-eyebrow">Nuevo Nova X1</p>
+          <h1>Potencia extraordinaria. Diseño esencial.</h1>
+          <p>
+            Motor neural de última generación, cámara profesional y batería para todo el día en un
+            cuerpo de titanio.
+          </p>
+          <div class="demo-actions">
+            <a class="demo-button" href="#consulta" data-product-choice="Nova X1"
+              >Consultar Nova X1</a
+            ><a class="demo-button demo-button--ghost" href="#productos">Ver catálogo</a>
+          </div>
+          <aside
+            class="commerce-lab"
+            data-commerce-lab
+            data-luenio-collision-zone
+            aria-label="Recomendador de productos"
+          >
+            <div class="commerce-lab__choices">
+              <div>
+                <span class="demo-lab-label">¿Qué quieres mejorar?</span>
+                <div class="demo-choice-row" data-demo-choice-group="use">
+                  <button
+                    class="demo-choice is-selected"
+                    type="button"
+                    data-demo-choice="Movilidad"
+                    aria-pressed="true"
+                  >
+                    Movilidad
+                  </button>
+                  <button
+                    class="demo-choice"
+                    type="button"
+                    data-demo-choice="Enfoque"
+                    aria-pressed="false"
+                  >
+                    Enfoque
+                  </button>
+                  <button
+                    class="demo-choice"
+                    type="button"
+                    data-demo-choice="Audio"
+                    aria-pressed="false"
+                  >
+                    Audio
+                  </button>
+                </div>
+              </div>
+              <span class="demo-lab-note">Recomendación ilustrativa</span>
+            </div>
+            <div class="commerce-lab__result" aria-live="polite">
+              <div>
+                <strong data-commerce-product>Nova X1</strong>
+                <p data-commerce-description></p>
+              </div>
+              <span>Ver selección →</span>
+            </div>
+          </aside>
         </div>
       </section>
-      <section class="niche-section niche-problem">
-        <div class="section-head">
-          <p class="eyebrow">Dolor real</p>
-          <h2>Las ventas no se pierden en checkout. Muchas se pierden antes, en el chat.</h2>
-        </div>
-        <div class="niche-grid">
+
+      <section class="demo-section demo-section--compact" id="beneficios">
+        <div class="demo-shell ecommerce-benefits">
+          <article><strong>Envío nacional</strong><span>Gratis desde $250.000 COP</span></article>
           <article>
-            <span>01</span>
-            <h3>Dudas de producto sin respuesta</h3>
-            <p>El comprador necesita una confirmación pequeña para avanzar.</p>
+            <strong>Garantía oficial</strong><span>12 meses en productos seleccionados</span>
           </article>
           <article>
-            <span>02</span>
-            <h3>Carritos fríos</h3>
-            <p>Cada minuto sin respuesta baja intención y abre espacio a otra tienda.</p>
+            <strong>Pago protegido</strong><span>Pasarelas certificadas en el proyecto real</span>
           </article>
           <article>
-            <span>03</span>
-            <h3>Sin seguimiento</h3>
-            <p>Los interesados no quedan priorizados ni reciben alternativa a tiempo.</p>
+            <strong>Soporte humano</strong><span>Antes y después de la compra</span>
           </article>
         </div>
       </section>
-      <section class="niche-section" id="como-funciona">
-        <div class="section-head">
-          <p class="eyebrow">Solución</p>
-          <h2>Luenio responde dudas de compra y recupera intención antes de que se enfríe.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <h3>Inventario en conversación</h3>
-            <p>Confirma disponibilidad, variantes y envío con lenguaje natural.</p>
-          </article>
-          <article>
-            <h3>Compra CALIENTE/TIBIO/FRÍO</h3>
-            <p>Detecta quién está listo para comprar ahora y quién necesita seguimiento.</p>
-          </article>
-          <article>
-            <h3>Pipeline de ventas</h3>
-            <p>El comprador queda en CRM con producto, alternativa y siguiente paso.</p>
-          </article>
-        </div>
-      </section>
-      <section class="niche-section niche-demo-preview">
-        <div class="section-head">
-          <p class="eyebrow">Vista previa en vivo</p>
-          <h2>Mira cómo una duda de producto se convierte en venta recuperada.</h2>
-        </div>
-        <div class="niche-preview-card">
-          <div class="preview-chat">
-            <strong>Web chat</strong>
+
+      <section class="demo-section demo-section--surface" id="productos">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Productos destacados</p>
+              <h2>Tecnología elegida para durar.</h2>
+            </div>
             <p>
-              “Hola, ¿tienes disponible este producto en negro? Lo necesito para regalo esta
-              semana.”
-            </p>
-            <p class="ai">
-              “Sí, está disponible en negro y llega esta semana. También hay alternativa premium con
-              envío gratis hoy.”
+              Un catálogo breve, bien fotografiado y con información clara genera más confianza que
+              una cuadrícula interminable.
             </p>
           </div>
-          <div class="preview-crm">
-            <span>Score</span><strong>CALIENTE 🔥</strong>
-            <p>Pipeline de ventas + link de compra enviado.</p>
+          <div class="demo-grid demo-grid--3">
+            <article class="product-card" id="producto-destacado">
+              <span class="product-badge">NUEVO</span
+              ><img
+                decoding="async"
+                width="512"
+                height="279"
+                src="/assets/stitch/ecommerce-01.jpg"
+                srcset="
+                  /assets/stitch/ecommerce-01-480.webp 480w,
+                  /assets/stitch/ecommerce-01.jpg      512w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Nova X1"
+                loading="lazy"
+              />
+              <div class="product-card__body">
+                <h3>Nova X1</h3>
+                <p>256 GB · Titanio · Cámara Pro de 48 MP</p>
+                <strong>$3.899.000 COP</strong>
+                <div class="demo-actions">
+                  <a
+                    class="demo-button demo-button--ghost"
+                    href="#consulta"
+                    data-product-choice="Nova X1"
+                    >Consultar Nova X1</a
+                  >
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <span class="product-badge">MÁS VENDIDO</span
+              ><img
+                decoding="async"
+                width="512"
+                height="279"
+                src="/assets/stitch/ecommerce-02.jpg"
+                srcset="
+                  /assets/stitch/ecommerce-02-480.webp 480w,
+                  /assets/stitch/ecommerce-02.jpg      512w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Audífonos Nova Sonic Pro"
+                loading="lazy"
+              />
+              <div class="product-card__body">
+                <h3>Nova Sonic Pro</h3>
+                <p>Cancelación activa de ruido y audio espacial.</p>
+                <strong>$1.399.000 COP</strong>
+                <div class="demo-actions">
+                  <a
+                    class="demo-button demo-button--ghost"
+                    href="#consulta"
+                    data-product-choice="Nova Sonic Pro"
+                    >Consultar audífonos</a
+                  >
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <img
+                decoding="async"
+                width="512"
+                height="279"
+                src="/assets/stitch/ecommerce-03.jpg"
+                srcset="
+                  /assets/stitch/ecommerce-03-480.webp 480w,
+                  /assets/stitch/ecommerce-03.jpg      512w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Portátil NovaBook Air"
+                loading="lazy"
+              />
+              <div class="product-card__body">
+                <h3>NovaBook Air 15</h3>
+                <p>Chip M3, 16 GB RAM y batería de hasta 18 horas.</p>
+                <strong>$5.299.000 COP</strong>
+                <div class="demo-actions">
+                  <a
+                    class="demo-button demo-button--ghost"
+                    href="#consulta"
+                    data-product-choice="NovaBook Air 15"
+                    >Consultar NovaBook</a
+                  >
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <img
+                decoding="async"
+                width="512"
+                height="279"
+                src="/assets/stitch/ecommerce-04.jpg"
+                srcset="
+                  /assets/stitch/ecommerce-04-480.webp 480w,
+                  /assets/stitch/ecommerce-04.jpg      512w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Reloj Nova Watch Series 9"
+                loading="lazy"
+              />
+              <div class="product-card__body">
+                <h3>Nova Watch Series 9</h3>
+                <p>Seguimiento de salud y pantalla siempre activa.</p>
+                <strong>$1.649.000 COP</strong>
+                <div class="demo-actions">
+                  <a
+                    class="demo-button demo-button--ghost"
+                    href="#consulta"
+                    data-product-choice="Nova Watch Series 9"
+                    >Consultar Nova Watch</a
+                  >
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <img
+                decoding="async"
+                width="512"
+                height="279"
+                src="/assets/stitch/ecommerce-05.jpg"
+                srcset="
+                  /assets/stitch/ecommerce-05-480.webp 480w,
+                  /assets/stitch/ecommerce-05.jpg      512w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Base Nova Dock Pro"
+                loading="lazy"
+              />
+              <div class="product-card__body">
+                <h3>Nova Dock Pro</h3>
+                <p>12 puertos, carga rápida y doble monitor 4K.</p>
+                <strong>$549.000 COP</strong>
+                <div class="demo-actions">
+                  <a
+                    class="demo-button demo-button--ghost"
+                    href="#consulta"
+                    data-product-choice="Nova Dock Pro"
+                    >Consultar Nova Dock</a
+                  >
+                </div>
+              </div>
+            </article>
+            <article class="product-card">
+              <img
+                decoding="async"
+                width="512"
+                height="279"
+                src="/assets/stitch/ecommerce-02.jpg"
+                srcset="
+                  /assets/stitch/ecommerce-02-480.webp 480w,
+                  /assets/stitch/ecommerce-02.jpg      512w
+                "
+                sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+                alt="Audífonos Nova Buds"
+                loading="lazy"
+              />
+              <div class="product-card__body">
+                <h3>Nova Buds Air</h3>
+                <p>Audio adaptable, llamadas nítidas y estuche compacto.</p>
+                <strong>$729.000 COP</strong>
+                <div class="demo-actions">
+                  <a
+                    class="demo-button demo-button--ghost"
+                    href="#consulta"
+                    data-product-choice="Nova Buds Air"
+                    >Consultar Nova Buds</a
+                  >
+                </div>
+              </div>
+            </article>
           </div>
         </div>
-        <a class="button button-primary" href="/demo/ecommerce"
-          >Ver cómo el sistema completa esta venta</a
-        >
       </section>
-      <section class="niche-section">
-        <div class="section-head">
-          <p class="eyebrow">Prueba social</p>
-          <h2>Recuperar chats abandonados es recuperar ingresos.</h2>
-        </div>
-        <div class="proof-grid">
-          <article>
-            <span>Resultado ejemplo</span><strong>+30%</strong>
-            <p>más oportunidades recuperadas desde preguntas de producto.</p>
-          </article>
-          <article>
-            <span>WhatsApp/Web chat</span><strong>-60%</strong>
-            <p>menos tiempo promedio de respuesta en dudas de compra.</p>
-          </article>
-          <article>
+
+      <section class="demo-section" id="coleccion">
+        <div class="demo-shell real-estate-feature">
+          <img
+            decoding="async"
+            width="512"
+            height="279"
+            src="/assets/stitch/ecommerce-05.jpg"
+            srcset="/assets/stitch/ecommerce-05-480.webp 480w, /assets/stitch/ecommerce-05.jpg 512w"
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="Colección Nova Pro de accesorios"
+            loading="lazy"
+          />
+          <div class="real-estate-feature__copy">
+            <p class="demo-eyebrow">Colección Pro</p>
+            <h2>Un escritorio con menos cables y mejores decisiones.</h2>
             <p>
-              “Las preguntas repetidas dejaron de dormir en el chat. Ahora llegan como oportunidades
-              listas.”
+              Bases, cargadores y accesorios diseñados para trabajar juntos sin convertir tu espacio
+              en un catálogo de adaptadores.
             </p>
-            <strong>Testimonio de muestra</strong><span>Fundador, ecommerce premium</span>
-          </article>
+            <ul class="demo-list">
+              <li>Compatibilidad verificada</li>
+              <li>Materiales resistentes</li>
+              <li>Garantía unificada</li>
+            </ul>
+            <div class="demo-actions">
+              <a class="demo-button" href="#consulta" data-product-choice="Nova Dock Pro"
+                >Consultar accesorios</a
+              >
+            </div>
+          </div>
         </div>
       </section>
-      <section class="niche-final-cta">
-        <p class="eyebrow">Recupera intención</p>
-        <h2>No pierdas más compradores que ya estaban mirando el producto.</h2>
-        <a class="button button-primary" href="/demo/ecommerce">Activar para mi tienda</a>
+
+      <section class="demo-section demo-section--surface">
+        <div class="demo-shell restaurant-story">
+          <div>
+            <p class="demo-eyebrow">Diseñado alrededor de ti</p>
+            <h2>La tecnología desaparece cuando funciona bien.</h2>
+            <p class="demo-section-copy">
+              NovaStore presenta cada producto desde el uso real: autonomía, compatibilidad, soporte
+              y decisiones de compra fáciles de comparar.
+            </p>
+            <p class="demo-section-copy">
+              En una tienda real, esta estructura se conectaría al inventario, pasarela de pago y
+              logística del negocio.
+            </p>
+          </div>
+          <img
+            decoding="async"
+            width="512"
+            height="279"
+            src="/assets/stitch/ecommerce-03.jpg"
+            srcset="/assets/stitch/ecommerce-03-480.webp 480w, /assets/stitch/ecommerce-03.jpg 512w"
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="NovaBook en un espacio de trabajo"
+            loading="lazy"
+          />
+        </div>
       </section>
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
+
+      <section class="demo-section" id="opiniones">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Decisiones visibles</p>
+              <h2>Comprar con información suficiente.</h2>
+            </div>
+            <p>
+              La confianza se construye mostrando especificaciones, entrega y garantía antes de
+              pedir una consulta.
+            </p>
+          </div>
+          <div class="demo-grid demo-grid--3">
+            <article class="demo-card">
+              <span class="demo-number">01</span>
+              <h3>Comparación directa</h3>
+              <p>Capacidad, pantalla, batería y uso recomendado en una sola vista.</p>
+            </article>
+            <article class="demo-card">
+              <span class="demo-number">02</span>
+              <h3>Entrega explicada</h3>
+              <p>Cobertura, tiempos ilustrativos y disponibilidad antes de continuar.</p>
+            </article>
+            <article class="demo-card">
+              <span class="demo-number">03</span>
+              <h3>Garantía legible</h3>
+              <p>Condiciones y soporte ubicados junto a la decisión de producto.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section demo-section--surface">
+        <div class="demo-shell demo-callout">
+          <div>
+            <p class="demo-eyebrow">Oferta de muestra</p>
+            <h2>20% menos en accesorios Pro.</h2>
+            <p>
+              Una campaña visual con fecha, categoría y beneficio concreto. Sin temporizadores
+              falsos ni presión innecesaria.
+            </p>
+          </div>
+          <a class="demo-button" href="#consulta" data-product-choice="Accesorios Pro"
+            >Consultar promoción</a
+          >
+        </div>
+      </section>
+
+      <section class="demo-section" id="ayuda">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Ayuda antes de comprar</p>
+              <h2>Respuestas claras reducen devoluciones.</h2>
+            </div>
+          </div>
+          <div class="demo-faq">
+            <details>
+              <summary>¿Los precios incluyen IVA?</summary>
+              <p>
+                Sí. Todos los precios demostrativos están expresados en COP e incluyen impuestos.
+              </p>
+            </details>
+            <details>
+              <summary>¿Cuánto tarda el envío?</summary>
+              <p>
+                La información de muestra contempla 1–2 días hábiles en Bogotá y 3–5 días en otras
+                ciudades.
+              </p>
+            </details>
+            <details>
+              <summary>¿Puedo cambiar un producto?</summary>
+              <p>
+                Una tienda real incluiría condiciones, tiempos y proceso de cambios conectados a
+                cada pedido.
+              </p>
+            </details>
+            <details>
+              <summary>¿Los productos tienen garantía?</summary>
+              <p>Los productos seleccionados muestran garantía oficial de 12 meses.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="sector-sales" aria-labelledby="ecommerce-sales-title">
+        <div class="demo-shell sector-sales__grid">
+          <div>
+            <p class="demo-eyebrow">Una experiencia así para tu tienda</p>
+            <h2 id="ecommerce-sales-title">
+              Tu catálogo, convertido en una experiencia de compra.
+            </h2>
+          </div>
+          <ul class="sector-sales__list">
+            <li>Catálogo y recomendación personalizados</li>
+            <li>Consultas, pagos o WhatsApp conectables</li>
+            <li>Analítica y automatización opcional</li>
+          </ul>
+          <div class="sector-sales__actions">
+            <button class="demo-button" type="button" data-luenio-open>
+              Cotizar esta experiencia
+            </button>
+            <a class="demo-button demo-button--ghost" href="#consulta">Probar la consulta</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section demo-section--surface" id="consulta">
+        <div class="demo-shell demo-grid demo-grid--2">
+          <div>
+            <p class="demo-eyebrow">Consulta de producto</p>
+            <h2>Confirma qué producto te interesa.</h2>
+            <p class="demo-section-copy">
+              Esta demostración no envía datos ni crea una compra. En una tienda real, la consulta
+              confirmaría disponibilidad y opciones de pago.
+            </p>
+          </div>
+          <form
+            class="demo-form"
+            data-demo-form
+            data-demo-success="Consulta de producto simulada. No se enviaron datos ni se creó una compra."
+          >
+            <label class="demo-form__wide"
+              >Producto<select name="product" data-commerce-inquiry-product>
+                <option>Nova X1</option>
+                <option>Nova Sonic Pro</option>
+                <option>NovaBook Air 15</option>
+                <option>Nova Watch Series 9</option>
+                <option>Nova Dock Pro</option>
+                <option>Nova Buds Air</option>
+                <option>Accesorios Pro</option>
+              </select></label
+            ><label class="demo-form__wide"
+              >Correo electrónico<input
+                type="email"
+                name="email"
+                autocomplete="email"
+                required
+                placeholder="nombre@correo.com" /></label
+            ><button class="demo-button demo-form__wide" type="submit">Probar consulta</button>
+            <p
+              class="demo-form-status"
+              role="status"
+              aria-live="polite"
+              data-demo-status
+              hidden
+            ></p>
+          </form>
+        </div>
+      </section>
     </main>
+
+    <footer class="demo-footer">
+      <div class="demo-shell">
+        <div class="demo-footer__main">
+          <div>
+            <h2>NovaStore</h2>
+            <p>Tecnología premium con información clara y soporte humano.</p>
+          </div>
+          <div>
+            <h3>Tienda</h3>
+            <nav>
+              <a href="#productos">Productos</a><a href="#coleccion">Colección Pro</a
+              ><a href="#consulta">Consultar producto</a>
+            </nav>
+          </div>
+          <div>
+            <h3>Ayuda</h3>
+            <nav>
+              <a href="#ayuda">Cambios</a><a href="#ayuda">Garantías</a
+              ><a href="#ayuda">Preguntas</a>
+            </nav>
+          </div>
+          <div>
+            <h3>Colombia</h3>
+            <p>Ventas nacionales<br />Atención digital</p>
+          </div>
+        </div>
+        <div class="demo-footer__legal">
+          <strong
+            ><a href="/"
+              >© 2026 Luenio. Diseño y desarrollo de esta landing demostrativa. Todos los derechos
+              reservados por Luenio.</a
+            ></strong
+          ><span
+            >Las marcas, nombres, testimonios y datos mostrados son ficticios y se presentan
+            únicamente con fines demostrativos.</span
+          >
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

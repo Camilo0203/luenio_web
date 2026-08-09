@@ -2,6 +2,21 @@ async function readJson(response) {
   return response.json().catch(() => ({}));
 }
 
+export async function fetchPublicConfig() {
+  const response = await fetch("/api/public-config", { headers: { Accept: "application/json" } });
+  if (!response.ok) throw new Error(`Public config responded ${response.status}`);
+  return readJson(response);
+}
+
+export async function fetchAuthStatus() {
+  const response = await fetch("/api/auth", { credentials: "same-origin" });
+  const result = await readJson(response);
+  return {
+    ok: response.ok,
+    authenticated: Boolean(response.ok && result?.authenticated),
+  };
+}
+
 export async function submitPublicInquiry(lead) {
   const response = await fetch("/api/contact", {
     method: "POST",

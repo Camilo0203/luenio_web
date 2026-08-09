@@ -1,18 +1,28 @@
 import { getLeadUsage, getPlan, plans } from "../../config/billing.js";
 import { getEnv, getStripeEnv, isProduction } from "../../config/env.js";
 import { listCrmData } from "../../db/storage.js";
+import { fetchWithTimeout } from "./outbound-request.js";
 
 export function isStripeCheckoutConfigured() {
   return Boolean(getStripeEnv().secretKey);
 }
 
 export async function getBillingOverview(user) {
-  const crmData = await listCrmData(user.id);
+  const crmData = await listCrmData(user.businessId || user.id);
   return {
     currentPlan: user.plan,
     usage: getLeadUsage(user, crmData.leads || []),
-    plans,
-    stripeConfigured: isStripeCheckoutConfigured(),
+    plans: Object.fromEntries(
+      Object.entries(plans).map(([id, plan]) => [
+        id,
+        {
+          name: plan.name,
+          monthlyLeadLimit: plan.monthlyLeadLimit,
+          features: plan.features,
+        },
+      ]),
+    ),
+    checkoutEnabled: getStripeEnv().publicBillingEnabled && isStripeCheckoutConfigured(),
   };
 }
 
@@ -73,7 +83,7 @@ export async function createStripeCheckout({ user, planId, request }) {
     "subscription_data[metadata][plan]": planId,
   });
 
-  const stripeResponse = await fetch("https://api.stripe.com/v1/checkout/sessions", {
+  const stripeResponse = await fetchWithTimeout("https://api.stripe.com/v1/checkout/sessions", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${secretKey}`,
@@ -93,6 +103,11 @@ export async function createStripeCheckout({ user, planId, request }) {
 }
 
 export async function createBillingCheckout({ user, planId = "starter", request }) {
+  if (!getStripeEnv().publicBillingEnabled) {
+    const error = new Error("Online checkout is disabled. Contact Luenio for a quotation.");
+    error.statusCode = 403;
+    throw error;
+  }
   if (!plans[planId]) {
     const error = new Error("Unknown plan.");
     error.statusCode = 400;

@@ -1,5 +1,9 @@
 import { advanceScenario, createDemoScenario, demoTypes } from "../../src/demo-engine/index.js";
 import { submitPublicInquiry } from "../../src/api-client.js";
+import { protectContactForm } from "../../src/contact-security.js";
+import { initThemeControl } from "../../src/theme-control.js";
+
+initThemeControl();
 
 const root = document.querySelector("[data-demo-type]");
 const selectedType = root?.dataset.demoType || "restaurants";
@@ -11,6 +15,7 @@ const state = {
   events: [],
   timerIds: [],
 };
+let captureSecurity;
 
 function escapeHtml(value) {
   return String(value ?? "").replace(
@@ -113,7 +118,9 @@ function renderLeadCapture() {
   `,
   );
 
-  cta.querySelector("#demoCaptureForm")?.addEventListener("submit", submitDemoCapture);
+  const captureForm = cta.querySelector("#demoCaptureForm");
+  captureSecurity = protectContactForm(captureForm);
+  captureForm?.addEventListener("submit", submitDemoCapture);
 }
 
 function getCapturePayload(form) {
@@ -146,7 +153,10 @@ function setCaptureStatus(form, stateName, message) {
 async function submitDemoCapture(event) {
   event.preventDefault();
   const form = event.currentTarget;
-  const payload = getCapturePayload(form);
+  const payload = {
+    ...getCapturePayload(form),
+    ...(await captureSecurity).payload(),
+  };
 
   if (
     payload.name.length < 2 ||
@@ -166,6 +176,7 @@ async function submitDemoCapture(event) {
       "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.",
     );
     form.reset();
+    (await captureSecurity).reset();
   } catch {
     setCaptureStatus(
       form,
@@ -209,6 +220,16 @@ function runDemo() {
     state.timerIds.push(timerId);
   });
 }
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "hidden") return;
+  clearTimers();
+  const button = document.querySelector("#runDemo");
+  if (button) {
+    button.disabled = false;
+    button.textContent = "Ejecutar demo interactiva";
+  }
+});
 
 renderIndustryLinks();
 renderScenario();

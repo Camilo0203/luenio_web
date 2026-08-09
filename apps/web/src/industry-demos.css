@@ -1,0 +1,839 @@
+/*
+  Four distinct fictional businesses, one shared craft bar.
+  Each first viewport demonstrates the business instead of describing it.
+*/
+
+.demo-page:not(.gym-board) {
+  --industry-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --industry-shadow: 0 24px 70px -34px rgb(5 12 24 / 0.46);
+}
+
+.demo-page:not(.gym-board) .demo-header {
+  border-bottom-color: color-mix(in srgb, var(--line) 78%, transparent);
+}
+
+.demo-page:not(.gym-board) .demo-header__inner {
+  min-height: 70px;
+}
+
+.demo-page:not(.gym-board) .demo-brand::after {
+  margin-left: 10px;
+  padding: 5px 8px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  content: "Demo";
+  font-family: var(--body-font);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.demo-page:not(.gym-board) .demo-button,
+.demo-page:not(.gym-board) button {
+  min-height: 44px;
+}
+
+.demo-page:not(.gym-board) :focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 76%, white);
+  outline-offset: 4px;
+}
+
+.demo-page:not(.gym-board) .demo-hero {
+  min-height: 760px;
+}
+
+.demo-page:not(.gym-board) .demo-hero__content {
+  min-height: 760px;
+}
+
+.demo-page:not(.gym-board) .demo-hero h1 {
+  letter-spacing: -0.035em;
+}
+
+.demo-page:not(.gym-board) .demo-section h2,
+.demo-page:not(.gym-board) .demo-callout h2 {
+  letter-spacing: -0.025em;
+}
+
+.demo-choice {
+  min-height: 44px;
+  padding: 0 14px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 750;
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms var(--industry-ease);
+}
+
+.demo-choice:hover {
+  transform: translateY(-2px);
+}
+
+.demo-choice.is-selected {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 7px 16px -12px currentColor;
+}
+
+.demo-choice:active {
+  transform: translateY(0) scale(0.96);
+  transition-duration: 110ms;
+}
+
+.demo-choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.demo-lab-label {
+  display: block;
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.demo-lab-note {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* Agency — a live campaign wall. */
+.demo-agency {
+  --page: #090812;
+  --surface: #11101c;
+  --surface-2: #1a1830;
+  --ink: #fbf8ff;
+  --muted: #bbb4cf;
+  --accent: #b8ff5a;
+  --accent-2: #aa8dff;
+  --accent-ink: #10150a;
+}
+
+.demo-agency .demo-header {
+  background: color-mix(in srgb, var(--page) 90%, transparent);
+}
+
+.demo-agency .demo-hero {
+  display: grid;
+  overflow: hidden;
+  background: radial-gradient(circle at 76% 28%, rgb(170 141 255 / 0.27), transparent 30%), #090812;
+}
+
+.demo-agency .demo-hero__media {
+  inset: 0 0 0 47%;
+  opacity: 0.7;
+  clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.demo-agency .demo-hero__media::after {
+  background: linear-gradient(90deg, #090812 0%, rgb(9 8 18 / 0.22) 46%, rgb(9 8 18 / 0.38) 100%);
+}
+
+.demo-agency .demo-hero__content {
+  width: min(1240px, calc(100% - 48px));
+  max-width: none;
+  align-items: flex-start;
+}
+
+.demo-agency .demo-hero__content > h1 {
+  max-width: 780px;
+  font-size: clamp(4rem, 8vw, 6rem);
+}
+
+.demo-agency .demo-hero__content > p:not(.demo-eyebrow) {
+  max-width: 54ch;
+}
+
+.agency-brief-wall {
+  position: absolute;
+  right: max(24px, calc((100vw - 1240px) / 2));
+  bottom: 42px;
+  z-index: 4;
+  width: min(440px, 38vw);
+  padding: 20px;
+  color: #171222;
+  background: #f2edff;
+  box-shadow:
+    14px 16px 0 #b8ff5a,
+    var(--industry-shadow);
+  transform: rotate(-1.4deg);
+}
+
+.agency-brief-wall::before {
+  position: absolute;
+  top: -12px;
+  left: 40%;
+  width: 86px;
+  height: 24px;
+  background: rgb(255 255 255 / 0.62);
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.12);
+  content: "";
+  transform: rotate(2deg);
+}
+
+.agency-brief-wall__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgb(23 18 34 / 0.18);
+}
+
+.agency-brief-wall__head strong {
+  font-family: var(--heading-font);
+  font-size: 19px;
+}
+
+.agency-brief-wall__head span {
+  color: #625a74;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.agency-brief-wall__group {
+  margin-top: 18px;
+}
+
+.agency-brief-wall .demo-lab-label {
+  color: #625a74;
+}
+
+.agency-brief-wall .demo-choice {
+  color: #3b334b;
+}
+
+.agency-brief-wall .demo-choice.is-selected {
+  color: #100b1d;
+}
+
+.agency-brief-wall__result {
+  margin-top: 22px;
+  padding: 18px;
+  color: #f8f5ff;
+  background: #171222;
+}
+
+.agency-brief-wall__result strong {
+  display: block;
+  font-family: var(--heading-font);
+  font-size: 22px;
+}
+
+.agency-brief-wall__result p {
+  margin: 8px 0 0;
+  color: #c9c0dc;
+  font-size: 13px;
+}
+
+.demo-agency .demo-card:nth-child(even) {
+  transform: translateY(28px);
+}
+
+.demo-agency .agency-case {
+  border-radius: 0;
+}
+
+/* Ecommerce — a clear product workbench. */
+.demo-ecommerce {
+  --page: #eef4ff;
+  --surface: #ffffff;
+  --surface-2: #dbe8ff;
+  --ink: #101c35;
+  --muted: #52627c;
+  --accent: #ffcc33;
+  --accent-text: #715100;
+  --accent-ink: #1a1a10;
+  --line: rgb(16 28 53 / 0.14);
+}
+
+.demo-ecommerce .product-badge {
+  color: #1a1a10;
+}
+
+.demo-ecommerce .demo-header {
+  background: color-mix(in srgb, var(--page) 90%, transparent);
+}
+
+.demo-ecommerce .demo-hero {
+  background: #eef4ff;
+}
+
+.demo-ecommerce .demo-hero__media {
+  inset: 10% 4% 8% 51%;
+  overflow: hidden;
+  background: #d9e7ff;
+  border-radius: 44px;
+}
+
+.demo-ecommerce .demo-hero__media img {
+  object-fit: contain;
+  padding: 50px;
+  transition: transform 520ms var(--industry-ease);
+}
+
+.demo-ecommerce .demo-hero__media::after {
+  background: radial-gradient(circle at 50% 50%, transparent 40%, rgb(39 87 170 / 0.1));
+}
+
+.demo-ecommerce .demo-hero__content {
+  width: min(1240px, calc(100% - 48px));
+  max-width: none;
+  align-items: flex-start;
+}
+
+.demo-ecommerce .demo-hero__content > h1 {
+  max-width: 7ch;
+}
+
+.demo-ecommerce .demo-hero__content > p:not(.demo-eyebrow) {
+  max-width: 46ch;
+}
+
+.commerce-lab {
+  position: absolute;
+  right: max(30px, calc((100vw - 1180px) / 2));
+  bottom: 28px;
+  z-index: 5;
+  width: min(520px, 44vw);
+  padding: 18px;
+  background: rgb(255 255 255 / 0.96);
+  border-radius: 16px;
+  box-shadow: var(--industry-shadow);
+}
+
+.commerce-lab__choices {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.commerce-lab .demo-choice {
+  color: #31415f;
+}
+
+html[data-theme="dark"] .demo-ecommerce .product-badge,
+html[data-theme="dark"] .commerce-lab .demo-choice.is-selected {
+  color: #ffffff;
+}
+
+.commerce-lab__result {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 18px;
+  margin-top: 16px;
+  padding-top: 15px;
+  border-top: 1px solid #dce3ef;
+}
+
+.commerce-lab__result strong {
+  display: block;
+  color: #101c35;
+  font-size: 19px;
+}
+
+.commerce-lab__result p {
+  max-width: 34ch;
+  margin: 4px 0 0;
+  color: #5a687f;
+  font-size: 12px;
+}
+
+.commerce-lab__result span {
+  color: #101c35;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.demo-ecommerce .ecommerce-benefits {
+  border-radius: 16px;
+  box-shadow: 0 16px 40px -32px rgb(16 28 53 / 0.4);
+}
+
+.demo-ecommerce .ecommerce-product {
+  border-radius: 16px;
+  transition:
+    transform 240ms var(--industry-ease),
+    box-shadow 240ms ease;
+}
+
+.demo-ecommerce .ecommerce-product:hover {
+  box-shadow: 0 20px 42px -30px rgb(16 28 53 / 0.55);
+  transform: translateY(-6px);
+}
+
+/* Real estate — a private shortlist concierge. */
+.demo-real-estate {
+  --page: #f4f0e8;
+  --surface: #fffdf8;
+  --surface-2: #e9e3d8;
+  --ink: #142b42;
+  --muted: #596877;
+  --accent: #b87b39;
+  --accent-ink: #ffffff;
+  --line: rgb(20 43 66 / 0.16);
+}
+
+.demo-real-estate .demo-header {
+  background: color-mix(in srgb, var(--page) 90%, transparent);
+}
+
+.demo-real-estate .demo-hero {
+  min-height: 820px;
+  background: #142b42;
+}
+
+.demo-real-estate .demo-hero__media {
+  inset: 0;
+}
+
+.demo-real-estate .demo-hero__media img {
+  object-position: center;
+}
+
+.demo-real-estate .demo-hero__media::after {
+  background: linear-gradient(
+    90deg,
+    rgb(8 24 38 / 0.9) 0%,
+    rgb(8 24 38 / 0.58) 45%,
+    rgb(8 24 38 / 0.16) 100%
+  );
+}
+
+.demo-real-estate .demo-hero__content {
+  width: min(1180px, calc(100% - 48px));
+  max-width: none;
+  min-height: 820px;
+  justify-content: flex-start;
+  padding-top: 110px;
+}
+
+.demo-real-estate .demo-hero h1 {
+  max-width: 8ch;
+  font-size: clamp(3.8rem, 6vw, 5rem);
+  color: #fffdf8;
+}
+
+.demo-real-estate .demo-hero__content > p:not(.demo-eyebrow) {
+  max-width: 49ch;
+  color: #dbe1e5;
+}
+
+.property-concierge {
+  position: absolute;
+  right: 0;
+  bottom: 34px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  width: min(620px, 51vw);
+  overflow: hidden;
+  color: #142b42;
+  background: #fffdf8;
+  box-shadow: var(--industry-shadow);
+}
+
+.property-concierge__image {
+  min-height: 300px;
+}
+
+.property-concierge__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.property-concierge__panel {
+  padding: 22px;
+}
+
+.property-concierge .demo-lab-label {
+  color: #5f6b75;
+}
+
+.property-concierge .demo-choice {
+  color: #3f5365;
+}
+
+html[data-theme="light"] .property-concierge .demo-choice.is-selected {
+  color: var(--accent-ink);
+}
+
+html[data-theme="dark"] .property-concierge .demo-choice.is-selected {
+  color: #16243a;
+}
+
+.property-concierge__group + .property-concierge__group {
+  margin-top: 15px;
+}
+
+.property-concierge__result {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #d8d4cb;
+}
+
+.property-concierge__result header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.property-concierge__result strong {
+  font-family: var(--heading-font);
+  font-size: 24px;
+}
+
+.property-concierge__result span {
+  color: #7b6140;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.property-concierge__result p {
+  margin: 5px 0 0;
+  color: #5f6b75;
+  font-size: 13px;
+}
+
+.demo-real-estate .property-card {
+  overflow: visible;
+  border-radius: 0;
+}
+
+.demo-real-estate .property-card img {
+  transition: transform 420ms var(--industry-ease);
+}
+
+.demo-real-estate .property-card:hover img {
+  transform: scale(1.025);
+}
+
+/* Restaurant — a kitchen pass that leads to a table. */
+.demo-restaurant {
+  --page: #150f0b;
+  --surface: #201712;
+  --surface-2: #2a1e17;
+  --ink: #fff7e9;
+  --muted: #c9bca9;
+  --accent: #f4b942;
+  --accent-ink: #241708;
+  --line: rgb(255 235 207 / 0.16);
+}
+
+.demo-restaurant .demo-header {
+  background: color-mix(in srgb, var(--page) 90%, transparent);
+}
+
+.demo-restaurant .demo-hero {
+  min-height: 820px;
+  background: #150f0b;
+}
+
+.demo-restaurant .demo-hero__media {
+  inset: 0 0 0 42%;
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%);
+}
+
+.demo-restaurant .demo-hero__media::after {
+  background: linear-gradient(90deg, #150f0b 0%, rgb(21 15 11 / 0.12) 45%, rgb(21 15 11 / 0.25));
+}
+
+.demo-restaurant .demo-hero__content {
+  width: min(1180px, calc(100% - 48px));
+  max-width: none;
+  min-height: 820px;
+  justify-content: flex-start;
+  padding-top: 110px;
+}
+
+.demo-restaurant .demo-hero h1 {
+  max-width: 7ch;
+  color: #fff7e9;
+}
+
+.demo-restaurant .demo-hero__content > p:not(.demo-eyebrow) {
+  max-width: 46ch;
+  color: #d8cbbc;
+}
+
+.demo-restaurant .demo-hero .demo-button--ghost {
+  color: #fff7e9;
+  border-color: rgb(255 247 233 / 0.4);
+}
+
+.restaurant-pass {
+  position: absolute;
+  bottom: 36px;
+  right: 0;
+  left: auto;
+  z-index: 5;
+  width: min(610px, 52vw);
+  padding: 24px;
+  color: #2b1c12;
+  background: #f1e3cc;
+  box-shadow:
+    10px 12px 0 #7a2e22,
+    var(--industry-shadow);
+}
+
+.restaurant-pass::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 49%;
+  border-left: 1px dashed rgb(43 28 18 / 0.26);
+  content: "";
+}
+
+.restaurant-pass__top,
+.restaurant-pass__body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.restaurant-pass__top {
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgb(43 28 18 / 0.18);
+}
+
+.restaurant-pass__top strong {
+  font-family: var(--heading-font);
+  font-size: 24px;
+}
+
+.restaurant-pass__top span {
+  justify-self: end;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.restaurant-pass__body {
+  padding-top: 18px;
+}
+
+.restaurant-pass .demo-lab-label {
+  color: #6a5544;
+}
+
+.restaurant-pass .demo-choice {
+  color: #3b281b;
+}
+
+html[data-theme="light"] .restaurant-pass .demo-choice.is-selected {
+  color: #ffffff;
+  background: #62420a;
+  border-color: #62420a;
+}
+
+html[data-theme="dark"] .restaurant-pass .demo-choice.is-selected {
+  color: #2b1c12;
+}
+
+.restaurant-pass__group + .restaurant-pass__group {
+  margin-top: 14px;
+}
+
+.restaurant-pass__result strong {
+  display: block;
+  font-family: var(--heading-font);
+  font-size: 28px;
+}
+
+.restaurant-pass__result p {
+  margin: 6px 0 18px;
+  color: #6a5544;
+  font-size: 13px;
+}
+
+.restaurant-pass__time {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid rgb(43 28 18 / 0.18);
+}
+
+.restaurant-pass__time b {
+  font-size: 26px;
+}
+
+.demo-restaurant .restaurant-menu article {
+  border-radius: 0;
+}
+
+.demo-restaurant .restaurant-menu article:nth-child(3n + 2) {
+  transform: translateY(22px);
+}
+
+@media (max-width: 980px) {
+  .demo-page:not(.gym-board) .demo-hero,
+  .demo-page:not(.gym-board) .demo-hero__content,
+  .demo-real-estate .demo-hero,
+  .demo-real-estate .demo-hero__content,
+  .demo-restaurant .demo-hero,
+  .demo-restaurant .demo-hero__content {
+    min-height: 900px;
+  }
+
+  .agency-brief-wall,
+  .commerce-lab,
+  .property-concierge,
+  .restaurant-pass {
+    right: 24px;
+    bottom: 28px;
+    left: 24px;
+    width: auto;
+  }
+
+  .demo-agency .demo-hero__media,
+  .demo-restaurant .demo-hero__media {
+    inset: 0;
+    opacity: 0.42;
+    clip-path: none;
+  }
+
+  .demo-ecommerce .demo-hero__media {
+    inset: 40% 4% 7%;
+  }
+
+  .demo-ecommerce .demo-hero__media img {
+    padding: 30px;
+  }
+}
+
+@media (max-width: 680px) {
+  .demo-page:not(.gym-board) .demo-shell,
+  .demo-page:not(.gym-board) .demo-hero__content {
+    width: min(100% - 32px, var(--shell));
+  }
+
+  .demo-page:not(.gym-board) .demo-hero,
+  .demo-page:not(.gym-board) .demo-hero__content,
+  .demo-real-estate .demo-hero,
+  .demo-real-estate .demo-hero__content,
+  .demo-restaurant .demo-hero,
+  .demo-restaurant .demo-hero__content {
+    min-height: auto;
+  }
+
+  .demo-page:not(.gym-board) .demo-hero__content {
+    justify-content: flex-start;
+    padding-block: 80px 32px;
+  }
+
+  .demo-page:not(.gym-board) .demo-hero h1 {
+    max-width: 100%;
+    font-size: clamp(3.2rem, 16vw, 4.6rem);
+  }
+
+  .demo-page.demo-ecommerce .demo-hero h1 {
+    max-width: 9ch;
+    font-size: clamp(2.2rem, 9.2vw, 2.35rem);
+  }
+
+  .demo-page.demo-agency .demo-hero h1 {
+    font-size: clamp(2.7rem, 13vw, 3.8rem);
+  }
+
+  .agency-brief-wall,
+  .commerce-lab,
+  .property-concierge,
+  .restaurant-pass {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    margin-top: 32px;
+  }
+
+  .agency-brief-wall {
+    padding: 16px;
+    box-shadow:
+      7px 8px 0 #b8ff5a,
+      var(--industry-shadow);
+  }
+
+  .demo-ecommerce .demo-hero__media {
+    inset: 46% 16px 24px;
+  }
+
+  .commerce-lab {
+    margin-top: 36px;
+  }
+
+  .commerce-lab__choices,
+  .commerce-lab__result {
+    align-items: flex-start;
+    flex-direction: column;
+    grid-template-columns: 1fr;
+  }
+
+  .property-concierge {
+    grid-template-columns: 112px 1fr;
+  }
+
+  .property-concierge__image {
+    min-height: 338px;
+  }
+
+  .property-concierge__panel {
+    padding: 16px;
+  }
+
+  .restaurant-pass {
+    padding: 18px;
+    box-shadow:
+      6px 7px 0 #7a2e22,
+      var(--industry-shadow);
+  }
+
+  .restaurant-pass::before {
+    display: none;
+  }
+
+  .restaurant-pass__top,
+  .restaurant-pass__body {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .restaurant-pass__top span {
+    justify-self: start;
+  }
+
+  .restaurant-pass__result {
+    padding-top: 16px;
+    border-top: 1px dashed rgb(43 28 18 / 0.26);
+  }
+
+  .demo-agency .demo-card:nth-child(even),
+  .demo-restaurant .restaurant-menu article:nth-child(3n + 2) {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-choice,
+  .demo-ecommerce .demo-hero__media img,
+  .demo-real-estate .property-card img {
+    transition: none;
+  }
+}

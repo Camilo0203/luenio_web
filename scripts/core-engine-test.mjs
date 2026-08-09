@@ -3,6 +3,8 @@ import {
   generateRecordId,
   leadFieldLimits,
   normalizeLead,
+  normalizeTags,
+  scoreLead,
 } from "../core/engine.js";
 
 function assert(condition, message) {
@@ -110,6 +112,35 @@ assert(
 assert(
   restrictedPlan.restrictedActions.includes("send_crm_webhook"),
   "Core automation plan must report actions excluded by caller policy.",
+);
+
+const tags = normalizeTags([" WhatsApp ", "urgente", "urgente", "x".repeat(80), ""]);
+assert(tags.includes("whatsapp"), "Tags must normalize case and spacing.");
+assert(tags.filter((tag) => tag === "urgente").length === 1, "Tags must de-duplicate.");
+assert(
+  tags.every((tag) => tag.length <= leadFieldLimits.tag),
+  "Tags must respect max length.",
+);
+
+const taggedLead = normalizeLead({
+  name: "Tagged",
+  business: "Biz",
+  phone: "+57 300 111 2233",
+  service: "CRM",
+  message: "Necesito presupuesto esta semana para contratar automatizacion.",
+  notes: "Llamar manana",
+  tags: "demo, prioritario",
+});
+assert(taggedLead.notes === "Llamar manana", "Lead notes must be preserved and normalized.");
+assert(taggedLead.tags.includes("demo"), "Lead tags must be accepted from string input.");
+assert(
+  scoreLead({
+    service: "cotizar",
+    message: "quiero presupuesto urgente esta semana",
+    phone: "+57 300 111 2233",
+    source: "pricing",
+  }).score >= 60,
+  "Expanded Spanish intent lexicon must increase scores for commercial language.",
 );
 
 console.info("Core engine trust boundary passed");

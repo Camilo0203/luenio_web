@@ -2,173 +2,809 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio para Gimnasios | Convierte WhatsApp en membresías</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#0d0f0f" />
+    <script src="/theme-boot.js"></script>
+    <title>Titan Fitness Club | Demo interactiva creada por Luenio</title>
     <meta
       name="description"
-      content="Automatiza consultas de gimnasio, convierte interesados en visitas y recupera membresías perdidas por responder tarde."
+      content="Demo ficticia e interactiva de una experiencia digital para gimnasio creada por Luenio."
     />
-    <meta
-      name="keywords"
-      content="automatización WhatsApp gimnasios, CRM para gimnasios, chatbot IA gimnasio, recuperar membresías, ventas gimnasio WhatsApp"
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="author" content="Luenio" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/demo-premium/gym-hero-960.webp"
+      imagesrcset="
+        /assets/demo-premium/gym-hero-480.webp  480w,
+        /assets/demo-premium/gym-hero-960.webp  960w,
+        /assets/demo-premium/gym-hero.webp     1672w
+      "
+      imagesizes="(max-width: 820px) calc(100vw - 24px), 62vw"
+      type="image/webp"
+      fetchpriority="high"
     />
-    <meta name="author" content="Luenio Agency" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/gym" />
-    <meta name="theme-color" content="#07111f" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Luenio para Gimnasios | Convierte WhatsApp en membresías" />
-    <meta
-      property="og:description"
-      content="Automatiza consultas de gimnasio, convierte interesados en visitas y recupera membresías perdidas por responder tarde."
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400..700&family=Oswald:wght@400..700&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/gym" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Luenio para Gimnasios | Convierte WhatsApp en membresías" />
-    <meta
-      name="twitter:description"
-      content="Automatiza consultas de gimnasio, convierte interesados en visitas y recupera membresías perdidas por responder tarde."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400..700&family=Oswald:wght@400..700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
+    <link rel="stylesheet" href="/apps/web/pages/gym/gym-board.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-worlds.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-redesign.css" />
+    <script type="module" src="/apps/web/src/niche-landing.js"></script>
+    <script type="module" src="/apps/web/pages/gym/gym-demo.js"></script>
   </head>
-  <body>
-    <main class="niche-page niche-gym">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a>
-        <a class="button button-primary button-small" href="/demo/gym">Deja de perder membresías</a>
+  <!--
+    THESIS: La web se comporta como el panel de operaciones del club; rechaza el hero genérico de atleta y membresías.
+    OWN-WORLD: Paneles split-flap negros o marfil, acero cepillado, señal ámbar, tipografía condensada y fotografía documental.
+    STORY: El visitante arma su sesión, recibe una ruta ilustrativa, explora clases, zonas y entrenadores, y simula una reserva.
+    FIRST VIEWPORT: Constructor 01–03 a la izquierda, ruta resultante a la derecha y acceso verde a WhatsApp siempre legible.
+    FORM: Class Board, combinación aprobada B+C; constructor dominante + itinerario y banda fotográfica. Seed be3f3622.
+  -->
+  <body
+    class="gym-board sector-v2"
+    data-demo-name="Titan Fitness Club"
+    data-demo-type="gimnasio"
+    data-demo-goal="Quiero una web interactiva para mi gimnasio"
+    data-whatsapp-position="fixed"
+  >
+    <a class="skip-link" href="#constructor">Saltar al constructor de sesión</a>
+
+    <header class="gym-header">
+      <a class="gym-brand" href="#inicio" aria-label="Titan Fitness Club, inicio">
+        <span class="gym-brand__mark" aria-hidden="true">T</span>
+        <span>Titan Fitness Club</span>
+      </a>
+
+      <nav
+        class="gym-nav"
+        id="gym-navigation"
+        data-navigation
+        data-open="false"
+        aria-label="Principal"
+      >
+        <a href="#constructor">Crear ruta</a>
+        <a href="#clases">Clases</a>
+        <a href="#zonas">Zonas</a>
+        <a href="#entrenadores">Entrenadores</a>
       </nav>
 
-      <section class="niche-hero">
-        <p class="eyebrow">Luenio para gimnasios</p>
-        <p class="niche-loss-line">Estás perdiendo clientes ahora mismo sin darte cuenta.</p>
-        <h1>Estás perdiendo membresías por responder tarde en WhatsApp.</h1>
-        <p>
-          Cada persona que pregunta precio o clase de prueba está cerca de inscribirse. Si espera,
-          se enfría o se va al gimnasio que respondió primero.
-        </p>
-        <div class="niche-actions">
-          <a class="button button-primary" href="/demo/gym"
-            >Mira cuántos leads pierdes diariamente</a
+      <div class="gym-header__actions">
+        <span class="demo-stamp">Demo ficticia</span>
+        <a class="gym-whatsapp-cta" href="#constructor">Crear mi ruta</a>
+        <button
+          class="gym-menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="gym-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main id="inicio">
+      <section class="session-deck" id="constructor" aria-labelledby="builder-title">
+        <div class="deck-topline">
+          <div class="status-lamp">
+            <span aria-hidden="true"></span>
+            Sistema de entrenamiento activo
+          </div>
+          <p>Información y disponibilidad ilustrativas</p>
+          <time data-live-clock datetime="">--:--</time>
+        </div>
+
+        <div class="builder-heading">
+          <div class="builder-heading__copy">
+            <p class="board-kicker">Tu primera visita</p>
+            <h1 id="builder-title">Construye tu ruta.</h1>
+          </div>
+          <p>
+            Elige tres datos y descubre cómo podría sentirse una experiencia de reserva hecha a
+            medida para tu gimnasio.
+          </p>
+          <div class="gym-hero-actions">
+            <a class="amber-action" href="#clases">Explorar clases</a>
+            <button class="gym-whatsapp-cta" type="button" data-luenio-open>
+              Cotizar una web así
+            </button>
+          </div>
+          <figure
+            class="builder-gallery"
+            aria-label="Vistazo ilustrativo al gimnasio"
+            data-luenio-collision-zone
           >
-          <a class="button" href="#como-funciona">Descubre cómo recuperarlos</a>
+            <div class="builder-gallery__main">
+              <img
+                src="/assets/demo-premium/gym-hero.webp"
+                srcset="
+                  /assets/demo-premium/gym-hero-480.webp  480w,
+                  /assets/demo-premium/gym-hero-960.webp  960w,
+                  /assets/demo-premium/gym-hero.webp     1672w
+                "
+                sizes="(max-width: 820px) calc(100vw - 24px), 62vw"
+                width="1672"
+                height="941"
+                alt="Atleta entrenando peso muerto en la zona funcional"
+                fetchpriority="high"
+                decoding="async"
+              />
+              <span>Zona funcional</span>
+            </div>
+            <div class="builder-gallery__side">
+              <picture>
+                <source srcset="/assets/stitch/gym-04-480.webp" type="image/webp" />
+                <img
+                  src="/assets/stitch/gym-04.jpg"
+                  width="512"
+                  height="288"
+                  alt="Entrenador de Titan Fitness Club"
+                  decoding="async"
+                />
+              </picture>
+              <span>Coach en piso</span>
+            </div>
+            <div class="builder-gallery__side">
+              <picture>
+                <source srcset="/assets/stitch/gym-05-480.webp" type="image/webp" />
+                <img
+                  src="/assets/stitch/gym-05.jpg"
+                  width="512"
+                  height="382"
+                  alt="Zona de fuerza de Titan Fitness Club"
+                  decoding="async"
+                />
+              </picture>
+              <span>Fuerza</span>
+            </div>
+            <figcaption>
+              <span class="status-lamp"><i aria-hidden="true"></i> Piso activo</span>
+              <strong>18:30 · Acceso guiado</strong>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div class="route-builder" data-route-builder data-luenio-collision-zone>
+          <fieldset class="choice-column" data-choice-group="goal">
+            <legend><b>01</b> Objetivo</legend>
+            <button
+              type="button"
+              class="flap-choice is-selected"
+              data-value="Ganar fuerza"
+              aria-pressed="true"
+            >
+              Ganar fuerza
+            </button>
+            <button
+              type="button"
+              class="flap-choice"
+              data-value="Mejorar resistencia"
+              aria-pressed="false"
+            >
+              Mejorar resistencia
+            </button>
+            <button
+              type="button"
+              class="flap-choice"
+              data-value="Moverme mejor"
+              aria-pressed="false"
+            >
+              Moverme mejor
+            </button>
+          </fieldset>
+
+          <fieldset class="choice-column" data-choice-group="level">
+            <legend><b>02</b> Nivel</legend>
+            <button type="button" class="flap-choice" data-value="Primera vez" aria-pressed="false">
+              Primera vez
+            </button>
+            <button
+              type="button"
+              class="flap-choice is-selected"
+              data-value="Intermedio"
+              aria-pressed="true"
+            >
+              Intermedio
+            </button>
+            <button type="button" class="flap-choice" data-value="Avanzado" aria-pressed="false">
+              Avanzado
+            </button>
+          </fieldset>
+
+          <fieldset class="choice-column" data-choice-group="time">
+            <legend><b>03</b> Horario</legend>
+            <button type="button" class="flap-choice" data-value="06:30" aria-pressed="false">
+              06:30
+            </button>
+            <button
+              type="button"
+              class="flap-choice is-selected"
+              data-value="18:30"
+              aria-pressed="true"
+            >
+              18:30
+            </button>
+            <button type="button" class="flap-choice" data-value="20:00" aria-pressed="false">
+              20:00
+            </button>
+          </fieldset>
+
+          <section
+            class="route-result"
+            aria-live="polite"
+            aria-labelledby="route-title"
+            data-luenio-collision-zone
+          >
+            <div class="route-result__head">
+              <p class="board-kicker">Ruta ilustrativa</p>
+              <span data-route-code>TF-1830</span>
+            </div>
+            <h2 id="route-title">Tu ruta</h2>
+            <ol data-route-steps>
+              <li>Activación</li>
+              <li>Fuerza</li>
+              <li>Movilidad</li>
+            </ol>
+            <dl class="route-meta">
+              <div>
+                <dt>Objetivo</dt>
+                <dd data-summary-goal>Ganar fuerza</dd>
+              </div>
+              <div>
+                <dt>Nivel</dt>
+                <dd data-summary-level>Intermedio</dd>
+              </div>
+              <div>
+                <dt>Inicio</dt>
+                <dd data-summary-time>18:30</dd>
+              </div>
+            </dl>
+            <div class="route-date-picker" aria-label="Elegir día">
+              <span>Día</span>
+              <button type="button" class="is-selected" data-route-day="Hoy" aria-pressed="true">
+                Hoy
+              </button>
+              <button type="button" data-route-day="Mañana" aria-pressed="false">Mañana</button>
+              <button type="button" data-route-day="Sábado" aria-pressed="false">Sábado</button>
+            </div>
+            <button class="amber-action" type="button" data-confirm-route>
+              Revisar reserva <span aria-hidden="true">→</span>
+            </button>
+          </section>
+        </div>
+
+        <div class="deck-rail" aria-label="Accesos rápidos">
+          <a href="#itinerario"><span>01</span> Ver mi itinerario</a>
+          <a href="#zonas"><span>02</span> Explorar zonas</a>
+          <button type="button" data-luenio-open><span>03</span> Cotizar esta experiencia</button>
         </div>
       </section>
 
-      <section class="niche-section niche-problem">
-        <div class="section-head">
-          <p class="eyebrow">Dolor real</p>
-          <h2>El interés por entrenar dura poco si nadie responde.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <span>01</span>
-            <h3>Preguntan mensualidad y desaparecen</h3>
-            <p>
-              La mayoría compara opciones en minutos. Una respuesta lenta convierte intención en
-              silencio.
-            </p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Tu equipo repite lo mismo todo el día</h3>
-            <p>
-              Precios, horarios, clases y promociones consumen tiempo que debería cerrar
-              inscripciones.
-            </p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>No sabes quién está listo para visitar</h3>
-            <p>
-              Los leads calientes quedan mezclados con curiosos y no reciben seguimiento a tiempo.
-            </p>
-          </article>
-        </div>
-      </section>
+      <section
+        class="operations-grid reveal-on-scroll"
+        id="itinerario"
+        aria-labelledby="today-title"
+      >
+        <article class="itinerary-panel">
+          <header class="panel-heading">
+            <div>
+              <p class="board-kicker">Recorrido recomendado</p>
+              <h2 id="today-title">Hoy en Titan</h2>
+            </div>
+            <button class="panel-reset" type="button" data-reset-progress>
+              Reiniciar recorrido
+            </button>
+          </header>
 
-      <section class="niche-section" id="como-funciona">
-        <div class="section-head">
-          <p class="eyebrow">Solución</p>
-          <h2>Luenio responde, detecta intención y manda al CRM a quienes quieren inscribirse.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <h3>Respuesta inmediata</h3>
-            <p>La IA envía planes, horarios y clase de prueba sin hacer esperar al interesado.</p>
-          </article>
-          <article>
-            <h3>Clientes CALIENTE/TIBIO/FRÍO</h3>
-            <p>Detectamos quién preguntó precio, visita o promoción para priorizarlo.</p>
-          </article>
-          <article>
-            <h3>Seguimiento automático</h3>
-            <p>El lead queda en CRM con recordatorio para convertir la visita en membresía.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="niche-section niche-demo-preview">
-        <div class="section-head">
-          <p class="eyebrow">Vista previa en vivo</p>
-          <h2>Mira cómo una pregunta por precio se convierte en lead CALIENTE 🔥.</h2>
-        </div>
-        <div class="niche-preview-card">
-          <div class="preview-chat">
-            <strong>WhatsApp</strong>
-            <p>
-              “Hola, vivo cerca del gimnasio. ¿Cuánto cuesta la mensualidad y puedo hacer una clase
-              de prueba hoy?”
-            </p>
-            <p class="ai">
-              “Tenemos plan mensual desde $39. Puedo agendarte una visita o clase de prueba hoy.”
-            </p>
+          <ol class="itinerary-list" data-itinerary>
+            <li class="is-current" data-itinerary-step="0">
+              <span class="itinerary-number">1</span>
+              <div><strong>Activación</strong><small>Movilidad y cardio suave</small></div>
+              <button class="itinerary-status" type="button" data-complete-step="0">
+                Completar
+              </button>
+            </li>
+            <li data-itinerary-step="1">
+              <span class="itinerary-number">2</span>
+              <div><strong>Fuerza</strong><small>Tren superior · Técnica guiada</small></div>
+              <button class="itinerary-status" type="button" data-complete-step="1" disabled>
+                Pendiente
+              </button>
+            </li>
+            <li data-itinerary-step="2">
+              <span class="itinerary-number">3</span>
+              <div><strong>Recuperación</strong><small>Estiramiento y respiración</small></div>
+              <button class="itinerary-status" type="button" data-complete-step="2" disabled>
+                Pendiente
+              </button>
+            </li>
+          </ol>
+          <div class="itinerary-complete" data-itinerary-complete hidden>
+            <span aria-hidden="true">✓</span>
+            <div>
+              <strong>Recorrido completado</strong>
+              <small>La sesión demostrativa terminó.</small>
+            </div>
           </div>
-          <div class="preview-crm">
-            <span>Score</span><strong>CALIENTE 🔥</strong>
-            <p>Movido a Leads interesados + seguimiento de visita.</p>
+        </article>
+
+        <article class="classes-panel" id="clases">
+          <header class="panel-heading">
+            <div>
+              <p class="board-kicker">Agenda demostrativa</p>
+              <h2>Clases en salida</h2>
+            </div>
+            <div class="class-controls">
+              <div class="schedule-days" aria-label="Elegir día de agenda">
+                <button
+                  type="button"
+                  class="is-active"
+                  data-schedule-day="today"
+                  aria-pressed="true"
+                >
+                  Hoy
+                </button>
+                <button type="button" data-schedule-day="tomorrow" aria-pressed="false">
+                  Mañana
+                </button>
+                <button type="button" data-schedule-day="saturday" aria-pressed="false">
+                  Sábado
+                </button>
+              </div>
+              <div class="schedule-filters" aria-label="Filtrar clases por periodo">
+                <button type="button" class="is-active" data-period="all" aria-pressed="true">
+                  Todo
+                </button>
+                <button type="button" data-period="am" aria-pressed="false">AM</button>
+                <button type="button" data-period="pm" aria-pressed="false">PM</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="class-table" role="table" aria-label="Clases ilustrativas disponibles">
+            <div class="class-row class-row--head" role="row">
+              <span role="columnheader">Hora</span>
+              <span role="columnheader">Clase</span>
+              <span role="columnheader">Entrenador</span>
+              <span role="columnheader">Estado</span>
+              <span role="columnheader">Acción</span>
+            </div>
+            <div class="class-row" role="row" data-period-row="am" data-day-row="today">
+              <time role="cell" datetime="06:30">06:30</time>
+              <strong role="cell">Titan Start</strong>
+              <span role="cell">Laura M.</span>
+              <span role="cell" class="class-status is-open">Disponible</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Titan Start" data-book-time="06:30">
+                  Reservar
+                </button>
+              </span>
+            </div>
+            <div class="class-row" role="row" data-period-row="am" data-day-row="today">
+              <time role="cell" datetime="09:00">09:00</time>
+              <strong role="cell">Movilidad</strong>
+              <span role="cell">Sofía R.</span>
+              <span role="cell" class="class-status is-limited">Últimos cupos</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Movilidad" data-book-time="09:00">
+                  Reservar
+                </button>
+              </span>
+            </div>
+            <div class="class-row" role="row" data-period-row="pm" data-day-row="today">
+              <time role="cell" datetime="18:30">18:30</time>
+              <strong role="cell">Fuerza Total</strong>
+              <span role="cell">Daniel C.</span>
+              <span role="cell" class="class-status is-open">Disponible</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Fuerza Total" data-book-time="18:30">
+                  Reservar
+                </button>
+              </span>
+            </div>
+            <div class="class-row" role="row" data-period-row="pm" data-day-row="today">
+              <time role="cell" datetime="20:00">20:00</time>
+              <strong role="cell">Conditioning</strong>
+              <span role="cell">Mateo V.</span>
+              <span role="cell" class="class-status is-open">Disponible</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Conditioning" data-book-time="20:00">
+                  Reservar
+                </button>
+              </span>
+            </div>
+            <div class="class-row" role="row" data-period-row="am" data-day-row="tomorrow" hidden>
+              <time role="cell" datetime="07:00">07:00</time>
+              <strong role="cell">Power Lab</strong>
+              <span role="cell">Daniel C.</span>
+              <span role="cell" class="class-status is-open">Disponible</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Power Lab" data-book-time="07:00">
+                  Reservar
+                </button>
+              </span>
+            </div>
+            <div class="class-row" role="row" data-period-row="pm" data-day-row="tomorrow" hidden>
+              <time role="cell" datetime="19:30">19:30</time>
+              <strong role="cell">Mobility Flow</strong>
+              <span role="cell">Sofía R.</span>
+              <span role="cell" class="class-status is-open">Disponible</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Mobility Flow" data-book-time="19:30">
+                  Reservar
+                </button>
+              </span>
+            </div>
+            <div class="class-row" role="row" data-period-row="am" data-day-row="saturday" hidden>
+              <time role="cell" datetime="09:30">09:30</time>
+              <strong role="cell">Titan Circuit</strong>
+              <span role="cell">Laura M.</span>
+              <span role="cell" class="class-status is-limited">Últimos cupos</span>
+              <span role="cell" class="class-action">
+                <button type="button" data-book-class="Titan Circuit" data-book-time="09:30">
+                  Reservar
+                </button>
+              </span>
+            </div>
+          </div>
+          <p class="empty-schedule" data-empty-schedule hidden>No hay clases en este periodo.</p>
+        </article>
+      </section>
+
+      <section
+        class="active-booking reveal-on-scroll"
+        data-active-booking
+        hidden
+        tabindex="-1"
+        aria-live="polite"
+      >
+        <div class="active-booking__status">
+          <span aria-hidden="true"></span>
+          Reserva demostrativa activa
+        </div>
+        <div>
+          <small>Sesión</small>
+          <strong data-active-booking-name>Fuerza Total</strong>
+        </div>
+        <div>
+          <small>Salida</small>
+          <strong
+            ><span data-active-booking-day>Hoy</span> ·
+            <span data-active-booking-time>18:30</span></strong
+          >
+        </div>
+        <div class="active-booking__actions">
+          <button type="button" data-start-route>Iniciar recorrido</button>
+          <button type="button" data-change-booking>Cambiar</button>
+          <button type="button" data-cancel-booking>Cancelar</button>
+        </div>
+      </section>
+
+      <section class="zone-story reveal-on-scroll" id="zonas" aria-labelledby="zones-title">
+        <div class="zone-story__media">
+          <img
+            data-zone-image
+            src="/assets/stitch/gym-05-480.webp"
+            sizes="100vw"
+            width="512"
+            height="382"
+            loading="lazy"
+            alt="Zona de fuerza de la demo Titan Fitness Club"
+          />
+          <div class="zone-wayfinding" aria-hidden="true">
+            <span>Acceso</span>
+            <i></i>
+            <span class="is-active" data-zone-waypoint="Fuerza">Fuerza</span>
+            <i></i>
+            <span data-zone-waypoint="Funcional">Funcional</span>
+            <i></i>
+            <span data-zone-waypoint="Recovery">Recovery</span>
           </div>
         </div>
-        <a class="button button-primary" href="/demo/gym">Ver cómo el sistema captura este lead</a>
-      </section>
-
-      <section class="niche-section">
-        <div class="section-head">
-          <p class="eyebrow">Prueba social</p>
-          <h2>Ejemplos de resultados que una operación rápida puede desbloquear.</h2>
-        </div>
-        <div class="proof-grid">
-          <article>
-            <span>Resultado ejemplo</span><strong>+30%</strong>
-            <p>más consultas convertidas en visitas al responder precio al instante.</p>
-          </article>
-          <article>
-            <span>WhatsApp</span><strong>-60%</strong>
-            <p>menos tiempo perdido contestando preguntas repetidas del gimnasio.</p>
-          </article>
-          <article>
-            <p>
-              “Antes respondíamos cuando podíamos. Ahora los interesados llegan calificados y con
-              visita sugerida.”
+        <div class="zone-story__copy" data-luenio-collision-zone>
+          <p class="board-kicker">Recorre el club</p>
+          <h2 id="zones-title">Cada zona tiene un propósito.</h2>
+          <p>
+            Una página para gimnasio puede orientar antes de la visita, explicar el tipo de
+            entrenamiento y reducir las dudas al momento de reservar.
+          </p>
+          <div class="zone-switcher" role="tablist" aria-label="Zonas del club">
+            <button
+              id="zone-tab-strength"
+              type="button"
+              role="tab"
+              aria-selected="true"
+              aria-controls="zone-panel"
+              tabindex="0"
+              data-zone="Fuerza"
+            >
+              Fuerza
+            </button>
+            <button
+              id="zone-tab-functional"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="zone-panel"
+              tabindex="-1"
+              data-zone="Funcional"
+            >
+              Funcional
+            </button>
+            <button
+              id="zone-tab-recovery"
+              type="button"
+              role="tab"
+              aria-selected="false"
+              aria-controls="zone-panel"
+              tabindex="-1"
+              data-zone="Recovery"
+            >
+              Recovery
+            </button>
+          </div>
+          <div
+            class="zone-detail"
+            id="zone-panel"
+            role="tabpanel"
+            aria-labelledby="zone-tab-strength"
+            aria-live="polite"
+          >
+            <strong data-zone-title>Fuerza</strong>
+            <p data-zone-copy>
+              Racks, plataformas y acompañamiento técnico para progresar con seguridad.
             </p>
-            <strong>Testimonio de muestra</strong><span>Director comercial, gimnasio urbano</span>
+            <dl>
+              <div>
+                <dt>Ideal para</dt>
+                <dd data-zone-fit>Fuerza y técnica</dd>
+              </div>
+              <div>
+                <dt>Ambiente</dt>
+                <dd data-zone-mood>Guiado y concentrado</dd>
+              </div>
+            </dl>
+            <button type="button" data-zone-classes>Ver clases de fuerza</button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="trainer-deck reveal-on-scroll"
+        id="entrenadores"
+        aria-labelledby="trainers-title"
+      >
+        <header class="panel-heading">
+          <div>
+            <p class="board-kicker">Equipo demostrativo</p>
+            <h2 id="trainers-title">Entrenadores Titan</h2>
+          </div>
+          <p>Selecciona un perfil para conocer su enfoque.</p>
+        </header>
+
+        <div class="trainer-layout">
+          <div class="trainer-list" role="listbox" aria-label="Entrenadores">
+            <button
+              type="button"
+              class="trainer-card is-selected"
+              role="option"
+              aria-selected="true"
+              tabindex="0"
+              data-trainer="laura"
+            >
+              <picture>
+                <source
+                  type="image/webp"
+                  srcset="
+                    /assets/stitch/gym-trainer-laura-420.webp 420w,
+                    /assets/stitch/gym-trainer-laura-720.webp 720w
+                  "
+                  sizes="(max-width: 820px) 240px, 28vw"
+                />
+                <img
+                  src="/assets/stitch/gym-trainer-laura.jpg"
+                  width="864"
+                  height="1821"
+                  loading="lazy"
+                  decoding="async"
+                  alt=""
+                />
+              </picture>
+              <span><strong>Laura Méndez</strong><small>Fuerza y técnica</small></span>
+            </button>
+            <button
+              type="button"
+              class="trainer-card"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+              data-trainer="daniel"
+            >
+              <picture>
+                <source
+                  type="image/webp"
+                  srcset="
+                    /assets/stitch/gym-trainer-daniel-420.webp 420w,
+                    /assets/stitch/gym-trainer-daniel-720.webp 720w
+                  "
+                  sizes="(max-width: 820px) 240px, 28vw"
+                />
+                <img
+                  src="/assets/stitch/gym-trainer-daniel.jpg"
+                  width="864"
+                  height="1821"
+                  loading="lazy"
+                  decoding="async"
+                  alt=""
+                />
+              </picture>
+              <span><strong>Daniel Cruz</strong><small>Rendimiento</small></span>
+            </button>
+            <button
+              type="button"
+              class="trainer-card"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+              data-trainer="sofia"
+            >
+              <picture>
+                <source
+                  type="image/webp"
+                  srcset="
+                    /assets/stitch/gym-trainer-sofia-420.webp 420w,
+                    /assets/stitch/gym-trainer-sofia-720.webp 720w
+                  "
+                  sizes="(max-width: 820px) 240px, 28vw"
+                />
+                <img
+                  src="/assets/stitch/gym-trainer-sofia.jpg"
+                  width="864"
+                  height="1821"
+                  loading="lazy"
+                  decoding="async"
+                  alt=""
+                />
+              </picture>
+              <span><strong>Sofía Rojas</strong><small>Movilidad</small></span>
+            </button>
+          </div>
+
+          <article class="trainer-profile" aria-live="polite" data-luenio-collision-zone>
+            <span class="illustrative-tag">Perfil ilustrativo</span>
+            <h3 data-trainer-name>Laura Méndez</h3>
+            <p data-trainer-focus>
+              Fuerza, fundamentos y técnica para avanzar con una base sólida.
+            </p>
+            <dl>
+              <div>
+                <dt>Enfoque</dt>
+                <dd data-trainer-specialty>Técnica y progresión</dd>
+              </div>
+              <div>
+                <dt>Próxima clase</dt>
+                <dd data-trainer-next>Hoy · 18:30</dd>
+              </div>
+            </dl>
+            <button class="amber-action" type="button" data-book-trainer>
+              Ver sesión con Laura
+            </button>
           </article>
         </div>
       </section>
 
-      <section class="niche-final-cta">
-        <p class="eyebrow">Activa crecimiento</p>
-        <h2>No pierdas más personas que ya estaban pensando inscribirse.</h2>
-        <a class="button button-primary" href="/demo/gym">Activar para mi gimnasio</a>
+      <section
+        class="demo-close reveal-on-scroll"
+        aria-labelledby="close-title"
+        data-luenio-collision-zone
+      >
+        <div>
+          <p class="board-kicker">Esto es una demostración</p>
+          <h2 id="close-title">Tu gimnasio tendría su propia ruta.</h2>
+        </div>
+        <p>
+          Luenio adapta el diseño, las reservas y la automatización al funcionamiento real de tu
+          negocio. Esta demo no representa un cliente ni resultados reales.
+        </p>
+        <button class="gym-whatsapp-cta gym-whatsapp-cta--large" type="button" data-luenio-open>
+          Cotizar una página así <span aria-hidden="true">→</span>
+        </button>
       </section>
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
     </main>
+
+    <footer class="gym-footer">
+      <a href="#inicio" class="gym-brand">
+        <span class="gym-brand__mark" aria-hidden="true">T</span>
+        <span>Titan Fitness Club</span>
+      </a>
+      <p><a href="/">Demo ficticia creada por Luenio.</a></p>
+      <button type="button" data-luenio-open>Cotizar una página así</button>
+    </footer>
+
+    <dialog class="booking-dialog" data-booking-dialog aria-labelledby="booking-title">
+      <form method="dialog" class="booking-dialog__frame">
+        <header>
+          <div>
+            <p class="board-kicker">Reserva simulada</p>
+            <h2 id="booking-title">Confirma tu sesión</h2>
+          </div>
+          <button class="dialog-close" value="cancel" aria-label="Cerrar">×</button>
+        </header>
+        <div class="booking-ticket">
+          <span>Sesión</span>
+          <strong data-booking-name>Ruta Titan</strong>
+          <span>Hora</span>
+          <strong data-booking-time>18:30</strong>
+          <span>Día</span>
+          <strong data-booking-date>Hoy</strong>
+        </div>
+        <label>
+          Nombre
+          <input
+            type="text"
+            name="booking-name"
+            autocomplete="name"
+            placeholder="Tu nombre"
+            minlength="2"
+            aria-describedby="booking-name-error"
+            required
+          />
+          <small
+            class="field-error"
+            id="booking-name-error"
+            aria-live="polite"
+            data-name-error
+          ></small>
+        </label>
+        <label>
+          WhatsApp
+          <input
+            type="tel"
+            name="booking-phone"
+            autocomplete="tel"
+            inputmode="tel"
+            placeholder="300 000 0000"
+            pattern="[0-9 +()-]{7,18}"
+            aria-describedby="booking-phone-error"
+            required
+          />
+          <small
+            class="field-error"
+            id="booking-phone-error"
+            aria-live="polite"
+            data-phone-error
+          ></small>
+        </label>
+        <p class="booking-note">
+          No enviaremos información. Esta interacción solo demuestra cómo funcionaría una reserva.
+        </p>
+        <button class="amber-action" type="submit" value="confirm" data-simulate-booking>
+          Confirmar reserva de muestra
+        </button>
+      </form>
+    </dialog>
+
+    <div class="booking-toast" role="status" aria-live="polite" data-booking-toast hidden>
+      <span aria-hidden="true">✓</span>
+      <div><strong>Reserva simulada</strong><small>No se enviaron datos.</small></div>
+    </div>
   </body>
 </html>

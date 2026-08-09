@@ -1,4 +1,5 @@
 import { submitPublicInquiry } from "./api-client.js";
+import { protectContactForm } from "./contact-security.js";
 
 const TRACKING_STORAGE_KEY = "luenio.analytics.events";
 
@@ -102,6 +103,7 @@ function bindNavigation() {
 function bindContactForm() {
   const form = document.querySelector("#contactForm");
   if (!form) return;
+  const securityPromise = protectContactForm(form);
 
   form.addEventListener("input", () => {
     if (funnelState.formStarted) return;
@@ -118,7 +120,10 @@ function bindContactForm() {
 
     const source =
       funnelState.lastSource === "direct" ? getSourceFromElement(form) : funnelState.lastSource;
-    const lead = buildLeadPayload(form, source || "contacto");
+    const lead = {
+      ...buildLeadPayload(form, source || "contacto"),
+      ...(await securityPromise).payload(),
+    };
     const errors = validateLead(lead);
 
     if (errors.length) {
@@ -145,6 +150,7 @@ function bindContactForm() {
         "Solicitud recibida. Te contactaremos por WhatsApp para revisar tu proceso y recomendar la automatización adecuada.",
       );
       form.reset();
+      (await securityPromise).reset();
     } catch (error) {
       console.warn("[Luenio] Contact endpoint unavailable.", error);
       trackEvent("form_submit_error", {
@@ -168,8 +174,14 @@ function bindBrandLogo() {
     const brand = logo.closest(".brand");
     if (!brand) return;
 
-    const showLogo = () => brand.classList.add("has-logo");
-    const showFallback = () => brand.classList.remove("has-logo");
+    const showLogo = () => {
+      brand.classList.add("has-logo");
+      brand.classList.remove("logo-error");
+    };
+    const showFallback = () => {
+      brand.classList.remove("has-logo");
+      brand.classList.add("logo-error");
+    };
 
     logo.addEventListener("load", showLogo, { once: true });
     logo.addEventListener("error", showFallback);

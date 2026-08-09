@@ -5,13 +5,14 @@ import {
   PipelineStageValidationError,
   processCrmRequestBody,
 } from "./services/lead-processing-service.js";
+import { logError, logInfo } from "./services/logger.js";
 
 export default async function handler(request, response) {
   let user;
   try {
     user = await requireUser(request);
   } catch (error) {
-    return sendApiError(response, error, { status: 401, includeStorage: true });
+    return sendApiError(response, error, { status: 401 });
   }
 
   if (request.method !== "POST") {
@@ -21,6 +22,11 @@ export default async function handler(request, response) {
 
   try {
     const result = await processCrmRequestBody({ body: request.body || {}, user });
+    logInfo("crm.process.ok", {
+      requestId: request.requestId,
+      mode: result.response?.mode,
+      userId: user.id,
+    });
     return response.status(200).json(result.response);
   } catch (error) {
     if (error instanceof LeadValidationError) {
@@ -34,12 +40,14 @@ export default async function handler(request, response) {
     if (error instanceof PipelineStageValidationError) {
       return response.status(error.statusCode).json({
         ok: false,
-        error: "Invalid pipeline stage.",
-        storage: error.storage,
+        error: "Invalid lead update.",
       });
     }
 
-    console.error("[Luenio API] POST /api/process failed", error);
-    return sendApiError(response, error, { includeStorage: true });
+    logError("crm.process.failed", {
+      requestId: request.requestId,
+      statusCode: error.statusCode || 500,
+    });
+    return sendApiError(response, error);
   }
 }

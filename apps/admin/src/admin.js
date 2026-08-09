@@ -1,215 +1,95 @@
-﻿import {
-  createCheckout,
+import {
+  bulkUpdateLeads,
+  createInvitation,
   getBilling,
   getHealth,
+  getInvitations,
   getLeads,
   getSession,
   getSettings,
+  importLeads,
   logout,
+  previewDigest,
+  revokeInvitation,
   updatePipeline,
 } from "./api-client.js";
+import { parseCrmCsv } from "./csv-import.js";
+import { createLiveDemoController } from "./demo/live-demo.js";
+import { downloadLeadsCsv } from "./export-csv.js";
+import { classificationLabel, safeNumber, safeText, stageLabel } from "./format.js";
+import {
+  createDemoEvent,
+  getEventId,
+  getWorkspaceActions,
+  getWorkspaceEvents,
+  getWorkspaceLeads,
+  isDemoLead,
+  normalizeLeadFromApi,
+} from "./lead-model.js";
+import {
+  dismissOnboardingBanner,
+  getOnboardingProgress,
+  isOnboardingBannerDismissed,
+  markOnboardingStep,
+} from "./onboarding-progress.js";
+import { buildCrmReports } from "./reports.js";
+import {
+  buildMailtoUrl,
+  buildWhatsAppUrl,
+  getEmailTemplate,
+  getReplyTemplate,
+} from "./reply-templates.js";
+import { formatScoreReasons } from "./score-copy.js";
+import { demoStepTemplate, stages, state } from "./state.js";
+import { buildWorkQueue, matchesSmartFilter } from "./work-queue.js";
+import { loadInterFonts } from "../../web/src/load-fonts.js";
 
-const stages = ["new", "qualified", "contacted", "converted"];
+loadInterFonts();
 
-const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
-const STAGE_LABELS = {
-  new: "Nuevo",
-  qualified: "Calificado",
-  contacted: "Contactado",
-  converted: "Convertido",
-};
+const compactTimeFormatter = new Intl.DateTimeFormat("es", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
+const compactDateTimeFormatter = new Intl.DateTimeFormat("es", {
+  day: "2-digit",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+const shortDateTimeFormatter = new Intl.DateTimeFormat("es", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+const invitationDateTimeFormatter = new Intl.DateTimeFormat("es-CO", {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+const secondaryPanelLoaded = new Set();
+const secondaryPanelPending = new Map();
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-function classificationLabel(value) {
-  return CLASSIFICATION_LABELS[value] || value;
-}
-
-function stageLabel(value) {
-  return STAGE_LABELS[value] || value;
-}
-
-const demoStepTemplate = [
-  "Lead recibido...",
-  "Analizando intención...",
-  "Lead calificado: CALIENTE / TIBIO / FRÍO",
-  "Enviado al CRM",
-  "Automatización activada",
-];
-const demoLeads = [
-  {
-    name: "Camila Torres",
-    business: "Nova Studio",
-    phone: "+57 300 421 9090",
-    service: "Automatización de WhatsApp",
-    message: "Quiero responder clientes y agendar más rápido esta semana.",
-    source: "live_demo",
-    score: 92,
-    classification: "hot",
-    scoreReasons: ["alta urgencia", "intención de compra", "automatización de whatsapp"],
-    workflow: "whatsapp_qualification",
-  },
-  {
-    name: "Andrés Molina",
-    business: "LegalHub",
-    phone: "+57 310 884 1200",
-    service: "CRM automatizado",
-    message: "Necesitamos ordenar prospectos y seguimiento comercial.",
-    source: "live_demo",
-    score: 74,
-    classification: "warm",
-    scoreReasons: ["necesidad de crm", "intención operativa", "falta de seguimiento"],
-    workflow: "crm_sync",
-  },
-  {
-    name: "Sofía Rivas",
-    business: "EducaPro",
-    phone: "+57 315 330 7711",
-    service: "Chatbot IA para ventas",
-    message: "Estoy revisando opciones para automatizar información de cursos.",
-    source: "live_demo",
-    score: 48,
-    classification: "cold",
-    scoreReasons: ["etapa de investigación", "baja urgencia", "caso de uso educativo"],
-    workflow: "nurture_sequence",
-  },
-];
-
-const state = {
-  leads: [],
-  demoLeads: [],
-  actions: [],
-  demoActions: [],
-  notifications: [],
-  events: [],
-  demoEvents: [],
-  storage: "checking",
-  health: null,
-  user: null,
-  billing: null,
-  settings: null,
-  selectedLeadId: null,
-  filter: "all",
-  statusFilter: "all",
-  hydrated: false,
-  loadedOnce: false,
-  refreshing: false,
-  newEventIds: new Set(),
-  newLeadIds: new Set(),
-  updatedStages: new Set(),
-  demo: {
-    active: false,
-    running: false,
-    currentLeadId: null,
-    currentStep: -1,
-    selectedIndex: 0,
-    timers: [],
-  },
-};
-
-function escapeHtml(value) {
-  return String(value ?? "").replace(
-    /[&<>"']/g,
-    (character) =>
-      ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      })[character],
+function animateSecondaryPanel(panel) {
+  if (reduceMotion || !panel?.open) return;
+  const content = panel.querySelector(":scope > section");
+  content?.animate(
+    [
+      { clipPath: "inset(0 0 10% 0)", opacity: 0.72, transform: "translateY(-6px)" },
+      { clipPath: "inset(0)", opacity: 1, transform: "translateY(0)" },
+    ],
+    { duration: 240, easing: "cubic-bezier(0.16, 1, 0.3, 1)" },
   );
 }
 
-function safeText(value, fallback = "") {
-  const normalized = String(value ?? "").trim();
-  return escapeHtml(normalized || fallback);
-}
-
-function safeNumber(value, fallback = 0) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function getClassification(lead) {
-  return lead.classification || (lead.score >= 80 ? "hot" : lead.score >= 60 ? "warm" : "cold");
-}
-
-function normalizeLeadFromApi(lead) {
-  return {
-    id: lead.id,
-    name: lead.name,
-    business: lead.business,
-    phone: lead.phone,
-    service: lead.service,
-    message: lead.message,
-    source: lead.source,
-    score: lead.score,
-    classification: getClassification(lead),
-    status: lead.pipeline_stage || lead.pipelineStage || lead.status || "new",
-    timestamp: lead.created_at || lead.timestamp,
-    scoreReasons: lead.score_reasons || lead.scoreReasons || [],
-    workflow: lead.workflow,
-  };
-}
-
-function getWorkspaceLeads() {
-  return [...state.demoLeads, ...state.leads];
-}
-
-function getWorkspaceEvents() {
-  return [...state.demoEvents, ...state.events];
-}
-
-function getWorkspaceActions() {
-  return [...state.demoActions, ...state.actions];
-}
-
-function isDemoLead(leadId) {
-  return String(leadId || "").startsWith("demo_lead_");
-}
-
-function createDemoEvent(type, lead, payload = {}) {
-  return {
-    id: `demo_event_${Date.now()}_${type}_${lead.id}`,
-    type,
-    leadId: lead.id,
-    timestamp: new Date().toISOString(),
-    payload: {
-      source: "live_demo",
-      classification: lead.classification,
-      score: lead.score,
-      pipelineStage: lead.status,
-      ...payload,
-    },
-  };
-}
-
-function createDemoLead(template, stage = "new") {
-  const id = `demo_lead_${Date.now()}_${state.demo.selectedIndex}`;
-  return {
-    ...template,
-    id,
-    status: stage,
-    timestamp: new Date().toISOString(),
-    demo: true,
-  };
-}
-
-function getEventId(event) {
-  return (
-    event.id ||
-    `${event.type}_${event.created_at || event.timestamp || ""}_${event.lead_id || event.leadId || ""}`
-  );
-}
-
-function showLiveStatus(message = "Sincronización en vivo activa") {
+function showLiveStatus(message = "En línea") {
   const element = document.querySelector("#liveStatus");
-  if (!element) return;
+  const text = document.querySelector("#liveStatusText") || element?.lastChild;
+  if (!element || !text) return;
 
-  element.lastChild.textContent = message;
+  text.textContent = message;
   element.classList.add("pulse");
   window.clearTimeout(showLiveStatus.timeout);
   showLiveStatus.timeout = window.setTimeout(() => {
-    element.lastChild.textContent = "Sincronización en vivo activa";
+    text.textContent = "En línea";
     element.classList.remove("pulse");
   }, 2200);
 }
@@ -253,7 +133,10 @@ function detectLiveChanges(nextLeads, nextEvents) {
 }
 
 async function fetchCrm() {
-  const { response, data } = await getLeads();
+  const { response, data } = await getLeads({
+    q: state.searchQuery || "",
+    limit: 500,
+  });
   if (!response.ok) throw new Error(`CRM request failed ${response.status}`);
 
   const nextLeads = (data.leads || []).map(normalizeLeadFromApi);
@@ -263,9 +146,30 @@ async function fetchCrm() {
   state.actions = data.actions || [];
   state.notifications = data.notifications || [];
   state.events = nextEvents;
-  state.storage = data.storage || "unknown";
+  state.members = Array.isArray(data.members) ? data.members : [];
+  state.storage = "protected";
   state.hydrated = true;
+  populateAssigneeSelects();
+  // Drop selections that no longer exist
+  const validIds = new Set(nextLeads.map((lead) => lead.id));
+  state.selectedIds = new Set([...state.selectedIds].filter((id) => validIds.has(id)));
   return data;
+}
+
+function toggleLeadSelection(leadId, selected) {
+  if (!leadId || String(leadId).startsWith("demo_lead_")) return;
+  if (selected) state.selectedIds.add(leadId);
+  else state.selectedIds.delete(leadId);
+  renderBulkBar();
+}
+
+function renderBulkBar() {
+  const bar = document.querySelector("#bulkActionsBar");
+  const count = document.querySelector("#bulkSelectionCount");
+  if (!bar || !count) return;
+  const size = state.selectedIds.size;
+  bar.hidden = size === 0;
+  count.textContent = `${size} seleccionado${size === 1 ? "" : "s"}`;
 }
 
 async function fetchSession() {
@@ -275,6 +179,24 @@ async function fetchSession() {
     return null;
   }
   state.user = data.user;
+  const invitationWrap = document.querySelector("#invitationPanelWrap");
+  if (invitationWrap && !["admin", "owner"].includes(String(data.user.role || "").toLowerCase())) {
+    invitationWrap.hidden = true;
+  }
+  try {
+    localStorage.setItem("luenio-workspace", "leads");
+  } catch {
+    /* ignore */
+  }
+  document.querySelectorAll("[data-workspace]").forEach((el) => {
+    el.addEventListener("click", () => {
+      try {
+        localStorage.setItem("luenio-workspace", el.getAttribute("data-workspace") || "leads");
+      } catch {
+        /* ignore */
+      }
+    });
+  });
   return data.user;
 }
 
@@ -296,16 +218,118 @@ async function fetchSettings() {
   return state.settings;
 }
 
+async function fetchInvitations() {
+  const panel = document.querySelector("#invitationPanel");
+  const wrap = document.querySelector("#invitationPanelWrap");
+  const { response, data } = await getInvitations();
+  if (response.status === 403) {
+    if (panel) panel.hidden = true;
+    if (wrap) wrap.hidden = true;
+    return [];
+  }
+  if (!response.ok) throw new Error(data.error || "No se pudieron cargar las invitaciones.");
+  state.invitations = data.invitations || [];
+  if (panel) panel.hidden = false;
+  if (wrap) wrap.hidden = false;
+  renderInvitations();
+  return state.invitations;
+}
+
+function renderInvitations() {
+  const list = document.querySelector("#invitationList");
+  if (!list) return;
+  list.innerHTML = state.invitations.length
+    ? state.invitations
+        .map(
+          (invitation) =>
+            `<article><div><strong>${safeText(invitation.businessName)}</strong><span>${safeText(invitation.email)} · ${safeText(invitation.role)}</span><small>${safeText(invitation.status)} · vence ${invitationDateTimeFormatter.format(new Date(invitation.expiresAt))}</small></div>${invitation.status === "pending" ? `<button class="button button-small" type="button" data-revoke-invitation="${safeText(invitation.id)}">Revocar</button>` : ""}</article>`,
+        )
+        .join("")
+    : '<p class="empty-state">No hay invitaciones creadas.</p>';
+  list.querySelectorAll("[data-revoke-invitation]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      const { response } = await revokeInvitation(button.dataset.revokeInvitation);
+      if (response.ok) await fetchInvitations();
+      else button.disabled = false;
+    });
+  });
+}
+
+function populateAssigneeSelects() {
+  const bulk = document.querySelector("#bulkAssigneeSelect");
+  if (!bulk) return;
+  const current = bulk.value;
+  const options = [
+    `<option value="">Asignar a…</option>`,
+    `<option value="__me__">A mí</option>`,
+    `<option value="__none__">Sin asignar</option>`,
+    ...(state.members || [])
+      .filter((member) => member.id !== state.user?.id)
+      .map(
+        (member) =>
+          `<option value="${safeText(member.id)}">${safeText(member.email || member.id)}</option>`,
+      ),
+  ];
+  bulk.innerHTML = options.join("");
+  if ([...bulk.options].some((option) => option.value === current)) bulk.value = current;
+}
+
+function memberLabel(userId) {
+  if (!userId) return "Sin asignar";
+  if (userId === state.user?.id) return "Yo";
+  const member = (state.members || []).find((row) => row.id === userId);
+  return member?.email || userId;
+}
+
 function filteredLeads() {
+  const query = String(state.searchQuery || "")
+    .trim()
+    .toLowerCase();
+  const filterOptions = { currentUserId: state.user?.id || null };
   return getWorkspaceLeads().filter((lead) => {
     const matchesScore = state.filter === "all" || lead.classification === state.filter;
     const matchesStatus = state.statusFilter === "all" || lead.status === state.statusFilter;
-    return matchesScore && matchesStatus;
+    const matchesSmart = matchesSmartFilter(
+      lead,
+      state.smartFilter || "all",
+      new Date(),
+      filterOptions,
+    );
+    if (!matchesScore || !matchesStatus || !matchesSmart) return false;
+    if (!query) return true;
+    const haystack = [
+      lead.name,
+      lead.business,
+      lead.phone,
+      lead.service,
+      lead.message,
+      lead.source,
+      lead.notes,
+      lead.nextAction,
+      ...(Array.isArray(lead.tags) ? lead.tags : []),
+    ]
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(query);
+  });
+}
+
+function exportLeadsCsv(leads = filteredLeads()) {
+  downloadLeadsCsv(leads, {
+    onExported: (count) => {
+      markOnboardingStep("export_csv");
+      renderOnboardingBanner();
+      showLiveStatus(`Exportados ${count} leads a CSV`);
+    },
   });
 }
 
 function updateMetrics() {
   const leads = getWorkspaceLeads();
+  const now = new Date();
+  const dueToday = leads.filter((lead) => matchesSmartFilter(lead, "due_today", now)).length;
+  const staleHot = leads.filter((lead) => matchesSmartFilter(lead, "stale_hot", now)).length;
   document.querySelector("#metricTotal").textContent = leads.length;
   document.querySelector("#metricHot").textContent = leads.filter(
     (lead) => lead.classification === "hot",
@@ -316,24 +340,107 @@ function updateMetrics() {
   document.querySelector("#metricCold").textContent = leads.filter(
     (lead) => lead.classification === "cold" || lead.classification === "nurture",
   ).length;
+  const dueEl = document.querySelector("#metricDueToday");
+  if (dueEl) dueEl.textContent = String(dueToday);
+  const dueCard = document.querySelector("#metricDueCard");
+  if (dueCard) {
+    dueCard.classList.toggle("is-alert", dueToday > 0 || staleHot > 0);
+    dueCard.title =
+      staleHot > 0
+        ? `${dueToday} con acción hoy/vencida · ${staleHot} calientes sin tocar`
+        : `${dueToday} con acción hoy o vencida`;
+  }
 
   const storageBadge = document.querySelector("#storageBadge");
   if (storageBadge) {
-    const isSupabase = state.storage === "supabase";
-    storageBadge.textContent = isSupabase
-      ? "Almacenamiento: Supabase conectado"
-      : "Almacenamiento: respaldo JSON local";
-    storageBadge.classList.toggle("supabase", isSupabase);
+    storageBadge.textContent = "Datos protegidos y sincronizados";
+    storageBadge.classList.add("supabase");
   }
+}
+
+const STAGE_REPORT_LABELS = {
+  new: "Nuevo",
+  qualified: "Calificado",
+  contacted: "Contactado",
+  converted: "Convertido",
+};
+
+function renderReports() {
+  const summary = document.querySelector("#reportsSummary");
+  const sourcesEl = document.querySelector("#reportSources");
+  const funnelEl = document.querySelector("#reportFunnel");
+  if (!summary || !sourcesEl || !funnelEl) return;
+
+  const report = buildCrmReports(getWorkspaceLeads(), {
+    now: new Date(),
+    days: state.reportDays || 30,
+  });
+
+  summary.innerHTML = `
+    <article><span>En ventana</span><strong>${safeNumber(report.totals.leads)}</strong></article>
+    <article><span>Histórico</span><strong>${safeNumber(report.totals.allTime)}</strong></article>
+    <article><span>Calientes</span><strong>${safeNumber(report.totals.hot)}</strong></article>
+    <article><span>Sin tocar (hot)</span><strong>${safeNumber(report.totals.staleHot)}</strong></article>
+    <article><span>Vencen hoy</span><strong>${safeNumber(report.totals.dueToday)}</strong></article>
+    <article><span>Sin contacto</span><strong>${safeNumber(report.totals.noContact)}</strong></article>
+  `;
+
+  sourcesEl.innerHTML = report.sources.length
+    ? report.sources
+        .slice(0, 8)
+        .map(
+          (row) => `
+      <div class="report-bar-row">
+        <div class="report-bar-row__meta">
+          <strong>${safeText(row.source)}</strong>
+          <span>${safeNumber(row.count)}</span>
+        </div>
+        <div class="report-bar-track" aria-hidden="true">
+          <span data-bar-pct="${safeNumber(row.percent)}"></span>
+        </div>
+      </div>
+    `,
+        )
+        .join("")
+    : `<p class="empty-state compact">Sin leads en los últimos ${safeNumber(report.days)} días.</p>`;
+
+  funnelEl.innerHTML = report.funnel
+    .map(
+      (row) => `
+    <div class="report-bar-row">
+      <div class="report-bar-row__meta">
+        <strong>${safeText(STAGE_REPORT_LABELS[row.stage] || row.stage)}</strong>
+        <span>${safeNumber(row.count)}</span>
+      </div>
+      <div class="report-bar-track" aria-hidden="true">
+        <span data-bar-pct="${safeNumber(row.percent)}"></span>
+      </div>
+    </div>
+  `,
+    )
+    .join("");
+
+  document.querySelectorAll("#reports [data-bar-pct]").forEach((bar) => {
+    const pct = Math.min(100, Math.max(0, Number(bar.dataset.barPct) || 0));
+    bar.style.width = `${pct}%`;
+  });
+
+  document.querySelectorAll("[data-report-days]").forEach((button) => {
+    button.classList.toggle("active", Number(button.dataset.reportDays) === report.days);
+  });
 }
 
 function renderUser() {
   const userBox = document.querySelector("#adminUser");
   if (!userBox || !state.user) return;
+  const business = safeText(state.user.businessName, "Espacio de trabajo");
+  const plan = safeText(state.user.plan, "starter");
   userBox.innerHTML = `
-    <span>${safeText(state.user.email)}</span>
-    <strong>${safeText(state.user.businessName, "Espacio de trabajo")} - ${safeText(state.user.plan, "starter")}</strong>
+    <strong class="admin-user__email">${safeText(state.user.email)}</strong>
+    <span class="admin-user__meta">${business} · ${plan}</span>
   `;
+  const email = userBox.querySelector(".admin-user__email");
+  if (email) email.title = String(state.user.email || "");
 }
 
 function setHealthItem(selector, label, status) {
@@ -353,44 +460,19 @@ function renderHealth() {
     return;
   }
 
-  const storageMode = health.storage?.mode || "desconocido";
-  if (storageMode === "supabase") {
-    setHealthItem("#healthDatabase", "Supabase conectado", "ok");
-  } else if (storageMode === "supabase_required_missing" || !health.httpOk) {
-    setHealthItem("#healthDatabase", "Supabase no configurado", "error");
-  } else {
-    setHealthItem("#healthDatabase", "Respaldo local", "warn");
-  }
-
-  setHealthItem(
-    "#healthCrmWebhook",
-    health.integrations?.crmWebhook ? "Configurado" : "No configurado",
-    health.integrations?.crmWebhook ? "ok" : "warn",
-  );
-  setHealthItem(
-    "#healthWhatsapp",
-    health.integrations?.whatsapp ? "Configurado" : "No configurado",
-    health.integrations?.whatsapp ? "ok" : "warn",
-  );
-  setHealthItem(
-    "#healthEmail",
-    health.integrations?.email ? "Configurado" : "No configurado",
-    health.integrations?.email ? "ok" : "warn",
-  );
+  const serviceOnline = health.ok && health.httpOk;
+  const statusLabel = serviceOnline ? "Operativo" : "Revisando";
+  const statusClass = serviceOnline ? "ok" : "warn";
+  setHealthItem("#healthDatabase", statusLabel, statusClass);
+  setHealthItem("#healthCrmWebhook", statusLabel, statusClass);
+  setHealthItem("#healthWhatsapp", statusLabel, statusClass);
+  setHealthItem("#healthEmail", statusLabel, statusClass);
 
   if (note) {
     note.textContent = health.ok
-      ? `API en línea. Modo de almacenamiento: ${storageMode}.`
-      : `El sistema requiere atención: ${health.error || "error desconocido"}`;
+      ? "Servicios del espacio de trabajo en línea."
+      : "Estamos verificando la disponibilidad de los servicios.";
   }
-}
-
-function formatDate(value) {
-  if (!value) return "desconocido";
-  return new Intl.DateTimeFormat("es", {
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(value));
 }
 
 function renderBilling() {
@@ -398,83 +480,10 @@ function renderBilling() {
   const status = document.querySelector("#billingStatus");
   if (!grid) return;
 
-  if (!state.billing?.plans) {
-    grid.innerHTML = `
-      <div class="empty-state">
-        <strong>Facturación no disponible</strong>
-        <p>No pudimos cargar los planes. Revisa la sesión o la configuración de Stripe.</p>
-      </div>
-    `;
-    if (status) {
-      status.hidden = false;
-      status.textContent = state.billing?.error || "La API de facturación no está disponible.";
-    }
-    return;
-  }
-
-  if (status) {
-    status.hidden = !state.billing.stripeConfigured;
-    status.textContent = state.billing.stripeConfigured
-      ? "El checkout de Stripe está configurado. Las mejoras de plan se abren de forma segura en Stripe."
-      : "";
-  }
-
-  grid.innerHTML = Object.entries(state.billing.plans)
-    .map(([planId, plan]) => {
-      const isCurrent = state.billing.currentPlan === planId;
-      const usage = isCurrent ? state.billing.usage : null;
-      const usagePercent = Math.max(0, Math.min(100, safeNumber(usage?.percentUsed)));
-      return `
-      <article>
-        <span>${isCurrent ? "Plan actual" : "Plan"}</span>
-        <strong>${safeText(plan.name)}</strong>
-        <p>${safeNumber(plan.monthlyLeadLimit).toLocaleString()} leads/mes</p>
-        ${
-          usage
-            ? `
-          <div class="usage-card">
-            <strong>${safeNumber(usage.used).toLocaleString()} / ${safeNumber(usage.limit).toLocaleString()} leads usados</strong>
-            <div class="usage-bar" data-usage="${usagePercent}"><span></span></div>
-            <p>${safeNumber(usage.remaining).toLocaleString()} restantes. Periodo ${formatDate(usage.period?.start)} - ${formatDate(usage.period?.end)}.</p>
-          </div>
-        `
-            : ""
-        }
-        <p>${plan.features.includes("webhooks") ? "Webhooks habilitados" : "Webhooks restringidos"}</p>
-        <button class="button ${isCurrent ? "button-small" : "button-primary button-small"}" type="button" data-plan="${safeText(planId)}" ${isCurrent ? "disabled" : ""}>
-          ${isCurrent ? "Activo" : "Mejorar plan"}
-        </button>
-      </article>
-    `;
-    })
-    .join("");
-
-  grid.querySelectorAll("[data-usage]").forEach((usageBar) => {
-    usageBar.style.setProperty("--usage", `${safeNumber(usageBar.dataset.usage)}%`);
-  });
-
-  grid.querySelectorAll("[data-plan]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      const billingStatus = document.querySelector("#billingStatus");
-      button.disabled = true;
-      button.textContent = "Abriendo Stripe...";
-      if (billingStatus) {
-        billingStatus.hidden = false;
-        billingStatus.textContent = "Preparando checkout seguro...";
-      }
-      const { response, data: result } = await createCheckout(button.dataset.plan);
-      if (response.ok && result.url) {
-        window.location.href = result.url;
-        return;
-      }
-      button.disabled = false;
-      button.textContent = "Mejorar plan";
-      if (billingStatus) {
-        billingStatus.hidden = false;
-        billingStatus.textContent = result.error || "Stripe aún no está configurado.";
-      }
-    });
-  });
+  const usage = state.billing?.usage;
+  const plan = state.billing?.currentPlan || state.user?.plan || "personalizado";
+  grid.innerHTML = `<article><span>Configuración activa</span><strong>${safeText(plan)}</strong><p>${usage ? `${safeNumber(usage.used).toLocaleString()} leads procesados durante el periodo actual.` : "Alcance configurado por el equipo de Luenio."}</p><p>Los cambios de alcance y facturación se coordinan mediante una cotización personalizada.</p><a class="button button-small" href="mailto:contacto@luenio.com">Contactar a Luenio</a></article>`;
+  if (status) status.hidden = true;
 }
 
 function renderChecklist() {
@@ -519,11 +528,10 @@ function renderOnboarding() {
     },
     {
       title: "Conecta tu negocio",
-      description:
-        state.health?.integrations?.crmWebhook || state.storage !== "checking"
-          ? "El CRM y la capa de almacenamiento están disponibles."
-          : "Conecta el almacenamiento y los canales de automatización.",
-      done: state.storage !== "checking",
+      description: state.hydrated
+        ? "El CRM y la capa de almacenamiento están disponibles."
+        : "Conecta el almacenamiento y los canales de automatización.",
+      done: state.hydrated,
     },
     {
       title: "Crea tu primer lead",
@@ -577,119 +585,111 @@ function renderSystemSteps() {
     .join("");
 }
 
+function renderWorkQueue() {
+  const root = document.querySelector("#workQueue");
+  if (!root) return;
+  const queue = buildWorkQueue(getWorkspaceLeads(), { limit: 5 });
+  if (!queue.length) {
+    root.innerHTML = `
+      <div class="panel-head">
+        <h2>Prioridades de hoy</h2>
+        <span class="panel-count">0</span>
+      </div>
+      <div class="empty-state empty-state--inline">
+        <strong>Sin pendientes urgentes</strong>
+        <p>Aquí aparecen vencidos, calientes sin contacto y seguimientos.</p>
+      </div>
+    `;
+    return;
+  }
+  root.innerHTML = `
+    <div class="panel-head">
+      <h2>Prioridades de hoy</h2>
+      <span class="panel-count">${queue.length}</span>
+    </div>
+    <div class="work-queue-list">
+      ${queue
+        .map(
+          (lead) => `
+        <button type="button" class="work-queue-item score-${safeText(lead.classification)}" data-work-lead-id="${safeText(lead.id)}">
+          <strong>${safeText(lead.name)}</strong>
+          <span>${safeText(classificationLabel(lead.classification))} · ${safeText(stageLabel(lead.status))}</span>
+          <small>${safeText(lead.nextAction || lead.service || "Definir próxima acción")}</small>
+        </button>
+      `,
+        )
+        .join("")}
+    </div>
+  `;
+  root.querySelectorAll("[data-work-lead-id]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.selectedLeadId = button.dataset.workLeadId;
+      renderPipeline();
+      renderLeadTable();
+      renderDetail();
+      document.querySelector("#leadDetail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  });
+}
+
+function renderOnboardingBanner() {
+  const root = document.querySelector("#onboardingBanner");
+  if (!root) return;
+  if (isOnboardingBannerDismissed()) {
+    root.hidden = true;
+    return;
+  }
+  const progress = getOnboardingProgress();
+  if (progress.complete) {
+    root.hidden = false;
+    root.innerHTML = `
+      <div class="onboarding-banner__copy">
+        <strong>Espacio listo</strong>
+        <span>Completaste los ${progress.total} pasos de arranque.</span>
+      </div>
+      <button type="button" class="button button-small" data-dismiss-onboarding>Ocultar 30 días</button>
+    `;
+  } else {
+    root.hidden = false;
+    root.innerHTML = `
+      <div class="onboarding-banner__copy">
+        <strong>Completa tu espacio (${progress.doneCount}/${progress.total})</strong>
+        <ul>${progress.steps.map((step) => `<li class="${step.done ? "is-done" : ""}">${safeText(step.label)}</li>`).join("")}</ul>
+      </div>
+      <button type="button" class="button button-small" data-dismiss-onboarding>Ahora no</button>
+    `;
+  }
+  root.querySelector("[data-dismiss-onboarding]")?.addEventListener("click", () => {
+    dismissOnboardingBanner(30);
+    root.hidden = true;
+  });
+}
+
+function toDatetimeLocalValue(iso) {
+  if (!iso) return "";
+  const date = new Date(iso);
+  if (!Number.isFinite(date.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 function renderAll() {
   updateMetrics();
-  renderOnboarding();
-  renderEvents();
   renderPipeline();
   renderLeadTable();
   renderDetail();
-  renderSystemSteps();
-}
-
-function clearDemoTimers() {
-  state.demo.timers.forEach((timer) => window.clearTimeout(timer));
-  state.demo.timers = [];
-}
-
-function addDemoEvent(type, lead, payload = {}) {
-  const event = createDemoEvent(type, lead, payload);
-  state.demoEvents.unshift(event);
-  state.newEventIds.add(getEventId(event));
-  return event;
-}
-
-function setDemoStep(index, lead, statusMessage) {
-  state.demo.currentStep = index;
-  if (statusMessage) showLiveStatus(statusMessage);
-  if (lead) lead.timestamp = new Date().toISOString();
-  renderAll();
-}
-
-function runLiveDemo() {
-  if (state.demo.running) return;
-
-  clearDemoTimers();
-  state.demo.active = true;
-  state.demo.running = true;
-  state.demo.currentStep = 0;
-  state.demo.selectedIndex = (state.demo.selectedIndex + 1) % demoLeads.length;
-  state.newLeadIds = new Set();
-  state.newEventIds = new Set();
-  state.updatedStages = new Set();
-
-  const lead = createDemoLead(demoLeads[state.demo.selectedIndex], "new");
-  state.demo.currentLeadId = lead.id;
-  state.demoLeads.unshift(lead);
-  state.newLeadIds.add(lead.id);
-  state.selectedLeadId = lead.id;
-  addDemoEvent("message.received", lead, { source: "whatsapp" });
-  setDemoStep(0, lead, "Lead recibido...");
-
-  const schedule = (delay, action) => {
-    const timer = window.setTimeout(action, delay);
-    state.demo.timers.push(timer);
-  };
-
-  schedule(900, () => {
-    addDemoEvent("intent.classified", lead, {
-      score: lead.score,
-      classification: lead.classification,
-    });
-    setDemoStep(1, lead, "Analizando intención...");
-  });
-
-  schedule(1800, () => {
-    setDemoStep(
-      2,
-      lead,
-      `Lead calificado: ${classificationLabel(lead.classification)}${lead.classification === "hot" ? " 🔥" : ""}`,
-    );
-  });
-
-  schedule(2700, () => {
-    lead.status = "qualified";
-    state.updatedStages = new Set(["qualified"]);
-    addDemoEvent("crm.updated", lead, {
-      action: "Lead sincronizado con el CRM",
-      pipelineStage: "qualified",
-    });
-    state.demoActions.unshift({
-      leadId: lead.id,
-      workflow: lead.workflow,
-      actions: ["create_crm_deal", "assign_sales_owner"],
-      restrictedActions: [],
-      integrationResults: [{ status: "simulated", provider: "CRM" }],
-      internalActionResults: [{ status: "queued", action: "sales_follow_up" }],
-    });
-    setDemoStep(3, lead, "Enviado al CRM");
-  });
-
-  schedule(3700, () => {
-    lead.status = lead.classification === "hot" ? "contacted" : "qualified";
-    state.updatedStages = new Set([lead.status]);
-    addDemoEvent("followup.triggered", lead, { actions: ["whatsapp_reply", "sales_task"] });
-    addDemoEvent("automation.triggered", lead, { integrations: ["crm", "whatsapp"] });
-    setDemoStep(4, lead, "Automatización activada");
-  });
-
-  schedule(5000, () => {
-    state.demo.running = false;
-    state.demo.currentStep = -1;
-    showLiveStatus("Demo en vivo completada");
-    renderAll();
-  });
+  renderWorkQueue();
+  renderReports();
+  renderOnboardingBanner();
+  if (secondaryPanelLoaded.has("activity")) renderEvents();
+  if (secondaryPanelLoaded.has("setup")) renderOnboarding();
+  if (secondaryPanelLoaded.has("demo")) renderSystemSteps();
 }
 
 function formatEventTime(event) {
   const timestamp = event.created_at || event.timestamp;
   if (!timestamp) return "justo ahora";
-  return new Intl.DateTimeFormat("es", {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "short",
-  }).format(new Date(timestamp));
+  return compactDateTimeFormatter.format(new Date(timestamp));
 }
 
 function formatEventLabel(event, leadName) {
@@ -701,6 +701,11 @@ function formatEventLabel(event, leadName) {
     "automation.triggered": "Automatización activada",
     "lead.created": "Lead creado",
     "pipeline.updated": "Pipeline actualizado",
+    "lead.notes_updated": "Notas del lead actualizadas",
+    "lead.tags_updated": "Etiquetas del lead actualizadas",
+    "lead.metadata_updated": "Metadatos del lead actualizados",
+    "lead.contact_logged": "Contacto registrado",
+    "lead.next_action_updated": "Próxima acción actualizada",
     "subscription.updated": "Suscripción actualizada",
   };
   const label = labels[event.type] || event.type || "Evento del sistema";
@@ -765,27 +770,33 @@ function renderPipeline() {
     .map((stage) => {
       const stageLeads = visibleLeads.filter((lead) => lead.status === stage);
       return `
-      <section class="pipeline-column ${state.updatedStages.has(stage) ? "updated" : ""}">
+      <section class="pipeline-column ${state.updatedStages.has(stage) ? "updated" : ""}" data-stage="${stage}">
         <h3>${safeText(stageLabel(stage))}<span>${stageLeads.length}</span></h3>
         <div class="lead-list">
           ${
             stageLeads
               .map(
                 (lead) => `
-            <button class="lead-row score-${safeText(lead.classification)} ${lead.demo ? "demo-lead" : ""} ${lead.id === state.selectedLeadId ? "active" : ""} ${state.newLeadIds.has(lead.id) ? "is-new" : ""}" type="button" data-lead-id="${safeText(lead.id)}">
-              <span>${safeText(classificationLabel(lead.classification))}</span>
-              <strong>${safeText(lead.name)}</strong>
-              <small>${safeText(lead.business)} - ${safeText(lead.source, "directo")}</small>
-              <small>${safeText(lead.service, "Sin servicio seleccionado")}</small>
-              <small><b class="score-pill">${safeNumber(lead.score)}</b> ${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit" }).format(new Date(lead.timestamp))) : ""}</small>
-            </button>
+            <div class="lead-row score-${safeText(lead.classification)} ${lead.demo ? "demo-lead" : ""} ${lead.id === state.selectedLeadId ? "active" : ""} ${state.newLeadIds.has(lead.id) ? "is-new" : ""}" data-lead-id="${safeText(lead.id)}">
+              ${
+                lead.demo
+                  ? ""
+                  : `<label class="lead-select"><input type="checkbox" data-select-lead="${safeText(lead.id)}" ${state.selectedIds.has(lead.id) ? "checked" : ""} /><span class="visually-hidden">Seleccionar ${safeText(lead.name)}</span></label>`
+              }
+              <button class="lead-row__open" type="button" data-open-lead="${safeText(lead.id)}">
+                <span>${safeText(classificationLabel(lead.classification))}</span>
+                <strong>${safeText(lead.name)}</strong>
+                <small>${safeText(lead.business)} - ${safeText(lead.source, "directo")}</small>
+                <small>${safeText(lead.service, "Sin servicio seleccionado")}</small>
+                <small><b class="score-pill">${safeNumber(lead.score)}</b> ${lead.timestamp ? safeText(compactTimeFormatter.format(new Date(lead.timestamp))) : ""}</small>
+              </button>
+            </div>
           `,
               )
               .join("") ||
             `
-            <div class="empty-state compact">
-              <strong>Sin leads</strong>
-              <p>No hay leads que coincidan en esta etapa.</p>
+            <div class="empty-state empty-state--column">
+              <span>—</span>
             </div>
           `
           }
@@ -795,13 +806,7 @@ function renderPipeline() {
     })
     .join("");
 
-  board.querySelectorAll("[data-lead-id]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.selectedLeadId = button.dataset.leadId;
-      renderPipeline();
-      renderDetail();
-    });
-  });
+  renderBulkBar();
 }
 
 function renderLeadTable() {
@@ -811,9 +816,9 @@ function renderLeadTable() {
 
   if (!leads.length) {
     table.innerHTML = `
-      <div class="empty-state">
-        <strong>Sin registros coincidentes</strong>
-        <p>Ajusta los filtros o ejecuta la Demo en Vivo para ver el CRM llenarse en tiempo real.</p>
+      <div class="empty-state empty-state--inline">
+        <strong>Sin resultados con estos filtros</strong>
+        <p>Prueba “Todos” o limpia la búsqueda. Los leads nuevos de cotización aparecerán aquí al instante.</p>
       </div>
     `;
     return;
@@ -821,6 +826,7 @@ function renderLeadTable() {
 
   table.innerHTML = `
     <div class="lead-table-row lead-table-head">
+      <span></span>
       <span>Lead</span>
       <span>Negocio</span>
       <span>Score</span>
@@ -830,26 +836,26 @@ function renderLeadTable() {
     ${leads
       .map(
         (lead) => `
-      <button class="lead-table-row ${lead.id === state.selectedLeadId ? "active" : ""}" type="button" data-table-lead-id="${safeText(lead.id)}">
-        <span><strong>${safeText(lead.name)}</strong><small>${safeText(lead.service, "Sin servicio")}</small></span>
+      <div class="lead-table-row ${lead.id === state.selectedLeadId ? "active" : ""}" data-table-lead-id="${safeText(lead.id)}">
+        <span>${
+          lead.demo
+            ? ""
+            : `<label class="lead-select"><input type="checkbox" data-select-lead="${safeText(lead.id)}" ${state.selectedIds.has(lead.id) ? "checked" : ""} /><span class="visually-hidden">Seleccionar</span></label>`
+        }</span>
+        <button class="lead-table-open" type="button" data-open-table-lead="${safeText(lead.id)}">
+          <strong>${safeText(lead.name)}</strong><small>${safeText(lead.service, "Sin servicio")}</small>
+        </button>
         <span>${safeText(lead.business)}${lead.demo ? "<small>Demo en vivo</small>" : ""}</span>
         <span><b class="score-pill score-${safeText(lead.classification)}">${safeNumber(lead.score)}</b>${safeText(classificationLabel(lead.classification))}</span>
         <span>${safeText(stageLabel(lead.status))}</span>
-        <span>${lead.timestamp ? safeText(new Intl.DateTimeFormat("es", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" }).format(new Date(lead.timestamp))) : "ahora"}</span>
-      </button>
+        <span>${lead.timestamp ? safeText(compactDateTimeFormatter.format(new Date(lead.timestamp))) : "ahora"}</span>
+      </div>
     `,
       )
       .join("")}
   `;
 
-  table.querySelectorAll("[data-table-lead-id]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.selectedLeadId = button.dataset.tableLeadId;
-      renderPipeline();
-      renderLeadTable();
-      renderDetail();
-    });
-  });
+  renderBulkBar();
 }
 
 function renderDetail() {
@@ -858,9 +864,15 @@ function renderDetail() {
 
   if (!lead) {
     detail.innerHTML = `
-      <p class="eyebrow">Detalle del lead</p>
-      <h2>Selecciona un lead</h2>
-      <p>Verás score, fuente, etapa, razones del scoring y acciones automatizadas.</p>
+      <div class="detail-empty">
+        <h2>Detalle</h2>
+        <p>Selecciona un lead del pipeline o del listado.</p>
+        <ol class="detail-empty__steps">
+          <li>Abre un lead</li>
+          <li>Revisa score y etapa</li>
+          <li>Agenda la próxima acción</li>
+        </ol>
+      </div>
     `;
     return;
   }
@@ -883,7 +895,101 @@ function renderDetail() {
       <article><span>Interés</span><strong>${safeText(lead.service)}</strong></article>
       <article><span>Flujo</span><strong>${safeText(lead.workflow || action?.workflow, "pendiente")}</strong></article>
       <article><span>Razones</span><strong>${safeText((lead.scoreReasons || []).join(", "), "Sin razones registradas")}</strong></article>
+      <article><span>Etiquetas</span><strong>${safeText((lead.tags || []).join(", "), "Sin etiquetas")}</strong></article>
+      <article><span>Próxima acción</span><strong>${safeText(lead.nextAction || "Sin definir")}</strong></article>
+      <article><span>Último contacto</span><strong>${lead.lastContactedAt ? safeText(shortDateTimeFormatter.format(new Date(lead.lastContactedAt))) : "Nunca"}</strong></article>
+      <article><span>Asignado a</span><strong>${safeText(memberLabel(lead.assigneeUserId))}</strong></article>
     </div>
+    <form class="lead-assignee-form" id="leadAssigneeForm">
+      <strong>Asignar lead</strong>
+      <label>
+        <span>Miembro del equipo</span>
+        <select name="assigneeUserId">
+          <option value="">Sin asignar</option>
+          <option value="${safeText(state.user?.id || "")}" ${lead.assigneeUserId === state.user?.id ? "selected" : ""}>Yo (${safeText(state.user?.email || "sesión")})</option>
+          ${(state.members || [])
+            .filter((member) => member.id !== state.user?.id)
+            .map(
+              (member) =>
+                `<option value="${safeText(member.id)}" ${lead.assigneeUserId === member.id ? "selected" : ""}>${safeText(member.email || member.id)}</option>`,
+            )
+            .join("")}
+        </select>
+      </label>
+      <button class="button button-small" type="submit">Guardar asignación</button>
+    </form>
+
+    <div class="score-reasons-block">
+      <strong>Por qué este score</strong>
+      <ul>${formatScoreReasons(lead.scoreReasons || [])
+        .map((reason) => `<li>${safeText(reason)}</li>`)
+        .join("")}</ul>
+    </div>
+    <div class="reply-templates">
+      <strong>Plantilla WhatsApp</strong>
+      <p class="reply-templates__text">${safeText(getReplyTemplate(lead))}</p>
+      <div class="reply-templates__actions">
+        <button class="button button-small" type="button" data-copy-reply>Copiar mensaje WhatsApp</button>
+        ${buildWhatsAppUrl(lead) ? `<a class="button button-small button-primary" href="${safeText(buildWhatsAppUrl(lead))}" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>` : ""}
+      </div>
+      <strong>Plantilla email</strong>
+      <p class="reply-templates__text"><em>${safeText(getEmailTemplate(lead).subject)}</em><br />${safeText(getEmailTemplate(lead).body)}</p>
+      <div class="reply-templates__actions">
+        <button class="button button-small" type="button" data-copy-email>Copiar email</button>
+        <a class="button button-small" href="${safeText(buildMailtoUrl(lead))}">Abrir correo</a>
+      </div>
+    </div>
+    <form class="lead-next-action" id="leadNextActionForm">
+      <strong>Próxima acción</strong>
+      <label><span>Qué hacer</span><input name="nextAction" maxlength="200" value="${safeText(lead.nextAction || "")}" placeholder="Llamar / enviar propuesta" /></label>
+      <label><span>Cuándo</span><input name="nextActionAt" type="datetime-local" value="${safeText(toDatetimeLocalValue(lead.nextActionAt))}" /></label>
+      <button class="button button-small" type="submit">Guardar próxima acción</button>
+    </form>
+    <form class="lead-contact-log" id="leadContactLogForm">
+      <strong>Registrar contacto</strong>
+      <label><span>Tipo</span>
+        <select name="type">
+          <option value="whatsapp">WhatsApp</option>
+          <option value="call">Llamada</option>
+          <option value="email">Email</option>
+          <option value="note">Nota</option>
+          <option value="other">Otro</option>
+        </select>
+      </label>
+      <label><span>Resumen</span><input name="summary" maxlength="500" required placeholder="Respondió; pide propuesta" /></label>
+      <button class="button button-small" type="submit">Guardar contacto</button>
+    </form>
+    <div class="lead-contact-history">
+      <strong>Historial de contactos</strong>
+      ${
+        (lead.contactLog || []).length
+          ? (lead.contactLog || [])
+              .slice(0, 10)
+              .map(
+                (entry) => `
+        <article>
+          <span>${safeText(entry.type)} · ${entry.createdAt ? safeText(shortDateTimeFormatter.format(new Date(entry.createdAt))) : ""}</span>
+          <p>${safeText(entry.summary)}</p>
+        </article>
+      `,
+              )
+              .join("")
+          : "<p>Sin contactos registrados.</p>"
+      }
+    </div>
+
+    <form class="lead-metadata-form" id="leadMetadataForm" data-lead-id="${safeText(lead.id)}">
+      <label class="lead-notes-field">
+        <span>Notas internas</span>
+        <textarea name="notes" rows="3" maxlength="2000" placeholder="Contexto comercial, acuerdos, objeciones...">${safeText(lead.notes || "")}</textarea>
+      </label>
+      <label class="lead-tags-field">
+        <span>Etiquetas</span>
+        <input name="tags" type="text" maxlength="200" value="${safeText((lead.tags || []).join(", "))}" placeholder="whatsapp, urgente, demo" />
+      </label>
+      <button class="button button-small" type="submit">Guardar notas y etiquetas</button>
+      <p class="form-status" data-metadata-status role="status" aria-live="polite" hidden></p>
+    </form>
     <div class="actions-history">
       <strong>Historial de acciones</strong>
       ${
@@ -917,9 +1023,165 @@ function renderDetail() {
   `;
 
   detail.querySelector("[data-open-billing]")?.addEventListener("click", () => {
-    document
-      .querySelector(".billing-panel")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const billingPanel = document.querySelector(".billing-panel");
+    const fold = billingPanel?.closest("details.admin-fold");
+    if (fold) fold.open = true;
+    billingPanel?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  detail.querySelector("[data-copy-reply]")?.addEventListener("click", async () => {
+    const text = getReplyTemplate(lead);
+    try {
+      await navigator.clipboard.writeText(text);
+      showLiveStatus("Mensaje WhatsApp copiado");
+    } catch {
+      showLiveStatus("No se pudo copiar el mensaje");
+    }
+  });
+
+  detail.querySelector("[data-copy-email]")?.addEventListener("click", async () => {
+    const email = getEmailTemplate(lead);
+    const text = `${email.subject}\n\n${email.body}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      showLiveStatus("Email copiado");
+    } catch {
+      showLiveStatus("No se pudo copiar el email");
+    }
+  });
+
+  detail.querySelector("#leadAssigneeForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const assigneeUserId = String(new FormData(form).get("assigneeUserId") || "") || null;
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
+    if (isDemoLead(lead.id)) {
+      lead.assigneeUserId = assigneeUserId;
+      if (button) button.disabled = false;
+      renderAll();
+      showLiveStatus("Asignación de demo guardada");
+      return;
+    }
+    const { response, data } = await updatePipeline({ leadId: lead.id, assigneeUserId });
+    if (button) button.disabled = false;
+    if (!response.ok) {
+      showLiveStatus(data.error || "No se pudo asignar");
+      return;
+    }
+    await loadDashboard({ showSkeleton: false });
+    state.selectedLeadId = lead.id;
+    renderDetail();
+    showLiveStatus("Lead asignado");
+  });
+
+  detail.querySelector("#leadNextActionForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const nextAction = String(formData.get("nextAction") || "");
+    const localValue = String(formData.get("nextActionAt") || "");
+    const nextActionAt = localValue ? new Date(localValue).toISOString() : null;
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    if (isDemoLead(lead.id)) {
+      lead.nextAction = nextAction;
+      lead.nextActionAt = nextActionAt;
+      state.demoEvents.unshift(
+        createDemoEvent("lead.next_action_updated", lead, { nextAction, nextActionAt }),
+      );
+      button.disabled = false;
+      renderAll();
+      showLiveStatus("Próxima acción de demo guardada");
+      return;
+    }
+    await updatePipeline({ leadId: lead.id, nextAction, nextActionAt });
+    button.disabled = false;
+    await loadDashboard({ showSkeleton: false });
+    state.selectedLeadId = lead.id;
+    renderDetail();
+    showLiveStatus("Próxima acción guardada");
+  });
+
+  detail.querySelector("#leadContactLogForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const logContact = {
+      type: String(formData.get("type") || "note"),
+      summary: String(formData.get("summary") || ""),
+    };
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    if (isDemoLead(lead.id)) {
+      const entry = {
+        id: `clog_demo_${Date.now()}`,
+        type: logContact.type,
+        summary: logContact.summary,
+        createdAt: new Date().toISOString(),
+      };
+      lead.contactLog = [entry, ...(lead.contactLog || [])].slice(0, 50);
+      lead.lastContactedAt = entry.createdAt;
+      state.demoEvents.unshift(createDemoEvent("lead.contact_logged", lead, { type: entry.type }));
+      button.disabled = false;
+      form.reset();
+      renderAll();
+      showLiveStatus("Contacto de demo registrado");
+      return;
+    }
+    await updatePipeline({ leadId: lead.id, logContact });
+    button.disabled = false;
+    await loadDashboard({ showSkeleton: false });
+    state.selectedLeadId = lead.id;
+    renderDetail();
+    showLiveStatus("Contacto registrado");
+  });
+
+  detail.querySelector("#leadMetadataForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const statusEl = form.querySelector("[data-metadata-status]");
+    const formData = new FormData(form);
+    const notes = String(formData.get("notes") || "");
+    const tags = String(formData.get("tags") || "")
+      .split(/[,;]/)
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const button = form.querySelector('button[type="submit"]');
+    button.disabled = true;
+    if (isDemoLead(lead.id)) {
+      lead.notes = notes;
+      lead.tags = tags;
+      lead.timestamp = new Date().toISOString();
+      const metaEvent = createDemoEvent("lead.metadata_updated", lead, { notes, tags });
+      state.demoEvents.unshift(metaEvent);
+      state.newEventIds.add(getEventId(metaEvent));
+      button.disabled = false;
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = "Notas de demo guardadas.";
+      }
+      renderAll();
+      markOnboardingStep("add_note_or_tag");
+      renderOnboardingBanner();
+      showLiveStatus("Metadatos de demo actualizados");
+      return;
+    }
+    const { response, data } = await updatePipeline({ leadId: lead.id, notes, tags });
+    button.disabled = false;
+    if (!response.ok) {
+      if (statusEl) {
+        statusEl.hidden = false;
+        statusEl.textContent = data.error || "No se pudieron guardar las notas.";
+      }
+      return;
+    }
+    await loadDashboard({ showSkeleton: false });
+    state.selectedLeadId = lead.id;
+    renderDetail();
+    markOnboardingStep("add_note_or_tag");
+    renderOnboardingBanner();
+    showLiveStatus("Notas y etiquetas guardadas");
   });
 
   detail.querySelector("[data-next-stage]").addEventListener("click", async (event) => {
@@ -939,16 +1201,91 @@ function renderDetail() {
       button.disabled = false;
       button.textContent = "Mover etapa";
       renderAll();
+      markOnboardingStep("move_stage");
+      renderOnboardingBanner();
       showLiveStatus("Pipeline de demo actualizado");
       return;
     }
     await updatePipeline({ leadId: lead.id, status: nextStage, pipelineStage: nextStage });
+    markOnboardingStep("move_stage");
+    renderOnboardingBanner();
     state.updatedStages = new Set([nextStage]);
     await loadDashboard();
     state.selectedLeadId = lead.id;
     showLiveStatus("Pipeline actualizado");
     renderDetail();
   });
+}
+
+const liveDemo = createLiveDemoController({
+  showLiveStatus,
+  renderAll,
+  renderOnboardingBanner,
+});
+const { runLiveDemo } = liveDemo;
+
+async function runSecondaryPanelLoader(key) {
+  if (key === "invitations") {
+    await fetchInvitations();
+    return;
+  }
+  if (key === "activity") {
+    renderEvents();
+    return;
+  }
+  if (key === "billing") {
+    await fetchBilling();
+    renderBilling();
+    return;
+  }
+  if (key === "health") {
+    await fetchHealth();
+    renderHealth();
+    return;
+  }
+  if (key === "setup") {
+    await fetchSettings();
+    renderChecklist();
+    renderOnboarding();
+    return;
+  }
+  if (key === "demo") renderSystemSteps();
+}
+
+function loadSecondaryPanel(panel, { force = false } = {}) {
+  const key = panel?.dataset.adminPanel;
+  if (!key) return Promise.resolve();
+  if (!force && secondaryPanelLoaded.has(key)) return Promise.resolve();
+  if (secondaryPanelPending.has(key)) return secondaryPanelPending.get(key);
+
+  panel.setAttribute("aria-busy", "true");
+  panel.dataset.loadState = "loading";
+  const pending = runSecondaryPanelLoader(key)
+    .then(() => {
+      secondaryPanelLoaded.add(key);
+      panel.dataset.loadState = "ready";
+    })
+    .catch((error) => {
+      panel.dataset.loadState = "error";
+      showLiveStatus("No se pudo cargar este panel");
+      console.warn(`[Luenio CRM] Secondary panel "${key}" failed`, error);
+      throw error;
+    })
+    .finally(() => {
+      panel.removeAttribute("aria-busy");
+      secondaryPanelPending.delete(key);
+    });
+  secondaryPanelPending.set(key, pending);
+  return pending;
+}
+
+function refreshLoadedSecondaryPanels() {
+  return Promise.allSettled(
+    [...secondaryPanelLoaded].map((key) => {
+      const panel = document.querySelector(`[data-admin-panel="${key}"]`);
+      return loadSecondaryPanel(panel, { force: true });
+    }),
+  );
 }
 
 async function loadDashboard(options = {}) {
@@ -961,32 +1298,84 @@ async function loadDashboard(options = {}) {
     if (!user) return;
   }
 
-  const results = await Promise.allSettled([
-    fetchHealth(),
-    fetchCrm(),
-    fetchBilling(),
-    fetchSettings(),
-  ]);
+  const results = await Promise.allSettled([fetchCrm()]);
   const failed = results.filter((result) => result.status === "rejected");
   if (failed.length) {
     showLiveStatus("Algunos datos no se pudieron sincronizar");
     failed.forEach((result) => console.warn("[Luenio CRM] Dashboard sync failed", result.reason));
   }
 
-  document.body.classList.remove("admin-loading", "admin-refreshing");
   state.loadedOnce = true;
   updateMetrics();
   renderUser();
-  renderHealth();
-  renderBilling();
-  renderChecklist();
-  renderOnboarding();
-  renderEvents();
   renderPipeline();
   renderLeadTable();
   renderDetail();
-  renderSystemSteps();
+  renderWorkQueue();
+  renderReports();
+  renderOnboardingBanner();
+  renderBulkBar();
+  document.body.classList.remove("admin-loading", "admin-refreshing");
+  void refreshLoadedSecondaryPanels();
 }
+
+const pipelineBoard = document.querySelector("#pipelineBoard");
+pipelineBoard?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-open-lead]");
+  if (!button || !pipelineBoard.contains(button)) return;
+  state.selectedLeadId = button.dataset.openLead;
+  renderPipeline();
+  renderLeadTable();
+  renderDetail();
+});
+pipelineBoard?.addEventListener("change", (event) => {
+  const input = event.target.closest("[data-select-lead]");
+  if (!input || !pipelineBoard.contains(input)) return;
+  toggleLeadSelection(input.dataset.selectLead, input.checked);
+  renderPipeline();
+  renderLeadTable();
+});
+
+const leadTable = document.querySelector("#leadTable");
+leadTable?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-open-table-lead]");
+  if (!button || !leadTable.contains(button)) return;
+  state.selectedLeadId = button.dataset.openTableLead;
+  renderPipeline();
+  renderLeadTable();
+  renderDetail();
+});
+leadTable?.addEventListener("change", (event) => {
+  const input = event.target.closest("[data-select-lead]");
+  if (!input || !leadTable.contains(input)) return;
+  toggleLeadSelection(input.dataset.selectLead, input.checked);
+  renderPipeline();
+  renderLeadTable();
+});
+
+document.querySelectorAll("details[data-admin-panel]").forEach((panel) => {
+  panel.addEventListener("toggle", () => {
+    if (panel.open) {
+      loadSecondaryPanel(panel)
+        .then(() => animateSecondaryPanel(panel))
+        .catch(() => {
+          // The panel stays open so the user can retry by closing and reopening it.
+        });
+    }
+  });
+});
+
+document.querySelectorAll("[data-report-days]").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.reportDays = Number(button.dataset.reportDays) === 7 ? 7 : 30;
+    document
+      .querySelectorAll("[data-report-days]")
+      .forEach((item) =>
+        item.classList.toggle("active", Number(item.dataset.reportDays) === state.reportDays),
+      );
+    renderReports();
+  });
+});
 
 document.querySelectorAll("[data-filter]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -995,6 +1384,7 @@ document.querySelectorAll("[data-filter]").forEach((button) => {
       .querySelectorAll("[data-filter]")
       .forEach((item) => item.classList.toggle("active", item === button));
     renderPipeline();
+    renderLeadTable();
   });
 });
 
@@ -1005,7 +1395,135 @@ document.querySelectorAll("[data-status-filter]").forEach((button) => {
       .querySelectorAll("[data-status-filter]")
       .forEach((item) => item.classList.toggle("active", item === button));
     renderPipeline();
+    renderLeadTable();
   });
+});
+
+let searchDebounce = null;
+document.querySelector("#leadSearch")?.addEventListener("input", (event) => {
+  state.searchQuery = event.currentTarget.value || "";
+  window.clearTimeout(searchDebounce);
+  searchDebounce = window.setTimeout(() => {
+    // Server-side q= on refresh; client filter still applies for demo leads
+    loadDashboard({ showSkeleton: false, silent: true }).catch(() => {
+      renderPipeline();
+      renderLeadTable();
+    });
+  }, 280);
+  renderPipeline();
+  renderLeadTable();
+});
+
+document.querySelector("#exportLeadsCsv")?.addEventListener("click", () => {
+  exportLeadsCsv(filteredLeads());
+});
+
+document.querySelector("#importLeadsCsv")?.addEventListener("change", async (event) => {
+  const file = event.currentTarget.files?.[0];
+  event.currentTarget.value = "";
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const parsed = parseCrmCsv(text, { maxRows: 100 });
+    if (!parsed.rows.length) {
+      showLiveStatus(parsed.errors[0] || "CSV vacío o inválido");
+      return;
+    }
+    const { response, data } = await importLeads(parsed.rows);
+    if (!response.ok) {
+      showLiveStatus(data.error || "No se pudo importar");
+      return;
+    }
+    await loadDashboard({ showSkeleton: false });
+    const extra = parsed.errors.length ? ` · ${parsed.errors[0]}` : "";
+    showLiveStatus(`Importados ${data.imported || 0} leads (${data.failed || 0} fallidos)${extra}`);
+  } catch {
+    showLiveStatus("Error al leer el CSV");
+  }
+});
+
+document.querySelector("#bulkClear")?.addEventListener("click", () => {
+  state.selectedIds.clear();
+  renderPipeline();
+  renderLeadTable();
+  renderBulkBar();
+});
+
+document.querySelector("#bulkApply")?.addEventListener("click", async () => {
+  const leadIds = [...state.selectedIds];
+  if (!leadIds.length) return;
+  const status = document.querySelector("#bulkStageSelect")?.value || "";
+  const tag = String(document.querySelector("#bulkTagInput")?.value || "").trim();
+  const assigneeRaw = document.querySelector("#bulkAssigneeSelect")?.value || "";
+  let assigneeUserId;
+  if (assigneeRaw === "__me__") assigneeUserId = state.user?.id || null;
+  else if (assigneeRaw === "__none__") assigneeUserId = null;
+  else if (assigneeRaw) assigneeUserId = assigneeRaw;
+  if (!status && !tag && assigneeRaw === "") {
+    showLiveStatus("Elige etapa, tag o asignación");
+    return;
+  }
+  const button = document.querySelector("#bulkApply");
+  if (button) button.disabled = true;
+  const { response, data } = await bulkUpdateLeads({
+    leadIds,
+    status: status || undefined,
+    pipelineStage: status || undefined,
+    addTags: tag ? [tag] : undefined,
+    assigneeUserId: assigneeRaw !== "" ? assigneeUserId : undefined,
+  });
+  if (button) button.disabled = false;
+  if (!response.ok) {
+    showLiveStatus(data.error || "Bulk falló");
+    return;
+  }
+  state.selectedIds.clear();
+  if (document.querySelector("#bulkTagInput")) document.querySelector("#bulkTagInput").value = "";
+  if (document.querySelector("#bulkStageSelect"))
+    document.querySelector("#bulkStageSelect").value = "";
+  if (document.querySelector("#bulkAssigneeSelect"))
+    document.querySelector("#bulkAssigneeSelect").value = "";
+  await loadDashboard({ showSkeleton: false });
+  showLiveStatus(`Bulk: ${data.updated || 0} actualizados, ${data.failed || 0} fallidos`);
+});
+
+document.querySelectorAll("[data-smart-filter]").forEach((button) => {
+  button.addEventListener("click", () => {
+    state.smartFilter = button.dataset.smartFilter || "all";
+    document
+      .querySelectorAll("[data-smart-filter]")
+      .forEach((item) => item.classList.toggle("active", item === button));
+    renderPipeline();
+    renderLeadTable();
+    renderWorkQueue();
+  });
+});
+
+document.querySelector("#previewDigest")?.addEventListener("click", async () => {
+  const panel = document.querySelector("#digestPreview");
+  const button = document.querySelector("#previewDigest");
+  if (button) button.disabled = true;
+  try {
+    const { response, data } = await previewDigest();
+    if (!response.ok) throw new Error(data.error || "No se pudo generar el digest");
+    const digest = data.digest || {};
+    const totals = digest.totals || {};
+    if (panel) {
+      panel.hidden = false;
+      panel.innerHTML = `
+        <strong>Digest del día</strong>
+        <p>Leads: ${safeNumber(totals.leads)} · Calientes: ${safeNumber(totals.hot)} · Vencen hoy: ${safeNumber(totals.dueToday)} · Calientes sin tocar: ${safeNumber(totals.staleHot)}</p>
+      `;
+    }
+    showLiveStatus("Vista previa del digest lista");
+  } catch (error) {
+    if (panel) {
+      panel.hidden = false;
+      panel.textContent = error.message || "Error al generar digest";
+    }
+  } finally {
+    if (button) button.disabled = false;
+  }
 });
 
 document.querySelector("#refreshLeads").addEventListener("click", async () => {
@@ -1036,15 +1554,54 @@ document.querySelector("#logoutButton").addEventListener("click", async () => {
   window.location.href = "/login";
 });
 
+document.querySelector("#invitationForm")?.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const status = form.querySelector("[data-invitation-status]");
+  const resultBox = document.querySelector("[data-invitation-result]");
+  const data = new FormData(form);
+  const payload = {
+    businessName: String(data.get("businessName") || "").trim(),
+    email: String(data.get("email") || "").trim(),
+    role: String(data.get("role") || "client"),
+  };
+  if (payload.businessName.length < 2 || !payload.email.includes("@")) {
+    status.hidden = false;
+    status.textContent = "Completa empresa y email.";
+    return;
+  }
+  const button = form.querySelector('button[type="submit"]');
+  button.disabled = true;
+  const { response, data: result } = await createInvitation(payload);
+  button.disabled = false;
+  if (!response.ok) {
+    status.hidden = false;
+    status.textContent = result.error || "No se pudo crear la invitación.";
+    return;
+  }
+  status.hidden = true;
+  resultBox.hidden = false;
+  resultBox.innerHTML = `<strong>Enlace generado</strong><input value="${safeText(result.acceptanceUrl)}" readonly aria-label="Enlace de invitación" /><button class="button button-small" type="button" data-copy-invitation>Copiar enlace</button>`;
+  resultBox.querySelector("[data-copy-invitation]").addEventListener("click", async () => {
+    await navigator.clipboard.writeText(result.acceptanceUrl);
+    resultBox.querySelector("[data-copy-invitation]").textContent = "Copiado";
+  });
+  form.reset();
+  await fetchInvitations();
+});
+
+renderOnboardingBanner();
+
 loadDashboard({ showSkeleton: true }).catch((error) => {
+  document.body.classList.remove("admin-loading", "admin-refreshing");
   document.querySelector("#pipelineBoard").innerHTML =
     `<p>No se pudo cargar el CRM: ${safeText(error.message)}</p>`;
 });
 
-window.setInterval(() => {
+document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "visible" && state.user) {
     loadDashboard({ silent: true, showSkeleton: false }).catch((error) =>
-      console.warn("[Luenio CRM] Live refresh failed", error),
+      console.warn("[Luenio CRM] Refresh after visibility change failed", error),
     );
   }
-}, 5000);
+});

@@ -1,0 +1,385 @@
+/**
+ * Luenio CRM — Global styles driven by design tokens.
+ * Theme: data-theme="light" | data-theme="dark" on <html>
+ */
+
+@import url("./ui-primitives.css");
+
+:root,
+[data-theme="light"] {
+  --color-canvas: var(--luenio-operate-canvas);
+  --color-surface: var(--luenio-surface);
+  --color-surface-2: var(--luenio-operate-surface-soft);
+  --color-surface-deep: var(--luenio-operate-surface-deep);
+  --color-text: var(--luenio-operate-text);
+  --color-text-2: var(--luenio-operate-text-soft);
+  --color-mute: var(--luenio-operate-muted);
+  --color-accent: var(--luenio-operate-accent);
+  --color-accent-soft: var(--luenio-operate-accent-soft);
+  --color-accent-border: rgba(15, 61, 86, 0.18);
+  --color-border: var(--luenio-operate-line);
+  --color-border-strong: var(--luenio-operate-line-strong);
+  --color-border-control: var(--luenio-operate-line-control);
+  --color-success: var(--luenio-success);
+  --color-success-soft: var(--luenio-success-soft);
+  --color-warning: var(--luenio-warning);
+  --color-warning-soft: var(--luenio-warning-soft);
+  --color-danger: var(--luenio-danger);
+  --color-danger-soft: var(--luenio-danger-soft);
+  --color-warm: #c2410c;
+  --color-warm-soft: #fff7ed;
+  --color-cold: #57534e;
+  --color-cold-soft: #f5f5f4;
+  --color-focus-ring: rgba(15, 61, 86, 0.12);
+  --shadow-sm: var(--luenio-shadow-operate-low);
+  --shadow-md: var(--luenio-shadow-operate-medium);
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  /* Exact Figma CRM Desktop frame (Bx0I3QJCW0YEQegrX35Sw2 / 2:2) */
+  --color-canvas: var(--luenio-dark-canvas);
+  --color-surface: var(--luenio-dark-surface);
+  --color-surface-2: var(--luenio-dark-surface-soft);
+  --color-surface-deep: var(--luenio-dark-surface-deep);
+  --color-text: var(--luenio-dark-text);
+  --color-text-2: var(--luenio-dark-text-soft);
+  --color-mute: var(--luenio-dark-muted);
+  --color-accent: var(--luenio-dark-accent);
+  --color-accent-soft: rgba(212, 165, 116, 0.1);
+  --color-accent-border: rgba(212, 165, 116, 0.28);
+  --color-border: rgba(140, 153, 173, 0.15);
+  --color-border-strong: rgba(140, 153, 173, 0.2);
+  --color-border-control: rgba(140, 153, 173, 0.28);
+  --color-success: #34d399;
+  --color-success-soft: rgba(52, 211, 153, 0.12);
+  --color-warning: #fbbf24;
+  --color-warning-soft: rgba(251, 191, 36, 0.12);
+  --color-danger: #f87171;
+  --color-danger-soft: rgba(248, 113, 113, 0.12);
+  --color-warm: #fb923c;
+  --color-warm-soft: rgba(251, 146, 60, 0.12);
+  --color-cold: #94a3b8;
+  --color-cold-soft: rgba(148, 163, 184, 0.12);
+  --color-focus-ring: rgba(212, 165, 116, 0.2);
+  --shadow-sm: none;
+  --shadow-md: 0 0 0 1px rgba(140, 153, 173, 0.12);
+  color-scheme: dark;
+}
+
+:root {
+  --font-sans: var(--luenio-font-operate);
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius-sm: var(--luenio-radius-micro);
+  --radius-control: var(--luenio-radius-operate-control);
+  --radius-card: var(--luenio-radius-operate-card);
+  --radius-panel: var(--luenio-radius-operate-panel);
+  --radius-pill: var(--luenio-radius-pill);
+  --space-1: var(--luenio-space-1);
+  --space-2: var(--luenio-space-2);
+  --space-3: var(--luenio-space-3);
+  --space-4: var(--luenio-space-4);
+  --space-5: var(--luenio-space-5);
+  --space-6: var(--luenio-space-6);
+  --space-8: var(--luenio-space-8);
+  --ease-out: var(--luenio-ease-out);
+  --ease-in-out: var(--luenio-ease-in-out);
+  --duration-fast: var(--luenio-duration-fast);
+  --duration-normal: var(--luenio-duration-normal);
+  --duration-spatial: var(--luenio-duration-spatial);
+  --motion-distance: var(--luenio-motion-distance);
+  --z-modal: 50;
+  --z-toast: 60;
+  --text-label: 0.5625rem;
+  --text-caption: 0.625rem;
+  --text-meta: 0.6875rem;
+  --text-body: 0.75rem;
+  --text-body-md: var(--luenio-type-operate-control);
+  --text-body-lg: var(--luenio-type-operate-body);
+  --text-title: 0.9375rem;
+  --text-title-lg: var(--luenio-type-operate-section-title);
+  --text-h3: var(--luenio-type-operate-view-title);
+  --text-h2: var(--luenio-type-operate-metric);
+  --text-h1: 2rem;
+  --text-kpi: 1.375rem;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-weight: var(--font-weight-regular);
+  line-height: 1.5;
+}
+
+/* Prefer system theme until user toggles */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+  }
+}
+
+/* —— Micro-interactions —— */
+@keyframes luenio-record-resolve {
+  from {
+    opacity: 0.58;
+    transform: translateX(-6px);
+    clip-path: inset(0 8px 0 0);
+    filter: saturate(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+    clip-path: inset(0);
+    filter: saturate(1);
+  }
+}
+
+@keyframes luenio-skeleton {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.stagger-in > * {
+  animation: luenio-record-resolve var(--duration-normal) var(--ease-out) both;
+}
+
+.stagger-in > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger-in > *:nth-child(2) {
+  animation-delay: 28ms;
+}
+.stagger-in > *:nth-child(3) {
+  animation-delay: 56ms;
+}
+.stagger-in > *:nth-child(4) {
+  animation-delay: 84ms;
+}
+.stagger-in > *:nth-child(5) {
+  animation-delay: 112ms;
+}
+.stagger-in > *:nth-child(6) {
+  animation-delay: 140ms;
+}
+.stagger-in > *:nth-child(7) {
+  animation-delay: 168ms;
+}
+.stagger-in > *:nth-child(8) {
+  animation-delay: 196ms;
+}
+
+.skeleton {
+  border-radius: var(--radius-control);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-deep) 0%,
+    var(--color-surface-2) 50%,
+    var(--color-surface-deep) 100%
+  );
+  background-size: 200% 100%;
+  animation: luenio-skeleton 1.4s var(--ease-in-out) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus rings from tokens */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--color-focus-ring);
+}
+
+/* Bento grid helper */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.bento-span-3 {
+  grid-column: span 3;
+}
+.bento-span-4 {
+  grid-column: span 4;
+}
+.bento-span-6 {
+  grid-column: span 6;
+}
+.bento-span-8 {
+  grid-column: span 8;
+}
+.bento-span-12 {
+  grid-column: span 12;
+}
+
+@media (max-width: 960px) {
+  .bento-span-3,
+  .bento-span-4 {
+    grid-column: span 6;
+  }
+  .bento-span-6,
+  .bento-span-8 {
+    grid-column: span 12;
+  }
+}
+
+@media (max-width: 640px) {
+  .bento-span-3,
+  .bento-span-4,
+  .bento-span-6,
+  .bento-span-8 {
+    grid-column: span 12;
+  }
+}
+
+/* Settings + responsive CRM shell */
+.settings-panel__title {
+  margin: 0 0 12px;
+  font-size: var(--text-title-lg);
+  font-weight: var(--font-weight-semibold);
+}
+.settings-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.settings-panel__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+.settings-panel__email {
+  font-size: var(--text-body);
+  color: var(--color-mute);
+  margin-top: 2px;
+}
+.settings-panel__role {
+  font-size: var(--text-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+@media (max-width: 1024px) {
+  .crm-shell__outlet {
+    padding: 12px 14px 20px;
+  }
+  .data-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 640px) {
+  .crm-shell {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .crm-sidebar {
+    width: 100%;
+    min-height: auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .crm-sidebar__brand {
+    padding: 0 4px 0 0;
+  }
+  .crm-sidebar__nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+  }
+  .crm-sidebar__link {
+    padding: 8px 10px;
+    font-size: var(--text-meta);
+  }
+  .crm-sidebar__name,
+  .crm-sidebar__sub,
+  .crm-sidebar__link span:last-child {
+    display: inline !important;
+  }
+  .crm-shell__main {
+    width: 100%;
+    min-width: 0;
+  }
+  .crm-topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .crm-topbar__right {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .crm-topbar__user {
+    align-items: flex-start;
+    min-width: 0;
+    flex: 1;
+  }
+  .crm-shell__outlet {
+    padding: 12px;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .kanban__scroller {
+    max-width: 100%;
+  }
+  .kanban__col {
+    flex: 0 0 min(240px, 78vw);
+  }
+  .metric-card__value {
+    font-size: var(--text-title-lg);
+  }
+  .bento-grid {
+    gap: 8px;
+  }
+}

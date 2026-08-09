@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /demo
+Disallow: /demo/
+Disallow: /gym
+Disallow: /restaurants
+Disallow: /real-estate
+Disallow: /ecommerce
+Disallow: /agencies
+Disallow: /veterinary
+Disallow: /aesthetics
+Disallow: /veterinarias
+Disallow: /esteticas
+Disallow: /login
+Disallow: /dashboard
+Disallow: /admin
+
+Sitemap: https://luenio.com/sitemap.xml

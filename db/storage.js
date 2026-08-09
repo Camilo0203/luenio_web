@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getSupabaseEnv } from "../config/env.js";
+import { getSupabaseEnv, isProduction } from "../config/env.js";
 
 const dbPath = path.join(process.cwd(), "db", "leads-db.json");
 const DUPLICATE_WINDOW_MS = 90_000;
@@ -26,23 +26,66 @@ export async function supabaseRequest(pathname, options = {}) {
   const config = getSupabaseConfig();
   if (!config) return null;
 
-  const response = await fetch(`${config.url}/rest/v1/${pathname}`, {
-    ...options,
-    headers: {
-      apikey: config.key,
-      Authorization: `Bearer ${config.key}`,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-      ...(options.headers || {}),
-    },
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10_000);
+  try {
+    const response = await fetch(`${config.url}/rest/v1/${pathname}`, {
+      ...options,
+      headers: {
+        apikey: config.key,
+        Authorization: `Bearer ${config.key}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+        ...(options.headers || {}),
+      },
+      signal: controller.signal,
+    });
 
-  if (!response.ok) {
-    const body = await response.text();
-    throw new Error(`Supabase ${pathname} failed ${response.status}: ${body}`);
+    if (!response.ok) {
+      const responseBody = (await response.text()).slice(0, 4_000);
+      const databaseCode = [
+        "INVITATION_INVALID",
+        "INVITATION_UNAVAILABLE",
+        "INVITATION_EXPIRED",
+        "INVITATION_USER_EXISTS",
+        "RESET_INVALID",
+        "RESET_UNAVAILABLE",
+        "RESET_EXPIRED",
+        "CONTACT_DUPLICATE",
+        "CONTACT_DELIVERY_INVALID",
+        "INVALID_THROTTLE_KEY",
+      ].find((code) => responseBody.includes(code));
+      if (!isProduction()) {
+        console.error("[Luenio DB] Supabase error", {
+          pathname,
+          status: response.status,
+          body: responseBody.slice(0, 500),
+        });
+      }
+      const error = new Error(`Supabase request failed (${response.status}).`);
+      error.statusCode = 503;
+      error.publicMessage =
+        "No pudimos conectar con el servicio de datos. Intenta de nuevo en un momento.";
+      error.databaseCode = databaseCode || null;
+      error.details = responseBody;
+      throw error;
+    }
+
+    return response.json().catch(() => []);
+  } catch (error) {
+    if (error.statusCode) throw error;
+    if (!isProduction()) {
+      console.error("[Luenio DB] Supabase network/error", pathname, error?.message || error);
+    }
+    const storageError = new Error("Supabase request failed.");
+    storageError.statusCode = 503;
+    storageError.publicMessage =
+      "No pudimos conectar con el servicio de datos. Intenta de nuevo en un momento.";
+    storageError.cause = error;
+    throw storageError;
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json().catch(() => []);
 }
 
 function emptyDatabase() {
@@ -54,6 +97,15 @@ function emptyDatabase() {
     notifications: [],
     subscriptions: [],
     inquiries: [],
+    contactDeliveries: [],
+    businesses: [],
+    memberships: [],
+    invitations: [],
+    auditLogs: [],
+    passwordResets: [],
+    sessions: [],
+    authThrottles: [],
+    authChallenges: [],
     updatedAt: null,
   };
 }
@@ -127,7 +179,8 @@ function duplicateError() {
 function mapLeadForSupabase(lead) {
   return {
     id: lead.id,
-    user_id: lead.userId,
+    user_id: lead.actorUserId || null,
+    business_id: lead.userId,
     name: lead.name,
     business: lead.business,
     phone: lead.phone,
@@ -135,6 +188,17 @@ function mapLeadForSupabase(lead) {
     service: lead.service,
     message: lead.message,
     source: lead.source,
+    notes: lead.notes ?? "",
+    tags: Array.isArray(lead.tags) ? lead.tags : [],
+    next_action: lead.nextAction ?? lead.next_action ?? "",
+    next_action_at: lead.nextActionAt ?? lead.next_action_at ?? null,
+    last_contacted_at: lead.lastContactedAt ?? lead.last_contacted_at ?? null,
+    contact_log: Array.isArray(lead.contactLog)
+      ? lead.contactLog
+      : Array.isArray(lead.contact_log)
+        ? lead.contact_log
+        : [],
+    assignee_user_id: lead.assigneeUserId ?? lead.assignee_user_id ?? null,
     score: lead.score,
     classification: lead.classification,
     status: lead.status,
@@ -149,7 +213,8 @@ function mapLeadForSupabase(lead) {
 function mapActionForSupabase(action) {
   return {
     id: action.id,
-    user_id: action.userId,
+    user_id: action.actorUserId || null,
+    business_id: action.userId,
     lead_id: action.leadId,
     workflow: action.workflow,
     segment: action.segment,
@@ -168,7 +233,8 @@ function mapActionForSupabase(action) {
 function mapNotificationForSupabase(notification) {
   return {
     id: notification.id,
-    user_id: notification.userId,
+    user_id: notification.actorUserId || null,
+    business_id: notification.userId,
     lead_id: notification.leadId,
     workflow: notification.workflow,
     classification: notification.classification,
@@ -180,7 +246,8 @@ function mapNotificationForSupabase(notification) {
 function mapEventForSupabase(event) {
   return {
     id: event.id,
-    user_id: event.userId,
+    user_id: event.actorUserId || null,
+    business_id: event.userId,
     lead_id: event.leadId || null,
     type: event.type,
     payload: event.payload || {},
@@ -218,6 +285,112 @@ export async function testStorageConnection() {
   return { ok: true, storage: "json_fallback" };
 }
 
+/**
+ * Workspace ids that may need a CRM digest (businesses or distinct lead tenants).
+ */
+/**
+ * Members of a workspace for assignee pickers.
+ * @returns {Promise<Array<{ id: string, email: string, role: string, businessName: string }>>}
+ */
+export async function listWorkspaceMembers(businessId) {
+  assertStorageAvailable();
+  if (!businessId) return [];
+
+  if (getSupabaseConfig()) {
+    const [byBusiness, memberships] = await Promise.all([
+      supabaseRequest(
+        `users?business_id=eq.${encodeURIComponent(businessId)}&select=id,email,business_name,role`,
+      ),
+      supabaseRequest(
+        `memberships?business_id=eq.${encodeURIComponent(businessId)}&select=user_id,role`,
+      ),
+    ]);
+    const memberIds = [
+      ...new Set((memberships || []).map((row) => row.user_id || row.userId).filter(Boolean)),
+    ];
+    let byMembership = [];
+    if (memberIds.length) {
+      const filter = memberIds.map((id) => `"${id.replace(/"/g, "")}"`).join(",");
+      byMembership = await supabaseRequest(
+        `users?id=in.(${filter})&select=id,email,business_name,role`,
+      );
+    }
+    const byId = new Map();
+    for (const user of [...(byBusiness || []), ...(byMembership || [])]) {
+      if (!user?.id) continue;
+      byId.set(user.id, {
+        id: user.id,
+        email: user.email || "",
+        role: user.role || "client",
+        businessName: user.business_name || user.businessName || "",
+      });
+    }
+    return [...byId.values()].sort((a, b) => a.email.localeCompare(b.email));
+  }
+
+  const database = readLocalDatabase();
+  const members = new Map();
+  for (const user of database.users || []) {
+    const userBusiness = user.businessId || user.business_id || user.id;
+    if (userBusiness !== businessId && user.id !== businessId) continue;
+    members.set(user.id, {
+      id: user.id,
+      email: user.email || "",
+      role: user.role || "client",
+      businessName: user.businessName || user.business_name || "",
+    });
+  }
+  for (const membership of database.memberships || []) {
+    const mid = membership.businessId || membership.business_id;
+    if (mid !== businessId) continue;
+    const uid = membership.userId || membership.user_id;
+    if (!uid || members.has(uid)) continue;
+    const user = (database.users || []).find((row) => row.id === uid);
+    if (!user) continue;
+    members.set(uid, {
+      id: user.id,
+      email: user.email || "",
+      role: membership.role || user.role || "client",
+      businessName: user.businessName || user.business_name || "",
+    });
+  }
+  return [...members.values()].sort((a, b) => a.email.localeCompare(b.email));
+}
+
+export async function listCrmWorkspaceIds() {
+  assertStorageAvailable();
+
+  if (getSupabaseConfig()) {
+    try {
+      const businesses = await supabaseRequest("businesses?select=id");
+      const ids = (businesses || []).map((row) => row.id).filter(Boolean);
+      if (ids.length) return [...new Set(ids)];
+    } catch {
+      // Fall through to distinct business_id from leads.
+    }
+    const leadRows = await supabaseRequest("leads?select=business_id");
+    return [
+      ...new Set((leadRows || []).map((row) => row.business_id || row.businessId).filter(Boolean)),
+    ];
+  }
+
+  const database = readLocalDatabase();
+  const ids = new Set();
+  for (const business of database.businesses || []) {
+    if (business?.id) ids.add(business.id);
+  }
+  for (const lead of database.leads || []) {
+    if (lead?.userId) ids.add(lead.userId);
+    if (lead?.businessId) ids.add(lead.businessId);
+  }
+  for (const user of database.users || []) {
+    if (user?.business_id) ids.add(user.business_id);
+    if (user?.businessId) ids.add(user.businessId);
+    if (user?.id && user?.role === "admin") ids.add(user.business_id || user.businessId || user.id);
+  }
+  return [...ids];
+}
+
 export async function listCrmData(userId) {
   assertStorageAvailable();
   if (!userId) throw new Error("userId is required to list CRM data.");
@@ -225,16 +398,16 @@ export async function listCrmData(userId) {
   if (getSupabaseConfig()) {
     const [leads, actions, notifications, events] = await Promise.all([
       supabaseRequest(
-        `leads?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
+        `leads?business_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
       ),
       supabaseRequest(
-        `lead_actions?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
+        `lead_actions?business_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
       ),
       supabaseRequest(
-        `lead_notifications?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
+        `lead_notifications?business_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc`,
       ),
       supabaseRequest(
-        `events?user_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=100`,
+        `events?business_id=eq.${encodeURIComponent(userId)}&select=*&order=created_at.desc&limit=100`,
       ),
     ]);
     return {
@@ -365,29 +538,42 @@ export async function storePublicInquiry(inquiry) {
     source: inquiry.source || "landing",
     createdAt: inquiry.timestamp || timestamp,
   };
+  const delivery = {
+    id: `delivery_${publicInquiry.id}`,
+    inquiryId: publicInquiry.id,
+    status: "pending",
+    attempts: 0,
+    nextAttemptAt: publicInquiry.createdAt,
+    lockedUntil: null,
+    deliveredAt: null,
+    lastHttpStatus: null,
+    createdAt: publicInquiry.createdAt,
+    updatedAt: publicInquiry.createdAt,
+  };
 
   if (getSupabaseConfig()) {
-    const cutoff = new Date(Date.now() - DUPLICATE_WINDOW_MS).toISOString();
-    const duplicate = await supabaseRequest(
-      `contact_inquiries?phone_normalized=eq.${encodeURIComponent(publicInquiry.phoneNormalized)}&created_at=gte.${encodeURIComponent(cutoff)}&select=id&limit=1`,
-    );
-    if (duplicate?.length) throw duplicateError();
-
-    await supabaseRequest("contact_inquiries", {
-      method: "POST",
-      body: JSON.stringify({
-        id: publicInquiry.id,
-        name: publicInquiry.name,
-        business: publicInquiry.business,
-        phone: publicInquiry.phone,
-        phone_normalized: publicInquiry.phoneNormalized,
-        service: publicInquiry.service,
-        message: publicInquiry.message,
-        source: publicInquiry.source,
-        created_at: publicInquiry.createdAt,
-      }),
-    });
-    return { inquiry: publicInquiry, storage: "supabase" };
+    try {
+      await supabaseRequest("rpc/luenio_store_contact_inquiry", {
+        method: "POST",
+        body: JSON.stringify({
+          p_id: publicInquiry.id,
+          p_delivery_id: delivery.id,
+          p_name: publicInquiry.name,
+          p_business: publicInquiry.business,
+          p_phone: publicInquiry.phone,
+          p_phone_normalized: publicInquiry.phoneNormalized,
+          p_service: publicInquiry.service,
+          p_message: publicInquiry.message,
+          p_source: publicInquiry.source,
+          p_created_at: publicInquiry.createdAt,
+          p_duplicate_window_seconds: Math.floor(DUPLICATE_WINDOW_MS / 1_000),
+        }),
+      });
+    } catch (error) {
+      if (error.databaseCode === "CONTACT_DUPLICATE") throw duplicateError();
+      throw error;
+    }
+    return { inquiry: publicInquiry, delivery, storage: "supabase" };
   }
 
   const database = readLocalDatabase();
@@ -396,12 +582,175 @@ export async function storePublicInquiry(inquiry) {
   const nextDatabase = writeLocalDatabase({
     ...database,
     inquiries: [publicInquiry, ...(database.inquiries || [])].slice(0, 500),
+    contactDeliveries: [delivery, ...(database.contactDeliveries || [])].slice(0, 1_000),
   });
 
   return {
     inquiry: publicInquiry,
+    delivery,
     storedInquiries: nextDatabase.inquiries.length,
     storage: "json_fallback",
+  };
+}
+
+function mapContactDeliveryClaim(record) {
+  return {
+    deliveryId: record.delivery_id,
+    inquiry: {
+      id: record.inquiry_id,
+      name: record.inquiry_name,
+      business: record.inquiry_business,
+      phone: record.inquiry_phone,
+      service: record.inquiry_service,
+      message: record.inquiry_message || "",
+      source: record.inquiry_source || "landing",
+      timestamp: record.inquiry_created_at,
+    },
+    attempts: record.delivery_attempts,
+  };
+}
+
+export async function claimContactDeliveries({ limit = 10, inquiryId = null } = {}) {
+  assertStorageAvailable();
+  if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+    throw new Error("Contact delivery limit is invalid.");
+  }
+  const now = new Date();
+  const nowIso = now.toISOString();
+
+  if (getSupabaseConfig()) {
+    const records = await supabaseRequest("rpc/luenio_claim_contact_deliveries", {
+      method: "POST",
+      body: JSON.stringify({
+        p_now: nowIso,
+        p_limit: limit,
+        p_lock_seconds: 300,
+        p_inquiry_id: inquiryId || null,
+      }),
+    });
+    return records.map(mapContactDeliveryClaim);
+  }
+
+  const database = readLocalDatabase();
+  const deliveries = database.contactDeliveries || [];
+  const claimedIds = deliveries
+    .filter((delivery) => {
+      if (delivery.attempts >= 10) return false;
+      if (inquiryId && delivery.inquiryId !== inquiryId) return false;
+      const due = new Date(delivery.nextAttemptAt).getTime() <= now.getTime();
+      const staleLock =
+        delivery.status === "processing" &&
+        delivery.lockedUntil &&
+        new Date(delivery.lockedUntil).getTime() <= now.getTime();
+      return (["pending", "retry"].includes(delivery.status) && due) || staleLock;
+    })
+    .sort((left, right) => new Date(left.nextAttemptAt) - new Date(right.nextAttemptAt))
+    .slice(0, limit)
+    .map((delivery) => delivery.id);
+  const claimedIdSet = new Set(claimedIds);
+  const nextDeliveries = deliveries.map((delivery) =>
+    claimedIdSet.has(delivery.id)
+      ? {
+          ...delivery,
+          status: "processing",
+          attempts: delivery.attempts + 1,
+          lockedUntil: new Date(now.getTime() + 5 * 60 * 1_000).toISOString(),
+          updatedAt: nowIso,
+        }
+      : delivery,
+  );
+  writeLocalDatabase({ ...database, contactDeliveries: nextDeliveries });
+  const inquiries = new Map((database.inquiries || []).map((inquiry) => [inquiry.id, inquiry]));
+  return nextDeliveries
+    .filter((delivery) => claimedIdSet.has(delivery.id))
+    .map((delivery) => ({
+      deliveryId: delivery.id,
+      inquiry: {
+        ...inquiries.get(delivery.inquiryId),
+        timestamp: inquiries.get(delivery.inquiryId)?.createdAt,
+      },
+      attempts: delivery.attempts,
+    }))
+    .filter((claim) => claim.inquiry?.id);
+}
+
+export async function completeContactDelivery({ deliveryId, succeeded, httpStatus = null }) {
+  assertStorageAvailable();
+  const normalizedHttpStatus =
+    Number.isInteger(httpStatus) && httpStatus >= 100 && httpStatus <= 599 ? httpStatus : null;
+  const now = new Date();
+  const nowIso = now.toISOString();
+
+  if (getSupabaseConfig()) {
+    const [result] = await supabaseRequest("rpc/luenio_complete_contact_delivery", {
+      method: "POST",
+      body: JSON.stringify({
+        p_delivery_id: deliveryId,
+        p_succeeded: Boolean(succeeded),
+        p_http_status: normalizedHttpStatus,
+        p_now: nowIso,
+      }),
+    });
+    return result || null;
+  }
+
+  const database = readLocalDatabase();
+  let completed = null;
+  const contactDeliveries = (database.contactDeliveries || []).map((delivery) => {
+    if (delivery.id !== deliveryId || delivery.status !== "processing") return delivery;
+    const status = succeeded ? "sent" : delivery.attempts >= 10 ? "dead" : "retry";
+    const backoffSeconds = Math.min(3_600, 30 * 2 ** Math.max(delivery.attempts - 1, 0));
+    completed = {
+      ...delivery,
+      status,
+      nextAttemptAt: succeeded
+        ? delivery.nextAttemptAt
+        : new Date(now.getTime() + backoffSeconds * 1_000).toISOString(),
+      lockedUntil: null,
+      deliveredAt: succeeded ? nowIso : delivery.deliveredAt,
+      lastHttpStatus: normalizedHttpStatus,
+      updatedAt: nowIso,
+    };
+    return completed;
+  });
+  writeLocalDatabase({ ...database, contactDeliveries });
+  return completed;
+}
+
+export async function getContactDeliveryHealth() {
+  assertStorageAvailable();
+  const records = getSupabaseConfig()
+    ? await supabaseRequest(
+        "contact_deliveries?select=status,next_attempt_at,updated_at&status=in.(pending,retry,processing,dead)&order=next_attempt_at.asc&limit=1000",
+      )
+    : readLocalDatabase().contactDeliveries || [];
+  const active = records.filter((record) =>
+    ["pending", "retry", "processing", "dead"].includes(record.status),
+  );
+  const counts = active.reduce(
+    (summary, record) => ({ ...summary, [record.status]: (summary[record.status] || 0) + 1 }),
+    { pending: 0, retry: 0, processing: 0, dead: 0 },
+  );
+  const oldestTimestamp = active
+    .filter((record) => record.status !== "dead")
+    .map(
+      (record) =>
+        record.nextAttemptAt || record.next_attempt_at || record.updatedAt || record.updated_at,
+    )
+    .filter(Boolean)
+    .map((value) => new Date(value).getTime())
+    .filter(Number.isFinite)
+    .sort((left, right) => left - right)[0];
+  const oldestAgeSeconds = oldestTimestamp
+    ? Math.max(0, Math.floor((Date.now() - oldestTimestamp) / 1_000))
+    : 0;
+  return {
+    healthy: counts.dead === 0 && oldestAgeSeconds < 15 * 60,
+    pending: counts.pending,
+    retry: counts.retry,
+    processing: counts.processing,
+    dead: counts.dead,
+    oldestAgeSeconds,
   };
 }
 
@@ -418,12 +767,21 @@ export async function updateLeadPipeline(leadId, updates, userId, pipelineEvent)
 
   if (getSupabaseConfig()) {
     const body = {
-      status: updates.status,
-      pipeline_stage: updates.pipelineStage || updates.status,
       updated_at: new Date().toISOString(),
     };
+    if (updates.status !== undefined) body.status = updates.status;
+    if (updates.pipelineStage !== undefined || updates.status !== undefined) {
+      body.pipeline_stage = updates.pipelineStage || updates.status;
+    }
+    if (updates.notes !== undefined) body.notes = updates.notes;
+    if (updates.tags !== undefined) body.tags = updates.tags;
+    if (updates.nextAction !== undefined) body.next_action = updates.nextAction;
+    if (updates.nextActionAt !== undefined) body.next_action_at = updates.nextActionAt;
+    if (updates.lastContactedAt !== undefined) body.last_contacted_at = updates.lastContactedAt;
+    if (updates.contactLog !== undefined) body.contact_log = updates.contactLog;
+    if (updates.assigneeUserId !== undefined) body.assignee_user_id = updates.assigneeUserId;
     const [lead] = await supabaseRequest(
-      `leads?id=eq.${encodeURIComponent(leadId)}&user_id=eq.${encodeURIComponent(userId)}`,
+      `leads?id=eq.${encodeURIComponent(leadId)}&business_id=eq.${encodeURIComponent(userId)}`,
       {
         method: "PATCH",
         body: JSON.stringify(body),
@@ -440,9 +798,14 @@ export async function updateLeadPipeline(leadId, updates, userId, pipelineEvent)
   );
   if (!existingLead) throw notFoundError;
 
+  const nextUpdates = { ...updates };
+  if (nextUpdates.pipelineStage === undefined && nextUpdates.status !== undefined) {
+    nextUpdates.pipelineStage = nextUpdates.status;
+  }
+
   const leads = (database.leads || []).map((lead) =>
     lead.id === leadId && lead.userId === userId
-      ? { ...lead, ...updates, updatedAt: new Date().toISOString() }
+      ? { ...lead, ...nextUpdates, updatedAt: new Date().toISOString() }
       : lead,
   );
   writeLocalDatabase({
@@ -456,7 +819,11 @@ export async function updateLeadPipeline(leadId, updates, userId, pipelineEvent)
   };
 }
 
-export async function updateUserSubscription(subscription, subscriptionEvent) {
+export async function updateUserSubscription(
+  subscription,
+  subscriptionEvent,
+  { workspaceId = subscription?.userId } = {},
+) {
   assertStorageAvailable();
   const { userId, plan, status, stripeCustomerId, stripeSubscriptionId, currentPeriodEnd } =
     subscription || {};
@@ -464,7 +831,8 @@ export async function updateUserSubscription(subscription, subscriptionEvent) {
   if (!subscription?.id) throw new Error("subscription id is required to update subscription.");
   if (!subscriptionEvent?.id)
     throw new Error("subscription event id is required to update subscription.");
-  if (subscriptionEvent.userId !== userId)
+  if (!workspaceId) throw new Error("workspaceId is required to record subscription activity.");
+  if (subscriptionEvent.userId !== workspaceId)
     throw new Error("subscription event userId must match the workspace.");
 
   const timestamp = subscription.updatedAt || new Date().toISOString();

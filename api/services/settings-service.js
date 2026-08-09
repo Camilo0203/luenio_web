@@ -1,5 +1,4 @@
 import { getPlan } from "../../config/billing.js";
-import { buildReadiness } from "../../config/readiness.js";
 
 export function buildWorkspaceChecklist({ user }) {
   const plan = getPlan(user.plan);
@@ -20,15 +19,15 @@ export function buildWorkspaceChecklist({ user }) {
 }
 
 export function getWorkspaceSettings(user) {
-  const readiness = buildReadiness();
   const plan = getPlan(user.plan);
 
   return {
     user,
-    plan,
-    storage: readiness.storage,
-    integrations: readiness.integrations,
-    readiness,
+    plan: {
+      name: plan.name,
+      monthlyLeadLimit: plan.monthlyLeadLimit,
+      features: plan.features,
+    },
     checklist: buildWorkspaceChecklist({ user }),
   };
 }

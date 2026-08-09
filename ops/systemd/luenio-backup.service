@@ -1,0 +1,15 @@
+[Unit]
+Description=Backup Luenio production, staging and edge volumes
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+Environment=PROJECT_DIR=/opt/luenio
+EnvironmentFile=/etc/luenio/backup.env
+Environment=RCLONE_CONFIG=/etc/luenio/rclone.conf
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ExecStart=/opt/luenio/ops/backup-volumes.sh

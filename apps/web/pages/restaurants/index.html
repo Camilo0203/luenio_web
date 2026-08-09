@@ -1,160 +1,620 @@
 <!doctype html>
 <html lang="es">
+  <!--
+    THESIS: La visita comienza como una decisión de mesa, no como una galería pasiva de platos.
+    OWN-WORLD: Pase de cocina en carbón, papel de comanda, vino oscuro, ámbar y fotografía de fuego.
+    STORY: El visitante elige ocasión y hora, recibe una ruta de menú ilustrativa, explora la carta y reserva.
+    FIRST VIEWPORT: Titular en penumbra, cocina a sangre y comanda manipulable apoyada en el borde inferior.
+    FORM: Pase de cocina, estructura asignada 6. Seed 718376be.
+  -->
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luenio para Restaurantes | Recupera pedidos de WhatsApp</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Sabor &amp; Fuego | Cocina contemporánea en Bogotá</title>
     <meta
       name="description"
-      content="Automatiza WhatsApp para restaurantes, responde menú y reservas al instante y recupera pedidos perdidos por lentitud."
+      content="Landing demo para un restaurante premium en Bogotá con carta, experiencia, reservas y ubicación."
     />
-    <meta
-      name="keywords"
-      content="automatización WhatsApp restaurantes, chatbot pedidos restaurante, CRM para restaurantes, IA para restaurantes, recuperar pedidos WhatsApp"
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="author" content="Luenio" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..700&family=Hanken+Grotesk:wght@400..700&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
     />
-    <meta name="author" content="Luenio Agency" />
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/restaurants" />
-    <meta name="theme-color" content="#07111f" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Luenio para Restaurantes | Recupera pedidos de WhatsApp" />
-    <meta
-      property="og:description"
-      content="Automatiza WhatsApp para restaurantes, responde menú y reservas al instante y recupera pedidos perdidos por lentitud."
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400..700&family=Hanken+Grotesk:wght@400..700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/demo-premium/restaurant-hero-960.webp"
+      imagesrcset="
+        /assets/demo-premium/restaurant-hero-480.webp  480w,
+        /assets/demo-premium/restaurant-hero-960.webp  960w,
+        /assets/demo-premium/restaurant-hero.webp     1672w
+      "
+      imagesizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+      type="image/webp"
+      fetchpriority="high"
     />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/restaurants" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Luenio para Restaurantes | Recupera pedidos de WhatsApp" />
-    <meta
-      name="twitter:description"
-      content="Automatiza WhatsApp para restaurantes, responde menú y reservas al instante y recupera pedidos perdidos por lentitud."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-showcase.css" />
+    <link rel="stylesheet" href="/apps/web/src/industry-demos.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-worlds.css" />
+    <link rel="stylesheet" href="/apps/web/src/sector-redesign.css" />
+    <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
+    <script type="module" src="/apps/web/src/niche-landing.js"></script>
+    <script type="module" src="/apps/web/src/industry-demos.js"></script>
   </head>
-  <body>
-    <main class="niche-page niche-restaurants">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a
-        ><a class="button button-primary button-small" href="/demo/restaurants"
-          >Deja de perder pedidos</a
+  <body
+    class="demo-page demo-restaurant sector-v2"
+    data-demo-name="Sabor &amp; Fuego"
+    data-demo-type="restaurante"
+    data-demo-goal="Quiero una landing para mi restaurante"
+  >
+    <header class="demo-header">
+      <div class="demo-shell demo-header__inner">
+        <a class="demo-brand" href="#inicio">Sabor &amp; Fuego</a>
+        <nav class="demo-nav" id="restaurant-navigation" data-navigation data-open="false">
+          <a href="#historia">Historia</a><a href="#carta">Carta</a
+          ><a href="#experiencia">Experiencia</a><a href="#chef">Chef</a
+          ><a href="#ubicacion">Ubicación</a>
+        </nav>
+        <a class="demo-button" href="#reservas">Solicitar reserva</a>
+        <button
+          class="demo-menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="restaurant-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
         >
-      </nav>
-      <section class="niche-hero">
-        <p class="eyebrow">Luenio para restaurantes</p>
-        <p class="niche-loss-line">Estás perdiendo clientes ahora mismo sin darte cuenta.</p>
-        <h1>Cada WhatsApp sin respuesta puede ser un pedido perdido.</h1>
-        <p>
-          Cuando alguien pide menú, ubicación o reserva, está listo para comprar. Si tu equipo
-          tarda, el cliente elige otra opción.
-        </p>
-        <div class="niche-actions">
-          <a class="button button-primary" href="/demo/restaurants"
-            >Mira cuántas ventas te estás perdiendo</a
-          ><a class="button" href="#como-funciona">Descubre por qué desaparecen los pedidos</a>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="demo-hero" id="inicio">
+        <div class="demo-hero__media">
+          <img
+            decoding="async"
+            width="1672"
+            height="941"
+            src="/assets/demo-premium/restaurant-hero.webp"
+            srcset="
+              /assets/demo-premium/restaurant-hero-480.webp  480w,
+              /assets/demo-premium/restaurant-hero-960.webp  960w,
+              /assets/demo-premium/restaurant-hero.webp     1672w
+            "
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="Plato de autor de Sabor y Fuego"
+            fetchpriority="high"
+          />
+        </div>
+        <div class="demo-shell demo-hero__content">
+          <p class="demo-eyebrow">Cocina contemporánea · Chapinero Alto</p>
+          <h1>El fuego transforma cada ingrediente.</h1>
+          <p>
+            Una cocina colombiana de temporada donde la brasa, el origen y el tiempo construyen
+            platos para recordar.
+          </p>
+          <div class="demo-actions">
+            <a class="demo-button" href="#reservas">Solicitar reserva</a
+            ><a class="demo-button demo-button--ghost" href="#carta">Explorar la carta</a>
+          </div>
+          <aside
+            class="restaurant-pass"
+            data-restaurant-pass
+            data-luenio-collision-zone
+            aria-label="Pase de cocina interactivo"
+          >
+            <div class="restaurant-pass__top">
+              <strong>Mesa de esta noche</strong>
+              <span>Selección ilustrativa</span>
+            </div>
+            <div class="restaurant-pass__body">
+              <div>
+                <div class="restaurant-pass__group" data-demo-choice-group="occasion">
+                  <span class="demo-lab-label">Ocasión</span>
+                  <div class="demo-choice-row">
+                    <button
+                      class="demo-choice is-selected"
+                      type="button"
+                      data-demo-choice="Primera visita"
+                      aria-pressed="true"
+                    >
+                      Primera visita
+                    </button>
+                    <button
+                      class="demo-choice"
+                      type="button"
+                      data-demo-choice="Celebración"
+                      aria-pressed="false"
+                    >
+                      Celebración
+                    </button>
+                    <button
+                      class="demo-choice"
+                      type="button"
+                      data-demo-choice="Cena tranquila"
+                      aria-pressed="false"
+                    >
+                      Cena tranquila
+                    </button>
+                  </div>
+                </div>
+                <div class="restaurant-pass__group" data-demo-choice-group="hour">
+                  <span class="demo-lab-label">Hora</span>
+                  <div class="demo-choice-row">
+                    <button
+                      class="demo-choice"
+                      type="button"
+                      data-demo-choice="18:30"
+                      aria-pressed="false"
+                    >
+                      18:30
+                    </button>
+                    <button
+                      class="demo-choice is-selected"
+                      type="button"
+                      data-demo-choice="20:00"
+                      aria-pressed="true"
+                    >
+                      20:00
+                    </button>
+                    <button
+                      class="demo-choice"
+                      type="button"
+                      data-demo-choice="21:30"
+                      aria-pressed="false"
+                    >
+                      21:30
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="restaurant-pass__result" aria-live="polite">
+                <span class="demo-lab-label">Sugerencia de la casa</span>
+                <strong data-restaurant-menu>Ruta de la brasa</strong>
+                <p data-restaurant-detail></p>
+                <div class="restaurant-pass__time">
+                  <span>Llegada</span><b data-restaurant-time>20:00</b>
+                </div>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
-      <section class="niche-section niche-problem">
-        <div class="section-head">
-          <p class="eyebrow">Dolor real</p>
-          <h2>Responder tarde en hora pico cuesta ventas reales.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <span>01</span>
-            <h3>Pedidos que se van</h3>
-            <p>El cliente con hambre no espera. Busca otro restaurante con respuesta inmediata.</p>
-          </article>
-          <article>
-            <span>02</span>
-            <h3>Reservas sin confirmar</h3>
-            <p>Una mesa puede quedar vacía porque nadie contestó a tiempo.</p>
-          </article>
-          <article>
-            <span>03</span>
-            <h3>Equipo saturado</h3>
-            <p>Menú, horarios y dirección se repiten todo el día mientras ventas se escapan.</p>
-          </article>
-        </div>
-      </section>
-      <section class="niche-section" id="como-funciona">
-        <div class="section-head">
-          <p class="eyebrow">Solución</p>
-          <h2>Luenio atiende primero y deja al equipo cerrar pedidos y reservas.</h2>
-        </div>
-        <div class="niche-grid">
-          <article>
-            <h3>Menú al instante</h3>
-            <p>La IA responde dudas frecuentes y mantiene la conversación activa.</p>
-          </article>
-          <article>
-            <h3>Pedidos CALIENTE/TIBIO/FRÍO</h3>
-            <p>Detectamos quién está listo para pedir y quién solo consulta.</p>
-          </article>
-          <article>
-            <h3>CRM ordenado</h3>
-            <p>Pedidos, reservas y seguimientos quedan listos para el equipo.</p>
-          </article>
-        </div>
-      </section>
-      <section class="niche-section niche-demo-preview">
-        <div class="section-head">
-          <p class="eyebrow">Vista previa en vivo</p>
-          <h2>Mira cómo una pregunta por menú se convierte en pedido capturado.</h2>
-        </div>
-        <div class="niche-preview-card">
-          <div class="preview-chat">
-            <strong>WhatsApp</strong>
-            <p>“Hola, estoy cerca de Chapinero. ¿Tienen menú para pedir ahora?”</p>
-            <p class="ai">
-              “Sí. Te comparto el menú de hoy. Si estás en Chapinero podemos coordinar tu pedido
-              ahora.”
+
+      <section class="demo-section" id="historia">
+        <div class="demo-shell restaurant-story">
+          <img
+            decoding="async"
+            width="286"
+            height="512"
+            src="/assets/stitch/restaurants-02.jpg"
+            alt="Interior cálido del restaurante"
+            loading="lazy"
+          />
+          <div>
+            <p class="demo-eyebrow">Nuestra historia</p>
+            <h2>Una mesa construida alrededor de la leña.</h2>
+            <p class="demo-section-copy">
+              Sabor &amp; Fuego nace de una idea sencilla: cocinar con tiempo y respetar el origen.
+              Trabajamos con productores cercanos, pescas responsables y vegetales que cambian con
+              la temporada.
+            </p>
+            <p class="demo-section-copy">
+              La carta combina memoria colombiana, técnica contemporánea y una sala íntima de solo
+              42 puestos.
             </p>
           </div>
-          <div class="preview-crm">
-            <span>Score</span><strong>CALIENTE 🔥</strong>
-            <p>Pedido capturado y movido al pipeline.</p>
-          </div>
         </div>
-        <a class="button button-primary" href="/demo/restaurants"
-          >Ver cómo el sistema recupera este pedido</a
-        >
       </section>
-      <section class="niche-section">
-        <div class="section-head">
-          <p class="eyebrow">Prueba social</p>
-          <h2>Menos demora, más pedidos atendidos.</h2>
-        </div>
-        <div class="proof-grid">
-          <article>
-            <span>Resultado ejemplo</span><strong>+30%</strong>
-            <p>más pedidos atendidos en canales de WhatsApp con respuesta inmediata.</p>
-          </article>
-          <article>
-            <span>Operación</span><strong>24/7</strong>
-            <p>menú, horarios y reservas respondidos incluso fuera de caja.</p>
-          </article>
-          <article>
+
+      <section class="demo-section demo-section--surface" id="carta">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Carta de temporada</p>
+              <h2>El arte servido sin exceso.</h2>
+            </div>
             <p>
-              “El equipo dejó de perseguir chats y empezó a confirmar pedidos mejor preparados.”
+              Precios demostrativos en COP. La carta real podría administrarse desde un CMS para
+              actualizar platos y disponibilidad.
             </p>
-            <strong>Testimonio de muestra</strong><span>Administrador, restaurante casual</span>
-          </article>
+          </div>
+          <div class="restaurant-menu">
+            <article>
+              <h3>Trucha curada</h3>
+              <p>Suero costeño, pepino, aceite de cilantro y limón mandarino.</p>
+              <strong>$48.000</strong>
+            </article>
+            <article>
+              <h3>Coliflor a la brasa</h3>
+              <p>Miso de maíz, almendras, encurtidos y hojas tiernas.</p>
+              <strong>$39.000</strong>
+            </article>
+            <article>
+              <h3>Pulpo sobre carbón</h3>
+              <p>Papa criolla, paprika ahumada y emulsión de ají dulce.</p>
+              <strong>$66.000</strong>
+            </article>
+            <article>
+              <h3>Arroz de montaña</h3>
+              <p>Hongos, queso paipa, fondo de cebolla y hierbas frescas.</p>
+              <strong>$54.000</strong>
+            </article>
+            <article>
+              <h3>Pesca del Pacífico</h3>
+              <p>Purée de arracacha, coco tostado y salsa de maracuyá.</p>
+              <strong>$72.000</strong>
+            </article>
+            <article>
+              <h3>Costilla 12 horas</h3>
+              <p>Demi-glace de panela, yuca crocante y repollo asado.</p>
+              <strong>$78.000</strong>
+            </article>
+            <article>
+              <h3>Cacao y café</h3>
+              <p>Chocolate 70%, café de origen y helado de panela.</p>
+              <strong>$32.000</strong>
+            </article>
+            <article>
+              <h3>Menú de degustación</h3>
+              <p>Siete momentos elegidos por el chef. Maridaje opcional.</p>
+              <strong>$245.000</strong>
+            </article>
+          </div>
         </div>
       </section>
-      <section class="niche-final-cta">
-        <p class="eyebrow">No pierdas pedidos</p>
-        <h2>Activa Luenio antes de que otro restaurante responda por ti.</h2>
-        <a class="button button-primary" href="/demo/restaurants">Activar para mi negocio</a>
+
+      <section class="demo-section" id="experiencia">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">La experiencia</p>
+              <h2>Cada detalle prepara el siguiente plato.</h2>
+            </div>
+            <p>
+              Iluminación cálida, servicio preciso y una cocina abierta que convierte la preparación
+              en parte de la noche.
+            </p>
+          </div>
+          <div class="demo-gallery">
+            <img
+              decoding="async"
+              width="512"
+              height="279"
+              src="/assets/stitch/restaurants-03.jpg"
+              srcset="
+                /assets/stitch/restaurants-03-480.webp 480w,
+                /assets/stitch/restaurants-03.jpg      512w
+              "
+              sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+              alt="Plato de temporada"
+              loading="lazy"
+            />
+            <img
+              decoding="async"
+              width="512"
+              height="279"
+              src="/assets/stitch/restaurants-04.jpg"
+              srcset="
+                /assets/stitch/restaurants-04-480.webp 480w,
+                /assets/stitch/restaurants-04.jpg      512w
+              "
+              sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+              alt="Servicio de vino"
+              loading="lazy"
+            />
+            <img
+              decoding="async"
+              width="512"
+              height="279"
+              src="/assets/stitch/restaurants-05.jpg"
+              srcset="
+                /assets/stitch/restaurants-05-480.webp 480w,
+                /assets/stitch/restaurants-05.jpg      512w
+              "
+              sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+              alt="Chef terminando un plato"
+              loading="lazy"
+            />
+            <img
+              decoding="async"
+              width="512"
+              height="279"
+              src="/assets/stitch/restaurants-06.jpg"
+              srcset="
+                /assets/stitch/restaurants-06-480.webp 480w,
+                /assets/stitch/restaurants-06.jpg      512w
+              "
+              sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+              alt="Mesa del restaurante"
+              loading="lazy"
+            />
+            <img
+              decoding="async"
+              width="512"
+              height="279"
+              src="/assets/stitch/restaurants-07.jpg"
+              srcset="
+                /assets/stitch/restaurants-07-480.webp 480w,
+                /assets/stitch/restaurants-07.jpg      512w
+              "
+              sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+              alt="Detalle gastronómico"
+              loading="lazy"
+            />
+          </div>
+        </div>
       </section>
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
+
+      <section class="demo-section demo-section--surface" id="chef">
+        <div class="demo-shell restaurant-story">
+          <div>
+            <p class="demo-eyebrow">Chef ejecutivo</p>
+            <h2>Alejandro Medina</h2>
+            <p class="demo-section-copy">
+              Después de trabajar en cocinas de Latinoamérica y Europa, Alejandro regresó a Colombia
+              para construir una propuesta conectada con el territorio.
+            </p>
+            <p class="demo-section-copy">
+              Su cocina evita artificios: producto reconocible, técnica silenciosa y sabores que
+              permanecen.
+            </p>
+          </div>
+          <img
+            decoding="async"
+            width="512"
+            height="279"
+            src="/assets/stitch/restaurants-08.jpg"
+            srcset="
+              /assets/stitch/restaurants-08-480.webp 480w,
+              /assets/stitch/restaurants-08.jpg      512w
+            "
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="Retrato del chef Alejandro Medina"
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">El servicio, antes de llegar</p>
+              <h2>Una reserva con el contexto suficiente.</h2>
+            </div>
+            <p>
+              La experiencia explica la cocina, el ritmo y la ubicación sin depender de testimonios
+              inventados.
+            </p>
+          </div>
+          <div class="demo-grid demo-grid--3">
+            <article class="demo-card">
+              <span class="demo-number">01</span>
+              <h3>Menú comprensible</h3>
+              <p>Platos, momentos y alternativas se presentan antes de reservar.</p>
+            </article>
+            <article class="demo-card">
+              <span class="demo-number">02</span>
+              <h3>Horario disponible</h3>
+              <p>La ocasión y la hora elegidas acompañan al visitante hasta el formulario.</p>
+            </article>
+            <article class="demo-card">
+              <span class="demo-number">03</span>
+              <h3>Ubicación clara</h3>
+              <p>Dirección, servicio y contacto aparecen dentro del mismo recorrido.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="sector-sales" aria-labelledby="restaurant-sales-title">
+        <div class="demo-shell sector-sales__grid">
+          <div>
+            <p class="demo-eyebrow">Una experiencia así para tu restaurante</p>
+            <h2 id="restaurant-sales-title">
+              Tu servicio, convertido en una experiencia reservable.
+            </h2>
+          </div>
+          <ul class="sector-sales__list">
+            <li>Carta, historia y reservas personalizadas</li>
+            <li>WhatsApp o sistema de reservas conectable</li>
+            <li>Analítica y automatización opcional</li>
+          </ul>
+          <div class="sector-sales__actions">
+            <button class="demo-button" type="button" data-luenio-open>
+              Cotizar esta experiencia
+            </button>
+            <a class="demo-button demo-button--ghost" href="#reservas">Probar la reserva</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section demo-section--surface" id="reservas">
+        <div class="demo-shell demo-grid demo-grid--2">
+          <div>
+            <p class="demo-eyebrow">Reservas</p>
+            <h2>Tu mesa, preparada con tiempo.</h2>
+            <p class="demo-section-copy">
+              Este formulario es demostrativo. En un proyecto real se conectaría con la
+              disponibilidad, correo o sistema de reservas del restaurante.
+            </p>
+          </div>
+          <form
+            class="demo-form"
+            data-demo-form
+            data-demo-success="Solicitud de reserva simulada. No se enviaron datos; en un restaurante real quedaría pendiente de confirmación."
+          >
+            <label>Nombre<input name="name" autocomplete="name" required /></label>
+            <label
+              >Personas<select name="people">
+                <option>2 personas</option>
+                <option>3 personas</option>
+                <option>4 personas</option>
+                <option>5 o más</option>
+              </select></label
+            >
+            <label
+              >Ocasión<select name="occasion" data-restaurant-occasion>
+                <option>Primera visita</option>
+                <option>Celebración</option>
+                <option>Cena tranquila</option>
+              </select></label
+            >
+            <label>Fecha<input name="date" type="date" required /></label>
+            <label
+              >Hora<select name="time" data-restaurant-form-time>
+                <option>18:30</option>
+                <option>20:00</option>
+                <option>21:30</option>
+              </select></label
+            >
+            <button class="demo-button demo-form__wide" type="submit">
+              Probar solicitud de reserva
+            </button>
+            <p
+              class="demo-form-status"
+              role="status"
+              aria-live="polite"
+              data-demo-status
+              hidden
+            ></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="demo-section" id="ubicacion">
+        <div class="demo-shell demo-grid demo-grid--2">
+          <div>
+            <p class="demo-eyebrow">Ubicación</p>
+            <h2>Chapinero Alto, Bogotá.</h2>
+            <p class="demo-section-copy">
+              Carrera 4 Este #58–21 · Miércoles a sábado de 12:00 m. a 3:00 p. m. y de 6:00 p. m. a
+              11:00 p. m. Domingo de 12:00 m. a 5:00 p. m.
+            </p>
+          </div>
+          <img
+            decoding="async"
+            width="512"
+            height="279"
+            src="/assets/stitch/restaurants-09.jpg"
+            srcset="
+              /assets/stitch/restaurants-09-480.webp 480w,
+              /assets/stitch/restaurants-09.jpg      512w
+            "
+            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
+            alt="Ubicación de muestra de Sabor y Fuego"
+            loading="lazy"
+          />
+        </div>
+      </section>
+
+      <section class="demo-section demo-section--surface">
+        <div class="demo-shell">
+          <div class="demo-section-head">
+            <div>
+              <p class="demo-eyebrow">Preguntas frecuentes</p>
+              <h2>Antes de reservar.</h2>
+            </div>
+          </div>
+          <div class="demo-faq">
+            <details>
+              <summary>¿Tienen opciones vegetarianas?</summary>
+              <p>
+                Sí. El menú incluye opciones vegetales y el equipo puede adaptar el menú de
+                degustación con reserva previa.
+              </p>
+            </details>
+            <details>
+              <summary>¿Aceptan grupos?</summary>
+              <p>
+                La mesa comunal recibe hasta 12 personas y cuenta con un menú especial para
+                compartir.
+              </p>
+            </details>
+            <details>
+              <summary>¿Hay parqueadero?</summary>
+              <p>
+                Contamos con convenio de parqueadero a dos cuadras y espacio seguro para bicicletas.
+              </p>
+            </details>
+            <details>
+              <summary>¿Puedo celebrar una ocasión especial?</summary>
+              <p>
+                Sí. Puedes indicar la ocasión al reservar para coordinar detalles con el equipo de
+                sala.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="demo-section">
+        <div class="demo-shell demo-callout">
+          <div>
+            <p class="demo-eyebrow">Una mesa con intención</p>
+            <h2>Descubre la cocina de Sabor &amp; Fuego.</h2>
+            <p>
+              Una landing completa convierte el ambiente, la carta y la confianza del restaurante en
+              una reserva.
+            </p>
+          </div>
+          <a class="demo-button" href="#reservas">Solicitar reserva</a>
+        </div>
+      </section>
     </main>
+
+    <footer class="demo-footer">
+      <div class="demo-shell">
+        <div class="demo-footer__main">
+          <div>
+            <h2>Sabor &amp; Fuego</h2>
+            <p>Cocina colombiana contemporánea alrededor de la leña.</p>
+          </div>
+          <div>
+            <h3>Experiencia</h3>
+            <nav>
+              <a href="#carta">Carta</a><a href="#chef">Chef</a><a href="#reservas">Reservas</a>
+            </nav>
+          </div>
+          <div>
+            <h3>Ubicación</h3>
+            <p>Chapinero Alto<br />Bogotá, Colombia</p>
+          </div>
+          <div>
+            <h3>Contacto</h3>
+            <p>reservas@saboryfuego.demo<br />Reservas con confirmación</p>
+          </div>
+        </div>
+        <div class="demo-footer__legal">
+          <strong
+            ><a href="/"
+              >© 2026 Luenio. Diseño y desarrollo de esta landing demostrativa. Todos los derechos
+              reservados por Luenio.</a
+            ></strong
+          ><span
+            >Las marcas, nombres, testimonios y datos mostrados son ficticios y se presentan
+            únicamente con fines demostrativos.</span
+          >
+        </div>
+      </div>
+    </footer>
   </body>
 </html>

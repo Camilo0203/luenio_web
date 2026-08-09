@@ -1,0 +1,74 @@
+{
+  "name": "Luenio - Administrator MFA email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luenio-admin-mfa",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "mfa-webhook",
+      "name": "Authenticated MFA webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-420, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $input.first().json.body || $input.first().json;\nif (payload.type !== 'admin_mfa' || !payload.challengeId || !/^[0-9]{6}$/.test(String(payload.code || '')) || !payload.email || !payload.expiresAt) throw new Error('Invalid MFA payload');\nreturn [{ json: payload }];"
+      },
+      "id": "validate-mfa",
+      "name": "Validate MFA payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-180, 0]
+    },
+    {
+      "parameters": {
+        "fromEmail": "contacto@luenio.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Código de acceso administrativo de Luenio",
+        "emailFormat": "text",
+        "text": "=Tu código de verificación es: {{ $json.code }}\n\nExpira en 10 minutos y solo puede utilizarse una vez. Si no intentaste acceder a Luenio, cambia tu contraseña y contacta al equipo de seguridad.",
+        "options": {}
+      },
+      "id": "send-mfa-email",
+      "name": "Send MFA email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [60, 0]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\":true,\"challengeId\":\"{{ $json.challengeId }}\"}",
+        "options": { "responseCode": 200 }
+      },
+      "id": "respond-mfa",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [300, 0]
+    }
+  ],
+  "connections": {
+    "Authenticated MFA webhook": {
+      "main": [[{ "node": "Validate MFA payload", "type": "main", "index": 0 }]]
+    },
+    "Validate MFA payload": {
+      "main": [[{ "node": "Send MFA email", "type": "main", "index": 0 }]]
+    },
+    "Send MFA email": {
+      "main": [[{ "node": "Respond 200", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none"
+  },
+  "versionId": "a7f37035-626a-407d-87b3-d254dd61e53c"
+}

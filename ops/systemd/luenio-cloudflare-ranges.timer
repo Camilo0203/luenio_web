@@ -1,0 +1,10 @@
+[Unit]
+Description=Verify Cloudflare IP ranges weekly
+
+[Timer]
+OnCalendar=Mon *-*-* 04:10:00 America/Bogota
+RandomizedDelaySec=30m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

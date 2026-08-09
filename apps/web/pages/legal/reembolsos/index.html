@@ -3,117 +3,188 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Política de Reembolsos | Luenio Agency</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Política de Reembolsos | Luenio</title>
     <meta
       name="description"
-      content="Condiciones de cancelación, cambio de plan y reembolso de las suscripciones de Luenio."
+      content="Condiciones de cancelación, cambios y reembolsos para proyectos de landing pages y automatización de Luenio."
     />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://luenio.agency/reembolsos" />
-    <meta name="theme-color" content="#07111f" />
+    <link rel="canonical" href="https://luenio.com/reembolsos" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:site_name" content="Luenio Agency" />
-    <meta property="og:title" content="Política de Reembolsos | Luenio Agency" />
-    <meta
-      property="og:description"
-      content="Condiciones de cancelación, cambio de plan y reembolso de las suscripciones de Luenio."
-    />
-    <meta property="og:image" content="/luenio-logo.png" />
-    <meta property="og:url" content="https://luenio.agency/reembolsos" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Política de Reembolsos | Luenio" />
+    <meta property="og:description" content="Condiciones comerciales de los proyectos de Luenio." />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/reembolsos" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Política de Reembolsos | Luenio Agency" />
-    <meta
-      name="twitter:description"
-      content="Condiciones de cancelación, cambio de plan y reembolso de las suscripciones de Luenio."
-    />
-    <meta name="twitter:image" content="/luenio-logo.png" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+    <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
-  <body>
-    <!-- ⚠️ Placeholders marcados con [ ]: reemplazar antes de producción y validar con asesoría legal. -->
-    <main class="niche-page legal-page">
-      <nav class="niche-nav">
-        <a href="/">Luenio</a>
-        <a class="button button-primary button-small" href="/precios">Ver planes</a>
-      </nav>
-
-      <section class="legal-header">
-        <p class="eyebrow">Legal</p>
-        <h1>Política de Reembolsos</h1>
-        <p class="legal-updated">Última actualización: [FECHA]</p>
+  <body data-whatsapp-widget="false">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand-lockup" href="/"
+          ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+        >
+        <nav
+          class="site-nav"
+          id="site-navigation"
+          data-navigation
+          data-open="false"
+          aria-label="Navegación principal"
+        >
+          <a href="/#servicios">Servicios</a><a href="/#proceso">Proceso</a
+          ><a href="/#casos">Casos</a><a href="/cotizacion">Cotización</a
+          ><a href="/login" data-client-access
+            ><span class="access-label--guest">Acceso</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+        </nav>
+        <div class="site-header__actions">
+          <a
+            class="button button--outline button--small site-header__access"
+            href="/login"
+            data-client-access
+            ><span class="access-label--guest">Acceso clientes</span
+            ><span class="access-label--user">Mi espacio</span></a
+          >
+          <a class="button button--primary button--small site-header__cta" href="/cotizacion"
+            >Solicitar cotización gratis</a
+          >
+        </div>
+        <button
+          class="menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span>
+        </button>
+      </div>
+    </header>
+    <main id="contenido">
+      <section class="legal-hero">
+        <div class="legal-hero__inner">
+          <p class="eyebrow">Información legal</p>
+          <h1>Política de Reembolsos</h1>
+          <p class="legal-date">Última actualización: 10 de julio de 2026</p>
+          <p>
+            Estas condiciones explican cómo manejamos cancelaciones, cambios de alcance y
+            solicitudes de reembolso.
+          </p>
+        </div>
       </section>
-
-      <nav class="legal-crosslinks" aria-label="Documentos legales">
-        <a href="/terminos">Términos de Servicio</a>
-        <a href="/privacidad">Política de Privacidad</a>
-        <a href="/reembolsos" class="active">Política de Reembolsos</a>
-      </nav>
-
-      <article class="legal-content">
-        <h2>1. Modelo de Suscripción</h2>
-        <p>
-          Los planes Starter, Pro y Agency se facturan de forma mensual y recurrente a través de
-          Stripe. La renovación es automática al final de cada periodo salvo cancelación previa.
-        </p>
-
-        <h2>2. Periodo de Prueba o Garantía</h2>
-        <p>[POLÍTICA DE PRUEBA GRATUITA/GARANTÍA — definir antes de publicar].</p>
-
-        <h2>3. Política General de Reembolsos</h2>
-        <p>
-          Como regla general, los pagos ya procesados no son reembolsables una vez iniciado el
-          periodo de facturación, salvo en los casos descritos en la sección 6 (Errores de Cobro y
-          Disputas) o cuando la ley aplicable exija lo contrario. [AJUSTAR SEGÚN POLÍTICA COMERCIAL
-          DEFINITIVA].
-        </p>
-
-        <h2>4. Cancelación</h2>
-        <p>
-          Puedes cancelar tu suscripción en cualquier momento desde el panel de facturación. La
-          cancelación surte efecto al final del periodo de facturación vigente: conservas acceso
-          completo al Servicio hasta esa fecha y no se te cobrará el siguiente ciclo.
-        </p>
-
-        <h2>5. Cambios de Plan</h2>
-        <p>
-          Puedes cambiar de plan (upgrade o downgrade) en cualquier momento desde el panel. Los
-          cambios de plan y su prorrateo correspondiente son gestionados automáticamente por Stripe.
-          [DETALLAR REGLA DE PRORRATEO SI DIFIERE DEL COMPORTAMIENTO POR DEFECTO DE STRIPE].
-        </p>
-
-        <h2>6. Errores de Cobro y Disputas</h2>
-        <p>
-          Si detectas un cargo duplicado o incorrecto, contáctanos dentro de los 30 días siguientes
-          al cargo en [TU EMAIL DE SOPORTE] y lo revisaremos para corregirlo o reembolsarlo cuando
-          corresponda.
-        </p>
-
-        <h2>7. Procesamiento vía Stripe</h2>
-        <p>
-          Todos los cobros y reembolsos se procesan a través de Stripe. Los tiempos de acreditación
-          de un reembolso dependen de tu banco o método de pago y pueden tardar varios días hábiles.
-        </p>
-
-        <h2>8. Excepciones</h2>
-        <p>
-          No se otorgan reembolsos en casos de suspensión de cuenta por uso fraudulento o
-          incumplimiento de los <a href="/terminos">Términos de Servicio</a>.
-        </p>
-
-        <h2>9. Contacto para Solicitudes</h2>
-        <p>
-          Para solicitudes de cancelación, cambio de plan o reembolso, escríbenos a [TU EMAIL DE
-          SOPORTE].
-        </p>
-      </article>
-
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
+      <div class="section-shell legal-layout">
+        <nav class="legal-toc" aria-label="Contenido">
+          <strong>Contenido</strong><a href="#naturaleza">1. Naturaleza</a
+          ><a href="#diagnostico">2. Diagnóstico</a><a href="#pagos">3. Pagos</a
+          ><a href="#cancelaciones">4. Cancelaciones</a><a href="#cambios">5. Cambios</a
+          ><a href="#errores">6. Errores</a><a href="#terceros">7. Terceros</a
+          ><a href="#contacto-legal">8. Contacto</a>
+        </nav>
+        <article class="legal-article">
+          <section id="naturaleza">
+            <h2>1. Naturaleza del servicio</h2>
+            <p>
+              Luenio presta servicios personalizados de estrategia, diseño, desarrollo web, landing
+              pages, integraciones y automatización con IA. Los proyectos requieren tiempo
+              profesional y entregables creados para cada cliente.
+            </p>
+          </section>
+          <section id="diagnostico">
+            <h2>2. Diagnóstico y cotización gratuitos</h2>
+            <p>
+              El diagnóstico inicial y la cotización ofrecidos desde luenio.com son gratuitos y no
+              generan obligación de compra. El compromiso comercial comienza únicamente después de
+              aceptar una propuesta.
+            </p>
+          </section>
+          <section id="pagos">
+            <h2>3. Pagos de proyectos</h2>
+            <p>
+              Los pagos cubren análisis, reserva de capacidad, diseño, desarrollo, configuración,
+              pruebas y soporte según la propuesta. Una vez iniciada una fase, el valor
+              correspondiente al trabajo ejecutado o reservado no es reembolsable, salvo error de
+              cobro o acuerdo escrito diferente.
+            </p>
+          </section>
+          <section id="cancelaciones">
+            <h2>4. Cancelaciones</h2>
+            <p>
+              El cliente puede cancelar antes de comenzar. Si ya se inició el trabajo, Luenio
+              calculará lo ejecutado, las reuniones realizadas, recursos adquiridos y tiempo
+              reservado. Cuando exista un saldo no causado, se informará y devolverá según el medio
+              acordado.
+            </p>
+          </section>
+          <section id="cambios">
+            <h2>5. Cambios y pausas</h2>
+            <p>
+              Los cambios fuera del alcance pueden cotizarse aparte. Una pausa solicitada por el
+              cliente puede modificar fechas y disponibilidad. Herramientas o servicios de terceros
+              adquiridos específicamente no son reembolsables por Luenio.
+            </p>
+          </section>
+          <section id="errores">
+            <h2>6. Errores de cobro</h2>
+            <p>
+              Si detectas duplicidad o un cargo incorrecto, escríbenos dentro de los 30 días
+              siguientes. Revisaremos soportes y corregiremos o reembolsaremos el monto cuando
+              corresponda.
+            </p>
+          </section>
+          <section id="terceros">
+            <h2>7. Proveedores externos</h2>
+            <p>
+              Dominios, hosting, mensajería, WhatsApp, CRM, correo, automatización y otras
+              plataformas se rigen por las políticas de cada proveedor. Sus pagos y reembolsos no
+              dependen de Luenio.
+            </p>
+          </section>
+          <section id="contacto-legal">
+            <h2>8. Contacto</h2>
+            <p>Analizamos cada solicitud con el contexto del proyecto y la propuesta aceptada.</p>
+            <div class="legal-contact">
+              <strong>Pagos y reembolsos</strong><br /><a href="mailto:contacto@luenio.com"
+                >contacto@luenio.com</a
+              ><br />+57 319 320 3702<br />Bogotá D.C., Colombia
+            </div>
+          </section>
+        </article>
+      </div>
     </main>
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__intro">
+          <a class="brand-lockup" href="/"
+            ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
+          >
+          <p>Landings y automatizaciones con IA diseñadas alrededor de negocios reales.</p>
+        </div>
+        <nav class="footer-group" aria-label="Legal">
+          <strong>Documentos</strong><a href="/terminos">Términos</a
+          ><a href="/privacidad">Privacidad</a
+          ><a href="/reembolsos" aria-current="page">Reembolsos</a
+          ><a href="/cotizacion">Cotización</a>
+        </nav>
+        <div class="footer-group">
+          <strong>Contacto</strong><a href="mailto:contacto@luenio.com">contacto@luenio.com</a
+          ><span>+57 319 320 3702</span><span>Bogotá D.C., Colombia</span>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
+      </div>
+    </footer>
+    <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

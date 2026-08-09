@@ -1,0 +1,96 @@
+import { getPublicConfig } from "./public-config-client.js";
+
+const consentKey = "luenio.analytics.consent";
+const eventKey = "luenio.analytics.events";
+let measurementId = null;
+let analyticsLoaded = false;
+
+function consentCommand(command, value) {
+  window.dataLayer = window.dataLayer || [];
+  window.gtag =
+    window.gtag ||
+    function gtag() {
+      window.dataLayer.push(arguments);
+    };
+  window.gtag("consent", command, value);
+}
+
+consentCommand("default", {
+  analytics_storage: "denied",
+  ad_storage: "denied",
+  ad_user_data: "denied",
+  ad_personalization: "denied",
+});
+
+function loadAnalytics() {
+  if (!measurementId || analyticsLoaded) return;
+  analyticsLoaded = true;
+  consentCommand("update", {
+    analytics_storage: "granted",
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+  });
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  document.head.append(script);
+  window.gtag("js", new Date());
+  window.gtag("config", measurementId, { anonymize_ip: true });
+}
+
+function saveConsent(value) {
+  localStorage.setItem(consentKey, value);
+  document.querySelector("[data-consent-banner]")?.remove();
+  if (value === "accepted") loadAnalytics();
+  else consentCommand("update", { analytics_storage: "denied" });
+}
+
+function showBanner() {
+  document.querySelector("[data-consent-banner]")?.remove();
+  const banner = document.createElement("aside");
+  banner.className = "consent-banner";
+  banner.dataset.consentBanner = "";
+  banner.setAttribute("aria-label", "Preferencias de privacidad");
+  banner.innerHTML = `<p><strong>Privacidad bajo tu control.</strong> Usamos analítica para mejorar Luenio. No cargamos Google Analytics sin tu permiso.</p><div><button type="button" data-consent="necessary">Solo necesarias</button><button type="button" data-consent="accepted">Aceptar analítica</button></div>`;
+  banner.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-consent]");
+    if (button) saveConsent(button.dataset.consent);
+  });
+  document.body.append(banner);
+}
+
+export async function initAnalytics() {
+  const config = await getPublicConfig();
+  measurementId = config.gaMeasurementId;
+  if (!config.analyticsEnabled) return;
+  if (!document.querySelector("[data-cookie-settings]")) {
+    const footer = document.querySelector("footer");
+    if (footer) {
+      const settings = document.createElement("button");
+      settings.type = "button";
+      settings.className = "cookie-settings-link";
+      settings.dataset.cookieSettings = "";
+      settings.textContent = "Preferencias de cookies";
+      footer.append(settings);
+    }
+  }
+  const consent = localStorage.getItem(consentKey);
+  if (consent === "accepted") loadAnalytics();
+  else if (!consent) showBanner();
+  document.querySelectorAll("[data-cookie-settings]").forEach((button) => {
+    button.addEventListener("click", showBanner);
+  });
+}
+
+export function trackEvent(name, properties = {}) {
+  const event = { name, properties, page: location.pathname, timestamp: new Date().toISOString() };
+  try {
+    const stored = JSON.parse(localStorage.getItem(eventKey) || "[]");
+    stored.push(event);
+    localStorage.setItem(eventKey, JSON.stringify(stored.slice(-80)));
+  } catch {
+    // Analytics must never interrupt conversion paths.
+  }
+  if (analyticsLoaded && window.gtag) window.gtag("event", name, properties);
+}

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f4f3f0" />
+    <title>Luenio · Espacios</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="stylesheet" href="/styles/design-tokens.css" />
+    <link rel="stylesheet" href="/apps/admin/src/workspace-hub.css" />
+  </head>
+  <body class="hub-body">
+    <div class="hub" id="hubRoot">
+      <header class="hub-top">
+        <a class="hub-brand" href="/" aria-label="Luenio">
+          <img src="/brand/logotipo.svg" width="921" height="268" alt="Luenio" />
+        </a>
+        <div class="hub-top__right">
+          <div class="hub-user" id="hubUser" hidden>
+            <span class="hub-user__label">Sesión</span>
+            <strong id="hubUserEmail">…</strong>
+          </div>
+          <button type="button" class="hub-btn hub-btn--ghost" id="hubLogout" hidden>Salir</button>
+        </div>
+      </header>
+
+      <main class="hub-main">
+        <p class="hub-eyebrow">Espacio de trabajo</p>
+        <h1 class="hub-title">¿A dónde vas hoy?</h1>
+        <p class="hub-lead">
+          Elige el módulo. Puedes cambiar de uno a otro en cualquier momento desde el menú superior.
+        </p>
+
+        <div class="hub-resume" id="hubResume" hidden>
+          <button type="button" class="hub-btn hub-btn--primary" id="hubContinue">
+            Continuar donde estabas
+          </button>
+          <span class="hub-resume__hint" id="hubResumeHint"></span>
+        </div>
+
+        <div class="hub-grid" role="list">
+          <a
+            class="hub-card"
+            role="listitem"
+            href="/dashboard"
+            data-workspace="leads"
+            id="cardLeads"
+          >
+            <span class="hub-card__badge">Producto</span>
+            <h2 class="hub-card__title">Leads</h2>
+            <p class="hub-card__desc">
+              Inbound, score, cola de hoy y pipeline de contactos del producto.
+            </p>
+            <span class="hub-card__cta">Abrir Leads →</span>
+          </a>
+
+          <a
+            class="hub-card hub-card--accent"
+            role="listitem"
+            href="/crm"
+            data-workspace="crm"
+            id="cardCrm"
+          >
+            <span class="hub-card__badge">Agencia</span>
+            <h2 class="hub-card__title">Cartera</h2>
+            <p class="hub-card__desc">
+              Clientes, deals, proyectos, facturación y MRR de la operación de agencia.
+            </p>
+            <span class="hub-card__cta">Abrir Agencia →</span>
+          </a>
+        </div>
+
+        <section class="hub-sessions" id="hubSessions" hidden aria-label="Seguridad de la cuenta">
+          <header class="hub-sessions__head">
+            <div>
+              <p class="hub-eyebrow">Seguridad</p>
+              <h2 class="hub-sessions__title">Sesiones activas</h2>
+            </div>
+            <button type="button" class="hub-btn hub-btn--ghost" id="hubRevokeOthers">
+              Cerrar otras sesiones
+            </button>
+          </header>
+          <p class="hub-sessions__status" data-sessions-status role="status"></p>
+          <div class="hub-sessions__list" data-sessions-list></div>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="/apps/admin/src/workspace-hub.js"></script>
+    <!-- impeccable-live-start -->
+    <!-- impeccable-live-end -->
+  </body>
+</html>

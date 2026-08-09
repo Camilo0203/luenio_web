@@ -1,4 +1,12 @@
-export const demoTypes = ["restaurants", "real-estate", "gym", "ecommerce", "agencies"];
+export const demoTypes = [
+  "restaurants",
+  "real-estate",
+  "gym",
+  "ecommerce",
+  "agencies",
+  "veterinary",
+  "aesthetics",
+];
 
 const CLASSIFICATION_LABELS = { hot: "CALIENTE", warm: "TIBIO", cold: "FRÍO" };
 
@@ -11,6 +19,13 @@ const demoAliases = {
   ecommerce: "ecommerce",
   agency: "agencies",
   agencies: "agencies",
+  veterinary: "veterinary",
+  veterinaria: "veterinary",
+  veterinarias: "veterinary",
+  aesthetics: "aesthetics",
+  estetica: "aesthetics",
+  estéticas: "aesthetics",
+  esteticas: "aesthetics",
 };
 
 const demoConfigs = {
@@ -146,6 +161,66 @@ const demoConfigs = {
       "Crear oportunidad en pipeline de agencia",
     ],
   },
+  veterinary: {
+    label: "Veterinarias",
+    headline: "Convierte consultas de mascotas en citas atendidas.",
+    lead: {
+      name: "Laura Méndez",
+      business: "Luna, beagle de 4 años",
+      service: "Consulta veterinaria",
+      message:
+        "Hola, Luna está decaída y necesito saber si tienen cita hoy. También quisiera preguntar por la vacuna anual.",
+      source: "WhatsApp",
+      score: 96,
+      classification: "hot",
+    },
+    aiReply:
+      "Hola, Laura. Podemos revisar a Luna hoy. Te comparto los horarios disponibles y dejo anotada la consulta por la vacuna anual para que el equipo llegue preparado. ¿Qué hora te funciona mejor?",
+    captureLabel: "Cita veterinaria capturada",
+    crmStage: "Citas por confirmar",
+    pain: "Cuando una consulta de mascota queda sin respuesta, la familia busca otra clínica antes de agendar.",
+    services: [
+      { name: "Consulta general", detail: "Agenda prioritaria", status: "Disponible" },
+      { name: "Vacunación", detail: "Recordatorio anual", status: "Sugerida" },
+      { name: "Seguimiento", detail: "Mensaje postconsulta", status: "Automático" },
+    ],
+    automation: [
+      "Detectar urgencia",
+      "Proponer horario",
+      "Crear cita en CRM",
+      "Programar recordatorio",
+    ],
+  },
+  aesthetics: {
+    label: "Estéticas",
+    headline: "Lleva cada consulta de belleza hasta la agenda.",
+    lead: {
+      name: "Camila Rojas",
+      business: "Valoración facial",
+      service: "Tratamiento estético",
+      message:
+        "Hola, quiero una valoración para manchas y textura. ¿Qué tratamiento recomiendan y tienen espacio esta semana?",
+      source: "Instagram",
+      score: 92,
+      classification: "hot",
+    },
+    aiReply:
+      "Hola, Camila. Podemos empezar con una valoración personalizada y recomendarte el tratamiento adecuado después de revisar tu piel. Tengo espacios esta semana y te puedo reservar uno ahora.",
+    captureLabel: "Valoración agendada",
+    crmStage: "Valoraciones nuevas",
+    pain: "Una respuesta tardía en Instagram deja la intención de cuidado personal en manos de otro centro.",
+    services: [
+      { name: "Valoración facial", detail: "Primera visita", status: "Recomendada" },
+      { name: "Limpieza profunda", detail: "60 minutos", status: "Disponible" },
+      { name: "Seguimiento", detail: "Rutina personalizada", status: "Automático" },
+    ],
+    automation: [
+      "Entender necesidad",
+      "Sugerir valoración",
+      "Reservar espacio",
+      "Activar seguimiento",
+    ],
+  },
 };
 
 export function normalizeDemoType(type = "restaurants") {
@@ -179,6 +254,7 @@ export function createDemoScenario(type = "restaurants") {
     inventory: config.inventory || [],
     clients: config.clients || [],
     properties: config.properties || [],
+    services: config.services || [],
     lead,
     steps: [
       {
