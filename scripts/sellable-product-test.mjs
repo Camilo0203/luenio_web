@@ -66,14 +66,20 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   ],
   [
     "demonstrative cases",
-    ["Titan Fitness", "Sabor y Fuego", "Hogar Prime", "NovaStore", "Impulso Digital"].every(
-      (name) => landingHtml.includes(name),
+    ["Agencias", "Ecommerce", "Inmobiliarias"].every((sector) =>
+      landingHtml.includes(sector),
     ) &&
-      ["/gimnasios", "/restaurantes", "/inmobiliarias", "/tiendas-online", "/agencias"].every(
-        (route) => landingHtml.includes(`href="${route}"`),
-      ),
+      ["/inmobiliarias", "/tiendas-online", "/agencias"].every(
+        (route) =>
+          landingHtml.includes(`href="${route}"`) ||
+          landingHtml.includes(`data-demo-href="${route}"`),
+      ) &&
+      landingHtml.includes('href="/demos"'),
   ],
-  ["landing conversion CTA", landingHtml.includes("Cotizar por WhatsApp")],
+  [
+    "landing conversion CTA",
+    landingHtml.includes("Solicitar cotización") && landingHtml.includes('href="/cotizacion"'),
+  ],
   [
     "landing value proposition",
     landingHtml.includes("Tu próxima solución digital") && landingHtml.includes("funcionando."),
@@ -107,11 +113,12 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   ],
   [
     "search index boundaries",
-    robotsTxt.includes("Disallow: /demo") &&
+    robotsTxt.includes("Disallow: /demo/") &&
       robotsTxt.includes("Disallow: /gym") &&
       sitemapXml.includes("https://luenio.com/") &&
       sitemapXml.includes("https://luenio.com/cotizacion") &&
-      !sitemapXml.includes("/demo"),
+      sitemapXml.includes("https://luenio.com/demos") &&
+      !sitemapXml.includes("/demo/"),
   ],
   [
     "domain and social metadata",

@@ -53,9 +53,15 @@ Si n8n está caído, el lead **ya está en Supabase** y se reintenta con el work
 | `/`               | `apps/web/pages/home`        |
 | `/cotizacion`     | `apps/web/pages/pricing`     |
 | `/gimnasios` etc. | nichos en `apps/web/pages/*` |
-| `/demo`           | demos interactivas           |
+| `/demos`          | catálogo de siete demos      |
+| `/demo/*`         | simulaciones interactivas    |
 | `/login`          | `apps/admin/auth.html`       |
 | `/dashboard`      | `apps/admin/admin.html`      |
+
+`/dashboard` + Supabase es el único producto privado del lanzamiento. El CRM de agencia sobre
+Neon se conserva como laboratorio reversible: solo se carga cuando `ENABLE_AGENCY_CRM=true`; con
+el valor predeterminado `false`, `/app` y `/crm` redirigen a `/dashboard` y `/api/crm/*` responde
+404 sin abrir una conexión Neon.
 
 ## Seguridad (resumen)
 

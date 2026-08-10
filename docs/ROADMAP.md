@@ -41,6 +41,10 @@ Elegir **una** apuesta:
 
 No las tres a la vez.
 
+El prototipo de multi-workspace/Agency CRM ya existe en el repositorio, pero permanece congelado
+con `ENABLE_AGENCY_CRM=false` hasta cumplir las métricas siguientes. No forma parte del build ni
+del readiness del lanzamiento lead-gen.
+
 ## Métricas para abrir P2
 
 En 4 semanas de producción:

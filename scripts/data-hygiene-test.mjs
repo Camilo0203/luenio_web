@@ -95,7 +95,13 @@ trackedFiles.forEach((filePath) => {
   const basename = path.posix.basename(filePath);
   const forbidden =
     (basename.startsWith(".env") &&
-      ![".env.example", ".env.production.example"].includes(basename)) ||
+      ![
+        ".env.example",
+        ".env.production.example",
+        ".env.backup.example",
+        ".env.edge.example",
+        ".env.monitor.example",
+      ].includes(basename)) ||
     filePath === "db/leads-db.json" ||
     filePath.startsWith("backups/") ||
     /\.(?:pem|key|age)$/i.test(filePath);

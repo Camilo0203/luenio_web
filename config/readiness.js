@@ -5,6 +5,7 @@ import {
   getAutomationEnv,
   getAnalyticsEnv,
   getContactEnv,
+  getCrmEnv,
   getDigestEnv,
   getLegalEnv,
   getMfaEnv,
@@ -161,6 +162,7 @@ export function buildReadiness() {
   const analytics = getAnalyticsEnv();
   const sentry = getSentryEnv();
   const legal = getLegalEnv();
+  const agencyCrm = getCrmEnv();
 
   const checks = [
     {
@@ -190,6 +192,15 @@ export function buildReadiness() {
       description: deployment.serveDist
         ? "Runtime serves built Vite assets from dist."
         : "Use NODE_ENV=production or SERVE_DIST=true after running npm run build.",
+    },
+    {
+      id: "agency_crm_launch_scope",
+      label: "Initial CRM scope",
+      done: !agencyCrm.enabled,
+      severity: "critical",
+      description: agencyCrm.enabled
+        ? "Disable ENABLE_AGENCY_CRM for the initial lead-generation launch."
+        : "Agency CRM is frozen; /dashboard is the only active private workspace.",
     },
     {
       id: "api_rate_limits",

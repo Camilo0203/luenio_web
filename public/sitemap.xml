@@ -9,6 +9,38 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://luenio.com/demos</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/agencias</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/tiendas-online</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/inmobiliarias</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/gimnasios</loc>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/restaurantes</loc>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/veterinarias</loc>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/esteticas</loc>
+    <priority>0.4</priority>
+  </url>
+  <url>
     <loc>https://luenio.com/terminos</loc>
     <priority>0.3</priority>
   </url>

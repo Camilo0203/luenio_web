@@ -10,7 +10,10 @@ Consulta primero:
 
 ## Catalogo publico temporal
 
-`PUBLIC_DEMO_MODE=true` redirige temporalmente `/login`, `/dashboard` y `/crm` hacia `/demos` para mostrar el catalogo sin habilitar el CRM. Es una bandera de exhibicion, no reemplaza la configuracion de produccion: las landings permanecen `noindex`, los formularios deben tener Turnstile y webhook reales, y el valor debe volver a `false` antes de activar acceso privado.
+`PUBLIC_DEMO_MODE=true` redirige temporalmente `/login`, `/dashboard` y `/crm` hacia `/demos` para mostrar el catálogo sin habilitar el CRM. Es una bandera de exhibición, no reemplaza la configuración de producción: los formularios deben tener Turnstile y webhook reales, y el valor debe volver a `false` antes de activar acceso privado.
+
+El lanzamiento inicial usa únicamente `/dashboard`. `ENABLE_AGENCY_CRM=false` mantiene `/crm`,
+`/app` y `/api/crm/*` fuera de la superficie activa y evita depender de Neon.
 
 - `apps/web`: sitio público, cotización, demos y landings de portafolio.
 - `apps/admin`: login por invitación y CRM privado.
@@ -28,6 +31,8 @@ Rutas indexables:
 
 - `/`
 - `/cotizacion`
+- `/demos`
+- las siete landings sectoriales mediante sus URL canónicas en español
 - `/terminos`
 - `/privacidad`
 - `/reembolsos`
@@ -38,7 +43,7 @@ Rutas privadas o `noindex`:
 - `/dashboard`
 - `/aceptar-invitacion`
 - `/restablecer-acceso`
-- demos y páginas de nicho
+- simulaciones interactivas bajo `/demo/*`
 - `automation.luenio.com`
 - `staging.luenio.com`
 

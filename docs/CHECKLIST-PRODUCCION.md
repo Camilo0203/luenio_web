@@ -12,6 +12,7 @@ Completa cada ítem en staging antes de promover exactamente la misma imagen a p
 
 - [ ] `/etc/luenio/production.env`, `staging.env` y `edge.env` existen con permisos `600`.
 - [ ] Supabase, secretos, Turnstile, Sentry, GA4, n8n y volúmenes son distintos por entorno.
+- [ ] `ENABLE_AGENCY_CRM=false`; el lanzamiento no depende de Neon.
 - [ ] Los dos stacks usan el mismo `LUENIO_IMAGE` inmutable al promover.
 - [ ] Caddy es el único servicio con `80/443`; app y n8n no publican puertos.
 
@@ -45,7 +46,7 @@ npm run build
 - [ ] Lead persiste con n8n apagado y se entrega al reactivarlo.
 - [ ] Invitación, expiración, reset, revocación y MFA admin.
 - [ ] Aislamiento entre dos empresas; anon Supabase denegado.
-- [ ] Recorridos Home ↔ siete landings ↔ siete simulaciones ↔ cotización/WhatsApp.
+- [ ] Home con tres demos destacadas ↔ catálogo `/demos` con siete landings ↔ siete simulaciones ↔ cotización/WhatsApp.
 - [ ] Responsive a 320, 375, 768, 1024 y escritorio; teclado y zoom 200%.
 - [ ] Origen directo bloqueado; staging y automation-staging noindex.
 - [ ] Health autenticado: `criticalReady: true`, `storage.mode: "supabase"`.

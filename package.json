@@ -14,6 +14,7 @@
     "start": "node server.js",
     "dev:full": "node server.js",
     "test": "node scripts/production-gate.mjs",
+    "test:quick": "npm run lint && npm run build && npm run test:architecture && npm run test:api-errors && npm run test:core",
     "test:api-errors": "node scripts/api-error-boundary-test.mjs",
     "test:automation": "node scripts/automation-privacy-test.mjs",
     "test:billing": "node scripts/billing-checkout-guard-test.mjs",

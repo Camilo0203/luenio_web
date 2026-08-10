@@ -131,6 +131,7 @@ export function getAnalyticsEnv() {
 
 export function getCrmEnv() {
   return {
+    enabled: getBooleanEnv("ENABLE_AGENCY_CRM", false),
     public: getBooleanEnv("CRM_PUBLIC", false) || getBooleanEnv("CRM_API_PUBLIC", false),
     debugEndpoints: getBooleanEnv("CRM_DEBUG_ENDPOINTS", !isProduction()),
   };

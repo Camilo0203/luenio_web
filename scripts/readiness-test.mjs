@@ -21,6 +21,7 @@ const envKeys = [
   "AUTH_MFA_WEBHOOK_TOKEN",
   "COOKIE_SECURE",
   "ENABLE_PUBLIC_BILLING",
+  "ENABLE_AGENCY_CRM",
   "STRIPE_SECRET_KEY",
   "STRIPE_WEBHOOK_SECRET",
   "STRIPE_STARTER_PRICE_ID",
@@ -92,6 +93,10 @@ try {
   assert(
     incomplete.checks.find((check) => check.id === "api_rate_limits")?.done === true,
     "Default API rate limits must be production-safe.",
+  );
+  assert(
+    incomplete.checks.find((check) => check.id === "agency_crm_launch_scope")?.done === true,
+    "Agency CRM must be disabled by default for the initial launch.",
   );
 
   resetEnv();

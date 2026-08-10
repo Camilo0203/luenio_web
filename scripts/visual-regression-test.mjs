@@ -150,6 +150,7 @@ async function startServer() {
       HOST: "127.0.0.1",
       PORT: String(port),
       NODE_ENV: "test",
+      ENABLE_AGENCY_CRM: "true",
       LUENIO_SKIP_ENV_FILE: "true",
       REQUIRE_SUPABASE: "false",
       SUPABASE_URL: "",

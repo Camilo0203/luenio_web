@@ -46,7 +46,7 @@ form.addEventListener("submit", async (event) => {
       return;
     }
     setStatus("success", "Acceso activado. Abriendo tu espacio…");
-    window.setTimeout(() => window.location.assign("/app"), 450);
+    window.setTimeout(() => window.location.assign("/dashboard"), 450);
   } catch {
     setStatus("error", "No pudimos conectar con el servidor. Intenta nuevamente.");
   }

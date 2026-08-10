@@ -1,6 +1,14 @@
 import { defineConfig } from "vite";
 import { resolve } from "node:path";
 
+const agencyCrmEntries =
+  process.env.ENABLE_AGENCY_CRM === "true"
+    ? {
+        app: resolve(__dirname, "apps/admin/app.html"),
+        crm: resolve(__dirname, "apps/admin/crm.html"),
+      }
+    : {};
+
 export default defineConfig({
   build: {
     rollupOptions: {
@@ -24,9 +32,8 @@ export default defineConfig({
         auth: resolve(__dirname, "apps/admin/auth.html"),
         invite: resolve(__dirname, "apps/admin/invite.html"),
         reset: resolve(__dirname, "apps/admin/reset.html"),
-        app: resolve(__dirname, "apps/admin/app.html"),
         admin: resolve(__dirname, "apps/admin/admin.html"),
-        crm: resolve(__dirname, "apps/admin/crm.html"),
+        ...agencyCrmEntries,
         legalTerminos: resolve(__dirname, "apps/web/pages/legal/terminos/index.html"),
         legalPrivacidad: resolve(__dirname, "apps/web/pages/legal/privacidad/index.html"),
         legalReembolsos: resolve(__dirname, "apps/web/pages/legal/reembolsos/index.html"),

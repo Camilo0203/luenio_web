@@ -11,7 +11,7 @@ import {
   revokeUserSession,
   verifyTrustedDeviceToken,
 } from "./auth-service.js";
-import { getMfaEnv } from "../../config/env.js";
+import { getCrmEnv, getMfaEnv } from "../../config/env.js";
 import { createAdminMfaChallenge, verifyAdminMfaChallenge } from "./mfa-service.js";
 import { getTurnstileEnv } from "../../config/env.js";
 import { PublicInquirySecurityError, validateTurnstileToken } from "./turnstile-service.js";
@@ -35,21 +35,21 @@ export function getAuthErrorStatus(error) {
 /** Only same-origin relative paths for post-login redirect. */
 export function sanitizeNextPath(next) {
   const raw = String(next || "").trim();
-  if (!raw) return "/app";
-  if (!raw.startsWith("/") || raw.startsWith("//")) return "/app";
-  if (raw.includes("\\") || raw.includes("\0")) return "/app";
+  if (!raw) return "/dashboard";
+  if (!raw.startsWith("/") || raw.startsWith("//")) return "/dashboard";
+  if (raw.includes("\\") || raw.includes("\0")) return "/dashboard";
   // Block protocol-relative and external
-  if (raw.includes("://")) return "/app";
+  if (raw.includes("://")) return "/dashboard";
+  if (raw === "/app" || raw.startsWith("/app?")) return "/dashboard";
+  if (raw === "/crm" || raw.startsWith("/crm")) {
+    return getCrmEnv().enabled ? raw.slice(0, 512) : "/dashboard";
+  }
   const allowed =
-    raw === "/app" ||
-    raw.startsWith("/app?") ||
     raw === "/dashboard" ||
     raw.startsWith("/dashboard") ||
-    raw === "/crm" ||
-    raw.startsWith("/crm") ||
     raw.startsWith("/aceptar-invitacion") ||
     raw.startsWith("/restablecer-acceso");
-  return allowed ? raw.slice(0, 512) : "/app";
+  return allowed ? raw.slice(0, 512) : "/dashboard";
 }
 
 /**

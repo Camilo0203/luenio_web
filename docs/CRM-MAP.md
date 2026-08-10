@@ -1,6 +1,8 @@
-# CRM Map — Dual surface (Luenio)
+# CRM Map — producto activo y laboratorio (Luenio)
 
-Dos paneles intencionalmente separados. **No unificar bases de datos en este pase.**
+`/dashboard` sobre Supabase es el producto activo. `/crm` sobre Neon se conserva como laboratorio
+sin migrar ni mezclar bases de datos. La bandera `ENABLE_AGENCY_CRM=false` es el valor obligatorio
+del lanzamiento inicial.
 
 ## Entrada de producto (profesional)
 
@@ -8,8 +10,8 @@ No se espera que el usuario escriba URLs. Flujo:
 
 1. Sitio público → botón **Acceso clientes** → login
 2. Login (Turnstile si `TURNSTILE_REQUIRED`, MFA admin si aplica, “confiar dispositivo 30 días”)
-3. Redirect seguro `?next=` o hub **`/app`**
-4. Hub: tarjetas **Leads** / **Agencia** + panel **Sesiones activas**
+3. Redirect seguro `?next=` hacia **`/dashboard`**
+4. `/app` y `/crm` redirigen a `/dashboard` mientras el laboratorio esté apagado
 5. Switcher **Espacios | Leads | Agencia** en cada módulo
 6. `localStorage.luenio-workspace` recuerda el último módulo
 

@@ -252,9 +252,12 @@ export function attachPasswordStrength(input, meterRoot) {
 /** Safe post-login path from query or result. */
 export function resolveNextPath(preferred) {
   const fromQuery = new URLSearchParams(window.location.search).get("next");
-  const raw = String(preferred || fromQuery || "/app").trim();
-  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) return "/app";
-  return raw.slice(0, 512) || "/app";
+  const raw = String(preferred || fromQuery || "/dashboard").trim();
+  if (!raw.startsWith("/") || raw.startsWith("//") || raw.includes("://")) return "/dashboard";
+  if (raw === "/app" || raw.startsWith("/app?") || raw === "/crm" || raw.startsWith("/crm?")) {
+    return "/dashboard";
+  }
+  return raw.slice(0, 512) || "/dashboard";
 }
 
 /** Lightweight client device summary (not a secret fingerprint). */

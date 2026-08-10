@@ -196,9 +196,19 @@ function bindLeadForms() {
       }
 
       setFormState(form, "loading", "Enviando tu solicitud...");
+      trackEvent("quote_submit", {
+        source: lead.source,
+        service: lead.service,
+        ...journeyAnalyticsProperties(journeyContext),
+      });
       try {
         await submitPublicInquiry(lead);
         trackEvent("generate_lead", {
+          source: lead.source,
+          service: lead.service,
+          ...journeyAnalyticsProperties(journeyContext),
+        });
+        trackEvent("quote_success", {
           source: lead.source,
           service: lead.service,
           ...journeyAnalyticsProperties(journeyContext),
@@ -214,6 +224,7 @@ function bindLeadForms() {
       } catch (error) {
         console.warn("[Luenio] Contact endpoint unavailable.", error);
         trackEvent("form_error", { source: lead.source, reason: "api" });
+        trackEvent("quote_error", { source: lead.source, reason: "api" });
         setFormState(
           form,
           "error",
@@ -400,7 +411,19 @@ function bindCaseTracking() {
   document.querySelectorAll("[data-demo-case]").forEach((link) => {
     link.addEventListener("click", () => {
       trackEvent("demo_case_click", { case: link.dataset.demoCase });
+      trackEvent("featured_demo_open", { case: link.dataset.demoCase });
     });
+  });
+}
+
+function bindConversionTracking() {
+  document.querySelectorAll("[data-quote-cta]").forEach((link) => {
+    link.addEventListener("click", () => {
+      trackEvent("quote_cta_click", { source: link.dataset.quoteCta || "public" });
+    });
+  });
+  document.querySelectorAll("[data-all-demos-open]").forEach((link) => {
+    link.addEventListener("click", () => trackEvent("all_demos_open"));
   });
 }
 
@@ -445,7 +468,7 @@ function setSignedInUi(on) {
       return;
     }
     link.hidden = false;
-    link.setAttribute("href", on ? "/app" : "/login");
+    link.setAttribute("href", on ? "/dashboard" : "/login");
   });
 }
 
@@ -515,6 +538,7 @@ bindLeadForms();
 createWhatsappWidget();
 bindQuoteFormVisibility();
 bindCaseTracking();
+bindConversionTracking();
 bindClientAccess();
 injectOrganizationSchema();
 initAnalytics();

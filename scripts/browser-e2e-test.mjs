@@ -291,7 +291,10 @@ async function runBrowserChecks(baseUrl) {
     // --- Public landing ---
     await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
     await expectVisibleText(page, "Luenio", "home brand");
-    await expectVisibleText(page, "Cotizar por WhatsApp", "home CTA");
+    await page.getByRole("link", { name: /Solicitar cotizaci/ }).waitFor({
+      state: "visible",
+      timeout: 10_000,
+    });
     assert(
       (await page.locator('a.skip-link[href="#contenido"]').count()) >= 1,
       "Home must expose a skip link to main content.",
@@ -352,9 +355,9 @@ async function runBrowserChecks(baseUrl) {
 
     // --- Public funnel continuity: home -> demo -> contextual quote -> confirmation ---
     const agencyDemoCard = page.locator(
-      '.hc-demo-card[data-demo-case="impulso-digital"][href="/agencias"]',
+      '.hc-browser__open[data-demo-case="impulso-digital"][href="/agencias"]',
     );
-    assert((await agencyDemoCard.count()) === 1, "Home must expose the agency demo card.");
+    assert((await agencyDemoCard.count()) === 1, "Home must expose the featured agency demo.");
     await Promise.all([
       page.waitForURL(`${baseUrl}/agencias`, { waitUntil: "domcontentloaded" }),
       agencyDemoCard.click(),

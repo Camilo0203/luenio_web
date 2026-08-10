@@ -1,6 +1,6 @@
 /**
  * Smoke test for Agency CRM API (/api/crm/*).
- * Requires a running server + Neon DATABASE_URL.
+ * Requires a running server with ENABLE_AGENCY_CRM=true + Neon DATABASE_URL.
  *
  *   CRM_SMOKE_BASE=http://127.0.0.1:4180 npm run test:crm-api
  */

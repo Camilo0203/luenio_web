@@ -504,7 +504,7 @@ for (const filePath of frontendFiles) {
   );
 }
 
-const publicWebSource = readText("apps/web/src/main.js");
+const publicWebSource = readText("apps/web/src/public-site.js");
 ["luenio.public.leads", "luenio.recent.leads", "storeLeadRequest", "isDuplicateLead"].forEach(
   (forbiddenPublicStoragePattern) => {
     assert(

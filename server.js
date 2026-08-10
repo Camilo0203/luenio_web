@@ -6,6 +6,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import {
   getContactEnv,
+  getCrmEnv,
   getDigestEnv,
   getInvitationEnv,
   getMfaEnv,
@@ -42,6 +43,7 @@ if (process.env.LUENIO_SKIP_ENV_FILE !== "true") {
 
 const serverConfig = getServerConfig();
 const securityConfig = getSecurityConfig();
+const agencyCrmConfig = getCrmEnv();
 
 function assertSecureProductionRuntime() {
   if (!isProduction()) return;
@@ -116,6 +118,9 @@ function assertSecureProductionRuntime() {
   }
   if (stripe.publicBillingEnabled) {
     failures.push("public billing must remain disabled for the reviewed lead-generation release");
+  }
+  if (agencyCrmConfig.enabled) {
+    failures.push("Agency CRM must remain disabled for the initial lead-generation release");
   }
   const digest = getDigestEnv();
   if (digest.cronEnabled && !isDigestDeliveryConfigured(digest)) {
@@ -686,6 +691,7 @@ function resolvePublicFile(pathname) {
     return path.join(root, cleanPath);
   }
   if (cleanPath.startsWith("apps/admin/crm/")) {
+    if (!agencyCrmConfig.enabled) return null;
     return path.join(root, cleanPath);
   }
   if (cleanPath.startsWith("core/demo-simulator/")) {
@@ -880,9 +886,30 @@ async function protectDashboardRoute(request, response, pathname) {
   return true;
 }
 
+function redirectDisabledWorkspaceRoute(request, response, pathname) {
+  if (agencyCrmConfig.enabled || !["GET", "HEAD"].includes(request.method)) return false;
+  if (!isCrmPath(pathname) && !isAppPath(pathname)) return false;
+  response.writeHead(302, {
+    Location: "/dashboard",
+    "Cache-Control": "no-store",
+  });
+  response.end();
+  return true;
+}
+
 function redirectLegacyPublicRoute(request, response, pathname) {
-  if (!["/precios", "/precios/"].includes(pathname)) return false;
   if (!["GET", "HEAD"].includes(request.method)) return false;
+
+  if (["/demo", "/demo/"].includes(pathname)) {
+    response.writeHead(301, {
+      Location: "/demos",
+      "Cache-Control": "public, max-age=86400",
+    });
+    response.end();
+    return true;
+  }
+
+  if (!["/precios", "/precios/"].includes(pathname)) return false;
 
   response.writeHead(301, {
     Location: "/cotizacion",
@@ -1026,6 +1053,9 @@ const server = http.createServer(
       if (serverConfig.publicDemoMode && isAuthPath(pathname)) {
         response.writeHead(302, { Location: "/demos", "Cache-Control": "no-store" });
         response.end();
+        return;
+      }
+      if (redirectDisabledWorkspaceRoute(request, response, pathname)) {
         return;
       }
       if (await protectDashboardRoute(request, response, pathname)) {

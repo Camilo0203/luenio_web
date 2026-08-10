@@ -43,6 +43,8 @@ La combinación diferenciadora es personalización, automatización comercial, r
 - Automatizaciones e integraciones configuradas según las necesidades de cada cliente.
 - Acceso al CRM únicamente mediante invitación; MFA obligatorio para administradores en producción.
 - Facturación pública de autoservicio desactivada en la versión actual.
+- El lanzamiento inicial usa únicamente el CRM de leads en `/dashboard` con Supabase. El CRM de
+  agencia sobre Neon permanece como laboratorio desactivado mediante `ENABLE_AGENCY_CRM=false`.
 - Las demos no escriben en los datos reales del CRM y no deben presentarse como implementaciones de clientes.
 - Stack actual: HTML, CSS y JavaScript con Vite; Node.js; Supabase o almacenamiento local de desarrollo; n8n; Cloudflare, Caddy y Docker.
 - Decisión abierta: no existe todavía un sector principal confirmado dentro de la combinación de audiencias.

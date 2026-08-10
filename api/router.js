@@ -9,7 +9,7 @@ import passwordResetHandler from "./password-reset.js";
 import publicConfigHandler from "./public-config.js";
 import settingsHandler from "./settings.js";
 import stripeWebhookHandler from "./stripe-webhook.js";
-import crmHandler from "./crm.js";
+import { getCrmEnv } from "../config/env.js";
 
 const apiHandlers = {
   "/api/auth": authHandler,
@@ -60,6 +60,12 @@ export async function handleApiRoute({
   }
 
   if (pathname === "/api/crm" || pathname.startsWith("/api/crm/")) {
+    if (!getCrmEnv().enabled) {
+      response.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
+      response.end(JSON.stringify({ ok: false, error: "Agency CRM is not enabled." }));
+      return true;
+    }
+    const { default: crmHandler } = await import("./crm.js");
     await crmHandler(
       {
         method: request.method,

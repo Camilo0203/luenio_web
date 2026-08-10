@@ -248,7 +248,7 @@ assert(
   "Landing must open with a clear trust-first value proposition.",
 );
 assert(
-  landingSource.includes("Cotizar por WhatsApp"),
+  landingSource.includes('data-quote-cta="hero"') && landingSource.includes('href="/cotizacion"'),
   "Landing must use the required primary CTA.",
 );
 assert(
@@ -265,8 +265,9 @@ assert(
 );
 const demoSelectorSource = readText("apps/web/pages/demo/index.html");
 assert(
-  demoSelectorSource.includes('content="noindex, nofollow"'),
-  "Demo selector must stay noindex for the lead-gen launch.",
+  demoSelectorSource.includes('content="index, follow"') &&
+    demoSelectorSource.includes('href="https://luenio.com/demos"'),
+  "Demo selector must expose its indexable canonical catalog route.",
 );
 assert(
   demoSelectorSource.includes("Prueba la demo de tu industria"),

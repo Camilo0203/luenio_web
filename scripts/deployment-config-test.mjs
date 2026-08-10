@@ -48,6 +48,7 @@ for (const variable of [
   "SENTRY_DSN_PUBLIC",
   "GA_MEASUREMENT_ID",
   "LUENIO_IMAGE",
+  "ENABLE_AGENCY_CRM",
 ]) {
   assert(productionEnv.includes(`${variable}=`), `Production env must declare ${variable}.`);
 }

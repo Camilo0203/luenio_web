@@ -148,7 +148,7 @@ for (const page of pages) {
   const html = readText(pagePath);
   const normalizedHtml = html.replace(/\s+/g, " ");
 
-  assert(html.includes('content="noindex, nofollow"'), `${page.slug} must stay noindex.`);
+  assert(html.includes('content="index, follow"'), `${page.slug} must be indexable.`);
   assert(html.includes(page.className), `${page.slug} must use its own visual identity.`);
   assert(html.includes(page.brand), `${page.slug} must present its sample brand.`);
   assert(html.includes(page.hero), `${page.slug} must include its final hero.`);

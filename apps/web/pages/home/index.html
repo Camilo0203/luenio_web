@@ -158,29 +158,17 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               seguimiento.
             </p>
             <div class="hc-actions">
-              <a class="hc-button hc-button--primary" href="#demos">
-                Explorar demos
+              <a class="hc-button hc-button--primary" href="/cotizacion" data-quote-cta="hero">
+                Solicitar cotización
                 <svg viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M4 10h11M11 6l4 4-4 4" />
                 </svg>
               </a>
-              <button
-                class="hc-button hc-button--whatsapp"
-                type="button"
-                data-wa-open
-                data-source="hero"
-              >
-                <svg class="hc-whatsapp-mark" viewBox="0 0 32 32" aria-hidden="true">
-                  <path
-                    d="M16.04 3A12.9 12.9 0 0 0 5.1 22.75L3.38 29l6.4-1.68A12.96 12.96 0 1 0 16.04 3Zm0 23.58c-2.02 0-3.98-.55-5.7-1.6l-.41-.24-3.8 1 1.02-3.7-.27-.43A10.55 10.55 0 1 1 16.04 26.58Zm5.79-7.91c-.32-.16-1.87-.92-2.16-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57a9.57 9.57 0 0 1-1.77-2.2c-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.55-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.54-.71-.55h-.61c-.21 0-.55.08-.84.4-.29.32-1.11 1.08-1.11 2.64 0 1.56 1.13 3.06 1.29 3.27.16.21 2.23 3.4 5.4 4.77.75.32 1.34.52 1.8.66.76.24 1.45.21 2 .13.61-.09 1.87-.76 2.13-1.5.26-.74.26-1.37.18-1.5-.08-.14-.29-.21-.61-.37Z"
-                  />
-                </svg>
-                Cotizar por WhatsApp
-              </button>
+              <a class="hc-button hc-button--secondary" href="#demos">Ver ejemplos</a>
             </div>
           </div>
 
-          <div class="hc-stage-wrap" data-hero-stage>
+          <div class="hc-stage-wrap" id="demos" data-hero-stage>
             <div class="hc-stage-aura" aria-hidden="true"></div>
             <article class="hc-browser" aria-label="Vista previa de una demo ficticia">
               <div class="hc-browser__bar">
@@ -227,48 +215,12 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 />
                 <img
                   class="hc-demo-shot"
-                  alt="Captura de la demo ficticia para gimnasios"
-                  width="1440"
-                  height="900"
-                  data-src="/assets/previews/gym-desktop.avif"
-                  data-fallback-src="/assets/previews/gym-desktop.webp"
-                  data-demo-shot="gimnasios"
-                />
-                <img
-                  class="hc-demo-shot"
                   alt="Captura de la demo ficticia para inmobiliarias"
                   width="1440"
                   height="900"
                   data-src="/assets/previews/real-estate-desktop.avif"
                   data-fallback-src="/assets/previews/real-estate-desktop.webp"
                   data-demo-shot="inmobiliarias"
-                />
-                <img
-                  class="hc-demo-shot"
-                  alt="Captura de la demo ficticia para restaurantes"
-                  width="1440"
-                  height="900"
-                  data-src="/assets/previews/restaurants-desktop.avif"
-                  data-fallback-src="/assets/previews/restaurants-desktop.webp"
-                  data-demo-shot="restaurantes"
-                />
-                <img
-                  class="hc-demo-shot"
-                  alt="Captura de la demo ficticia para veterinarias"
-                  width="1440"
-                  height="1000"
-                  data-src="/assets/previews/veterinary-desktop.avif"
-                  data-fallback-src="/assets/previews/veterinary-desktop.webp"
-                  data-demo-shot="veterinarias"
-                />
-                <img
-                  class="hc-demo-shot"
-                  alt="Captura de la demo ficticia para centros de estética"
-                  width="1440"
-                  height="1000"
-                  data-src="/assets/previews/aesthetics-desktop.avif"
-                  data-fallback-src="/assets/previews/aesthetics-desktop.webp"
-                  data-demo-shot="esteticas"
                 />
               </div>
             </article>
@@ -295,15 +247,6 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               </button>
               <button
                 type="button"
-                data-demo-target="gimnasios"
-                data-demo-href="/gimnasios"
-                data-demo-case-id="titan-fitness"
-                aria-pressed="false"
-              >
-                Gimnasios
-              </button>
-              <button
-                type="button"
                 data-demo-target="inmobiliarias"
                 data-demo-href="/inmobiliarias"
                 data-demo-case-id="hogar-prime"
@@ -311,36 +254,10 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               >
                 Inmobiliarias
               </button>
-              <button
-                type="button"
-                data-demo-target="restaurantes"
-                data-demo-href="/restaurantes"
-                data-demo-case-id="sabor-fuego"
-                aria-pressed="false"
-              >
-                Restaurantes
-              </button>
-              <button
-                type="button"
-                data-demo-target="veterinarias"
-                data-demo-href="/veterinarias"
-                data-demo-case-id="huella-veterinaria"
-                aria-pressed="false"
-              >
-                Veterinarias
-              </button>
-              <button
-                type="button"
-                data-demo-target="esteticas"
-                data-demo-href="/esteticas"
-                data-demo-case-id="aura-estetica"
-                aria-pressed="false"
-              >
-                Estéticas
-              </button>
             </div>
             <p class="hc-demo-note">
               Demos ficticias para explorar posibilidades. No representan clientes reales.
+              <a href="/demos" data-all-demos-open>Ver las siete demos</a>
             </p>
           </div>
         </div>
@@ -388,198 +305,6 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <h2>Seguimiento</h2>
               <p>Información organizada para saber qué oportunidad sigue.</p>
             </article>
-          </div>
-        </div>
-      </section>
-
-      <section class="hc-gallery" id="demos" aria-labelledby="gallery-title">
-        <div class="hc-container">
-          <header class="hc-gallery__head" data-reveal>
-            <div>
-              <p class="hc-kicker">Demos ficticias para explorar posibilidades</p>
-              <h2 id="gallery-title">Encuentra una idea cercana a tu negocio.</h2>
-            </div>
-            <p>
-              Cada demo muestra una dirección de diseño distinta. Son ejercicios demostrativos, no
-              proyectos de clientes.
-            </p>
-          </header>
-
-          <div class="hc-gallery__grid">
-            <a
-              class="hc-demo-card hc-demo-card--agency"
-              href="/agencias"
-              data-demo-case="impulso-digital"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/agency-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/agency-desktop.webp"
-                    alt="Captura de la demo ficticia Impulso Digital"
-                    width="1440"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Agencias</small><strong>Impulso Digital</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a
-              class="hc-demo-card hc-demo-card--ecommerce"
-              href="/tiendas-online"
-              data-demo-case="novastore"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/ecommerce-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/ecommerce-desktop.webp"
-                    alt="Captura de la demo ficticia NovaStore"
-                    width="1440"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Ecommerce</small><strong>NovaStore</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a
-              class="hc-demo-card hc-demo-card--gym"
-              href="/gimnasios"
-              data-demo-case="titan-fitness"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/gym-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/gym-desktop.webp"
-                    alt="Captura de la demo ficticia Titan Fitness Club"
-                    width="1440"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Gimnasios</small><strong>Titan Fitness Club</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a
-              class="hc-demo-card hc-demo-card--real-estate"
-              href="/inmobiliarias"
-              data-demo-case="hogar-prime"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/real-estate-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/real-estate-desktop.webp"
-                    alt="Captura de la demo ficticia Hogar Prime"
-                    width="1440"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Inmobiliarias</small><strong>Hogar Prime</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a
-              class="hc-demo-card hc-demo-card--restaurant"
-              href="/restaurantes"
-              data-demo-case="sabor-fuego"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/restaurants-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/restaurants-desktop.webp"
-                    alt="Captura de la demo ficticia Sabor y Fuego"
-                    width="1440"
-                    height="900"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Restaurantes</small><strong>Sabor y Fuego</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a
-              class="hc-demo-card hc-demo-card--veterinary"
-              href="/veterinarias"
-              data-demo-case="huella-veterinaria"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/veterinary-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/veterinary-desktop.webp"
-                    alt="Captura de la demo ficticia Huella Veterinaria"
-                    width="1440"
-                    height="1000"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Veterinarias</small><strong>Huella Veterinaria</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
-
-            <a
-              class="hc-demo-card hc-demo-card--aesthetics"
-              href="/esteticas"
-              data-demo-case="aura-estetica"
-              data-reveal
-            >
-              <span class="hc-demo-card__visual">
-                <picture>
-                  <source srcset="/assets/previews/aesthetics-desktop.avif" type="image/avif" />
-                  <img
-                    src="/assets/previews/aesthetics-desktop.webp"
-                    alt="Captura de la demo ficticia Aura Estética"
-                    width="1440"
-                    height="1000"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </picture>
-              </span>
-              <span class="hc-demo-card__meta">
-                <span><small>Estética</small><strong>Aura Estética</strong></span>
-                <span class="hc-demo-card__arrow" aria-hidden="true">↗</span>
-              </span>
-            </a>
           </div>
         </div>
       </section>

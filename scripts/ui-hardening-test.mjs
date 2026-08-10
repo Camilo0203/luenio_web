@@ -56,6 +56,7 @@ const server = spawn(process.execPath, ["server.js"], {
     HOST: "127.0.0.1",
     PORT: String(port),
     NODE_ENV: "test",
+    ENABLE_AGENCY_CRM: "true",
     CRM_PUBLIC: "true",
     LUENIO_SKIP_ENV_FILE: "true",
     REQUIRE_SUPABASE: "false",

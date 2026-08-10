@@ -233,15 +233,17 @@ async function runSmoke() {
       "Niche JPG assets must use the image/jpeg MIME type.",
     );
     await expectTextRoute(baseUrl, "/Pagina%20Luenio", ">Luenio</span>");
-    const demoSelectorHtml = await expectTextRoute(baseUrl, "/demo", "Revisar flujo");
+    const legacyDemo = await fetch(`${baseUrl}/demo`, { redirect: "manual" });
     assert(
-      demoSelectorHtml.includes('content="noindex, nofollow"'),
-      "Demo selector must be noindex for the lead-gen launch.",
+      legacyDemo.status === 301 && legacyDemo.headers.get("location") === "/demos",
+      "/demo must permanently redirect to the canonical /demos route.",
     );
     const demosAliasHtml = await expectTextRoute(baseUrl, "/demos", "Revisar flujo");
     assert(
-      demosAliasHtml.includes("Prueba la demo de tu industria"),
-      "/demos must render the complete demo catalog.",
+      demosAliasHtml.includes("Prueba la demo de tu industria") &&
+        demosAliasHtml.includes('content="index, follow"') &&
+        demosAliasHtml.includes('rel="canonical" href="https://luenio.com/demos"'),
+      "/demos must render the complete indexable demo catalog.",
     );
     for (const demoRoute of [
       "/demos/restaurants",
@@ -268,10 +270,7 @@ async function runSmoke() {
       "/aesthetics",
     ]) {
       const nicheHtml = await expectTextRoute(baseUrl, nicheRoute, "Luenio");
-      assert(
-        nicheHtml.includes('content="noindex, nofollow"'),
-        `${nicheRoute} must be noindex for the lead-gen launch.`,
-      );
+      assert(nicheHtml.includes('content="index, follow"'), `${nicheRoute} must be indexable.`);
     }
     for (const aliasRoute of [
       "/gimnasios",
@@ -283,10 +282,7 @@ async function runSmoke() {
       "/esteticas",
     ]) {
       const aliasHtml = await expectTextRoute(baseUrl, aliasRoute, "Luenio");
-      assert(
-        aliasHtml.includes('content="noindex, nofollow"'),
-        `${aliasRoute} must route to a noindex industry landing.`,
-      );
+      assert(aliasHtml.includes('content="index, follow"'), `${aliasRoute} must be indexable.`);
     }
     await expectTextRoute(baseUrl, "/login", "Bienvenido de nuevo.");
     await expectTextRoute(baseUrl, "/terminos", "Términos de Servicio");
@@ -309,7 +305,10 @@ async function runSmoke() {
     const sitemapResponse = await expectOkRoute(baseUrl, "/sitemap.xml", "application/xml");
     const sitemapXml = await sitemapResponse.text();
     assert(sitemapXml.includes("https://luenio.com/"), "Sitemap must include the homepage.");
-    assert(!sitemapXml.includes("/demo"), "Sitemap must not include demo routes.");
+    ["/demos", "/agencias", "/tiendas-online", "/inmobiliarias"].forEach((route) => {
+      assert(sitemapXml.includes(`https://luenio.com${route}`), `Sitemap must include ${route}.`);
+    });
+    assert(!sitemapXml.includes("/demo/"), "Sitemap must omit interactive simulation routes.");
     await expectOkRoute(baseUrl, "/favicon.png", "image/png");
     await expectOkRoute(baseUrl, "/site.webmanifest", "application/manifest+json");
     await expectTextRoute(baseUrl, "/aceptar-invitacion", "Activa tu espacio de trabajo");
@@ -397,6 +396,23 @@ async function runSmoke() {
       internalDashboard.status === 302 &&
         internalDashboard.headers.get("location") === "/login?next=%2Fapps%2Fadmin%2Fadmin.html",
       "Internal dashboard HTML path must enforce the same authentication boundary.",
+    );
+    for (const disabledWorkspacePath of ["/app", "/crm"]) {
+      const disabledWorkspace = await fetch(`${baseUrl}${disabledWorkspacePath}`, {
+        redirect: "manual",
+      });
+      assert(
+        disabledWorkspace.status === 302 &&
+          disabledWorkspace.headers.get("location") === "/dashboard",
+        `${disabledWorkspacePath} must redirect to the primary dashboard while Agency CRM is disabled.`,
+      );
+    }
+    const disabledCrmApi = await fetch(`${baseUrl}/api/crm/health`);
+    const disabledCrmApiBody = await disabledCrmApi.json();
+    assert(disabledCrmApi.status === 404, "Disabled Agency CRM API must return 404.");
+    assert(
+      disabledCrmApiBody.error === "Agency CRM is not enabled.",
+      "Disabled Agency CRM API must return an explicit JSON error.",
     );
 
     const unknownApi = await fetch(`${baseUrl}/api/nope`);

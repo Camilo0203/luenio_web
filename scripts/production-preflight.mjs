@@ -47,6 +47,7 @@ function validateEnv() {
   const required = [
     "NODE_ENV",
     "SERVE_DIST",
+    "ENABLE_AGENCY_CRM",
     "APP_URL",
     "COOKIE_SECURE",
     "AUTH_SECRET",
@@ -95,6 +96,10 @@ function validateEnv() {
   assert(process.env.REQUIRE_TRUSTED_PROXY === "true", "REQUIRE_TRUSTED_PROXY must be true.");
   assert(process.env.TURNSTILE_REQUIRED === "true", "TURNSTILE_REQUIRED must be true.");
   assert(process.env.ADMIN_MFA_REQUIRED === "true", "ADMIN_MFA_REQUIRED must be true.");
+  assert(
+    process.env.ENABLE_AGENCY_CRM === "false",
+    "ENABLE_AGENCY_CRM must stay false for the initial lead-gen launch.",
+  );
   assert(
     process.env.CONTACT_DELIVERY_WORKER_ENABLED === "true",
     "CONTACT_DELIVERY_WORKER_ENABLED must be true.",

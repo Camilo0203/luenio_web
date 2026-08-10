@@ -3,7 +3,7 @@
 Sitio y CRM de **lead generation** para vender landings y automatizaciones con IA.
 
 - **Público:** cotización, demos por nicho, legales, captura de leads.
-- **Privado:** CRM por invitación (sin registro abierto), scoring, pipeline, demo en vivo.
+- **Privado:** `/dashboard` por invitación (sin registro abierto), scoring, pipeline y seguimiento.
 - **Ops:** Node + Vite, Supabase, n8n, Caddy, Docker, Cloudflare.
 
 El scoring es **por reglas** (léxico de intención), no un LLM. Las landings de nicho son **demostrativas**.
@@ -53,6 +53,10 @@ Por defecto: [http://127.0.0.1:4180](http://127.0.0.1:4180)
 | `/dashboard`  | CRM                   |
 | `/api/health` | Liveness              |
 
+`/crm` (Neon) se conserva como laboratorio y está desactivado por defecto con
+`ENABLE_AGENCY_CRM=false`. `/app` y `/crm` redirigen al dashboard principal mientras la bandera
+permanezca apagada.
+
 ## Scripts
 
 | Comando                         | Descripción                         |
@@ -60,6 +64,7 @@ Por defecto: [http://127.0.0.1:4180](http://127.0.0.1:4180)
 | `npm run dev`                   | Servidor completo (API + estáticos) |
 | `npm run build`                 | Build Vite → `dist/`                |
 | `npm test`                      | Production gate (suite completa)    |
+| `npm run test:quick`            | Gate diario: lint, build, arquitectura, API y core |
 | `npm run lint` / `format:check` | Calidad de código                   |
 | `npm run readiness:report`      | Checklist de readiness en consola   |
 | `npm run preflight:production`  | Validación fail-closed pre-deploy   |
