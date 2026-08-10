@@ -24,59 +24,10 @@ if (root) {
   const demoButtons = [...document.querySelectorAll("[data-demo-target]")];
   const demoShots = [...document.querySelectorAll("[data-demo-shot]")];
   const activeDemoLink = document.querySelector("[data-active-demo-link]");
-  const typewriter = document.querySelector("[data-typewriter]");
+  const mobileDemoLink = document.querySelector("[data-mobile-demo-link]");
+  const demoStatus = document.querySelector("[data-demo-status]");
   let demoRequest = 0;
   let activeDemoIndex = 0;
-
-  if (typewriter) {
-    const words = (typewriter.dataset.words || "")
-      .split("|")
-      .map((word) => word.trim())
-      .filter(Boolean);
-
-    if (words.length) {
-      typewriter.textContent = words[0];
-
-      if (!reduceMotion && words.length > 1) {
-        let wordIndex = 0;
-        let characterIndex = 0;
-        let deleting = false;
-
-        const typeNextCharacter = () => {
-          const word = words[wordIndex];
-
-          if (!deleting) {
-            characterIndex += 1;
-            typewriter.textContent = word.slice(0, characterIndex);
-
-            if (characterIndex === word.length) {
-              deleting = true;
-              window.setTimeout(typeNextCharacter, 1300);
-              return;
-            }
-
-            window.setTimeout(typeNextCharacter, 90);
-            return;
-          }
-
-          characterIndex -= 1;
-          typewriter.textContent = word.slice(0, characterIndex);
-
-          if (characterIndex === 0) {
-            deleting = false;
-            wordIndex = (wordIndex + 1) % words.length;
-            window.setTimeout(typeNextCharacter, 240);
-            return;
-          }
-
-          window.setTimeout(typeNextCharacter, 50);
-        };
-
-        typewriter.textContent = "";
-        window.setTimeout(typeNextCharacter, 320);
-      }
-    }
-  }
 
   const syncThemeControl = () => {
     const isDark = document.documentElement.dataset.theme === "dark";
@@ -152,13 +103,23 @@ if (root) {
     browserFrame?.removeAttribute("aria-busy");
     activeDemoIndex = next;
 
+    const demoLabel = button.textContent.trim();
+    const demoHref = button.dataset.demoHref || "#demos";
+    const demoCase = button.dataset.demoCaseId || target;
+
     if (activeDemoLink) {
-      activeDemoLink.href = button.dataset.demoHref || "#demos";
-      activeDemoLink.dataset.demoCase = button.dataset.demoCaseId || target;
-      activeDemoLink.setAttribute(
-        "aria-label",
-        `Abrir demo ficticia de ${button.textContent.trim()}`,
-      );
+      activeDemoLink.href = demoHref;
+      activeDemoLink.dataset.demoCase = demoCase;
+      activeDemoLink.setAttribute("aria-label", `Abrir demo ficticia de ${demoLabel}`);
+    }
+    if (mobileDemoLink) {
+      mobileDemoLink.href = demoHref;
+      mobileDemoLink.dataset.demoCase = demoCase;
+      mobileDemoLink.setAttribute("aria-label", `Abrir demo ficticia de ${demoLabel}`);
+      mobileDemoLink.firstChild.textContent = `Abrir demo de ${demoLabel} `;
+    }
+    if (demoStatus) {
+      demoStatus.textContent = `Mostrando demo ficticia de ${demoLabel}`;
     }
   }
 

@@ -18,6 +18,9 @@ function bindMenu() {
   const toggle = document.querySelector("[data-menu-toggle]");
   const navigation = document.querySelector("[data-navigation]");
   if (!toggle || !navigation) return;
+  const backgroundRegions = [document.querySelector("main"), document.querySelector("footer")].filter(
+    Boolean,
+  );
 
   const mobileMenu = window.matchMedia("(max-width: 980px)");
   navigation.id ||= "primary-navigation";
@@ -31,6 +34,8 @@ function bindMenu() {
     navigation.toggleAttribute("inert", mobileMenu.matches && !isOpen);
     if (mobileMenu.matches) navigation.setAttribute("aria-hidden", String(!isOpen));
     else navigation.removeAttribute("aria-hidden");
+    backgroundRegions.forEach((region) => region.toggleAttribute("inert", isOpen));
+    body.classList.toggle("mobile-menu-open", isOpen);
     if (returnFocus) toggle.focus();
   };
 
@@ -247,9 +252,9 @@ function createWhatsappWidget() {
           <button class="wa-widget__close" type="button" data-wa-close aria-label="Cerrar formulario">&times;</button>
         </header>
         <div class="wa-widget__intro">
-          <span>COTIZACIÓN GRATUITA</span>
-          <h2 id="wa-title">Cuéntanos qué quieres construir.</h2>
-          <p>Prepararemos un mensaje con el contexto de tu negocio.</p>
+          <span>MENSAJE PARA WHATSAPP</span>
+          <h2 id="wa-title">Prepara el contexto de tu conversación.</h2>
+          <p>Completa 3 datos obligatorios. Toma menos de un minuto.</p>
         </div>
         <form class="wa-widget__form" data-wa-form novalidate>
           <label>Nombre<input name="name" autocomplete="name" required aria-describedby="wa-form-status" /></label>
@@ -268,7 +273,7 @@ function createWhatsappWidget() {
         </form>
       </section>
     </aside>
-    <button class="wa-widget__trigger" type="button" data-wa-open aria-controls="whatsapp-contact" aria-expanded="false">${whatsappIcon}<span>Cotización gratis</span></button>`;
+    <button class="wa-widget__trigger" type="button" data-wa-open aria-controls="whatsapp-contact" aria-expanded="false">${whatsappIcon}<span>Preparar cotización</span></button>`;
   document.body.append(...wrapper.childNodes);
 
   const modal = document.querySelector("#whatsapp-contact");

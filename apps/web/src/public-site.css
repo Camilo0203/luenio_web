@@ -185,6 +185,10 @@ select {
 [data-client-access] .access-label--user {
   display: none;
 }
+
+[data-client-access][hidden] {
+  display: none;
+}
 html[data-signed-in="1"] [data-client-access] .access-label--guest {
   display: none;
 }

@@ -146,9 +146,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 <span class="hc-hero__promise-line">
                   <span>digital,</span>
                   <span class="hc-promise-motion">
-                    <i data-typewriter data-words="funcionando.|vendiendo.|creciendo.">
-                      funcionando.
-                    </i>
+                    <i>funcionando.</i>
                   </span>
                 </span>
               </span>
@@ -158,13 +156,18 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               seguimiento.
             </p>
             <div class="hc-actions">
-              <a class="hc-button hc-button--primary" href="/cotizacion" data-quote-cta="hero">
-                Solicitar cotización
+              <a class="hc-button hc-button--primary" href="#demos">
+                Explorar demos
                 <svg viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M4 10h11M11 6l4 4-4 4" />
                 </svg>
               </a>
-              <a class="hc-button hc-button--secondary" href="#demos">Ver ejemplos</a>
+              <a
+                class="hc-button hc-button--secondary"
+                href="/cotizacion"
+                data-quote-cta="hero"
+                >Solicitar cotización</a
+              >
             </div>
           </div>
 
@@ -255,9 +258,25 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 Inmobiliarias
               </button>
             </div>
+            <div class="hc-demo-action-row">
+              <p class="hc-demo-status" aria-live="polite" data-demo-status>
+                Mostrando demo ficticia de Agencias
+              </p>
+              <a
+                class="hc-demo-mobile-open"
+                href="/agencias"
+                data-mobile-demo-link
+                data-demo-case="impulso-digital"
+                aria-label="Abrir demo ficticia de Agencias"
+              >
+                Abrir demo de Agencias
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M7 5h8v8M15 5l-9 9" />
+                </svg>
+              </a>
+            </div>
             <p class="hc-demo-note">
               Demos ficticias para explorar posibilidades. No representan clientes reales.
-              <a href="/demos" data-all-demos-open>Ver las siete demos</a>
             </p>
           </div>
         </div>
@@ -305,6 +324,51 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <h2>Seguimiento</h2>
               <p>Información organizada para saber qué oportunidad sigue.</p>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="hc-proof" id="prueba" aria-labelledby="proof-title">
+        <div class="hc-container hc-proof__layout">
+          <header class="hc-proof__intro" data-reveal>
+            <p class="hc-kicker">Cómo funciona de verdad</p>
+            <h2 id="proof-title">Una visita no debería terminar en un formulario olvidado.</h2>
+            <p>
+              Diseñamos el recorrido completo para que cada contacto llegue con contexto y tenga un
+              siguiente paso definido.
+            </p>
+            <a href="/demos" data-all-demos-open>Explorar las siete demos ficticias</a>
+          </header>
+
+          <div class="hc-proof__body" data-reveal>
+            <ol class="hc-proof__trace" aria-label="Recorrido operativo de una oportunidad">
+              <li>
+                <span>Entrada</span>
+                <strong>La página recoge la intención.</strong>
+                <p>El visitante elige un servicio y comparte el contexto mínimo de su necesidad.</p>
+              </li>
+              <li>
+                <span>Conexión</span>
+                <strong>La información llega organizada.</strong>
+                <p>El flujo puede preparar el mensaje, avisar al equipo y conservar el origen.</p>
+              </li>
+              <li>
+                <span>Continuidad</span>
+                <strong>La oportunidad conserva un siguiente paso.</strong>
+                <p>El seguimiento parte de información útil, no de una conversación en blanco.</p>
+              </li>
+            </ol>
+
+            <aside class="hc-proof__scope" aria-label="Claridad antes de construir">
+              <span>Antes de construir</span>
+              <h3>La propuesta deja el trabajo por escrito.</h3>
+              <ul>
+                <li>Objetivo y recorrido prioritario</li>
+                <li>Alcance, entregables y responsabilidades</li>
+                <li>Fases y ruta de implementación</li>
+              </ul>
+              <p>Las herramientas y los tiempos se definen según el alcance de cada proyecto.</p>
+            </aside>
           </div>
         </div>
       </section>
@@ -364,8 +428,9 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 data-service="Automatización de WhatsApp"
                 data-goal="Quiero automatizar tareas comerciales y dar continuidad al seguimiento."
               >
-                Cuéntanos qué quieres automatizar
+                Preparar mensaje para WhatsApp
               </button>
+              <span class="hc-wa-hint">3 datos obligatorios · menos de un minuto</span>
             </div>
             <div class="hc-solution__visual hc-automation-map" aria-hidden="true">
               <svg viewBox="0 0 620 420">
@@ -459,8 +524,8 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
             <p class="hc-kicker">Tu proyecto puede empezar aquí</p>
             <h2>Cuéntanos qué quieres mejorar.</h2>
             <p>
-              Revisamos tu necesidad y preparamos una cotización personalizada directamente por
-              WhatsApp.
+              Reunimos tres datos para preparar el contexto y continuar la conversación por
+              WhatsApp sin empezar desde cero.
             </p>
             <div class="hc-actions">
               <button
@@ -469,11 +534,14 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 data-wa-open
                 data-source="cierre"
               >
-                Escribir por WhatsApp
+                Preparar mensaje para WhatsApp
                 <svg viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M4 10h11M11 6l4 4-4 4" />
                 </svg>
               </button>
+              <span class="hc-wa-hint hc-wa-hint--light">
+                3 datos obligatorios · menos de un minuto
+              </span>
               <a class="hc-close__mail" href="mailto:contacto@luenio.com">contacto@luenio.com</a>
             </div>
           </div>

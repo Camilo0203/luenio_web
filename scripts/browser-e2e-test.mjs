@@ -295,6 +295,10 @@ async function runBrowserChecks(baseUrl) {
       state: "visible",
       timeout: 10_000,
     });
+    await page.getByRole("link", { name: "Explorar demos", exact: true }).waitFor({
+      state: "visible",
+      timeout: 10_000,
+    });
     assert(
       (await page.locator('a.skip-link[href="#contenido"]').count()) >= 1,
       "Home must expose a skip link to main content.",
@@ -338,6 +342,11 @@ async function runBrowserChecks(baseUrl) {
           (await navigation.getAttribute("aria-hidden")) === "false",
         "Open mobile navigation must restore its links to keyboard and assistive technology.",
       );
+      assert(
+        (await page.locator("main").getAttribute("inert")) !== null &&
+          (await page.locator("footer").getAttribute("inert")) !== null,
+        "Open mobile navigation must isolate background content.",
+      );
       await page.keyboard.press("Escape");
       assert(
         (await menuToggle.first().getAttribute("aria-expanded")) === "false" &&
@@ -350,7 +359,25 @@ async function runBrowserChecks(baseUrl) {
           .evaluate((element) => element === element.ownerDocument.activeElement),
         "Escape must return focus to the mobile menu toggle.",
       );
+      assert(
+        (await page.locator("main").getAttribute("inert")) === null &&
+          (await page.locator("footer").getAttribute("inert")) === null,
+        "Closing mobile navigation must restore background content.",
+      );
     }
+
+    const ecommerceDemoButton = page.getByRole("button", { name: "Ecommerce", exact: true });
+    await ecommerceDemoButton.click();
+    await page.getByText("Mostrando demo ficticia de Ecommerce", { exact: true }).waitFor({
+      state: "visible",
+    });
+    assert(
+      (await page
+        .getByRole("link", { name: "Abrir demo ficticia de Ecommerce" })
+        .getAttribute("href")) === "/tiendas-online",
+      "Mobile demo selection must expose the selected demo destination.",
+    );
+    await page.getByRole("button", { name: "Agencias", exact: true }).click();
     await page.setViewportSize({ width: 1280, height: 800 });
 
     // --- Public funnel continuity: home -> demo -> contextual quote -> confirmation ---

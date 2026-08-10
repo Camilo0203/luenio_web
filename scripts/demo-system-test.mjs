@@ -248,8 +248,10 @@ assert(
   "Landing must open with a clear trust-first value proposition.",
 );
 assert(
-  landingSource.includes('data-quote-cta="hero"') && landingSource.includes('href="/cotizacion"'),
-  "Landing must use the required primary CTA.",
+  landingSource.includes("Explorar demos") &&
+    landingSource.includes('data-quote-cta="hero"') &&
+    landingSource.includes('href="/cotizacion"'),
+  "Landing must prioritize demo exploration while preserving the quote path.",
 );
 assert(
   !landingSource.includes('href="/demo"'),

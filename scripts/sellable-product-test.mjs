@@ -33,6 +33,7 @@ function readAdminSource() {
 const landingHtml = readText("apps/web/pages/home/index.html");
 const landingCss = readText("apps/web/src/public-site.css");
 const landingJs = readText("apps/web/src/public-site.js");
+const homeClarityJs = readText("apps/web/src/home-clarity.js");
 const brandConfig = readText("apps/web/src/brand-config.js");
 const pricingHtml = readText("apps/web/pages/pricing/index.html");
 const termsHtml = readText("apps/web/pages/legal/terminos/index.html");
@@ -78,7 +79,22 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   ],
   [
     "landing conversion CTA",
-    landingHtml.includes("Solicitar cotización") && landingHtml.includes('href="/cotizacion"'),
+    landingHtml.includes("Explorar demos") &&
+      landingHtml.includes("Solicitar cotización") &&
+      landingHtml.includes('href="/cotizacion"'),
+  ],
+  [
+    "mobile demo continuity",
+      landingHtml.includes("data-mobile-demo-link") &&
+      landingHtml.includes("data-demo-status") &&
+      homeClarityJs.includes("mobileDemoLink") &&
+      homeClarityJs.includes("demoStatus"),
+  ],
+  [
+    "operational proof",
+    landingHtml.includes("Una visita no debería terminar en un formulario olvidado") &&
+      landingHtml.includes("La propuesta deja el trabajo por escrito") &&
+      landingHtml.includes("Alcance, entregables y responsabilidades"),
   ],
   [
     "landing value proposition",
@@ -100,6 +116,8 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
     landingJs.includes("whatsapp_open") &&
       landingJs.includes("whatsapp_submit") &&
       landingJs.includes("generate_lead") &&
+      landingHtml.includes("Preparar mensaje para WhatsApp") &&
+      landingJs.includes("Completa 3 datos obligatorios") &&
       brandConfig.includes('["57", "319", "320", "3702"]'),
   ],
   [
