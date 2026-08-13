@@ -5,6 +5,7 @@ import {
   getHealth,
   getInvitations,
   getLeads,
+  getPublicConfig,
   getSession,
   getSettings,
   importLeads,
@@ -67,6 +68,25 @@ const invitationDateTimeFormatter = new Intl.DateTimeFormat("es-CO", {
 const secondaryPanelLoaded = new Set();
 const secondaryPanelPending = new Map();
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let launchScopeLoaded = false;
+
+async function configureLaunchScope() {
+  if (launchScopeLoaded) return;
+  launchScopeLoaded = true;
+
+  const workspaceNavigation = document.querySelector(".crm-nav");
+  const contextBanner = document.querySelector(".app-context-banner");
+  try {
+    const { response, data } = await getPublicConfig();
+    const agencyCrmEnabled = Boolean(response.ok && data.agencyCrmEnabled);
+    if (workspaceNavigation) workspaceNavigation.hidden = !agencyCrmEnabled;
+    if (contextBanner) contextBanner.hidden = !agencyCrmEnabled;
+  } catch (error) {
+    console.warn("[Luenio CRM] Launch scope could not be loaded", error);
+    if (workspaceNavigation) workspaceNavigation.hidden = true;
+    if (contextBanner) contextBanner.hidden = true;
+  }
+}
 
 function animateSecondaryPanel(panel) {
   if (reduceMotion || !panel?.open) return;
@@ -1297,6 +1317,8 @@ async function loadDashboard(options = {}) {
     const user = await fetchSession();
     if (!user) return;
   }
+
+  await configureLaunchScope();
 
   const results = await Promise.allSettled([fetchCrm()]);
   const failed = results.filter((result) => result.status === "rejected");

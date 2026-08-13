@@ -18,9 +18,10 @@ function bindMenu() {
   const toggle = document.querySelector("[data-menu-toggle]");
   const navigation = document.querySelector("[data-navigation]");
   if (!toggle || !navigation) return;
-  const backgroundRegions = [document.querySelector("main"), document.querySelector("footer")].filter(
-    Boolean,
-  );
+  const backgroundRegions = [
+    document.querySelector("main"),
+    document.querySelector("footer"),
+  ].filter(Boolean);
 
   const mobileMenu = window.matchMedia("(max-width: 980px)");
   navigation.id ||= "primary-navigation";

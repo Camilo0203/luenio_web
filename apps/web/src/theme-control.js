@@ -41,9 +41,9 @@ function normalizeBrandMarks() {
     viewport.className = "brand-mark__viewport";
     const lightImage = image.cloneNode();
     image.classList.add("brand-mark__logo", "brand-mark__logo--primary");
-    image.src = "/brand/isotipo.svg";
+    image.src = "/brand/isotipo.svg?v=202608";
     lightImage.classList.add("brand-mark__logo", "brand-mark__logo--light");
-    lightImage.src = "/brand/isotipo-blanco.svg";
+    lightImage.src = "/brand/isotipo-blanco.svg?v=202608";
     lightImage.alt = "";
     lightImage.setAttribute("aria-hidden", "true");
     image.before(viewport);
@@ -60,6 +60,12 @@ function syncControl(control, theme) {
 }
 
 function placeControl(control) {
+  const headerActions = document.querySelector(".site-header__actions");
+  if (headerActions) {
+    headerActions.append(control);
+    return;
+  }
+
   const menuToggle = document.querySelector("[data-menu-toggle]");
   if (menuToggle) {
     menuToggle.before(control);

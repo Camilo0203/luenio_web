@@ -6,59 +6,242 @@
     <meta name="robots" content="noindex, nofollow" />
     <title>Opciones de landing · Luenio</title>
     <style>
-      :root { color-scheme: dark; font-family: Arial, sans-serif; background: #0d0f0e; color: #f5f3ed; }
-      * { box-sizing: border-box; }
-      body { margin: 0; }
-      header { max-width: 1480px; margin: auto; padding: 54px 28px 30px; }
-      h1 { max-width: 900px; margin: 0; font-size: clamp(2.5rem, 6vw, 5.5rem); line-height: .92; letter-spacing: -.055em; }
-      header p { max-width: 650px; color: #aeb5b0; line-height: 1.6; }
-      main { max-width: 1480px; margin: auto; padding: 10px 28px 80px; }
-      section { margin-top: 54px; }
-      section > header { display: flex; align-items: end; justify-content: space-between; padding: 0 0 18px; border-bottom: 1px solid #343a36; }
-      h2 { margin: 0; font-size: clamp(1.8rem, 4vw, 3.5rem); }
-      section > header p { margin: 0; }
-      .grid { display: grid; gap: 46px; padding-top: 30px; }
-      article { scroll-margin-top: 18px; }
-      .meta { display: flex; gap: 16px; align-items: baseline; margin-bottom: 12px; }
-      .code { color: #ff7458; font-size: 14px; font-weight: 800; letter-spacing: .12em; }
-      h3 { margin: 0; font-size: 22px; }
-      img { display: block; width: 100%; height: auto; border: 1px solid #343a36; background: #181b19; }
-      .note { margin: 12px 0 0; color: #aeb5b0; line-height: 1.5; }
-      nav { position: sticky; z-index: 5; top: 0; display: flex; gap: 8px; justify-content: center; padding: 10px; background: rgba(13,15,14,.9); backdrop-filter: blur(16px); }
-      nav a { padding: 11px 14px; border: 1px solid #343a36; border-radius: 999px; color: inherit; text-decoration: none; font-size: 12px; }
-      nav a:hover { border-color: #ff7458; }
+      :root {
+        color-scheme: dark;
+        font-family: Arial, sans-serif;
+        background: #0d0f0e;
+        color: #f5f3ed;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+      }
+      header {
+        max-width: 1480px;
+        margin: auto;
+        padding: 54px 28px 30px;
+      }
+      h1 {
+        max-width: 900px;
+        margin: 0;
+        font-size: clamp(2.5rem, 6vw, 5.5rem);
+        line-height: 0.92;
+        letter-spacing: -0.055em;
+      }
+      header p {
+        max-width: 650px;
+        color: #aeb5b0;
+        line-height: 1.6;
+      }
+      main {
+        max-width: 1480px;
+        margin: auto;
+        padding: 10px 28px 80px;
+      }
+      section {
+        margin-top: 54px;
+      }
+      section > header {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        padding: 0 0 18px;
+        border-bottom: 1px solid #343a36;
+      }
+      h2 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 3.5rem);
+      }
+      section > header p {
+        margin: 0;
+      }
+      .grid {
+        display: grid;
+        gap: 46px;
+        padding-top: 30px;
+      }
+      article {
+        scroll-margin-top: 18px;
+      }
+      .meta {
+        display: flex;
+        gap: 16px;
+        align-items: baseline;
+        margin-bottom: 12px;
+      }
+      .code {
+        color: #ff7458;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+      }
+      h3 {
+        margin: 0;
+        font-size: 22px;
+      }
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid #343a36;
+        background: #181b19;
+      }
+      .note {
+        margin: 12px 0 0;
+        color: #aeb5b0;
+        line-height: 1.5;
+      }
+      nav {
+        position: sticky;
+        z-index: 5;
+        top: 0;
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        padding: 10px;
+        background: rgba(13, 15, 14, 0.9);
+        backdrop-filter: blur(16px);
+      }
+      nav a {
+        padding: 11px 14px;
+        border: 1px solid #343a36;
+        border-radius: 999px;
+        color: inherit;
+        text-decoration: none;
+        font-size: 12px;
+      }
+      nav a:hover {
+        border-color: #ff7458;
+      }
       @media (max-width: 700px) {
-        header { padding-top: 38px; }
-        section > header { display: block; }
-        nav { justify-content: start; overflow-x: auto; }
-        nav a { flex: 0 0 auto; }
+        header {
+          padding-top: 38px;
+        }
+        section > header {
+          display: block;
+        }
+        nav {
+          justify-content: start;
+          overflow-x: auto;
+        }
+        nav a {
+          flex: 0 0 auto;
+        }
       }
     </style>
   </head>
   <body>
     <nav aria-label="Ir a una propuesta">
-      <a href="#v1">V1</a><a href="#v2">V2</a><a href="#v3">V3</a>
-      <a href="#e1">E1</a><a href="#e2">E2</a><a href="#e3">E3</a>
+      <a href="#v1">V1</a><a href="#v2">V2</a><a href="#v3">V3</a> <a href="#e1">E1</a
+      ><a href="#e2">E2</a><a href="#e3">E3</a>
     </nav>
     <header>
       <h1>Seis caminos para elegir.</h1>
-      <p>Mockups conceptuales creados con Impeccable. Selecciona una opción de cada sector o combina elementos antes de implementar.</p>
+      <p>
+        Mockups conceptuales creados con Impeccable. Selecciona una opción de cada sector o combina
+        elementos antes de implementar.
+      </p>
     </header>
     <main>
       <section>
-        <header><h2>Veterinaria</h2><p>Confianza, orientación y agenda.</p></header>
+        <header>
+          <h2>Veterinaria</h2>
+          <p>Confianza, orientación y agenda.</p>
+        </header>
         <div class="grid">
-          <article id="v1"><div class="meta"><span class="code">V1</span><h3>Expediente editorial</h3></div><img src="veterinary-v1.png" width="1536" height="1024" alt="Propuesta veterinaria V1, expediente editorial" /><p class="note">Humana, cercana y artesanal.</p></article>
-          <article id="v2"><div class="meta"><span class="code">V2</span><h3>Ruta de barrio</h3></div><img src="veterinary-v2.png" width="1536" height="1024" loading="lazy" alt="Propuesta veterinaria V2, ruta de barrio" /><p class="note">Directa, enérgica y comercial.</p></article>
-          <article id="v3"><div class="meta"><span class="code">V3</span><h3>Centro de cuidado</h3></div><img src="veterinary-v3.png" width="1536" height="1024" loading="lazy" alt="Propuesta veterinaria V3, centro de cuidado" /><p class="note">Premium, precisa y digital.</p></article>
+          <article id="v1">
+            <div class="meta">
+              <span class="code">V1</span>
+              <h3>Expediente editorial</h3>
+            </div>
+            <img
+              src="veterinary-v1.png"
+              width="1536"
+              height="1024"
+              alt="Propuesta veterinaria V1, expediente editorial"
+            />
+            <p class="note">Humana, cercana y artesanal.</p>
+          </article>
+          <article id="v2">
+            <div class="meta">
+              <span class="code">V2</span>
+              <h3>Ruta de barrio</h3>
+            </div>
+            <img
+              src="veterinary-v2.png"
+              width="1536"
+              height="1024"
+              loading="lazy"
+              alt="Propuesta veterinaria V2, ruta de barrio"
+            />
+            <p class="note">Directa, enérgica y comercial.</p>
+          </article>
+          <article id="v3">
+            <div class="meta">
+              <span class="code">V3</span>
+              <h3>Centro de cuidado</h3>
+            </div>
+            <img
+              src="veterinary-v3.png"
+              width="1536"
+              height="1024"
+              loading="lazy"
+              alt="Propuesta veterinaria V3, centro de cuidado"
+            />
+            <p class="note">Premium, precisa y digital.</p>
+          </article>
         </div>
       </section>
       <section>
-        <header><h2>Estética</h2><p>Atención, criterio y experiencia.</p></header>
+        <header>
+          <h2>Estética</h2>
+          <p>Atención, criterio y experiencia.</p>
+        </header>
         <div class="grid">
-          <article id="e1"><div class="meta"><span class="code">E1</span><h3>Estudio editorial</h3></div><img src="aesthetics-e1.png" width="1536" height="1024" loading="lazy" alt="Propuesta estética E1, estudio editorial" /><p class="note">Elegante, íntima y profesional.</p></article>
-          <article id="e2"><div class="meta"><span class="code">E2</span><h3>Laboratorio de piel</h3></div><img src="aesthetics-e2.png" width="1536" height="1024" loading="lazy" alt="Propuesta estética E2, laboratorio de piel" /><p class="note">Luminosa, científica y contemporánea.</p></article>
-          <article id="e3"><div class="meta"><span class="code">E3</span><h3>Galería sensorial</h3></div><img src="aesthetics-e3.png" width="1536" height="1024" loading="lazy" alt="Propuesta estética E3, galería sensorial" /><p class="note">Artística, cálida y diferenciada.</p></article>
+          <article id="e1">
+            <div class="meta">
+              <span class="code">E1</span>
+              <h3>Estudio editorial</h3>
+            </div>
+            <img
+              src="aesthetics-e1.png"
+              width="1536"
+              height="1024"
+              loading="lazy"
+              alt="Propuesta estética E1, estudio editorial"
+            />
+            <p class="note">Elegante, íntima y profesional.</p>
+          </article>
+          <article id="e2">
+            <div class="meta">
+              <span class="code">E2</span>
+              <h3>Laboratorio de piel</h3>
+            </div>
+            <img
+              src="aesthetics-e2.png"
+              width="1536"
+              height="1024"
+              loading="lazy"
+              alt="Propuesta estética E2, laboratorio de piel"
+            />
+            <p class="note">Luminosa, científica y contemporánea.</p>
+          </article>
+          <article id="e3">
+            <div class="meta">
+              <span class="code">E3</span>
+              <h3>Galería sensorial</h3>
+            </div>
+            <img
+              src="aesthetics-e3.png"
+              width="1536"
+              height="1024"
+              loading="lazy"
+              alt="Propuesta estética E3, galería sensorial"
+            />
+            <p class="note">Artística, cálida y diferenciada.</p>
+          </article>
         </div>
       </section>
     </main>

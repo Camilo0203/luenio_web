@@ -24,21 +24,24 @@
 
 .brand-lockup .brand-mark__logo {
   position: absolute;
-  max-width: none;
-  height: auto;
-  object-fit: initial;
+  top: 0;
+  left: 0;
+  width: 30px !important;
+  height: 34px;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 .brand-mark__logo--primary {
-  top: -15px;
-  left: -38px;
-  width: 103px !important;
+  display: block;
 }
 
-.brand-mark__logo--light {
-  top: -17px;
-  left: -42px;
+.brand-lockup .brand-mark__logo--light {
+  top: -17px !important;
+  left: -42px !important;
   width: 105px !important;
+  height: auto !important;
+  max-width: none !important;
   display: none;
 }
 

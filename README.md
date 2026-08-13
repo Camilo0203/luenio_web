@@ -59,15 +59,15 @@ permanezca apagada.
 
 ## Scripts
 
-| Comando                         | Descripción                         |
-| ------------------------------- | ----------------------------------- |
-| `npm run dev`                   | Servidor completo (API + estáticos) |
-| `npm run build`                 | Build Vite → `dist/`                |
-| `npm test`                      | Production gate (suite completa)    |
+| Comando                         | Descripción                                        |
+| ------------------------------- | -------------------------------------------------- |
+| `npm run dev`                   | Servidor completo (API + estáticos)                |
+| `npm run build`                 | Build Vite → `dist/`                               |
+| `npm test`                      | Production gate (suite completa)                   |
 | `npm run test:quick`            | Gate diario: lint, build, arquitectura, API y core |
-| `npm run lint` / `format:check` | Calidad de código                   |
-| `npm run readiness:report`      | Checklist de readiness en consola   |
-| `npm run preflight:production`  | Validación fail-closed pre-deploy   |
+| `npm run lint` / `format:check` | Calidad de código                                  |
+| `npm run readiness:report`      | Checklist de readiness en consola                  |
+| `npm run preflight:production`  | Validación fail-closed pre-deploy                  |
 
 ## Auth y billing (v1)
 
@@ -112,7 +112,13 @@ Contrato HTTP: [docs/API.md](./docs/API.md). Migraciones SQL: `supabase/migratio
 npm test
 ```
 
-Los tests son self-contained (JSON fallback, sin Supabase real). En Windows, el suite completa tarda ~1 min.
+Los tests son self-contained (JSON fallback, sin Supabase real). En Windows, el gate completo puede tardar unos 10 minutos.
+
+Para actualizar una referencia visual aprobada sin reemplazar las demás:
+
+```bash
+node scripts/visual-regression-test.mjs --update --scenario=home-light-desktop
+```
 
 ## Licencia
 

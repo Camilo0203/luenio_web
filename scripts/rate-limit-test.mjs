@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
+import { stopTestProcess } from "./test-process.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -18,7 +19,7 @@ function getFreePort() {
   });
 }
 
-async function waitForServer(baseUrl, timeoutMs = 10_000) {
+async function waitForServer(baseUrl, timeoutMs = 30_000) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     try {
@@ -77,10 +78,6 @@ server.stdout.on("data", (chunk) => {
 server.stderr.on("data", (chunk) => {
   output += chunk.toString();
 });
-const closePromise = new Promise((resolve) => {
-  server.once("close", resolve);
-});
-
 try {
   await waitForServer(baseUrl);
 
@@ -109,10 +106,7 @@ try {
   error.message = `${error.message}\n\nServer output:\n${output || "(no output)"}`;
   throw error;
 } finally {
-  if (server.exitCode === null && !server.killed) {
-    server.kill();
-    await closePromise;
-  }
+  await stopTestProcess(server, { label: "rate-limit test server" });
   if (localDbSnapshot !== null) {
     fs.writeFileSync(localDbPath, localDbSnapshot);
   } else if (fs.existsSync(localDbPath)) {

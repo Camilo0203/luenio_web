@@ -7,7 +7,7 @@ Auth de sesión: cookie HttpOnly de login (`POST /api/auth`). Las mutaciones de 
 | Método   | Ruta                      | Auth                                                 | Notas                                                    |
 | -------- | ------------------------- | ---------------------------------------------------- | -------------------------------------------------------- |
 | GET      | `/api/health`             | público liveness; `?details=1` + Bearer health token |                                                          |
-| GET      | `/api/public-config`      | no                                                   | Turnstile site key, flags públicos                       |
+| GET      | `/api/public-config`      | no                                                   | Turnstile, analítica y flags públicos de alcance         |
 | POST     | `/api/contact`            | no                                                   | Turnstile + honeypot; respuesta solo `{ ok, inquiryId }` |
 | GET/POST | `/api/auth`               | sesión / login                                       | MFA admin en prod                                        |
 | GET/POST | `/api/invitations`        | admin                                                |                                                          |
@@ -20,6 +20,12 @@ Auth de sesión: cookie HttpOnly de login (`POST /api/auth`). Las mutaciones de 
 | GET      | `/api/billing`            | sesión                                               | overview; checkout off en v1                             |
 | GET      | `/api/settings`           | sesión                                               |                                                          |
 | POST     | `/api/stripe-webhook`     | Stripe signature                                     | fail-closed si billing off                               |
+
+## Configuración pública
+
+`GET /api/public-config` solo expone valores seguros para el navegador: configuración pública de
+Turnstile y analítica, DSN público de Sentry, entorno y las banderas booleanas
+`agencyCrmEnabled` / `publicBillingEnabled`. Nunca incluye tokens, secretos ni URLs privadas.
 
 ## `POST /api/process` bodies
 

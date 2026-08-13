@@ -26,6 +26,10 @@ export async function getSession() {
   return requestJson("/api/auth");
 }
 
+export async function getPublicConfig() {
+  return requestJson("/api/public-config", { credentials: "same-origin" });
+}
+
 export async function getAuthGuard() {
   return requestJson("/api/auth?guard=1", { credentials: "same-origin" });
 }

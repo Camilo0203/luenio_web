@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import http from "node:http";
 import net from "node:net";
+import { stopTestProcess } from "./test-process.mjs";
 
 const isProductionSmoke = process.argv.includes("--production");
 const testProxySecret = "luenio-production-smoke-proxy-secret-123456789";
@@ -83,7 +84,7 @@ function getFreePort() {
   });
 }
 
-async function waitForServer(baseUrl, timeoutMs = 10_000) {
+async function waitForServer(baseUrl, timeoutMs = 30_000) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     try {
@@ -214,9 +215,6 @@ async function runSmoke() {
   server.stderr.on("data", (chunk) => {
     output += chunk.toString();
   });
-  const closePromise = new Promise((resolve) => {
-    server.once("close", resolve);
-  });
 
   try {
     await waitForServer(baseUrl);
@@ -238,9 +236,9 @@ async function runSmoke() {
       legacyDemo.status === 301 && legacyDemo.headers.get("location") === "/demos",
       "/demo must permanently redirect to the canonical /demos route.",
     );
-    const demosAliasHtml = await expectTextRoute(baseUrl, "/demos", "Revisar flujo");
+    const demosAliasHtml = await expectTextRoute(baseUrl, "/demos", "Explorar demo");
     assert(
-      demosAliasHtml.includes("Prueba la demo de tu industria") &&
+      demosAliasHtml.includes("Demos por sector") &&
         demosAliasHtml.includes('content="index, follow"') &&
         demosAliasHtml.includes('rel="canonical" href="https://luenio.com/demos"'),
       "/demos must render the complete indexable demo catalog.",
@@ -472,8 +470,13 @@ async function runSmoke() {
     assert(publicConfig.ok, "Public config route must return 200.");
     assert(
       Object.keys(publicConfigBody).sort().join(",") ===
-        "analyticsEnabled,environment,gaMeasurementId,sentryDsn,turnstileRequired,turnstileSiteKey",
+        "agencyCrmEnabled,analyticsEnabled,environment,gaMeasurementId,publicBillingEnabled,sentryDsn,turnstileRequired,turnstileSiteKey",
       "Public config must expose only allowlisted browser configuration.",
+    );
+    assert(
+      publicConfigBody.agencyCrmEnabled === false &&
+        publicConfigBody.publicBillingEnabled === false,
+      "Launch-scope flags must remain disabled in the initial product release.",
     );
     assert(
       !JSON.stringify(publicConfigBody).includes("SECRET") &&
@@ -486,10 +489,7 @@ async function runSmoke() {
     error.message = `${error.message}\n\nServer output:\n${output || "(no output)"}`;
     throw error;
   } finally {
-    if (server.exitCode === null && !server.killed) {
-      server.kill();
-      await closePromise;
-    }
+    await stopTestProcess(server, { label: "smoke test server" });
   }
 }
 

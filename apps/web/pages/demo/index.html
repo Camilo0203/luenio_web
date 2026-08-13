@@ -8,91 +8,208 @@
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#071a33" />
     <script src="/theme-boot.js"></script>
-    <title>Luenio Demo | Selecciona tu industria</title>
-    <meta name="description" content="Selecciona una demo interactiva de Luenio por industria." />
+    <title>Demos por sector | Luenio</title>
     <meta
-      name="keywords"
-      content="demo CRM WhatsApp, demo automatización IA, demo por industria, prueba Luenio"
+      name="description"
+      content="Explora siete demos ficticias de Luenio y descubre cómo podrían trabajar juntas tu web, WhatsApp y las automatizaciones."
     />
-    <meta name="author" content="Luenio" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://luenio.com/demos" />
     <meta property="og:type" content="website" />
-    <meta property="og:locale" content="es_ES" />
+    <meta property="og:locale" content="es_CO" />
     <meta property="og:site_name" content="Luenio" />
-    <meta property="og:title" content="Luenio Demo | Selecciona tu industria" />
+    <meta property="og:title" content="Demos por sector | Luenio" />
     <meta
       property="og:description"
-      content="Selecciona una demo interactiva de Luenio por industria."
+      content="Siete experiencias ficticias para explorar posibilidades digitales por sector."
     />
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
     <meta property="og:url" content="https://luenio.com/demos" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Luenio Demo | Selecciona tu industria" />
+    <meta name="twitter:title" content="Demos por sector | Luenio" />
     <meta
       name="twitter:description"
-      content="Selecciona una demo interactiva de Luenio por industria."
+      content="Siete experiencias ficticias para explorar posibilidades digitales por sector."
     />
     <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
-    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+    <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
-  <body>
-    <main class="demo-page demo-selector">
-      <nav class="demo-nav">
-        <a href="/">Luenio</a><a href="/cotizacion">Solicitar cotización</a>
-      </nav>
-      <section class="demo-hero">
-        <p class="eyebrow">Prueba la demo de tu industria</p>
-        <h1>Descubre dónde estás perdiendo clientes hoy.</h1>
-        <p>
-          Elige tu industria y mira cómo Luenio recupera consultas que normalmente quedan sin
-          respuesta, sin seguimiento o sin cierre.
-        </p>
-        <p>Estas experiencias son ficticias y muestran posibilidades, no proyectos de clientes.</p>
+  <body class="catalog-page">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
+          <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+          <span>Luenio</span>
+        </a>
+        <nav
+          class="site-nav"
+          id="site-navigation"
+          data-navigation
+          data-open="false"
+          aria-label="Navegación principal"
+        >
+          <a href="/demos" aria-current="page">Demos</a>
+          <a href="/#soluciones">Soluciones</a>
+          <a href="/#proceso">Proceso</a>
+          <a href="/#preguntas">Preguntas</a>
+          <a href="/cotizacion">Cotización</a>
+          <a class="site-nav__access" href="/login" data-client-access>
+            <span class="access-label--guest">Acceso clientes</span>
+            <span class="access-label--user">Mi espacio</span>
+          </a>
+        </nav>
+        <div class="site-header__actions">
+          <a
+            class="button button--outline button--small site-header__access"
+            href="/login"
+            data-client-access
+          >
+            <span class="access-label--guest">Acceso clientes</span>
+            <span class="access-label--user">Mi espacio</span>
+          </a>
+          <a class="button button--primary button--small" href="/cotizacion">
+            Solicitar cotización
+          </a>
+        </div>
+        <button
+          class="menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <section class="catalog-hero">
+        <div class="catalog-shell">
+          <p class="eyebrow">Demos por sector</p>
+          <h1>Explora cómo podría funcionar tu próxima solución.</h1>
+          <p class="catalog-hero__lead">
+            Elige un sector y recorre una experiencia diseñada para mostrar páginas, atención por
+            WhatsApp y automatizaciones trabajando juntas.
+          </p>
+          <p class="catalog-disclaimer">
+            Son experiencias ficticias para explorar posibilidades. No representan clientes ni
+            resultados reales.
+          </p>
+        </div>
       </section>
-      <section class="case-grid">
-        <article>
-          <h3>Restaurantes</h3>
-          <p>Pedidos y reservas se pierden cuando el WhatsApp tarda.</p>
-          <a class="button button-primary button-small" href="/demos/restaurants">Revisar flujo</a>
-        </article>
-        <article>
-          <h3>Inmobiliarias</h3>
-          <p>Compradores con presupuesto claro se van si nadie responde rápido.</p>
-          <a class="button button-primary button-small" href="/demos/real-estate">Revisar flujo</a>
-        </article>
-        <article>
-          <h3>Gimnasios</h3>
-          <p>Preguntas por precio se enfrían antes de convertirse en membresías.</p>
-          <a class="button button-primary button-small" href="/gimnasios">Revisar flujo</a>
-        </article>
-        <article>
-          <h3>Ecommerce</h3>
-          <p>Chats de producto abandonados son ventas que ya estaban cerca.</p>
-          <a class="button button-primary button-small" href="/demos/ecommerce">Revisar flujo</a>
-        </article>
-        <article>
-          <h3>Agencias</h3>
-          <p>Leads de clientes se califican tarde y reducen margen operativo.</p>
-          <a class="button button-primary button-small" href="/demos/agencies">Revisar flujo</a>
-        </article>
-        <article>
-          <h3>Veterinarias</h3>
-          <p>Consultas de mascotas que deberían terminar en una cita, no en silencio.</p>
-          <a class="button button-primary button-small" href="/veterinarias">Revisar flujo</a>
-        </article>
-        <article>
-          <h3>Estéticas</h3>
-          <p>Convierte preguntas de tratamientos en valoraciones y espacios reservados.</p>
-          <a class="button button-primary button-small" href="/esteticas">Revisar flujo</a>
-        </article>
+
+      <section class="catalog-section" aria-labelledby="catalog-title">
+        <div class="catalog-shell">
+          <div class="catalog-heading">
+            <div>
+              <p class="eyebrow">Siete experiencias</p>
+              <h2 id="catalog-title">Encuentra el mundo más cercano a tu negocio.</h2>
+            </div>
+            <p>Cada demo conserva su propia identidad visual dentro del ecosistema Luenio.</p>
+          </div>
+          <div class="catalog-grid">
+            <article class="catalog-card">
+              <span class="catalog-card__index">01</span>
+              <h3>Restaurantes</h3>
+              <p>Pedidos, reservas y consultas organizados en un flujo más claro.</p>
+              <a class="button button--outline button--small" href="/demos/restaurants"
+                >Explorar demo</a
+              >
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-card__index">02</span>
+              <h3>Inmobiliarias</h3>
+              <p>Propiedades, compradores y seguimiento reunidos en una sola experiencia.</p>
+              <a class="button button--outline button--small" href="/demos/real-estate"
+                >Explorar demo</a
+              >
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-card__index">03</span>
+              <h3>Gimnasios</h3>
+              <p>Planes, clases y conversaciones pensados para facilitar la decisión.</p>
+              <a class="button button--outline button--small" href="/gimnasios">Explorar demo</a>
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-card__index">04</span>
+              <h3>Ecommerce</h3>
+              <p>Productos, preguntas y recuperación de oportunidades en contexto.</p>
+              <a class="button button--outline button--small" href="/demos/ecommerce"
+                >Explorar demo</a
+              >
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-card__index">05</span>
+              <h3>Agencias</h3>
+              <p>Servicios, proyectos y calificación de prospectos con una narrativa editorial.</p>
+              <a class="button button--outline button--small" href="/demos/agencies"
+                >Explorar demo</a
+              >
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-card__index">06</span>
+              <h3>Veterinarias</h3>
+              <p>Servicios, orientación y citas para acompañar mejor a cada familia.</p>
+              <a class="button button--outline button--small" href="/veterinarias">Explorar demo</a>
+            </article>
+            <article class="catalog-card">
+              <span class="catalog-card__index">07</span>
+              <h3>Estéticas</h3>
+              <p>Tratamientos, valoraciones y reservas dentro de una experiencia cuidada.</p>
+              <a class="button button--outline button--small" href="/esteticas">Explorar demo</a>
+            </article>
+          </div>
+        </div>
       </section>
-      <footer class="legal-bar">
-        <a href="/terminos">Términos</a>
-        <a href="/privacidad">Privacidad</a>
-        <a href="/reembolsos">Reembolsos</a>
-      </footer>
+
+      <section class="catalog-cta">
+        <div class="catalog-shell catalog-cta__inner">
+          <div>
+            <p class="eyebrow">Hecho a tu medida</p>
+            <h2>Tu proyecto no tiene que verse como una plantilla.</h2>
+          </div>
+          <a class="button button--primary" href="/cotizacion">Conversemos sobre tu proyecto</a>
+        </div>
+      </section>
     </main>
-    <script type="module" src="/apps/web/src/theme-control-entry.js"></script>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__intro">
+          <a class="brand-lockup" href="/">
+            <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+            <span>Luenio</span>
+          </a>
+          <p>Páginas web y automatizaciones hechas a medida para negocios reales.</p>
+        </div>
+        <nav class="footer-group" aria-label="Navegación">
+          <strong>Explorar</strong>
+          <a href="/#soluciones">Soluciones</a>
+          <a href="/demos">Demos</a>
+          <a href="/cotizacion">Cotización</a>
+        </nav>
+        <nav class="footer-group" aria-label="Contacto y legal">
+          <strong>Contacto</strong>
+          <a href="mailto:contacto@luenio.com">contacto@luenio.com</a>
+          <span>+57 319 320 3702</span>
+          <span>Bogotá D.C., Colombia</span>
+          <a href="/login" data-client-access>
+            <span class="access-label--guest">Acceso clientes</span>
+            <span class="access-label--user">Mi espacio</span>
+          </a>
+          <a href="/terminos">Términos</a>
+          <a href="/privacidad">Privacidad</a>
+          <a href="/reembolsos">Reembolsos</a>
+        </nav>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
+      </div>
+    </footer>
+    <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

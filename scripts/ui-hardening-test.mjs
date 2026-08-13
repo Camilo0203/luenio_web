@@ -3,6 +3,7 @@ import { spawn } from "node:child_process";
 import net from "node:net";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
+import { stopTestProcess } from "./test-process.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -77,8 +78,6 @@ server.stdout.on("data", (chunk) => {
 server.stderr.on("data", (chunk) => {
   serverOutput += chunk.toString();
 });
-const serverClosed = new Promise((resolve) => server.once("close", resolve));
-
 let browser;
 try {
   await waitForServer(baseUrl);
@@ -405,13 +404,24 @@ try {
     Math.abs(window.innerHeight - element.getBoundingClientRect().bottom),
   );
   assert(dialogBottomGap <= 1, "Mobile modal must adapt into a bottom sheet.");
-  await page.evaluate(() => {
+  const pendingModalState = await page.evaluate(() => {
     const buttons = [...document.querySelectorAll(".ui-modal__foot button")];
     buttons.at(-1).click();
     buttons.at(-1).click();
+    return {
+      busy: document.querySelector(".ui-modal")?.getAttribute("aria-busy"),
+      calls: window.__hardeningConfirmCalls,
+      disabled: buttons.at(-1).disabled,
+      label: buttons.at(-1).textContent,
+    };
   });
-  await page.waitForTimeout(20);
-  assert(await dialog.getByRole("button", { name: "Procesando…" }).isDisabled(), "Pending modal.");
+  assert(
+    pendingModalState.busy === "true" &&
+      pendingModalState.calls === 1 &&
+      pendingModalState.disabled &&
+      pendingModalState.label === "Procesando…",
+    `Pending modal must be busy and idempotent: ${JSON.stringify(pendingModalState)}`,
+  );
   await page.waitForTimeout(130);
   assert(
     (await page.evaluate(() => window.__hardeningConfirmCalls)) === 1,
@@ -470,6 +480,5 @@ try {
   throw error;
 } finally {
   await browser?.close();
-  if (server.exitCode === null && !server.killed) server.kill();
-  await serverClosed;
+  await stopTestProcess(server, { label: "UI hardening server" });
 }

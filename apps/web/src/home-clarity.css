@@ -89,10 +89,6 @@ body.home-clarity {
   font: inherit;
 }
 
-.home-clarity a {
-  color: inherit;
-}
-
 .hc-visually-hidden {
   position: absolute;
   width: 1px;
@@ -110,8 +106,14 @@ body.home-clarity {
 }
 
 .hc-container {
-  width: min(1280px, calc(100% - 48px));
+  width: min(var(--luenio-public-container), calc(100% - 48px));
   margin-inline: auto;
+}
+
+.home-clarity .site-header--home {
+  position: fixed;
+  inset: 0 0 auto;
+  width: 100%;
 }
 
 .hc-header {
@@ -1973,7 +1975,7 @@ html[data-signed-in="1"] .home-clarity .signed-in-copy {
 
 @media (max-width: 680px) {
   .hc-container {
-    width: min(100% - 32px, 1280px);
+    width: min(100% - 32px, var(--luenio-public-container));
   }
 
   .hc-header {

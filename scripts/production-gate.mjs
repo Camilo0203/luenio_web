@@ -1,5 +1,6 @@
 import { spawn } from "node:child_process";
 import net from "node:net";
+import { stopTestProcess } from "./test-process.mjs";
 
 const isolatedTestEnv = {
   LUENIO_SKIP_ENV_FILE: "true",
@@ -34,24 +35,34 @@ const isolatedTestEnv = {
 
 const npmCliPath = process.env.npm_execpath || null;
 
-function run(command, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    const child = spawn(command, args, {
-      cwd: process.cwd(),
-      env: { ...process.env, ...isolatedTestEnv, ...(options.env || {}) },
-      stdio: options.stdio || "inherit",
-      windowsHide: true,
-    });
-
-    child.once("error", reject);
-    child.once("close", (code) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-      reject(new Error(`${command} ${args.join(" ")} exited with code ${code}.`));
-    });
+async function run(command, args, options = {}) {
+  const child = spawn(command, args, {
+    cwd: process.cwd(),
+    env: { ...process.env, ...isolatedTestEnv, ...(options.env || {}) },
+    stdio: options.stdio || "inherit",
+    windowsHide: true,
   });
+  const timeoutMs = options.timeoutMs || 4 * 60_000;
+  let timeout;
+  const outcome = await Promise.race([
+    new Promise((resolve) => {
+      child.once("error", (error) => resolve({ error }));
+      child.once("close", (code) => resolve({ code }));
+    }),
+    new Promise((resolve) => {
+      timeout = setTimeout(() => resolve({ timedOut: true }), timeoutMs);
+    }),
+  ]);
+  clearTimeout(timeout);
+
+  if (outcome.timedOut) {
+    await stopTestProcess(child, { label: `${command} ${args.join(" ")}`, timeoutMs: 3_000 });
+    throw new Error(`${command} ${args.join(" ")} exceeded ${Math.round(timeoutMs / 1000)}s.`);
+  }
+  if (outcome.error) throw outcome.error;
+  if (outcome.code !== 0) {
+    throw new Error(`${command} ${args.join(" ")} exited with code ${outcome.code}.`);
+  }
 }
 
 function runNpmScript(scriptName, options = {}) {
@@ -114,10 +125,6 @@ async function runE2EWithServer() {
   server.stderr.on("data", (chunk) => {
     output += chunk.toString();
   });
-  const closePromise = new Promise((resolve) => {
-    server.once("close", resolve);
-  });
-
   try {
     await waitForServer(baseUrl);
     await runNpmScript("test:e2e", {
@@ -131,10 +138,7 @@ async function runE2EWithServer() {
     error.message = `${error.message}\n\nServer output:\n${output || "(no output)"}`;
     throw error;
   } finally {
-    if (server.exitCode === null && !server.killed) {
-      server.kill();
-      await closePromise;
-    }
+    await stopTestProcess(server, { label: "production gate E2E server" });
   }
 }
 
@@ -168,6 +172,8 @@ const steps = [
   ["UI hardening", () => runNpmScript("test:ui-hardening")],
   ["Browser E2E + a11y", () => runNpmScript("test:browser")],
   ["Visual regression", () => runNpmScript("test:visual")],
+  ["Light/dark theme audit", () => runNpmScript("test:theme")],
+  ["UI performance budgets", () => runNpmScript("test:performance", { timeoutMs: 10 * 60_000 })],
 ];
 
 const results = [];

@@ -272,20 +272,20 @@ assert(
   "Demo selector must expose its indexable canonical catalog route.",
 );
 assert(
-  demoSelectorSource.includes("Prueba la demo de tu industria"),
+  demoSelectorSource.includes("Demos por sector"),
   "Demo selector must clearly invite users to try an industry demo.",
 );
 assert(
-  demoSelectorSource.includes("Revisar flujo") && !demoSelectorSource.includes("Ver demo"),
-  "Demo selector must avoid weak public 'Ver demo' CTAs.",
+  demoSelectorSource.includes("Explorar demo") && !demoSelectorSource.includes(">Ver demo<"),
+  "Demo selector must use clear exploratory CTAs.",
 );
 assert(
-  demoSelectorSource.includes("Descubre dónde estás perdiendo clientes hoy."),
-  "Demo selector must frame demos around loss awareness.",
+  demoSelectorSource.includes("Explora cómo podría funcionar tu próxima solución."),
+  "Demo selector must frame demos around the visitor's next solution.",
 );
 assert(
-  demoSelectorSource.includes("mira cómo Luenio recupera consultas"),
-  "Demo selector must use high-intent demo CTAs.",
+  demoSelectorSource.includes("WhatsApp y automatizaciones trabajando juntas"),
+  "Demo selector must explain the connected Luenio experience.",
 );
 
 const sharedDemoPageSource = readText("apps/web/pages/demo/demo-page.js");

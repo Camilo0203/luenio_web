@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026.8.1 - Release candidate
+
+### Lanzamiento
+
+- Sitio público, cotización, siete landings y siete simulaciones unificados para producción.
+- CRM, autenticación, invitaciones, recuperación y MFA endurecidos para el alcance P0/P1.
+- Gate de producción determinista con 31/31 controles, regresión visual y presupuestos de rendimiento.
+- Imagen prevista como `luenio-app:2026.08.1` y release Sentry `luenio@2026.08.1`.
+
+### Bloqueos externos
+
+- La promoción pública requiere identidad legal revisada y `LEGAL_IDENTITY_READY=true`.
+- Staging debe validar Supabase, n8n, Resend, Turnstile, GA4, Sentry, R2 y Better Stack reales.
+
 ## 0.1.0
 
 ### Producto

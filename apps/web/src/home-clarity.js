@@ -92,16 +92,6 @@ if (root) {
       item.classList.toggle("is-active", selected);
       item.setAttribute("aria-pressed", String(selected));
     });
-    browserFrame?.setAttribute("aria-busy", "true");
-    await loadDemoShot(shot);
-    if (request !== demoRequest) return;
-    demoShots.forEach((shot) => {
-      const selected = shot.dataset.demoShot === target;
-      shot.classList.toggle("is-active", selected);
-      shot.setAttribute("aria-hidden", String(!selected));
-    });
-    browserFrame?.removeAttribute("aria-busy");
-    activeDemoIndex = next;
 
     const demoLabel = button.textContent.trim();
     const demoHref = button.dataset.demoHref || "#demos";
@@ -121,6 +111,17 @@ if (root) {
     if (demoStatus) {
       demoStatus.textContent = `Mostrando demo ficticia de ${demoLabel}`;
     }
+
+    browserFrame?.setAttribute("aria-busy", "true");
+    await loadDemoShot(shot);
+    if (request !== demoRequest) return;
+    demoShots.forEach((shot) => {
+      const selected = shot.dataset.demoShot === target;
+      shot.classList.toggle("is-active", selected);
+      shot.setAttribute("aria-hidden", String(!selected));
+    });
+    browserFrame?.removeAttribute("aria-busy");
+    activeDemoIndex = next;
   }
 
   demoButtons.forEach((button, index) => {

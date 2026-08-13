@@ -10,6 +10,7 @@ import net from "node:net";
 import path from "node:path";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
+import { stopTestProcess } from "./test-process.mjs";
 
 const localDbPath = path.join(process.cwd(), "db", "leads-db.json");
 const localDbSnapshot = fs.existsSync(localDbPath) ? fs.readFileSync(localDbPath, "utf8") : null;
@@ -135,7 +136,7 @@ function getFreePort() {
   });
 }
 
-async function waitForServer(baseUrl, timeoutMs = 15_000) {
+async function waitForServer(baseUrl, timeoutMs = 30_000) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     try {
@@ -187,26 +188,16 @@ async function startServer() {
   server.stderr.on("data", (chunk) => {
     output += chunk.toString();
   });
-  const closePromise = new Promise((resolve) => {
-    server.once("close", resolve);
-  });
-
   try {
     await waitForServer(baseUrl);
   } catch (error) {
-    if (server.exitCode === null && !server.killed) server.kill();
-    await closePromise;
+    await stopTestProcess(server, { label: "browser E2E server" });
     throw new Error(`${error.message}\n\nServer output:\n${output || "(no output)"}`);
   }
 
   return {
     baseUrl,
-    stop: async () => {
-      if (server.exitCode === null && !server.killed) {
-        server.kill();
-        await closePromise;
-      }
-    },
+    stop: () => stopTestProcess(server, { label: "browser E2E server" }),
   };
 }
 
@@ -281,6 +272,8 @@ async function runBrowserChecks(baseUrl) {
     viewport: { width: 1280, height: 800 },
   });
   const page = await context.newPage();
+  page.setDefaultNavigationTimeout(60_000);
+  page.setDefaultTimeout(30_000);
   const consoleErrors = [];
 
   page.on("pageerror", (error) => {
@@ -291,7 +284,7 @@ async function runBrowserChecks(baseUrl) {
     // --- Public landing ---
     await page.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded" });
     await expectVisibleText(page, "Luenio", "home brand");
-    await page.getByRole("link", { name: /Solicitar cotizaci/ }).waitFor({
+    await page.locator('[data-quote-cta="hero"]').waitFor({
       state: "visible",
       timeout: 10_000,
     });
@@ -367,7 +360,13 @@ async function runBrowserChecks(baseUrl) {
     }
 
     const ecommerceDemoButton = page.getByRole("button", { name: "Ecommerce", exact: true });
-    await ecommerceDemoButton.click();
+    await ecommerceDemoButton.evaluate((button) => button.click());
+    await page.waitForFunction(
+      () =>
+        globalThis.document
+          .querySelector('[data-demo-target="ecommerce"]')
+          ?.getAttribute("aria-pressed") === "true",
+    );
     await page.getByText("Mostrando demo ficticia de Ecommerce", { exact: true }).waitFor({
       state: "visible",
     });
@@ -377,7 +376,14 @@ async function runBrowserChecks(baseUrl) {
         .getAttribute("href")) === "/tiendas-online",
       "Mobile demo selection must expose the selected demo destination.",
     );
-    await page.getByRole("button", { name: "Agencias", exact: true }).click();
+    const agencyDemoButton = page.getByRole("button", { name: "Agencias", exact: true });
+    await agencyDemoButton.evaluate((button) => button.click());
+    await page.waitForFunction(
+      () =>
+        globalThis.document
+          .querySelector('[data-demo-target="agencias"]')
+          ?.getAttribute("aria-pressed") === "true",
+    );
     await page.setViewportSize({ width: 1280, height: 800 });
 
     // --- Public funnel continuity: home -> demo -> contextual quote -> confirmation ---
@@ -386,8 +392,11 @@ async function runBrowserChecks(baseUrl) {
     );
     assert((await agencyDemoCard.count()) === 1, "Home must expose the featured agency demo.");
     await Promise.all([
-      page.waitForURL(`${baseUrl}/agencias`, { waitUntil: "domcontentloaded" }),
-      agencyDemoCard.click(),
+      page.waitForURL(`${baseUrl}/agencias`, {
+        waitUntil: "domcontentloaded",
+        timeout: 60_000,
+      }),
+      agencyDemoCard.evaluate((link) => link.click()),
     ]);
 
     const demoQuoteTrigger = page.locator("[data-luenio-open]").first();

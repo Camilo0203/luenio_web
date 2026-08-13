@@ -1,6 +1,7 @@
 import { spawn } from "node:child_process";
 import net from "node:net";
 import { chromium } from "playwright";
+import { stopTestProcess } from "./test-process.mjs";
 
 const ALL_ROUTES = [
   { name: "home", path: "/" },
@@ -128,17 +129,10 @@ async function startServer() {
     stdio: ["ignore", "pipe", "pipe"],
     windowsHide: true,
   });
-  const closePromise = new Promise((resolve) => server.once("close", resolve));
-
   await waitForServer(baseUrl);
   return {
     baseUrl,
-    stop: async () => {
-      if (server.exitCode === null && !server.killed) {
-        server.kill();
-        await closePromise;
-      }
-    },
+    stop: () => stopTestProcess(server, { label: "performance test server" }),
   };
 }
 
@@ -306,8 +300,9 @@ async function measureRoute(browser, baseUrl, route) {
 }
 
 const server = await startServer();
-const browser = await launchBrowser();
+let browser;
 try {
+  browser = await launchBrowser();
   const results = [];
   for (const route of ROUTES) {
     let bestResult = await measureRoute(browser, server.baseUrl, route);
@@ -336,6 +331,6 @@ try {
     throw new Error(`UI performance budgets failed:\n- ${budgetFailures.join("\n- ")}`);
   }
 } finally {
-  await browser.close();
+  await browser?.close();
   await server.stop();
 }

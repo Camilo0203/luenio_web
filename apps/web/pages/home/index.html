@@ -56,7 +56,6 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
     <script type="module" src="/apps/web/src/client-access-boot.js"></script>
   </head>
   <body
-    data-public-demo="true"
     class="home-clarity"
     data-schema="organization"
     data-page-context="Página principal de Luenio"
@@ -64,71 +63,52 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
   >
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-    <header class="hc-header" data-home-header>
-      <div class="hc-container hc-header__inner">
-        <a class="hc-brand" href="/" aria-label="Luenio, inicio">
-          <span class="hc-brand__viewport hc-brand__viewport--primary">
-            <img
-              class="hc-brand__logo"
-              src="/brand/logotipo.svg"
-              width="1536"
-              height="1024"
-              alt="Luenio"
-            />
-          </span>
-          <span class="hc-brand__viewport hc-brand__viewport--light" aria-hidden="true">
-            <img
-              class="hc-brand__logo"
-              src="/brand/logotipo-blanco.svg"
-              width="1536"
-              height="1024"
-              alt=""
-            />
-          </span>
+    <header class="site-header site-header--home" data-home-header>
+      <div class="site-header__inner">
+        <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
+          <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+          <span>Luenio</span>
         </a>
-
-        <nav class="hc-nav" aria-label="Navegación principal" data-navigation data-open="false">
+        <nav
+          class="site-nav"
+          id="site-navigation"
+          aria-label="Navegación principal"
+          data-navigation
+          data-open="false"
+        >
           <a href="#demos">Demos</a>
           <a href="#soluciones">Soluciones</a>
           <a href="#proceso">Proceso</a>
           <a href="#preguntas">Preguntas</a>
-          <a class="hc-nav__access" href="/login" data-client-access>
-            <span class="signed-out-copy">Acceso clientes</span>
-            <span class="signed-in-copy">Ir a mi espacio</span>
+          <a href="/cotizacion">Cotización</a>
+          <a class="site-nav__access" href="/login" data-client-access>
+            <span class="access-label--guest">Acceso clientes</span>
+            <span class="access-label--user">Mi espacio</span>
           </a>
         </nav>
-
-        <div class="hc-header__actions">
-          <button
-            class="hc-theme-toggle"
-            type="button"
-            data-theme-toggle
-            aria-label="Activar modo oscuro"
-            title="Activar modo oscuro"
+        <div class="site-header__actions">
+          <a
+            class="button button--outline button--small site-header__access"
+            href="/login"
+            data-client-access
           >
-            <span class="hc-theme-toggle__track" aria-hidden="true">
-              <svg class="hc-theme-toggle__sun" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="3.25"></circle>
-                <path
-                  d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"
-                ></path>
-              </svg>
-              <svg class="hc-theme-toggle__moon" viewBox="0 0 24 24">
-                <path d="M20 15.2A8.2 8.2 0 0 1 8.8 4a8.25 8.25 0 1 0 11.2 11.2Z"></path>
-              </svg>
-              <i></i>
-            </span>
-          </button>
-          <button
-            class="hc-menu"
-            type="button"
-            data-menu-toggle
-            aria-label="Abrir menú"
-            aria-expanded="false"
-          >
-            <span></span><span></span>
-          </button>
+            <span class="access-label--guest">Acceso clientes</span>
+            <span class="access-label--user">Mi espacio</span>
+          </a>
+          <a class="button button--primary button--small site-header__cta" href="/cotizacion">
+            Solicitar cotización
+          </a>
         </div>
+        <button
+          class="menu-toggle"
+          type="button"
+          data-menu-toggle
+          aria-controls="site-navigation"
+          aria-expanded="false"
+          aria-label="Abrir menú"
+        >
+          <span></span>
+        </button>
       </div>
     </header>
 
@@ -162,10 +142,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                   <path d="M4 10h11M11 6l4 4-4 4" />
                 </svg>
               </a>
-              <a
-                class="hc-button hc-button--secondary"
-                href="/cotizacion"
-                data-quote-cta="hero"
+              <a class="hc-button hc-button--secondary" href="/cotizacion" data-quote-cta="hero"
                 >Solicitar cotización</a
               >
             </div>
@@ -524,8 +501,8 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
             <p class="hc-kicker">Tu proyecto puede empezar aquí</p>
             <h2>Cuéntanos qué quieres mejorar.</h2>
             <p>
-              Reunimos tres datos para preparar el contexto y continuar la conversación por
-              WhatsApp sin empezar desde cero.
+              Reunimos tres datos para preparar el contexto y continuar la conversación por WhatsApp
+              sin empezar desde cero.
             </p>
             <div class="hc-actions">
               <button
@@ -549,28 +526,33 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
       </section>
     </main>
 
-    <footer class="hc-footer">
-      <div class="hc-container hc-footer__inner">
-        <a class="hc-brand" href="/" aria-label="Luenio, inicio">
-          <span class="hc-brand__viewport hc-brand__viewport--light">
-            <img
-              class="hc-brand__logo"
-              src="/brand/logotipo-blanco.svg"
-              width="1536"
-              height="1024"
-              alt="Luenio"
-            />
-          </span>
-        </a>
-        <p>Soluciones digitales hechas a medida en Colombia.</p>
-        <nav aria-label="Enlaces legales">
-          <a href="/login" data-client-access>
-            <span class="signed-out-copy">Acceso clientes</span>
-            <span class="signed-in-copy">Ir a mi espacio</span>
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__intro">
+          <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
+            <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+            <span>Luenio</span>
           </a>
+          <p>Páginas web y automatizaciones hechas a medida para negocios reales.</p>
+        </div>
+        <nav class="footer-group" aria-label="Navegación">
+          <strong>Explorar</strong>
+          <a href="#soluciones">Soluciones</a>
+          <a href="#demos">Demos</a>
+          <a href="#proceso">Proceso</a>
+          <a href="/cotizacion">Cotización</a>
+        </nav>
+        <nav class="footer-group" aria-label="Contacto y legal">
+          <strong>Contacto</strong>
+          <a href="mailto:contacto@luenio.com">contacto@luenio.com</a>
+          <span>+57 319 320 3702</span>
           <a href="/terminos">Términos</a>
           <a href="/privacidad">Privacidad</a>
         </nav>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 Luenio. Todos los derechos reservados.</span>
+        <span>Bogotá D.C., Colombia</span>
       </div>
     </footer>
 

@@ -1,6 +1,9 @@
 import { spawn } from "node:child_process";
 import http from "node:http";
 import assert from "node:assert/strict";
+import { stopTestProcess } from "./test-process.mjs";
+
+const serverStartupTimeoutMs = 60_000;
 
 /** Minimal host env so Windows/Linux child processes can start Node. */
 function baseProcessEnv() {
@@ -39,6 +42,7 @@ function baseProcessEnv() {
 function productionPortTestEnv(overrides = {}) {
   return {
     ...baseProcessEnv(),
+    LUENIO_SKIP_ENV_FILE: "true",
     NODE_ENV: "production",
     HOST: "127.0.0.1",
     APP_URL: "https://luenio.com",
@@ -79,6 +83,7 @@ function productionPortTestEnv(overrides = {}) {
 function developmentTestEnv(overrides = {}) {
   return {
     ...baseProcessEnv(),
+    LUENIO_SKIP_ENV_FILE: "true",
     NODE_ENV: "development",
     HOST: "127.0.0.1",
     COOKIE_SECURE: "false",
@@ -115,13 +120,19 @@ function closeServer(server) {
   return new Promise((resolve) => server.close(resolve));
 }
 
-function waitForServer(child, { expectExit = false } = {}) {
+function waitForServer(child, { expectExit = false, timeoutMs = serverStartupTimeoutMs } = {}) {
   return new Promise((resolve, reject) => {
     let output = "";
     const timeout = setTimeout(() => {
       cleanup();
-      reject(new Error(`Timed out waiting for server output. Output:\n${output}`));
-    }, 15_000);
+      reject(
+        new Error(
+          `Timed out after ${timeoutMs}ms waiting for server output ` +
+            `(pid=${child.pid ?? "unknown"}, exitCode=${child.exitCode ?? "running"}, ` +
+            `signal=${child.signalCode ?? "none"}). Output:\n${output || "(no output)"}`,
+        ),
+      );
+    }, timeoutMs);
 
     function cleanup() {
       clearTimeout(timeout);
@@ -167,6 +178,7 @@ function spawnServer(env) {
     cwd: process.cwd(),
     env,
     stdio: ["ignore", "pipe", "pipe"],
+    windowsHide: true,
   });
 }
 
@@ -191,7 +203,7 @@ async function testDevelopmentFallback() {
     assert.match(result.output, /Falling back to an available development port/);
     await fetchHealth(result.port);
   } finally {
-    child.kill("SIGTERM");
+    await stopTestProcess(child, { label: "development fallback server" });
     await closeServer(reserved.server);
   }
 }
@@ -212,7 +224,7 @@ async function testProductionFailsOnOccupiedPort() {
       /Server failed to start|EADDRINUSE|EADDRNOTAVAIL|address already in use/i,
     );
   } finally {
-    child.kill("SIGTERM");
+    await stopTestProcess(child, { label: "production occupied-port server" });
     await closeServer(reserved.server);
   }
 }

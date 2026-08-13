@@ -36,6 +36,7 @@ const landingJs = readText("apps/web/src/public-site.js");
 const homeClarityJs = readText("apps/web/src/home-clarity.js");
 const brandConfig = readText("apps/web/src/brand-config.js");
 const pricingHtml = readText("apps/web/pages/pricing/index.html");
+const catalogHtml = readText("apps/web/pages/demo/index.html");
 const termsHtml = readText("apps/web/pages/legal/terminos/index.html");
 const privacyHtml = readText("apps/web/pages/legal/privacidad/index.html");
 const refundsHtml = readText("apps/web/pages/legal/reembolsos/index.html");
@@ -45,6 +46,8 @@ const adminHtml = readText("apps/admin/admin.html");
 const adminJs = readAdminSource();
 const adminCss = readText("apps/admin/src/admin.css");
 const authHtml = readText("apps/admin/auth.html");
+const inviteHtml = readText("apps/admin/invite.html");
+const resetHtml = readText("apps/admin/reset.html");
 const crmAppJs = readText("apps/admin/crm/app.js");
 const crmShellJs = readText("components/layout/Shell.js");
 const crmSidebarJs = readText("components/layout/Sidebar.js");
@@ -67,9 +70,7 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   ],
   [
     "demonstrative cases",
-    ["Agencias", "Ecommerce", "Inmobiliarias"].every((sector) =>
-      landingHtml.includes(sector),
-    ) &&
+    ["Agencias", "Ecommerce", "Inmobiliarias"].every((sector) => landingHtml.includes(sector)) &&
       ["/inmobiliarias", "/tiendas-online", "/agencias"].every(
         (route) =>
           landingHtml.includes(`href="${route}"`) ||
@@ -85,7 +86,7 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   ],
   [
     "mobile demo continuity",
-      landingHtml.includes("data-mobile-demo-link") &&
+    landingHtml.includes("data-mobile-demo-link") &&
       landingHtml.includes("data-demo-status") &&
       homeClarityJs.includes("mobileDemoLink") &&
       homeClarityJs.includes("demoStatus"),
@@ -110,6 +111,32 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
       pricingHtml.includes("Diagnóstico 100% gratuito") &&
       !pricingHtml.includes("Desde 500 USD") &&
       !pricingHtml.includes("pricing-price"),
+  ],
+  [
+    "consistent public navigation",
+    landingHtml.includes('class="site-header site-header--home"') &&
+      landingHtml.includes('class="site-footer"') &&
+      !landingHtml.includes('class="hc-header"') &&
+      !landingHtml.includes('class="hc-footer"') &&
+      landingHtml.includes('href="/cotizacion"') &&
+      !landingHtml.includes('data-public-demo="true"') &&
+      [pricingHtml, catalogHtml, termsHtml, privacyHtml, refundsHtml].every(
+        (html) =>
+          (html.includes('href="/#demos"') || html.includes('href="/demos"')) &&
+          html.includes('href="/#soluciones"') &&
+          html.includes('href="/#proceso"') &&
+          html.includes('class="site-nav__access"') &&
+          html.includes("Acceso clientes") &&
+          !html.includes('href="/#servicios"'),
+      ),
+  ],
+  [
+    "shared demo catalog shell",
+    catalogHtml.includes('class="catalog-page"') &&
+      catalogHtml.includes('class="site-header"') &&
+      catalogHtml.includes('class="site-footer"') &&
+      catalogHtml.includes('class="catalog-grid"') &&
+      !catalogHtml.includes('class="demo-nav"'),
   ],
   [
     "WhatsApp and form conversion",
@@ -316,6 +343,16 @@ assert(
   authHtml.indexOf('class="auth-side"') < authHtml.indexOf('class="auth-panel auth-panel--main"') &&
     adminCss.includes(".auth-panel--main {\n    order: -1;"),
   "Mobile login must place the credential form before supporting security content.",
+);
+assert(
+  authHtml.includes('class="auth-wordmark__logo"') &&
+    authHtml.includes('class="auth-side__brand-logo"') &&
+    [inviteHtml, resetHtml].every(
+      (html) =>
+        html.includes('class="auth-body auth-body--compact"') &&
+        html.includes('class="auth-wordmark__logo"'),
+    ),
+  "Authentication surfaces must use the shared Luenio brand system.",
 );
 assert(
   crmShellJs.includes("@media (max-width: 640px)") &&
