@@ -190,25 +190,6 @@ select {
   box-shadow: none;
 }
 
-.site-header__access {
-  white-space: nowrap;
-}
-
-/* Client access labels: swap without JS FOUC when html[data-signed-in] is set early */
-[data-client-access] .access-label--user {
-  display: none;
-}
-
-[data-client-access][hidden] {
-  display: none;
-}
-html[data-signed-in="1"] [data-client-access] .access-label--guest {
-  display: none;
-}
-html[data-signed-in="1"] [data-client-access] .access-label--user {
-  display: inline;
-}
-
 .menu-toggle {
   display: none;
   width: var(--luenio-touch-target);

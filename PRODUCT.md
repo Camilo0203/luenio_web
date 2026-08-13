@@ -10,7 +10,7 @@ web
 
 Luenio sirve a una combinación de pymes y equipos comerciales colombianos que necesitan captar, organizar y convertir oportunidades sin depender de un equipo técnico propio. La oferta contempla negocios de distintos sectores —incluidas agencias, inmobiliarias, gimnasios, restaurantes y ecommerce— sin establecer por ahora un único nicho prioritario.
 
-Los visitantes públicos evalúan y solicitan soluciones de captación y automatización. Los clientes y operadores invitados gestionan leads, seguimientos y actividad comercial desde un espacio privado.
+Los visitantes públicos evalúan y solicitan soluciones de captación y automatización. El espacio privado para clientes y operadores se conserva en el código, pero no forma parte de la superficie activa del lanzamiento actual.
 
 ## Product Purpose
 
@@ -29,8 +29,8 @@ La combinación diferenciadora es personalización, automatización comercial, r
 - El sitio público presenta servicios, casos demostrativos por nicho y una ruta de cotización.
 - La venta comienza mediante una solicitud de cotización; no existe compra pública de autoservicio en la versión actual.
 - Los formularios y canales como WhatsApp capturan solicitudes con contexto.
-- El CRM privado permite trabajar con scoring por reglas, pipeline, cola de tareas, notas, etiquetas, responsables, próximos pasos, historial de contacto, importación y exportación.
-- Los administradores incorporan usuarios mediante invitaciones privadas; no existe registro público.
+- Login, invitaciones, recuperación, CRM y APIs privadas están cerrados mediante `PUBLIC_DEMO_MODE=true` hasta una fase posterior.
+- El código privado conserva scoring por reglas, pipeline, seguimiento e invitaciones sin exponerlos al público.
 - Las automatizaciones pueden conectar formularios, correo, WhatsApp, CRM y flujos de n8n.
 
 ## Capabilities and Constraints
@@ -39,12 +39,12 @@ La combinación diferenciadora es personalización, automatización comercial, r
 - Landing pages y experiencias demostrativas para varios nichos.
 - Captura segura de leads y persistencia antes de intentar su entrega a automatizaciones externas.
 - Scoring de intención basado en reglas léxicas; no debe presentarse como evaluación realizada por un LLM.
-- CRM privado con pipeline, asignación, seguimiento, reportes operativos y herramientas de contacto.
+- CRM privado conservado para una fase posterior, sin rutas ni APIs activas durante este lanzamiento.
 - Automatizaciones e integraciones configuradas según las necesidades de cada cliente.
-- Acceso al CRM únicamente mediante invitación; MFA obligatorio para administradores en producción.
+- Cuando se reactive, el acceso al CRM será únicamente mediante invitación y MFA administrativo.
 - Facturación pública de autoservicio desactivada en la versión actual.
-- El lanzamiento inicial usa únicamente el CRM de leads en `/dashboard` con Supabase. El CRM de
-  agencia sobre Neon permanece como laboratorio desactivado mediante `ENABLE_AGENCY_CRM=false`.
+- El lanzamiento actual es exclusivamente público. `/dashboard`, `/app` y `/crm` permanecen
+  cerrados; el CRM de agencia sobre Neon continúa además desactivado con `ENABLE_AGENCY_CRM=false`.
 - Las demos no escriben en los datos reales del CRM y no deben presentarse como implementaciones de clientes.
 - Stack actual: HTML, CSS y JavaScript con Vite; Node.js; Supabase o almacenamiento local de desarrollo; n8n; Cloudflare, Caddy y Docker.
 - Decisión abierta: no existe todavía un sector principal confirmado dentro de la combinación de audiencias.
@@ -58,7 +58,7 @@ La combinación diferenciadora es personalización, automatización comercial, r
 
 ## Evidence on Hand
 
-- Producto funcional con sitio público, cotización, autenticación por invitación y CRM privado.
+- Producto funcional con sitio público, cotización, demos y landings; autenticación y CRM conservados fuera de la superficie activa.
 - Demos interactivas y landings demostrativas para agencias, ecommerce, gimnasios, inmobiliarias, restaurantes, veterinarias y centros de estética en `apps/web/pages/`.
 - Documentación funcional y operativa en `README.md`, `docs/CRM.md`, `docs/ARCHITECTURE.md`, `docs/API.md` y `docs/RUNBOOK.md`.
 - Suite automatizada con pruebas de seguridad, accesibilidad, arquitectura, API, almacenamiento, demos y flujos principales en `scripts/`.

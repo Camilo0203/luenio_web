@@ -200,6 +200,8 @@ async function runSmoke() {
     cwd: process.cwd(),
     env: {
       ...process.env,
+      LUENIO_SKIP_ENV_FILE: "true",
+      PUBLIC_DEMO_MODE: "false",
       HOST: "127.0.0.1",
       PORT: String(port),
       ...(isProductionSmoke ? productionSmokeEnv : {}),

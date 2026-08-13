@@ -125,8 +125,9 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
           (html.includes('href="/#demos"') || html.includes('href="/demos"')) &&
           html.includes('href="/#soluciones"') &&
           html.includes('href="/#proceso"') &&
-          html.includes('class="site-nav__access"') &&
-          html.includes("Acceso clientes") &&
+          html.includes('href="/#nosotros"') &&
+          !html.includes('href="/login"') &&
+          !html.includes("data-client-access") &&
           !html.includes('href="/#servicios"'),
       ),
   ],

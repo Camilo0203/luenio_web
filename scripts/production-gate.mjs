@@ -157,6 +157,7 @@ const steps = [
   ["Data hygiene", () => runNpmScript("test:data")],
   ["Production readiness", () => runNpmScript("test:readiness")],
   ["Shared VPS deployment configuration", () => runNpmScript("test:deployment")],
+  ["Public-only launch mode", () => runNpmScript("test:public-only")],
   ["Development port fallback", () => runNpmScript("test:dev-port")],
   ["Industry demo system", () => runNpmScript("test:demo-system")],
   ["Niche landing conversion pages", () => runNpmScript("test:niche-landings")],

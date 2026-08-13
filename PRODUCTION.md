@@ -8,9 +8,11 @@ Consulta primero:
 
 ## Aplicaciones
 
-## Catalogo publico temporal
+## Sitio público sin portal de clientes
 
-`PUBLIC_DEMO_MODE=true` redirige temporalmente `/login`, `/dashboard` y `/crm` hacia `/demos` para mostrar el catálogo sin habilitar el CRM. Es una bandera de exhibición, no reemplaza la configuración de producción: los formularios deben tener Turnstile y webhook reales, y el valor debe volver a `false` antes de activar acceso privado.
+`PUBLIC_DEMO_MODE=true` mantiene visible el sitio comercial, la cotización, las siete landings y sus demos. El login, las invitaciones, la recuperación, `/dashboard`, `/app`, `/crm`, los archivos administrativos y sus APIs quedan cerrados y redirigen al catálogo cuando corresponde. El código privado se conserva para una reactivación posterior; la bandera solo debe cambiar a `false` cuando todo el portal de clientes vaya a habilitarse de forma intencional.
+
+Los formularios públicos siguen requiriendo Turnstile, persistencia y webhook reales. En este modo no se ejecuta el digest privado ni se exigen webhooks de invitación, reset o MFA.
 
 El lanzamiento inicial usa únicamente `/dashboard`. `ENABLE_AGENCY_CRM=false` mantiene `/crm`,
 `/app` y `/api/crm/*` fuera de la superficie activa y evita depender de Neon.

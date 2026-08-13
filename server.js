@@ -110,10 +110,16 @@ function assertSecureProductionRuntime() {
   ) {
     failures.push("persistent contact delivery retries must be enabled with safe limits");
   }
-  if (!invitation.webhookUrl || invitation.webhookToken.length < 32) {
+  if (
+    !serverConfig.publicDemoMode &&
+    (!invitation.webhookUrl || invitation.webhookToken.length < 32)
+  ) {
     failures.push("authenticated invitation and password reset delivery must be configured");
   }
-  if (!mfa.requiredForAdmins || !mfa.webhookUrl || mfa.webhookToken.length < 32) {
+  if (
+    !serverConfig.publicDemoMode &&
+    (!mfa.requiredForAdmins || !mfa.webhookUrl || mfa.webhookToken.length < 32)
+  ) {
     failures.push("administrator MFA delivery must be configured");
   }
   if (stripe.publicBillingEnabled) {
@@ -123,28 +129,33 @@ function assertSecureProductionRuntime() {
     failures.push("Agency CRM must remain disabled for the initial lead-generation release");
   }
   const digest = getDigestEnv();
+  if (serverConfig.publicDemoMode && digest.cronEnabled) {
+    failures.push("DIGEST_CRON_ENABLED must remain false while the client portal is disabled");
+  }
   if (digest.cronEnabled && !isDigestDeliveryConfigured(digest)) {
     failures.push(
       "DIGEST_CRON_ENABLED requires HTTPS DIGEST_WEBHOOK_URL, DIGEST_WEBHOOK_TOKEN (≥32), and safe worker intervals",
     );
   }
-  try {
-    if (new URL(mfa.webhookUrl).protocol !== "https:")
-      failures.push("AUTH_MFA_WEBHOOK_URL must use HTTPS");
-  } catch {
-    failures.push("AUTH_MFA_WEBHOOK_URL must be a valid URL");
+  if (!serverConfig.publicDemoMode) {
+    try {
+      if (new URL(mfa.webhookUrl).protocol !== "https:")
+        failures.push("AUTH_MFA_WEBHOOK_URL must use HTTPS");
+    } catch {
+      failures.push("AUTH_MFA_WEBHOOK_URL must be a valid URL");
+    }
+    try {
+      if (new URL(invitation.webhookUrl).protocol !== "https:")
+        failures.push("INVITATION_WEBHOOK_URL must use HTTPS");
+    } catch {
+      failures.push("INVITATION_WEBHOOK_URL must be a valid URL");
+    }
   }
   try {
     if (new URL(contact.webhookUrl).protocol !== "https:")
       failures.push("CONTACT_WEBHOOK_URL must use HTTPS");
   } catch {
     failures.push("CONTACT_WEBHOOK_URL must be a valid URL");
-  }
-  try {
-    if (new URL(invitation.webhookUrl).protocol !== "https:")
-      failures.push("INVITATION_WEBHOOK_URL must use HTTPS");
-  } catch {
-    failures.push("INVITATION_WEBHOOK_URL must be a valid URL");
   }
   if (
     !Number.isInteger(serverConfig.rateLimitMax) ||
@@ -194,8 +205,7 @@ function assertSecureProductionRuntime() {
     securityConfig.trustedProxySecret,
     securityConfig.healthcheckToken,
     contact.webhookToken,
-    invitation.webhookToken,
-    mfa.webhookToken,
+    ...(!serverConfig.publicDemoMode ? [invitation.webhookToken, mfa.webhookToken] : []),
   ];
   if (new Set(criticalSecrets).size !== criticalSecrets.length) {
     failures.push("production secrets must be unique per trust boundary");
@@ -572,6 +582,57 @@ function isAppPath(pathname) {
   return ["/app", "/app/", "/apps/admin/app.html"].includes(pathname);
 }
 
+function isClientPortalPath(pathname) {
+  return (
+    isAuthPath(pathname) ||
+    isInvitationPath(pathname) ||
+    isPasswordResetPath(pathname) ||
+    isDashboardPath(pathname) ||
+    isCrmPath(pathname) ||
+    isAppPath(pathname) ||
+    pathname.startsWith("/apps/admin/")
+  );
+}
+
+function isClientPortalApiPath(pathname) {
+  return (
+    pathname === "/api/auth" ||
+    pathname === "/api/billing" ||
+    pathname === "/api/stripe-webhook" ||
+    pathname === "/api/leads" ||
+    pathname === "/api/process" ||
+    pathname === "/api/settings" ||
+    pathname.startsWith("/api/invitations") ||
+    pathname.startsWith("/api/password-reset") ||
+    pathname === "/api/crm" ||
+    pathname.startsWith("/api/crm/")
+  );
+}
+
+function blockDisabledClientPortal(request, response, pathname) {
+  if (!serverConfig.publicDemoMode) return false;
+
+  if (isClientPortalApiPath(pathname)) {
+    response.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
+    response.end(JSON.stringify({ ok: false, error: "API route not found." }));
+    return true;
+  }
+
+  if (!isClientPortalPath(pathname)) return false;
+  if (!["GET", "HEAD"].includes(request.method)) {
+    response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    response.end("Not found.");
+    return true;
+  }
+
+  response.writeHead(302, {
+    Location: "/demos",
+    "Cache-Control": "no-store",
+  });
+  response.end();
+  return true;
+}
+
 function getDemoPagePath(pathname) {
   const demoRoutes = {
     "/demo": "index.html",
@@ -741,6 +802,7 @@ function isSensitiveApiPath(pathname) {
   return [
     "/api/auth",
     "/api/billing",
+    "/api/stripe-webhook",
     "/api/contact",
     "/api/leads",
     "/api/process",
@@ -1002,6 +1064,9 @@ const server = http.createServer(
       if (pathname.startsWith("/api/")) {
         applyApiCacheHeaders(response);
       }
+      if (blockDisabledClientPortal(request, response, pathname)) {
+        return;
+      }
       if (rejectCrossOriginMutation(request, response, pathname)) {
         return;
       }
@@ -1048,11 +1113,6 @@ const server = http.createServer(
       if (pathname.startsWith("/api/")) {
         response.writeHead(404, { "Content-Type": "application/json; charset=utf-8" });
         response.end(JSON.stringify({ ok: false, error: "API route not found." }));
-        return;
-      }
-      if (serverConfig.publicDemoMode && isAuthPath(pathname)) {
-        response.writeHead(302, { Location: "/demos", "Cache-Control": "no-store" });
-        response.end();
         return;
       }
       if (redirectDisabledWorkspaceRoute(request, response, pathname)) {
@@ -1130,7 +1190,7 @@ function listen(portToUse, allowDevelopmentFallback = !isProduction()) {
     const activePort = typeof address === "object" && address ? address.port : portToUse;
     announceServer(activePort);
     startContactDeliveryWorker();
-    startDigestDeliveryWorker();
+    if (!serverConfig.publicDemoMode) startDigestDeliveryWorker();
   });
 }
 

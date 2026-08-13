@@ -1,12 +1,13 @@
 # CRM Map — producto activo y laboratorio (Luenio)
 
-`/dashboard` sobre Supabase es el producto activo. `/crm` sobre Neon se conserva como laboratorio
-sin migrar ni mezclar bases de datos. La bandera `ENABLE_AGENCY_CRM=false` es el valor obligatorio
-del lanzamiento inicial.
+El portal privado completo queda reservado para una fase posterior. Con `PUBLIC_DEMO_MODE=true`,
+`/login`, invitaciones, reset, `/dashboard`, `/app`, `/crm`, sus archivos y APIs están cerrados. El
+código de `/dashboard` sobre Supabase y el laboratorio `/crm` sobre Neon se conservan sin migrar ni
+mezclar bases de datos. `ENABLE_AGENCY_CRM=false` sigue siendo obligatorio.
 
 ## Entrada de producto (profesional)
 
-No se espera que el usuario escriba URLs. Flujo:
+Flujo futuro, actualmente deshabilitado:
 
 1. Sitio público → botón **Acceso clientes** → login
 2. Login (Turnstile si `TURNSTILE_REQUIRED`, MFA admin si aplica, “confiar dispositivo 30 días”)

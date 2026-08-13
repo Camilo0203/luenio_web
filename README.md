@@ -1,9 +1,9 @@
 # Luenio
 
-Sitio y CRM de **lead generation** para vender landings y automatizaciones con IA.
+Sitio de **lead generation** para vender landings y automatizaciones con IA.
 
-- **Público:** cotización, demos por nicho, legales, captura de leads.
-- **Privado:** `/dashboard` por invitación (sin registro abierto), scoring, pipeline y seguimiento.
+- **Público:** quiénes somos, cotización, demos por nicho, legales y captura de leads.
+- **Reservado para después:** login, invitaciones y CRM, cerrados con `PUBLIC_DEMO_MODE=true`.
 - **Ops:** Node + Vite, Supabase, n8n, Caddy, Docker, Cloudflare.
 
 El scoring es **por reglas** (léxico de intención), no un LLM. Las landings de nicho son **demostrativas**.
@@ -49,13 +49,13 @@ Por defecto: [http://127.0.0.1:4180](http://127.0.0.1:4180)
 | ------------- | --------------------- |
 | `/`           | Landing               |
 | `/cotizacion` | Cotización (lead-gen) |
-| `/login`      | Acceso privado        |
-| `/dashboard`  | CRM                   |
+| `/demos`      | Catálogo demostrativo |
 | `/api/health` | Liveness              |
 
-`/crm` (Neon) se conserva como laboratorio y está desactivado por defecto con
-`ENABLE_AGENCY_CRM=false`. `/app` y `/crm` redirigen al dashboard principal mientras la bandera
-permanezca apagada.
+`PUBLIC_DEMO_MODE=true` redirige `/login`, invitaciones, reset, `/dashboard`, `/app`, `/crm` y
+archivos administrativos hacia `/demos`; sus APIs responden `404`. El código privado permanece en
+el repositorio para reactivarlo posteriormente. El CRM de agencia también conserva
+`ENABLE_AGENCY_CRM=false`.
 
 ## Scripts
 
@@ -69,15 +69,15 @@ permanezca apagada.
 | `npm run readiness:report`      | Checklist de readiness en consola                  |
 | `npm run preflight:production`  | Validación fail-closed pre-deploy                  |
 
-## Auth y billing (v1)
+## Auth y billing (reservados)
 
-- **No hay registro público.** El admin crea invitaciones de 72 h (un solo uso).
-- MFA obligatorio para admins en producción.
+- El acceso, las invitaciones, el reset y MFA no forman parte de la superficie activa.
+- Al reactivar el portal, seguirá sin existir registro público y MFA será obligatorio para admins.
 - **Billing self-serve desactivado** (`ENABLE_PUBLIC_BILLING=false`). La venta pública es por cotización.
 
-## CRM operativo
+## CRM conservado para una fase posterior
 
-En `/dashboard` (sesión):
+El código de `/dashboard` se conserva, pero no es accesible con el modo público activo. Incluye:
 
 - Notas, etiquetas, búsqueda y export CSV
 - **Próxima acción** + fecha

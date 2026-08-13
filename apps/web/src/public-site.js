@@ -1,4 +1,4 @@
-import { fetchAuthStatus, submitPublicInquiry } from "./api-client.js";
+import { submitPublicInquiry } from "./api-client.js";
 import { brandConfig } from "./brand-config.js";
 import { initAnalytics, trackEvent } from "./analytics.js";
 import { protectContactForm } from "./contact-security.js";
@@ -69,6 +69,11 @@ function bindSmoothNavigation() {
       if (!target) return;
       event.preventDefault();
       target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      if (!reduceMotion) {
+        window.setTimeout(() => {
+          target.scrollIntoView({ behavior: "auto", block: "start" });
+        }, 900);
+      }
     });
   });
 }
@@ -459,60 +464,6 @@ function bindQuoteFormVisibility() {
   syncWaTriggerA11y();
 }
 
-/**
- * Client access entry.
- * Label is driven by html[data-signed-in] (CSS + early boot script).
- * Server still gates /app, /dashboard, /crm (prod). Click never trusts the label alone.
- */
-function setSignedInUi(on) {
-  if (on) document.documentElement.dataset.signedIn = "1";
-  else delete document.documentElement.dataset.signedIn;
-
-  document.querySelectorAll("[data-client-access]").forEach((link) => {
-    if (document.body.dataset.publicDemo === "true") {
-      link.hidden = true;
-      return;
-    }
-    link.hidden = false;
-    link.setAttribute("href", on ? "/dashboard" : "/login");
-  });
-}
-
-function clearSignedInHintCookie() {
-  try {
-    document.cookie = "luenio_signed_in=; Path=/; Max-Age=0; SameSite=Strict";
-  } catch {
-    /* ignore */
-  }
-}
-
-function writeSignedInHintCookie() {
-  try {
-    // ~7d max; server will overwrite on next login/logout. Not a secret.
-    document.cookie = "luenio_signed_in=1; Path=/; Max-Age=604800; SameSite=Strict";
-  } catch {
-    /* ignore */
-  }
-}
-
-async function bindClientAccess() {
-  const links = document.querySelectorAll("[data-client-access]");
-  if (!links.length) return;
-
-  // Align href with early boot (label already correct via CSS if hint cookie present)
-  setSignedInUi(document.documentElement.dataset.signedIn === "1");
-
-  try {
-    const authStatus = await fetchAuthStatus();
-    const ok = authStatus.authenticated;
-    setSignedInUi(ok);
-    if (ok) writeSignedInHintCookie();
-    else clearSignedInHintCookie();
-  } catch {
-    /* keep early hint if network fails; protected routes still require real session */
-  }
-}
-
 function injectOrganizationSchema() {
   if (body.dataset.schema !== "organization") return;
   const script = document.createElement("script");
@@ -545,6 +496,5 @@ createWhatsappWidget();
 bindQuoteFormVisibility();
 bindCaseTracking();
 bindConversionTracking();
-bindClientAccess();
 injectOrganizationSchema();
 initAnalytics();
