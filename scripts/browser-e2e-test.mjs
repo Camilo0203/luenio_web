@@ -136,9 +136,15 @@ function getFreePort() {
   });
 }
 
-async function waitForServer(baseUrl, timeoutMs = 30_000) {
+async function waitForServer(baseUrl, { child = null, timeoutMs = 60_000 } = {}) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
+    if (child && (child.exitCode !== null || child.signalCode !== null)) {
+      throw new Error(
+        `Server exited before becoming ready ` +
+          `(exitCode=${child.exitCode ?? "none"}, signal=${child.signalCode ?? "none"})`,
+      );
+    }
     try {
       const response = await fetch(`${baseUrl}/api/health`);
       if (response.ok) return;
@@ -163,6 +169,7 @@ async function startServer() {
     cwd: process.cwd(),
     env: {
       ...process.env,
+      NODE_ENV: "test",
       HOST: "127.0.0.1",
       PORT: String(port),
       HEALTHCHECK_TOKEN: healthToken,
@@ -189,7 +196,7 @@ async function startServer() {
     output += chunk.toString();
   });
   try {
-    await waitForServer(baseUrl);
+    await waitForServer(baseUrl, { child: server });
   } catch (error) {
     await stopTestProcess(server, { label: "browser E2E server" });
     throw new Error(`${error.message}\n\nServer output:\n${output || "(no output)"}`);
@@ -214,6 +221,25 @@ function formatAxeViolations(violations) {
 }
 
 async function runAxe(page, label) {
+  const invalidPatterns = await page.locator("[pattern]").evaluateAll((elements) =>
+    elements.flatMap((element) => {
+      const pattern = element.getAttribute("pattern");
+      if (!pattern) return [];
+      try {
+        new RegExp(pattern, "v");
+        return [];
+      } catch (error) {
+        return [
+          `${element.tagName.toLowerCase()}[name="${element.getAttribute("name") || ""}"]: ${error.message}`,
+        ];
+      }
+    }),
+  );
+  assert(
+    invalidPatterns.length === 0,
+    `${label} contains invalid HTML patterns:\n${invalidPatterns.join("\n")}`,
+  );
+
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
     .analyze();
@@ -274,10 +300,13 @@ async function runBrowserChecks(baseUrl) {
   const page = await context.newPage();
   page.setDefaultNavigationTimeout(60_000);
   page.setDefaultTimeout(30_000);
-  const consoleErrors = [];
+  const browserErrors = [];
 
   page.on("pageerror", (error) => {
-    consoleErrors.push(String(error?.message || error));
+    browserErrors.push(`pageerror: ${String(error?.message || error)}`);
+  });
+  page.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(`console: ${message.text()}`);
   });
 
   try {
@@ -820,8 +849,9 @@ async function runBrowserChecks(baseUrl) {
     await runAxe(page, "privacidad");
 
     // No fatal pageerrors on critical paths (allow network/font noise filtered above)
-    const fatal = consoleErrors.filter(
-      (message) => !/favicon|fonts\.gstatic|Failed to load resource/i.test(message),
+    const fatal = browserErrors.filter(
+      (message) =>
+        !/favicon|fonts\.gstatic|Failed to load resource.*(?:401|403|404)/i.test(message),
     );
     assert(fatal.length === 0, `Unexpected page errors:\n${fatal.join("\n")}`);
 
