@@ -569,6 +569,28 @@ html[data-theme="dark"] .hc-theme-toggle__moon {
   opacity: 1;
 }
 
+.hc-promise-motion i::after {
+  display: inline-block;
+  height: 0.88em;
+  margin-left: 0.06em;
+  border-right: 0.055em solid var(--hc-action);
+  vertical-align: -0.08em;
+  content: "";
+  animation: hc-promise-caret 650ms steps(1, end) infinite;
+}
+
+@keyframes hc-promise-caret {
+  0%,
+  48% {
+    border-color: var(--hc-action);
+  }
+
+  49%,
+  100% {
+    border-color: transparent;
+  }
+}
+
 .hc-hero__lead {
   max-width: 680px;
   margin: 14px auto 0;

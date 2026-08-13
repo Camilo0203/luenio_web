@@ -24,8 +24,68 @@ if (root) {
   const activeDemoLink = document.querySelector("[data-active-demo-link]");
   const mobileDemoLink = document.querySelector("[data-mobile-demo-link]");
   const demoStatus = document.querySelector("[data-demo-status]");
+  const typewriter = document.querySelector("[data-typewriter]");
   let demoRequest = 0;
   let activeDemoIndex = 0;
+
+  if (typewriter) {
+    const words = (typewriter.dataset.words || "")
+      .split("|")
+      .map((word) => word.trim())
+      .filter(Boolean);
+
+    if (words.length) {
+      typewriter.textContent = words[0];
+
+      if (!reduceMotion && words.length > 1) {
+        let wordIndex = 0;
+        let characterIndex = words[0].length;
+        let deleting = true;
+        let timerId;
+
+        const schedule = (delay) => {
+          window.clearTimeout(timerId);
+          if (!document.hidden) timerId = window.setTimeout(typeNextCharacter, delay);
+        };
+
+        const typeNextCharacter = () => {
+          const word = words[wordIndex];
+
+          if (deleting) {
+            characterIndex -= 1;
+            typewriter.textContent = word.slice(0, characterIndex);
+
+            if (characterIndex === 0) {
+              deleting = false;
+              wordIndex = (wordIndex + 1) % words.length;
+              schedule(240);
+              return;
+            }
+
+            schedule(50);
+            return;
+          }
+
+          characterIndex += 1;
+          typewriter.textContent = words[wordIndex].slice(0, characterIndex);
+
+          if (characterIndex === words[wordIndex].length) {
+            deleting = true;
+            schedule(1300);
+            return;
+          }
+
+          schedule(90);
+        };
+
+        schedule(1300);
+        document.addEventListener("visibilitychange", () => {
+          if (document.hidden) window.clearTimeout(timerId);
+          else schedule(240);
+        });
+      }
+    }
+  }
 
   const syncHeader = () => header?.classList.toggle("is-scrolled", window.scrollY > 18);
   syncHeader();

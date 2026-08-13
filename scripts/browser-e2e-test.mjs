@@ -330,6 +330,15 @@ async function runBrowserChecks(baseUrl) {
       "Home document language must be Spanish.",
     );
     await runAxe(page, "home");
+    const typewriter = page.locator("[data-typewriter]");
+    await typewriter.waitFor({ state: "visible" });
+    const initialPromiseWord = (await typewriter.textContent())?.trim();
+    await page.waitForFunction(
+      (initialWord) =>
+        document.querySelector("[data-typewriter]")?.textContent?.trim() !== initialWord,
+      initialPromiseWord,
+      { timeout: 4_000 },
+    );
     await assertThemeSwitch(page, "Home");
 
     // Mobile nav toggle
