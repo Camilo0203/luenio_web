@@ -16,8 +16,6 @@ const root = document.querySelector(".home-clarity");
 
 if (root) {
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const themeToggle = document.querySelector("[data-theme-toggle]");
-  const themeColor = document.querySelector("[data-theme-color]");
   const header = document.querySelector("[data-home-header]");
   const stage = document.querySelector("[data-hero-stage]");
   const browserFrame = stage?.querySelector(".hc-browser");
@@ -28,28 +26,6 @@ if (root) {
   const demoStatus = document.querySelector("[data-demo-status]");
   let demoRequest = 0;
   let activeDemoIndex = 0;
-
-  const syncThemeControl = () => {
-    const isDark = document.documentElement.dataset.theme === "dark";
-    const nextLabel = isDark ? "Activar modo claro" : "Activar modo oscuro";
-    themeToggle?.setAttribute("aria-label", nextLabel);
-    themeToggle?.setAttribute("title", nextLabel);
-    themeToggle?.setAttribute("aria-pressed", String(isDark));
-    themeColor?.setAttribute("content", isDark ? "#071426" : "#f6f8fc");
-  };
-
-  syncThemeControl();
-  themeToggle?.addEventListener("click", () => {
-    const nextTheme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-    document.documentElement.dataset.theme = nextTheme;
-
-    try {
-      localStorage.setItem("luenio-theme", nextTheme);
-    } catch {
-      // The theme still works for this visit when storage is unavailable.
-    }
-    syncThemeControl();
-  });
 
   const syncHeader = () => header?.classList.toggle("is-scrolled", window.scrollY > 18);
   syncHeader();

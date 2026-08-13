@@ -301,6 +301,7 @@ async function runBrowserChecks(baseUrl) {
       "Home document language must be Spanish.",
     );
     await runAxe(page, "home");
+    await assertThemeSwitch(page, "Home");
 
     // Mobile nav toggle
     await page.setViewportSize({ width: 390, height: 844 });
