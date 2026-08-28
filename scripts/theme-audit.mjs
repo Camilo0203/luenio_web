@@ -1,9 +1,9 @@
 /* global document, getComputedStyle, localStorage, requestAnimationFrame, window */
 import { spawn } from "node:child_process";
-import net from "node:net";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 let baseUrl = process.env.THEME_AUDIT_BASE_URL || "";
 const defaultRoutes = [
@@ -48,30 +48,6 @@ async function launchBrowser() {
     }
   }
   throw new Error("No se encontró Chromium, Chrome ni Edge para ejecutar la auditoría.");
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const probe = net.createServer();
-    probe.on("error", reject);
-    probe.listen(0, "127.0.0.1", () => {
-      const address = probe.address();
-      probe.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(url, timeoutMs = 30_000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    try {
-      if ((await fetch(`${url}/api/health`)).ok) return;
-    } catch {
-      // Keep polling until the isolated server is ready.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error(`Theme audit server did not become ready at ${url}.`);
 }
 
 async function startServer() {

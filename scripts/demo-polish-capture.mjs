@@ -1,9 +1,9 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
-import net from "node:net";
 import path from "node:path";
 import { chromium } from "playwright";
 import sharp from "sharp";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 const outputDir = path.join(process.cwd(), "test-results", "demo-polish");
 const routes = [
@@ -13,31 +13,6 @@ const routes = [
   { slug: "inmobiliaria", landing: "/inmobiliarias", simulation: "/demo/real-estate" },
   { slug: "restaurante", landing: "/restaurantes", simulation: "/demo/restaurants" },
 ];
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.once("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      server.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl, timeoutMs = 15_000) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(`${baseUrl}/api/health`);
-      if (response.ok) return;
-    } catch {
-      // The isolated server can take a moment to load the application graph.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error(`Demo capture server did not become ready at ${baseUrl}.`);
-}
 
 async function startServer() {
   const port = await getFreePort();

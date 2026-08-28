@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import http from "node:http";
-import net from "node:net";
 import { stopTestProcess } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 const isProductionSmoke = process.argv.includes("--production");
 const testProxySecret = "luenio-production-smoke-proxy-secret-123456789";
@@ -71,31 +71,6 @@ function rawRequest(baseUrl, pathname, headers = {}) {
     request.on("error", reject);
     request.end();
   });
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.on("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      server.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl, timeoutMs = 30_000) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(`${baseUrl}/api/health`);
-      if (response.ok) return;
-    } catch {
-      // Keep polling until the server is ready or the timeout expires.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error(`Server did not become ready within ${timeoutMs}ms.`);
 }
 
 async function expectTextRoute(baseUrl, pathname, expectedText) {

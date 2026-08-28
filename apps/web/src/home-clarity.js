@@ -39,7 +39,11 @@ if (root) {
   function loadDemoShot(shot) {
     if (!shot || shot.currentSrc || shot.src) return shot?.decode?.().catch(() => {});
 
-    const source = shot.dataset.src;
+    // Phones get the 640px cut when the markup offers one: these shots are swapped
+    // in by script, so they cannot use <picture> media queries like the first one.
+    const wantsMobile =
+      shot.dataset.mobileSrc && globalThis.matchMedia?.("(max-width: 767px)").matches;
+    const source = wantsMobile ? shot.dataset.mobileSrc : shot.dataset.src;
     if (!source) return Promise.resolve();
 
     shot.src = source;

@@ -6,11 +6,11 @@
  */
 import { spawn } from "node:child_process";
 import fs from "node:fs";
-import net from "node:net";
 import path from "node:path";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 const fixtureDir = path.join(process.cwd(), "test-results", `.browser-fixture-${process.pid}`);
 const localDbPath = path.join(fixtureDir, "leads-db.json");
@@ -123,37 +123,6 @@ async function getWhatsappPresentation(page) {
       width: Number.parseFloat(styles.width),
     };
   });
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.on("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      server.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl, { child = null, timeoutMs = 60_000 } = {}) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    if (child && (child.exitCode !== null || child.signalCode !== null)) {
-      throw new Error(
-        `Server exited before becoming ready ` +
-          `(exitCode=${child.exitCode ?? "none"}, signal=${child.signalCode ?? "none"})`,
-      );
-    }
-    try {
-      const response = await fetch(`${baseUrl}/api/health`);
-      if (response.ok) return;
-    } catch {
-      // poll
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error(`Server did not become ready within ${timeoutMs}ms at ${baseUrl}`);
 }
 
 async function startServer() {

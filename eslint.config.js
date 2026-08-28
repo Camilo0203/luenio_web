@@ -3,7 +3,18 @@ import globals from "globals";
 import prettierConfig from "eslint-config-prettier";
 
 export default [
-  { ignores: ["dist/**", "public/**", "db/leads-db.json", "node_modules/**"] },
+  // tmp/ and test-results/ hold generated scratch output; they are gitignored and
+  // must not be able to fail lint.
+  {
+    ignores: [
+      "dist/**",
+      "public/**",
+      "db/leads-db.json",
+      "node_modules/**",
+      "tmp/**",
+      "test-results/**",
+    ],
+  },
   js.configs.recommended,
   {
     files: [

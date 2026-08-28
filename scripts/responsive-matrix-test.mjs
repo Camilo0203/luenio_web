@@ -1,9 +1,9 @@
 /* global document */
 
 import { spawn } from "node:child_process";
-import net from "node:net";
 import { chromium } from "playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 const ROUTES = [
   "/",
@@ -33,30 +33,6 @@ const VIEWPORTS = [
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const probe = net.createServer();
-    probe.once("error", reject);
-    probe.listen(0, "127.0.0.1", () => {
-      const address = probe.address();
-      probe.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl) {
-  const deadline = Date.now() + 30_000;
-  while (Date.now() < deadline) {
-    try {
-      if ((await fetch(`${baseUrl}/api/health`)).ok) return;
-    } catch {
-      // Keep polling until the isolated server is ready.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error(`Responsive matrix server did not become ready at ${baseUrl}.`);
 }
 
 async function launchBrowser() {

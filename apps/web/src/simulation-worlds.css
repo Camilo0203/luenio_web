@@ -439,12 +439,23 @@ html[data-theme] body.simulation-real-estate {
   --sim-secondary: #f3efe6;
 }
 
+/* The hero art covers roughly the right half of the frame, so the 1400px source
+   (155 KB) was never needed: 960px already exceeds the painted width on desktop
+   and the phone breakpoint gets the 480px cut. */
 html[data-theme] body.simulation-real-estate .real-estate-hero {
   grid-template-columns: minmax(0, 0.72fr) minmax(420px, 0.8fr);
   align-items: end;
   background:
     linear-gradient(90deg, #06182c 0 43%, transparent 68%),
-    url("/assets/stitch/property-rosales.webp") right center / cover !important;
+    url("/assets/stitch/property-rosales-960.webp") right center / cover !important;
+}
+
+@media (max-width: 767px) {
+  html[data-theme] body.simulation-real-estate .real-estate-hero {
+    background:
+      linear-gradient(90deg, #06182c 0 43%, transparent 68%),
+      url("/assets/stitch/property-rosales-480.webp") right center / cover !important;
+  }
 }
 
 body.simulation-real-estate .real-estate-hero::after {

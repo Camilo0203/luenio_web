@@ -1,39 +1,9 @@
 import { spawn } from "node:child_process";
-import net from "node:net";
 import { stopTestProcess } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const probe = net.createServer();
-    probe.once("error", reject);
-    probe.listen(0, "127.0.0.1", () => {
-      const address = probe.address();
-      probe.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl, child, timeoutMs = 30_000) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    if (child.exitCode !== null || child.signalCode !== null) {
-      throw new Error(
-        `Public-only server exited early (code=${child.exitCode}, signal=${child.signalCode}).`,
-      );
-    }
-    try {
-      const response = await fetch(`${baseUrl}/api/health`);
-      if (response.ok) return;
-    } catch {
-      // Keep polling until the bounded deadline.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 200));
-  }
-  throw new Error(`Public-only server did not become ready within ${timeoutMs}ms.`);
 }
 
 const port = await getFreePort();
@@ -67,7 +37,7 @@ server.stderr.on("data", (chunk) => {
 });
 
 try {
-  await waitForServer(baseUrl, server);
+  await waitForServer(baseUrl, { child: server, label: "Public-only mode server" });
 
   for (const route of ["/", "/demos", "/cotizacion", "/agencias", "/privacidad"]) {
     const response = await fetch(`${baseUrl}${route}`);

@@ -1,36 +1,11 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
-import net from "node:net";
 import path from "node:path";
 import { stopTestProcess } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer();
-    server.on("error", reject);
-    server.listen(0, "127.0.0.1", () => {
-      const address = server.address();
-      server.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl, timeoutMs = 30_000) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    try {
-      const response = await fetch(`${baseUrl}/api/health`);
-      if (response.ok) return;
-    } catch {
-      // Keep polling until the temporary server is ready.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 150));
-  }
-  throw new Error(`Server did not become ready within ${timeoutMs}ms.`);
 }
 
 async function postContact(baseUrl, index) {

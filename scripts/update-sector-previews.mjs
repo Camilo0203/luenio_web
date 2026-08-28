@@ -25,6 +25,30 @@ const sectors = requestedSectors.size
   ? allSectors.filter(([name]) => requestedSectors.has(name))
   : allSectors;
 
+// One 1440x1000 capture feeds every variant; the mobile cut is that same frame
+// downscaled, not a phone-viewport screenshot, so both show the identical layout.
+// Phones only get AVIF: the WebP fallback is for engines without AVIF support,
+// and serving those the desktop cut is an acceptable trade for 7 fewer files.
+const allVariants = [
+  { suffix: "desktop", width: null, formats: ["webp", "avif"] },
+  { suffix: "mobile", width: 640, formats: ["avif"] },
+];
+const requestedVariants = new Set(
+  (process.env.PREVIEW_VARIANTS || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean),
+);
+const variants = requestedVariants.size
+  ? allVariants.filter(({ suffix }) => requestedVariants.has(suffix))
+  : allVariants;
+
+function encode(pipeline, format) {
+  return format === "webp"
+    ? pipeline.webp({ quality: 82, effort: 5 })
+    : pipeline.avif({ quality: 62, effort: 5 });
+}
+
 await fs.mkdir(outputDirectory, { recursive: true });
 await fs.mkdir(temporaryDirectory, { recursive: true });
 
@@ -66,17 +90,18 @@ try {
     });
 
     const source = sharp(path.join(temporaryDirectory, `${name}.png`));
-    await Promise.all([
-      source
-        .clone()
-        .webp({ quality: 82, effort: 5 })
-        .toFile(path.join(outputDirectory, `${name}-desktop.webp`)),
-      source
-        .clone()
-        .avif({ quality: 62, effort: 5 })
-        .toFile(path.join(outputDirectory, `${name}-desktop.avif`)),
-    ]);
-    console.info(`[sector-preview] ${name}`);
+    await Promise.all(
+      variants.flatMap((variant) =>
+        variant.formats.map((format) => {
+          const pipeline = source.clone();
+          return encode(
+            variant.width ? pipeline.resize({ width: variant.width }) : pipeline,
+            format,
+          ).toFile(path.join(outputDirectory, `${name}-${variant.suffix}.${format}`));
+        }),
+      ),
+    );
+    console.info(`[sector-preview] ${name} -> ${variants.map(({ suffix }) => suffix).join(", ")}`);
   }
 } finally {
   await context.close();

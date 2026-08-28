@@ -1,36 +1,12 @@
 /* global document, window, getComputedStyle */
 import { spawn } from "node:child_process";
-import net from "node:net";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess } from "./test-process.mjs";
+import { getFreePort, waitForServer } from "./test-server.mjs";
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
-}
-
-function getFreePort() {
-  return new Promise((resolve, reject) => {
-    const probe = net.createServer();
-    probe.on("error", reject);
-    probe.listen(0, "127.0.0.1", () => {
-      const address = probe.address();
-      probe.close(() => resolve(address.port));
-    });
-  });
-}
-
-async function waitForServer(baseUrl) {
-  const deadline = Date.now() + 15_000;
-  while (Date.now() < deadline) {
-    try {
-      if ((await fetch(`${baseUrl}/api/health`)).ok) return;
-    } catch {
-      // Keep polling until the isolated server is ready.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 150));
-  }
-  throw new Error("UI hardening server did not become ready.");
 }
 
 async function launchBrowser() {
