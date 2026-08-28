@@ -94,8 +94,19 @@ if (root) {
     if (mobileDemoLink) {
       mobileDemoLink.href = demoHref;
       mobileDemoLink.dataset.demoCase = demoCase;
-      mobileDemoLink.setAttribute("aria-label", `Abrir demo ficticia de ${demoLabel}`);
-      mobileDemoLink.firstChild.textContent = `Abrir demo de ${demoLabel} `;
+      // The accessible name must start with the visible text, or voice control
+      // cannot address this link by what it says (WCAG 2.5.3).
+      mobileDemoLink.setAttribute(
+        "aria-label",
+        `Abrir demo de ${demoLabel}, demostración ficticia`,
+      );
+      // Address the label text node directly. firstChild happens to be whitespace
+      // today, but if the markup is ever collapsed it becomes the icon, and writing
+      // to it would silently replace the SVG instead of the label.
+      const labelNode =
+        [...mobileDemoLink.childNodes].find((node) => node.nodeType === Node.TEXT_NODE) ??
+        mobileDemoLink.insertBefore(document.createTextNode(""), mobileDemoLink.firstChild);
+      labelNode.textContent = `Abrir demo de ${demoLabel} `;
     }
     if (demoStatus) {
       demoStatus.textContent = `Mostrando demo ficticia de ${demoLabel}`;

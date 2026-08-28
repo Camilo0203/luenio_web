@@ -130,7 +130,7 @@ html[data-theme="dark"] .theme-control__moon {
 }
 
 .theme-control:focus-visible {
-  outline: 3px solid rgba(23, 107, 255, 0.34);
+  outline: 3px solid var(--luenio-action);
   outline-offset: 2px;
   border-radius: 999px;
 }
@@ -147,5 +147,83 @@ html[data-theme="dark"] .theme-control__moon {
   .theme-control *::before,
   .theme-control *::after {
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* Consent banner. Lives here because analytics.js injects it on every public
+   surface, including the /demo/* pages, and this is the only stylesheet all of
+   them load. */
+.consent-banner {
+  position: fixed;
+  z-index: 1200;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: min(680px, calc(100% - 40px));
+  padding: 16px;
+  color: #f7f9fc;
+  background: #071a33;
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 10px;
+  box-shadow: 0 18px 48px rgb(7 26 51 / 24%);
+}
+
+.consent-banner p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.consent-banner div {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.consent-banner button {
+  min-height: var(--luenio-touch-target);
+  padding: 0 14px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.consent-banner button:last-child {
+  color: #071a33;
+  background: #f7f9fc;
+}
+
+.cookie-settings-link {
+  margin: 12px auto 0;
+  padding: 4px;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  background: transparent;
+  border: 0;
+  opacity: 0.72;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (max-width: 680px) {
+  .consent-banner {
+    right: 12px;
+    bottom: 12px;
+    display: block;
+    width: calc(100% - 24px);
+  }
+
+  .consent-banner div {
+    margin-top: 12px;
+  }
+
+  .consent-banner button {
+    flex: 1;
   }
 }

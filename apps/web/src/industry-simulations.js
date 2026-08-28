@@ -131,7 +131,9 @@ if (root && runButton) {
     const running = runButton.disabled;
     root.classList.toggle("is-running", running);
     root.dataset.simulationState = running ? "running" : root.dataset.simulationState || "ready";
-    root.setAttribute("aria-busy", String(running));
+    // No aria-busy on the root: the status label lives inside it, and a busy
+    // ancestor suppresses its live announcements, so the run would pass in total
+    // silence for screen reader users. The label itself reports the state.
     if (stateLabel && running) {
       stateLabel.textContent = "Estado: En ejecución";
       stateLabel.dataset.state = "running";

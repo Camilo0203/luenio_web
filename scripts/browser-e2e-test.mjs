@@ -527,7 +527,7 @@ async function runBrowserChecks(baseUrl) {
     });
     assert(
       (await page
-        .getByRole("link", { name: "Abrir demo ficticia de Ecommerce" })
+        .getByRole("link", { name: "Abrir demo de Ecommerce, demostración ficticia" })
         .getAttribute("href")) === "/tiendas-online",
       "Mobile demo selection must expose the selected demo destination.",
     );

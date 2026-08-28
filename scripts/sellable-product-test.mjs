@@ -7,8 +7,10 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+// Normalise CRLF: with core.autocrlf=true a fresh Windows checkout hands us
+// \r\n, and several assertions below match multi-line source snippets literally.
 function readText(filePath) {
-  return fs.readFileSync(path.join(root, filePath), "utf8");
+  return fs.readFileSync(path.join(root, filePath), "utf8").replaceAll("\r\n", "\n");
 }
 
 function listFiles(directory) {

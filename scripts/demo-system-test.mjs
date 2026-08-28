@@ -15,6 +15,13 @@ function readText(filePath) {
   return fs.readFileSync(path.join(root, filePath), "utf8");
 }
 
+// Prettier owns the line breaks in these templates, so copy assertions have to
+// compare words rather than exact source text or reformatting looks like a
+// missing disclosure.
+function readCollapsedText(filePath) {
+  return readText(filePath).replace(/\s+/gu, " ");
+}
+
 const disclosureText =
   "Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.";
 
@@ -39,9 +46,14 @@ PUBLIC_JOURNEYS.forEach((journey) => {
 
   const landingHtml = readText(`apps/web/pages/${journey.id}/index.html`);
   const simulationHtml = readText(`apps/web/pages${journey.simulationPath}/index.html`);
-  assert(landingHtml.includes(disclosureText), `${journey.id} landing must show its disclosure.`);
   assert(
-    simulationHtml.includes(disclosureText),
+    readCollapsedText(`apps/web/pages/${journey.id}/index.html`).includes(disclosureText),
+    `${journey.id} landing must show its disclosure.`,
+  );
+  assert(
+    readCollapsedText(`apps/web/pages${journey.simulationPath}/index.html`).includes(
+      disclosureText,
+    ),
     `${journey.id} simulation must show its disclosure.`,
   );
   assert(
@@ -270,7 +282,7 @@ assert(
       `${pagePath} must not claim that AI detects or qualifies leads.`,
     );
     assert(
-      !html.replaceAll(disclosureText, "").includes("cliente real"),
+      !normalizedHtml.replaceAll(disclosureText, "").includes("cliente real"),
       `${pagePath} must not present a fictional user as real.`,
     );
     assert(

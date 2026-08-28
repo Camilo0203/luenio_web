@@ -72,7 +72,7 @@ select {
 }
 
 :focus-visible {
-  outline: 3px solid rgba(25, 118, 210, 0.35);
+  outline: 3px solid var(--luenio-action);
   outline-offset: 3px;
 }
 
@@ -1006,6 +1006,19 @@ select {
 .wa-widget__form textarea:focus {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+}
+
+/* The rules above clear the UA outline, and a border tint plus a 12% shadow does
+   not reach the 3:1 that WCAG 1.4.11 asks of a focus indicator. Put a real ring
+   back for keyboard focus only, so pointer interaction keeps its quiet styling. */
+.lead-form input:focus-visible,
+.lead-form select:focus-visible,
+.lead-form textarea:focus-visible,
+.wa-widget__form input:focus-visible,
+.wa-widget__form select:focus-visible,
+.wa-widget__form textarea:focus-visible {
+  outline: 3px solid var(--luenio-action);
+  outline-offset: 2px;
 }
 
 [aria-invalid="true"] {
@@ -2155,76 +2168,6 @@ body.modal-open .wa-widget__trigger {
 .turnstile-field {
   min-height: 65px;
   width: 100%;
-}
-
-.consent-banner {
-  position: fixed;
-  z-index: 1200;
-  right: 20px;
-  bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  width: min(680px, calc(100% - 40px));
-  padding: 16px;
-  color: #f7f9fc;
-  background: #071a33;
-  border: 1px solid rgb(255 255 255 / 14%);
-  border-radius: 10px;
-  box-shadow: 0 18px 48px rgb(7 26 51 / 24%);
-}
-
-.consent-banner p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-}
-.consent-banner div {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 8px;
-}
-.consent-banner button {
-  min-height: var(--luenio-touch-target);
-  padding: 0 14px;
-  color: inherit;
-  background: transparent;
-  border: 1px solid rgb(255 255 255 / 24%);
-  border-radius: 7px;
-  cursor: pointer;
-}
-.consent-banner button:last-child {
-  color: #071a33;
-  background: #f7f9fc;
-}
-
-.cookie-settings-link {
-  margin: 12px auto 0;
-  padding: 4px;
-  color: inherit;
-  font: inherit;
-  font-size: 13px;
-  background: transparent;
-  border: 0;
-  opacity: 0.72;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-@media (max-width: 680px) {
-  .consent-banner {
-    right: 12px;
-    bottom: 12px;
-    display: block;
-    width: calc(100% - 24px);
-  }
-  .consent-banner div {
-    margin-top: 12px;
-  }
-  .consent-banner button {
-    flex: 1;
-  }
 }
 
 /* Shared dark theme for public, quote and legal surfaces. */

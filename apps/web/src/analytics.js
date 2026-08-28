@@ -73,8 +73,28 @@ function loadAnalytics() {
   window.gtag("config", measurementId, { anonymize_ip: true });
 }
 
+// Storage can be unavailable (Safari private mode, blocked third-party storage).
+// Treat that as "no stored choice" rather than letting it throw: an exception in
+// saveConsent would leave the banner permanently undismissable, and one in
+// initAnalytics would reject its promise and skip the cookie-settings binding.
+function readStoredConsent() {
+  try {
+    return localStorage.getItem(consentKey);
+  } catch {
+    return null;
+  }
+}
+
+function writeStoredConsent(value) {
+  try {
+    localStorage.setItem(consentKey, value);
+  } catch {
+    // The choice still applies for this page view; it just will not persist.
+  }
+}
+
 function saveConsent(value) {
-  localStorage.setItem(consentKey, value);
+  writeStoredConsent(value);
   document.querySelector("[data-consent-banner]")?.remove();
   if (value === "accepted") loadAnalytics();
   else consentCommand("update", { analytics_storage: "denied" });
@@ -109,7 +129,7 @@ export async function initAnalytics() {
       footer.append(settings);
     }
   }
-  const consent = localStorage.getItem(consentKey);
+  const consent = readStoredConsent();
   if (consent === "accepted") loadAnalytics();
   else if (!consent) showBanner();
   document.querySelectorAll("[data-cookie-settings]").forEach((button) => {

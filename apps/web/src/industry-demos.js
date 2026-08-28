@@ -66,8 +66,16 @@ const bindChoiceGroups = (root, onChange) => {
   });
 };
 
-const selectedValue = (root, group) =>
-  root.querySelector(`[data-demo-choice-group="${group}"] .is-selected`)?.dataset.demoChoice || "";
+// The lookup tables below are keyed by these values, so falling back to the first
+// choice in the group keeps them addressable even if the markup ships without a
+// default selection. The update() callers still guard, because a renamed choice
+// would produce a valid string that no table knows about.
+const selectedValue = (root, group) => {
+  const scope = root.querySelector(`[data-demo-choice-group="${group}"]`);
+  if (!scope) return "";
+  const selected = scope.querySelector(".is-selected") || scope.querySelector("[data-demo-choice]");
+  return selected?.dataset.demoChoice || "";
+};
 
 const setSelectValue = (selector, value) => {
   const select = document.querySelector(selector);
@@ -90,6 +98,7 @@ const setupAgencyBrief = () => {
   const update = () => {
     const goal = selectedValue(root, "goal");
     const channel = selectedValue(root, "channel");
+    if (!title || !note || !plans[goal] || !channel) return;
     title.textContent = `${plans[goal]} · ${channel}`;
     note.textContent = `Ejemplo de plan para ${goal.toLowerCase()} mediante ${channel.toLowerCase()}, con estrategia, diseño y medición en un solo equipo.`;
     setSelectValue("[data-agency-goal]", goal);
@@ -130,12 +139,14 @@ const setupCommerceLab = () => {
   };
   const update = () => {
     const use = selectedValue(root, "use");
-    product.textContent = data[use].name;
-    description.textContent = data[use].description;
-    image.src = data[use].image;
-    image.srcset = data[use].srcset;
-    image.alt = `${data[use].name}, recomendación ilustrativa de NovaStore`;
-    setSelectValue("[data-commerce-inquiry-product]", data[use].name);
+    const entry = data[use];
+    if (!entry || !product || !description || !image) return;
+    product.textContent = entry.name;
+    description.textContent = entry.description;
+    image.src = entry.image;
+    image.srcset = entry.srcset;
+    image.alt = `${entry.name}, recomendación ilustrativa de NovaStore`;
+    setSelectValue("[data-commerce-inquiry-product]", entry.name);
     acknowledgeResult(root, result, "commerce");
   };
   bindChoiceGroups(root, update);
@@ -202,7 +213,9 @@ const setupPropertyConcierge = () => {
   const update = () => {
     const zone = selectedValue(root, "zone");
     const intent = selectedValue(root, "intent");
-    const [name, detail, source] = options[zone][intent];
+    const entry = options[zone]?.[intent];
+    if (!entry || !title || !meta || !image || !code) return;
+    const [name, detail, source] = entry;
     title.textContent = name;
     meta.textContent = detail;
     image.src = source;
@@ -231,8 +244,10 @@ const setupRestaurantPass = () => {
   const update = () => {
     const occasion = selectedValue(root, "occasion");
     const hour = selectedValue(root, "hour");
-    menu.textContent = suggestions[occasion][0];
-    detail.textContent = suggestions[occasion][1];
+    const entry = suggestions[occasion];
+    if (!entry || !menu || !detail || !time) return;
+    menu.textContent = entry[0];
+    detail.textContent = entry[1];
     time.textContent = hour;
     setSelectValue("[data-restaurant-occasion]", occasion);
     setSelectValue("[data-restaurant-form-time]", hour);

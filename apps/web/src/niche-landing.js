@@ -1,3 +1,4 @@
+import { focusAnchorTarget } from "./a11y.js";
 import { initAnalytics, trackEvent } from "./analytics.js";
 import { buildQuoteUrl } from "./journey-context.js";
 import { getPublicJourneyByDemo, getPublicJourneyBySector } from "./public-journeys.js";
@@ -94,6 +95,7 @@ document.querySelectorAll('a[href^="#"]').forEach((link) => {
       target: selector,
     });
     target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    focusAnchorTarget(target);
   });
 });
 

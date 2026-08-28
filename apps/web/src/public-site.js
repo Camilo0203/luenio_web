@@ -1,3 +1,4 @@
+import { focusAnchorTarget } from "./a11y.js";
 import { submitPublicInquiry } from "./api-client.js";
 import { brandConfig } from "./brand-config.js";
 import { initAnalytics, trackEvent } from "./analytics.js";
@@ -72,6 +73,7 @@ function bindSmoothNavigation() {
       if (!target) return;
       event.preventDefault();
       target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      focusAnchorTarget(target);
       if (!reduceMotion) {
         window.setTimeout(() => {
           target.scrollIntoView({ behavior: "auto", block: "start" });
@@ -470,15 +472,19 @@ function createWhatsappWidget() {
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && modal.getAttribute("aria-hidden") === "false") setOpen(false);
     if (event.key !== "Tab" || modal.getAttribute("aria-hidden") !== "false") return;
-    const focusable = [...panel.querySelectorAll("button, input, select, textarea")];
+    // The submit button is disabled while the inquiry is in flight, so an unfiltered
+    // list would park the focus cycle on an inert control.
+    const focusable = [...panel.querySelectorAll("button, input, select, textarea")].filter(
+      (element) => !element.disabled && element.getAttribute("aria-hidden") !== "true",
+    );
     const first = focusable[0];
     const last = focusable.at(-1);
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
-      last.focus();
+      last?.focus();
     } else if (!event.shiftKey && document.activeElement === last) {
       event.preventDefault();
-      first.focus();
+      first?.focus();
     }
   });
 
@@ -585,9 +591,15 @@ function bindQuoteFormVisibility() {
     const formVisible = body.classList.contains("quote-form-visible");
     const expanded = trigger.getAttribute("aria-expanded") === "true";
     const decorativeHidden = formVisible && !expanded;
-    trigger.toggleAttribute("aria-hidden", decorativeHidden);
-    if (decorativeHidden) trigger.setAttribute("tabindex", "-1");
-    else trigger.removeAttribute("tabindex");
+    // toggleAttribute would write aria-hidden="", which is not a valid true value:
+    // the trigger would stay exposed to screen readers while losing its tab stop.
+    if (decorativeHidden) {
+      trigger.setAttribute("aria-hidden", "true");
+      trigger.setAttribute("tabindex", "-1");
+    } else {
+      trigger.removeAttribute("aria-hidden");
+      trigger.removeAttribute("tabindex");
+    }
   };
 
   const observer = new IntersectionObserver(
