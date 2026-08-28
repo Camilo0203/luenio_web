@@ -16,7 +16,9 @@
   --luenio-public-canvas: #f6f8fc;
   --luenio-surface: #fff;
   --luenio-mist: #eaf0f8;
-  --luenio-public-muted: #61708a;
+  /* Darkened from #61708a, which reached only 4.37:1 on --luenio-mist and so
+     missed AA for body text on every soft surface. 4.66:1 there, 5.5:1 on white. */
+  --luenio-public-muted: #5c6b85;
   --luenio-public-line: #d9e2ef;
   --luenio-whatsapp: #0f743f;
   --luenio-night-section: #0b1b33;

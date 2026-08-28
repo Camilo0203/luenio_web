@@ -432,6 +432,17 @@ html[data-theme="dark"] .luenio-demo-disclosure {
   text-underline-offset: 3px;
 }
 
+/* The floating WhatsApp trigger is 52px plus a 14px inset, and it parks in this
+   corner when the page is scrolled to the end. Its collision avoidance gives up
+   and falls back to no lift when every offset still hits a link, which on a
+   narrow screen it does, so reserve the space here instead of letting the button
+   land on top of "Reembolsos". */
+@media (max-width: 560px) {
+  .legal-bar {
+    padding-bottom: 84px;
+  }
+}
+
 /* Skip link for the seven sector landings. Defined here, not in public-site.css,
    because those pages do not load that stylesheet. Values are literal rather than
    tokenised so it renders identically on every sector palette. */

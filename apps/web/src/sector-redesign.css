@@ -738,6 +738,10 @@ html[data-theme] body.demo-restaurant.sector-v2 {
   --muted: #c5b8ac;
   --accent: #8d2430;
   --accent-ink: #fff;
+  /* --accent-text defaults to --accent, and this wine only reaches 2.17:1 on the
+     surface below, so eyebrows rendered nearly invisible. The amber already used
+     for section eyebrows on this page gives 9:1 and keeps the palette. */
+  --accent-text: #f0a63d;
   --wine: #8d2430;
   --line: rgb(245 237 227 / 0.15);
   --signal: #b63d49;
@@ -751,6 +755,9 @@ html[data-theme="light"] body.demo-restaurant.sector-v2 {
   --muted: #665a51;
   --accent: #79202b;
   --accent-ink: #fff;
+  /* The block above sets an amber accent-text for the dark surface; on this cream
+     one the wine reads at 8:1, so take the accent back. */
+  --accent-text: var(--accent);
   --wine: #79202b;
   --line: rgb(33 26 22 / 0.17);
   --signal: #79202b;

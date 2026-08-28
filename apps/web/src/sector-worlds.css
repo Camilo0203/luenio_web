@@ -1090,6 +1090,18 @@ html[data-theme="dark"] .demo-ecommerce .commerce-lab__result {
   border-color: rgb(219 232 255 / 0.18);
 }
 
+/* industry-demos.css hard-codes light-theme ink on these children, which the rule
+   above cannot reach through inheritance. Without this the recommender's result
+   rendered at 1.03:1 in dark mode — the product name was invisible. */
+html[data-theme="dark"] .demo-ecommerce .commerce-lab__result strong,
+html[data-theme="dark"] .demo-ecommerce .commerce-lab__result span {
+  color: #f3f7ff;
+}
+
+html[data-theme="dark"] .demo-ecommerce .commerce-lab__result p {
+  color: #aebdd1;
+}
+
 html[data-theme="dark"] .demo-ecommerce .demo-section {
   background: #081322;
 }
