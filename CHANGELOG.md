@@ -5,9 +5,36 @@
 ### Lanzamiento
 
 - Sitio público, cotización, siete landings y siete simulaciones unificados para producción.
-- CRM, autenticación, invitaciones, recuperación y MFA endurecidos para el alcance P0/P1.
-- Gate de producción determinista con 31/31 controles, regresión visual y presupuestos de rendimiento.
+- **Portal de cliente fuera de la superficie pública** (`PUBLIC_DEMO_MODE=true`): acceso,
+  invitaciones, reset, `/dashboard`, `/app` y `/crm` redirigen a `/demos` y sus APIs responden
+  `404`. El código se conserva para reactivarlo en una fase posterior.
+- CRM de agencia congelado con `ENABLE_AGENCY_CRM=false`; el lanzamiento no depende de Neon.
+- Gate de producción determinista con 35/35 controles, regresión visual, matriz responsive,
+  auditoría de tema y presupuestos de rendimiento.
 - Imagen prevista como `luenio-app:2026.08.1` y release Sentry `luenio@2026.08.1`.
+
+### Accesibilidad
+
+- Los enlaces de ancla mueven el foco además del viewport; el "saltar al contenido" ya funciona.
+- Anillos de foco con contraste suficiente (antes ~1.6:1, por debajo del 3:1 de WCAG 1.4.11).
+- Corregidos `aria-hidden` inválido en el disparador de WhatsApp, `aria-busy` que silenciaba el
+  estado de las simulaciones, `aria-label` en elementos sin rol y nombre accesible que no contenía
+  el texto visible.
+- El banner de consentimiento ya se muestra con estilos en las siete páginas `/demo/*`.
+
+### Legal y SEO
+
+- Las siete landings sectoriales enlazan Términos, Privacidad y Reembolsos; la home añade
+  Reembolsos.
+- `robots.txt` deja de bloquear `/demo/` y los alias en inglés: su exclusión la aplican `noindex`
+  y el canonical, que exigen que la página sea rastreable.
+- Añadido JSON-LD (`Organization`, `WebSite`, `FAQPage`, `Service`, `BreadcrumbList`).
+
+### Rendimiento
+
+- `/demo/real-estate` pasa de 225 KB a 78 KB y `/demos` de 222 KB a 104 KB; la página más pesada
+  queda al 60% del presupuesto de 250 KB.
+- Previews móviles generadas para los siete sectores desde `npm run previews:sectors`.
 
 ### Bloqueos externos
 

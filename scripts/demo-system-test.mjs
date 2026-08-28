@@ -322,15 +322,11 @@ assert(
         html.includes("/apps/web/pages/demo/veterinary/veterinary-demo.js"),
         `${pagePath} must use the veterinary demo UI script.`,
       );
-    } else if (type === "aesthetics") {
-      assert(
-        html.includes("/apps/web/pages/demo/aesthetics/aesthetics-demo.js"),
-        `${pagePath} must use the aesthetics demo UI script.`,
-      );
     } else {
       assert(
-        html.includes("/apps/web/pages/demo/demo-page.js"),
-        `${pagePath} must use the shared demo page script.`,
+        type === "aesthetics" &&
+          html.includes("/apps/web/pages/demo/aesthetics/aesthetics-demo.js"),
+        `${pagePath} must use the aesthetics demo UI script.`,
       );
     }
     assert(!html.includes("createDemoScenario("), `${pagePath} must not inline demo logic.`);
@@ -432,22 +428,25 @@ assert(
   "Demo selector must not send primary cards to legacy simulations.",
 );
 
-const sharedDemoPageSource = readText("apps/web/pages/demo/demo-page.js");
+// The shared behaviour lives in the runtime every sector script imports. It used
+// to be asserted against apps/web/pages/demo/demo-page.js, which no page loaded,
+// so these guards were describing a file that could not affect the product.
+const sharedDemoRuntimeSource = readText("apps/web/src/demo-engine/industry-demo-runtime.js");
 assert(
-  sharedDemoPageSource.includes("submitPublicInquiry"),
+  sharedDemoRuntimeSource.includes("submitPublicInquiry"),
   "Interactive demos must include lead capture through the public contact API.",
 );
 assert(
-  sharedDemoPageSource.includes("demoCaptureForm"),
+  sharedDemoRuntimeSource.includes("demoCaptureForm"),
   "Interactive demos must render a lead capture form.",
 );
 assert(
-  sharedDemoPageSource.includes("industry_demo_"),
+  sharedDemoRuntimeSource.includes("industry_demo_"),
   "Demo lead capture must preserve industry source attribution.",
 );
 assert(
-  sharedDemoPageSource.includes("../../src/demo-engine/index.js"),
-  "Shared demo page must use the src demo engine.",
+  sharedDemoRuntimeSource.includes(`from "./index.js"`),
+  "Shared demo runtime must use the src demo engine.",
 );
 
 const restaurantDemoHtml = readText("apps/web/pages/demo/restaurants/index.html");

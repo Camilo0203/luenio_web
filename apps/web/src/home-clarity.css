@@ -715,8 +715,11 @@ body.home-clarity {
   font-size: 0.82rem;
 }
 
+/* This block was display:none everywhere except phones, so tablet and desktop
+   lost the sentence that ties the four steps together and read them as four
+   separate services. It also holds #flow-title, the section's accessible name. */
 .hc-flow__intro {
-  display: none;
+  display: flex;
   align-items: end;
   justify-content: space-between;
   gap: 32px;

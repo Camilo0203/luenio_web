@@ -4,8 +4,23 @@ Completa cada ítem en staging antes de promover exactamente la misma imagen a p
 
 ## Identidad, legal y consentimiento
 
-- [ ] La identidad natural responsable, identificación, domicilio y canales reales están revisados en términos, privacidad y reembolsos.
-- [ ] `LEGAL_IDENTITY_READY=true` solo después de esa revisión.
+Hoy las tres páginas legales publican únicamente marca, correo, teléfono y ciudad
+(`Luenio · contacto@luenio.com · +57 319 320 3702 · Bogotá D.C., Colombia`). Eso son canales de
+contacto, no identifican al responsable. Cada una lleva el marcador
+`LUENIO_LEGAL_IDENTITY_PENDING` en un comentario HTML, junto al bloque `.legal-contact`, hasta que
+se completen estos tres datos:
+
+| Dato                                  | Dónde va                                     |
+| ------------------------------------- | -------------------------------------------- |
+| Nombre completo o razón social        | `.legal-contact` de las tres páginas legales |
+| Identificación fiscal (NIT o cédula)  | `.legal-contact` de las tres páginas legales |
+| Domicilio físico completo (no ciudad) | `.legal-contact` de las tres páginas legales |
+
+- [ ] Los tres datos anteriores están publicados en términos, privacidad y reembolsos.
+- [ ] El comentario `LUENIO_LEGAL_IDENTITY_PENDING` fue eliminado de las tres páginas.
+- [ ] `LEGAL_IDENTITY_READY=true` solo después de esa revisión. `npm run preflight:production`
+      falla mientras el marcador siga presente, así que el orden es: publicar, quitar marcador,
+      activar la variable.
 - [ ] Consentimiento de analítica verificable; rechazo mantiene GA4 descargado.
 
 ## Infraestructura aislada

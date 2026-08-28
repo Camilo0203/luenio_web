@@ -132,6 +132,21 @@ function validateEnv() {
     process.env.LEGAL_IDENTITY_READY === "true",
     "LEGAL_IDENTITY_READY must be true after legal review.",
   );
+  // The flag is a human declaration, so pair it with something machine-checkable:
+  // the legal pages carry a marker until the responsible party is actually named.
+  // Without this, the flag could be flipped while the pages still only publish a
+  // brand, an email and a city.
+  const legalPagesStillPending = ["terminos", "privacidad", "reembolsos"].filter((page) =>
+    fs
+      .readFileSync(path.join(root, "apps", "web", "pages", "legal", page, "index.html"), "utf8")
+      .includes("LUENIO_LEGAL_IDENTITY_PENDING"),
+  );
+  assert(
+    legalPagesStillPending.length === 0,
+    `Legal identity is still marked pending on: ${legalPagesStillPending.join(", ")}. ` +
+      "Publish the responsible party's full name, tax id and physical address, remove the " +
+      "LUENIO_LEGAL_IDENTITY_PENDING marker, then set LEGAL_IDENTITY_READY=true.",
+  );
   assert(
     process.env.ENABLE_PUBLIC_BILLING !== "true",
     "ENABLE_PUBLIC_BILLING must stay false for the v1 lead-gen launch.",
