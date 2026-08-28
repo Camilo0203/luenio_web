@@ -14,6 +14,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "apps/web/pages/home/index.html"),
+        notFound: resolve(__dirname, "apps/web/pages/404/index.html"),
         demo: resolve(__dirname, "apps/web/pages/demo/index.html"),
         demoRestaurants: resolve(__dirname, "apps/web/pages/demo/restaurants/index.html"),
         demoRealEstate: resolve(__dirname, "apps/web/pages/demo/real-estate/index.html"),

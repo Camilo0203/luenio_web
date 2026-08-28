@@ -29,9 +29,12 @@ const sectors = requestedSectors.size
 // downscaled, not a phone-viewport screenshot, so both show the identical layout.
 // Phones only get AVIF: the WebP fallback is for engines without AVIF support,
 // and serving those the desktop cut is an acceptable trade for 7 fewer files.
+// The og cut is 1200x630 JPEG: that is the ratio social platforms crop to, and
+// JPEG is the only format every scraper reads reliably.
 const allVariants = [
   { suffix: "desktop", width: null, formats: ["webp", "avif"] },
   { suffix: "mobile", width: 640, formats: ["avif"] },
+  { suffix: "og", width: 1200, height: 630, fit: "cover", position: "top", formats: ["jpg"] },
 ];
 const requestedVariants = new Set(
   (process.env.PREVIEW_VARIANTS || "")
@@ -44,9 +47,18 @@ const variants = requestedVariants.size
   : allVariants;
 
 function encode(pipeline, format) {
-  return format === "webp"
-    ? pipeline.webp({ quality: 82, effort: 5 })
-    : pipeline.avif({ quality: 62, effort: 5 });
+  if (format === "webp") return pipeline.webp({ quality: 82, effort: 5 });
+  if (format === "jpg") return pipeline.jpeg({ quality: 82, mozjpeg: true });
+  return pipeline.avif({ quality: 62, effort: 5 });
+}
+
+function resizeFor(pipeline, variant) {
+  if (!variant.width) return pipeline;
+  return pipeline.resize({
+    width: variant.width,
+    ...(variant.height ? { height: variant.height } : {}),
+    ...(variant.fit ? { fit: variant.fit, position: variant.position || "centre" } : {}),
+  });
 }
 
 await fs.mkdir(outputDirectory, { recursive: true });
@@ -92,13 +104,11 @@ try {
     const source = sharp(path.join(temporaryDirectory, `${name}.png`));
     await Promise.all(
       variants.flatMap((variant) =>
-        variant.formats.map((format) => {
-          const pipeline = source.clone();
-          return encode(
-            variant.width ? pipeline.resize({ width: variant.width }) : pipeline,
-            format,
-          ).toFile(path.join(outputDirectory, `${name}-${variant.suffix}.${format}`));
-        }),
+        variant.formats.map((format) =>
+          encode(resizeFor(source.clone(), variant), format).toFile(
+            path.join(outputDirectory, `${name}-${variant.suffix}.${format}`),
+          ),
+        ),
       ),
     );
     console.info(`[sector-preview] ${name} -> ${variants.map(({ suffix }) => suffix).join(", ")}`);

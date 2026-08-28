@@ -45,6 +45,21 @@ const scenarios = [
   { name: "home-light-desktop", path: "/", theme: "light", width: 1280, height: 800 },
   { name: "home-dark-mobile", path: "/", theme: "dark", width: 390, height: 844 },
   ...publicSurfaceScenarios,
+  // The 404 is a real page a visitor can land on, so it gets the same coverage.
+  {
+    name: "notfound-light-desktop",
+    path: "/pagina-inexistente-para-regresion-visual",
+    theme: "light",
+    width: 1280,
+    height: 800,
+  },
+  {
+    name: "notfound-dark-mobile",
+    path: "/pagina-inexistente-para-regresion-visual",
+    theme: "dark",
+    width: 390,
+    height: 844,
+  },
   {
     name: "quote-light-desktop",
     path: "/cotizacion?sector=agencia&demo=Impulso+Digital&service=Página+web+a+medida&source=visual_test",

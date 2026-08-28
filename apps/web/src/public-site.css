@@ -2131,3 +2131,75 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
     margin-bottom: 18px;
   }
 }
+
+/* 404. Unknown URLs used to return a bare text/plain body, which left visitors
+   with no branding, no navigation and no way back. */
+.notfound {
+  display: flex;
+  align-items: center;
+  min-height: clamp(420px, 62vh, 640px);
+  padding-block: clamp(56px, 9vw, 104px);
+  background: var(--surface-soft);
+}
+
+.notfound__inner {
+  width: min(var(--container), calc(100% - 48px));
+  margin: 0 auto;
+  max-width: 720px;
+}
+
+.notfound__inner h1 {
+  margin: 0 0 18px;
+  font-size: clamp(2.1rem, 5vw, 3.2rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+}
+
+.notfound__lead {
+  margin: 0 0 32px;
+  max-width: 52ch;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.notfound__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 44px;
+}
+
+.notfound__links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 22px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.notfound__links strong {
+  width: 100%;
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.notfound__links a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--blue-dark);
+}
+
+@media (max-width: 560px) {
+  .notfound__actions .button {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -410,6 +410,32 @@ function getCanonicalPathname(encodedPathname) {
   return pathname;
 }
 
+// A browser asking for a page gets the branded 404 with its header, navigation
+// and footer. Asset and API requests keep the plain body: an <img> or a fetch has
+// no use for markup, and returning HTML there only wastes bytes.
+function wantsHtml(request) {
+  return String(request.headers.accept || "").includes("text/html");
+}
+
+function sendNotFound(request, response) {
+  if (wantsHtml(request)) {
+    const appRoot = serverConfig.serveDist ? distRoot : root;
+    const notFoundPage = path.join(appRoot, "apps", "web", "pages", "404", "index.html");
+    if (fs.existsSync(notFoundPage)) {
+      const body = fs.readFileSync(notFoundPage);
+      response.writeHead(404, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Length": body.length,
+        "Cache-Control": "no-store",
+      });
+      response.end(request.method === "HEAD" ? undefined : body);
+      return;
+    }
+  }
+  response.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+  response.end("Not found");
+}
+
 function serveStatic(request, response, pathname) {
   if (!["GET", "HEAD"].includes(request.method)) {
     response.writeHead(405, {
@@ -422,8 +448,7 @@ function serveStatic(request, response, pathname) {
 
   const filePath = resolvePublicFile(pathname);
   if (!filePath) {
-    response.writeHead(404);
-    response.end("Not found");
+    sendNotFound(request, response);
     return;
   }
 
@@ -436,15 +461,13 @@ function serveStatic(request, response, pathname) {
   }
 
   if (!fs.existsSync(resolvedPath)) {
-    response.writeHead(404);
-    response.end("Not found");
+    sendNotFound(request, response);
     return;
   }
 
   const fileStat = fs.statSync(resolvedPath);
   if (fileStat.isDirectory()) {
-    response.writeHead(404);
-    response.end("Not found");
+    sendNotFound(request, response);
     return;
   }
 

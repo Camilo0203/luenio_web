@@ -431,3 +431,28 @@ html[data-theme="dark"] .luenio-demo-disclosure {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+/* Skip link for the seven sector landings. Defined here, not in public-site.css,
+   because those pages do not load that stylesheet. Values are literal rather than
+   tokenised so it renders identically on every sector palette. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: #fff;
+  background: #071a33;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
