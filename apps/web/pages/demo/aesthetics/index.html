@@ -2,12 +2,27 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <script src="/theme-boot.js"></script>
     <title>Luenio Demo | Estéticas</title>
     <meta name="description" content="Demo de respuestas y agenda para estéticas." />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="https://luenio.com/demo/aesthetics" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Luenio Demo | Estéticas" />
+    <meta
+      property="og:description"
+      content="Simulación ficticia de un flujo de valoración, cuidado y seguimiento para estéticas."
+    />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/demo/aesthetics" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Luenio Demo | Estéticas" />
+    <meta name="twitter:description" content="Simulación ficticia de un flujo para estéticas." />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="stylesheet" href="/apps/web/src/style.css" />
     <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
     <link rel="stylesheet" href="/apps/web/src/industry-simulations.css" />
@@ -18,10 +33,24 @@
       <nav class="demo-nav">
         <div class="simulation-nav__brand">
           <a href="/">Luenio</a><span aria-hidden="true">/</span
-          ><a href="/demos/aesthetics">Aura Estética</a>
+          ><a href="/esteticas">Aura Estética</a>
         </div>
-        <div id="industryLinks"></div>
+        <div id="industryLinks" aria-label="Selector de sector">
+          <a href="/demo/agencies">Agencias</a><a href="/demo/ecommerce">Ecommerce</a
+          ><a href="/demo/gym">Gimnasios</a><a href="/demo/real-estate">Inmobiliarias</a
+          ><a href="/demo/restaurants">Restaurantes</a><a href="/demo/veterinary">Veterinarias</a
+          ><a class="active" href="/demo/aesthetics" aria-current="page">Estéticas</a>
+        </div>
       </nav>
+      <p class="simulation-disclosure" role="note">
+        <span class="simulation-disclosure__lead"
+          >Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+          reales.</span
+        >
+        <strong>Simulación ficticia.</strong> Nombres, tratamientos, precios, puntajes y escenarios
+        son datos ilustrativos; no representan clientes ni resultados reales. La clasificación
+        mostrada se calcula mediante reglas deterministas, no mediante IA.
+      </p>
       <section class="gym-hero">
         <div>
           <p class="eyebrow">Demo en vivo · Estéticas</p>
@@ -59,7 +88,7 @@
             <span>Cliente</span><strong id="aestheticLeadName">Esperando consulta</strong>
           </div>
           <div class="gym-crm-card">
-            <span>Intención</span><strong id="aestheticLeadScore">--</strong>
+            <span>Puntaje ilustrativo</span><strong id="aestheticLeadScore">--</strong>
           </div>
           <div class="gym-pipeline" id="aestheticPipeline">
             <article class="active"><span>Nuevo</span><strong>Instagram</strong></article>
@@ -80,7 +109,11 @@
             equipo.
           </p>
         </div>
-        <a class="button button-primary" href="/#contacto">Activar para mi estética</a>
+        <a
+          class="button button-primary"
+          href="/cotizacion?sector=est%C3%A9tica&amp;demo=Aura+Est%C3%A9tica&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+tratamientos+en+valoraciones&amp;source=simulacion_aesthetics"
+          >Cotizar un flujo como este</a
+        >
       </section>
       <footer class="legal-bar">
         <a href="/terminos">Términos</a><a href="/privacidad">Privacidad</a

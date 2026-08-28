@@ -21,6 +21,13 @@ export function isProduction() {
   return getEnv("NODE_ENV", "development") === "production";
 }
 
+export function getLocalStorageEnv() {
+  return {
+    fixturePath: getEnv("LUENIO_LOCAL_DB_PATH"),
+    fixtureAllowed: getEnv("NODE_ENV", "development") === "test",
+  };
+}
+
 export function getServerConfig() {
   const appUrl = getEnv("APP_URL");
   const configuredHosts = getEnv("ALLOWED_HOSTS")

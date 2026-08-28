@@ -1,4 +1,6 @@
 import { trackEvent } from "./analytics.js";
+import { buildQuoteUrl } from "./journey-context.js";
+import { getPublicJourneyById } from "./public-journeys.js";
 
 document.documentElement.classList.add("js");
 
@@ -24,68 +26,11 @@ if (root) {
   const activeDemoLink = document.querySelector("[data-active-demo-link]");
   const mobileDemoLink = document.querySelector("[data-mobile-demo-link]");
   const demoStatus = document.querySelector("[data-demo-status]");
-  const typewriter = document.querySelector("[data-typewriter]");
+  const activeDemoLabel = document.querySelector("[data-demo-active-label]");
+  const demoQuoteLink = document.querySelector("[data-demo-quote-link]");
+  const demoError = document.querySelector("[data-demo-error]");
   let demoRequest = 0;
   let activeDemoIndex = 0;
-
-  if (typewriter) {
-    const words = (typewriter.dataset.words || "")
-      .split("|")
-      .map((word) => word.trim())
-      .filter(Boolean);
-
-    if (words.length) {
-      typewriter.textContent = words[0];
-
-      if (!reduceMotion && words.length > 1) {
-        let wordIndex = 0;
-        let characterIndex = words[0].length;
-        let deleting = true;
-        let timerId;
-
-        const schedule = (delay) => {
-          window.clearTimeout(timerId);
-          if (!document.hidden) timerId = window.setTimeout(typeNextCharacter, delay);
-        };
-
-        const typeNextCharacter = () => {
-          const word = words[wordIndex];
-
-          if (deleting) {
-            characterIndex -= 1;
-            typewriter.textContent = word.slice(0, characterIndex);
-
-            if (characterIndex === 0) {
-              deleting = false;
-              wordIndex = (wordIndex + 1) % words.length;
-              schedule(240);
-              return;
-            }
-
-            schedule(50);
-            return;
-          }
-
-          characterIndex += 1;
-          typewriter.textContent = words[wordIndex].slice(0, characterIndex);
-
-          if (characterIndex === words[wordIndex].length) {
-            deleting = true;
-            schedule(1300);
-            return;
-          }
-
-          schedule(90);
-        };
-
-        schedule(1300);
-        document.addEventListener("visibilitychange", () => {
-          if (document.hidden) window.clearTimeout(timerId);
-          else schedule(240);
-        });
-      }
-    }
-  }
 
   const syncHeader = () => header?.classList.toggle("is-scrolled", window.scrollY > 18);
   syncHeader();
@@ -97,19 +42,26 @@ if (root) {
     const source = shot.dataset.src;
     if (!source) return Promise.resolve();
 
-    const fallback = shot.dataset.fallbackSrc;
-    if (fallback) {
-      shot.addEventListener(
-        "error",
-        () => {
-          if (!shot.src.endsWith(fallback)) shot.src = fallback;
-        },
-        { once: true },
-      );
-    }
     shot.src = source;
     return shot.decode?.().catch(() => {}) || Promise.resolve();
   }
+
+  demoShots.forEach((shot) => {
+    shot.addEventListener("error", () => {
+      const fallback = shot.dataset.fallbackSrc;
+      if (fallback && shot.dataset.fallbackAttempted !== "true") {
+        shot.dataset.fallbackAttempted = "true";
+        shot.src = fallback;
+        return;
+      }
+      if (demoError) {
+        demoError.hidden = false;
+        demoError.textContent =
+          "No pudimos cargar esta vista previa. Puedes abrir la experiencia completa.";
+      }
+      browserFrame?.removeAttribute("aria-busy");
+    });
+  });
 
   async function showDemo(index) {
     const next = (index + demoButtons.length) % demoButtons.length;
@@ -132,6 +84,7 @@ if (root) {
     const demoLabel = button.textContent.trim();
     const demoHref = button.dataset.demoHref || "#demos";
     const demoCase = button.dataset.demoCaseId || target;
+    const journey = getPublicJourneyById(button.dataset.demoJourneyId || target);
 
     if (activeDemoLink) {
       activeDemoLink.href = demoHref;
@@ -147,6 +100,18 @@ if (root) {
     if (demoStatus) {
       demoStatus.textContent = `Mostrando demo ficticia de ${demoLabel}`;
     }
+    if (activeDemoLabel) activeDemoLabel.textContent = demoLabel;
+    if (demoQuoteLink && journey) {
+      demoQuoteLink.href = buildQuoteUrl({
+        sector: journey.sector,
+        demo: journey.demo,
+        service: journey.quoteService,
+        goal: journey.goal,
+        source: "home_demo",
+      });
+      demoQuoteLink.dataset.demoContext = journey.id;
+    }
+    if (demoError) demoError.hidden = true;
 
     browserFrame?.setAttribute("aria-busy", "true");
     await loadDemoShot(shot);
@@ -166,6 +131,7 @@ if (root) {
       trackEvent("demo_selector_change", {
         case: button.dataset.demoCaseId || button.dataset.demoTarget,
         sector: button.dataset.demoTarget,
+        cta_location: "home_demo_switcher",
       });
     });
     const preload = () => {
@@ -182,9 +148,17 @@ if (root) {
       const bounds = stage.getBoundingClientRect();
       const x = (event.clientX - bounds.left) / bounds.width - 0.5;
       const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+      stage.style.setProperty("--hc-aura-x", `${(x * -18).toFixed(2)}px`);
+      stage.style.setProperty("--hc-aura-y", `${(y * -12).toFixed(2)}px`);
+      stage.style.setProperty("--hc-heading-x", `${(x * 6).toFixed(2)}px`);
+      stage.style.setProperty("--hc-heading-y", `${(y * 4).toFixed(2)}px`);
       browserFrame.style.transform = `rotateX(${(-y * 1.6).toFixed(2)}deg) rotateY(${(x * 2).toFixed(2)}deg) translateY(-2px)`;
     });
     stage.addEventListener("pointerleave", () => {
+      stage.style.removeProperty("--hc-aura-x");
+      stage.style.removeProperty("--hc-aura-y");
+      stage.style.removeProperty("--hc-heading-x");
+      stage.style.removeProperty("--hc-heading-y");
       browserFrame.style.transform = "";
     });
   }
@@ -243,4 +217,81 @@ if (root) {
       });
     });
   });
+
+  const chatDemo = document.querySelector("[data-chat-demo]");
+  if (chatDemo) {
+    const chatTabs = [...chatDemo.querySelectorAll("[data-chat-tab]")];
+    const chatPanels = [...chatDemo.querySelectorAll("[data-chat-panel]")];
+    const chatFlowTitle = chatDemo.querySelector("[data-chat-flow-title]");
+    const chatFlowCopy = chatDemo.querySelector("[data-chat-flow-copy]");
+    const chatSteps = [...chatDemo.querySelectorAll("[data-chat-step]")];
+    const chatFlows = {
+      whatsapp: {
+        title: "Del mensaje al seguimiento",
+        copy: "La conversación no se queda aislada: conserva la intención y prepara el siguiente paso.",
+        currentStep: "follow-up",
+      },
+      instagram: {
+        title: "De una pregunta a una oportunidad clara",
+        copy: "El flujo convierte una consulta breve en contexto útil para conversar con más precisión.",
+        currentStep: "understand",
+      },
+      facebook: {
+        title: "De la campaña a una acción concreta",
+        copy: "Cada mensaje puede llegar ordenado para que el equipo sepa cómo continuar.",
+        currentStep: "follow-up",
+      },
+    };
+
+    const setChatChannel = (channel, moveFocus = false) => {
+      const activeChannel = chatFlows[channel] ? channel : "whatsapp";
+      const flow = chatFlows[activeChannel];
+      chatDemo.dataset.chatChannel = activeChannel;
+
+      chatTabs.forEach((tab) => {
+        const selected = tab.dataset.chatTab === activeChannel;
+        tab.setAttribute("aria-selected", String(selected));
+        tab.tabIndex = selected ? 0 : -1;
+        if (selected && moveFocus) tab.focus();
+      });
+
+      chatPanels.forEach((panel) => {
+        const selected = panel.dataset.chatPanel === activeChannel;
+        panel.hidden = !selected;
+        panel.classList.toggle("is-active", selected);
+      });
+
+      if (chatFlowTitle) chatFlowTitle.textContent = flow.title;
+      if (chatFlowCopy) chatFlowCopy.textContent = flow.copy;
+      chatSteps.forEach((step) => {
+        const stepName = step.dataset.chatStep;
+        const isCurrent = stepName === flow.currentStep;
+        const isComplete =
+          stepName === "entry" || (activeChannel !== "instagram" && stepName === "understand");
+        step.classList.toggle("is-current", isCurrent);
+        step.classList.toggle("is-complete", !isCurrent && isComplete);
+      });
+    };
+
+    chatTabs.forEach((tab, index) => {
+      tab.addEventListener("click", () => setChatChannel(tab.dataset.chatTab));
+      tab.addEventListener("keydown", (event) => {
+        if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp", "Home", "End"].includes(event.key))
+          return;
+        event.preventDefault();
+        let nextIndex = index;
+        if (event.key === "ArrowRight" || event.key === "ArrowDown")
+          nextIndex = (index + 1) % chatTabs.length;
+        if (event.key === "ArrowLeft" || event.key === "ArrowUp")
+          nextIndex = (index - 1 + chatTabs.length) % chatTabs.length;
+        if (event.key === "Home") nextIndex = 0;
+        if (event.key === "End") nextIndex = chatTabs.length - 1;
+        setChatChannel(chatTabs[nextIndex].dataset.chatTab, true);
+      });
+    });
+
+    setChatChannel(chatDemo.dataset.chatChannel || "whatsapp");
+  }
+
+  root.classList.add("motion-ready");
 }

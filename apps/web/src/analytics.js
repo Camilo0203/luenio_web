@@ -5,7 +5,41 @@ const eventKey = "luenio.analytics.events";
 let measurementId = null;
 let analyticsLoaded = false;
 
+const sensitivePropertyKeys = new Set([
+  "name",
+  "business",
+  "phone",
+  "email",
+  "message",
+  "objective",
+  "website",
+  "formStartedAt",
+  "turnstileToken",
+]);
+
+export function sanitizeAnalyticsProperties(properties = {}) {
+  return Object.fromEntries(
+    Object.entries(properties)
+      .filter(([key, value]) => {
+        if (sensitivePropertyKeys.has(key)) return false;
+        return ["string", "number", "boolean"].includes(typeof value);
+      })
+      .map(([key, value]) => [
+        key,
+        typeof value === "string"
+          ? [...value]
+              .map((character) =>
+                character.charCodeAt(0) <= 31 || character.charCodeAt(0) === 127 ? " " : character,
+              )
+              .join("")
+              .slice(0, 160)
+          : value,
+      ]),
+  );
+}
+
 function consentCommand(command, value) {
+  if (typeof window === "undefined") return;
   window.dataLayer = window.dataLayer || [];
   window.gtag =
     window.gtag ||
@@ -84,7 +118,13 @@ export async function initAnalytics() {
 }
 
 export function trackEvent(name, properties = {}) {
-  const event = { name, properties, page: location.pathname, timestamp: new Date().toISOString() };
+  const safeProperties = sanitizeAnalyticsProperties(properties);
+  const event = {
+    name: String(name || "event").slice(0, 80),
+    properties: safeProperties,
+    page: location.pathname,
+    timestamp: new Date().toISOString(),
+  };
   try {
     const stored = JSON.parse(localStorage.getItem(eventKey) || "[]");
     stored.push(event);
@@ -92,5 +132,5 @@ export function trackEvent(name, properties = {}) {
   } catch {
     // Analytics must never interrupt conversion paths.
   }
-  if (analyticsLoaded && window.gtag) window.gtag("event", name, properties);
+  if (analyticsLoaded && window.gtag) window.gtag("event", event.name, safeProperties);
 }

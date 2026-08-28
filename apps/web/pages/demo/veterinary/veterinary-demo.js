@@ -41,9 +41,9 @@ mountIndustryDemo({
     {
       delay: 900,
       advanceIndex: 1,
-      status: "Detectando urgencia…",
+      status: "Priorizando contacto mediante reglas…",
       event: {
-        label: "Contexto detectado",
+        label: "Contexto clasificado por reglas",
         detail: "Se identificó mascota, motivo y necesidad de cita.",
       },
     },

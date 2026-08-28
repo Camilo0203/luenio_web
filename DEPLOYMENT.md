@@ -44,7 +44,7 @@ Genera cada secreto independientemente con `openssl rand -hex 32`. No reutilices
 Producción:
 
 ```dotenv
-LUENIO_IMAGE=luenio:<release-inmutable>
+LUENIO_IMAGE=ghcr.io/ORGANIZACION/REPOSITORIO@sha256:DIGEST_OCI_DE_64_HEX
 LUENIO_ENV_FILE=/etc/luenio/production.env
 APP_HOST=luenio.com
 APP_EDGE_ALIAS=app-production
@@ -60,7 +60,7 @@ SENTRY_ENVIRONMENT=production
 Staging:
 
 ```dotenv
-LUENIO_IMAGE=luenio:<misma-release-inmutable>
+LUENIO_IMAGE=ghcr.io/ORGANIZACION/REPOSITORIO@sha256:EL_MISMO_DIGEST_OCI
 LUENIO_ENV_FILE=/etc/luenio/staging.env
 APP_HOST=staging.luenio.com
 APP_EDGE_ALIAS=app-staging
@@ -100,43 +100,38 @@ npm run format:check
 npm run build
 ```
 
-En el VPS valida cada archivo real:
+En el VPS valida cada archivo real. El preflight exige ruta absoluta, archivo regular y permisos `600`; nunca carga `.env` implícitamente ni imprime secretos:
 
 ```bash
-set -a
-. /etc/luenio/staging.env
-set +a
-npm run preflight:production
-
-set -a
-. /etc/luenio/production.env
-set +a
-npm run preflight:production
-
-set -a
-. /etc/luenio/edge.env
-set +a
-npm run preflight:edge
+npm run preflight:production -- --env-file /etc/luenio/staging.env
+npm run preflight:production -- --env-file /etc/luenio/production.env
+npm run preflight:edge -- /etc/luenio/edge.env
 ```
 
-## 5. Desplegar y promover
+## 5. Construir, desplegar y promover
 
-Construye una imagen inmutable en staging:
+CI corre el gate y, únicamente en pushes a `main` o `master`, publica una imagen OCI en GHCR. El artefacto `oci-image-<git-sha>` contiene `LUENIO_IMAGE=...@sha256:...`. El digest es la unidad de promoción; el tag `sha-<git-sha>` es solo descubrible y nunca se despliega. No existe despliegue automático desde CI.
+
+Descarga el artefacto desde la ejecución aprobada, verifica su `GIT_SHA` y copia la referencia por digest a ambos archivos protegidos. Autentica Docker ante GHCR por separado con una credencial de solo lectura; no la guardes en esos archivos.
+
+Despliega primero en staging:
 
 ```bash
-sudo bash ops/deploy-environment.sh staging /etc/luenio/staging.env --build
+sudo bash ops/deploy-environment.sh staging /etc/luenio/staging.env
 sudo bash ops/deploy-edge.sh /etc/luenio/edge.env
 docker compose -p luenio-staging --env-file /etc/luenio/staging.env ps
 ```
 
-Prueba staging completamente. Después copia el mismo valor `LUENIO_IMAGE` a producción y promueve sin reconstruir:
+Prueba staging completamente. Registra commit, digest, aprobación y hora UTC fuera del repositorio. Después copia exactamente el mismo `LUENIO_IMAGE` a producción y promueve sin reconstruir:
 
 ```bash
-sudo bash ops/deploy-environment.sh production /etc/luenio/production.env --no-build
+sudo bash ops/deploy-environment.sh production /etc/luenio/production.env
 docker compose -p luenio-production --env-file /etc/luenio/production.env ps
 ```
 
-Nunca promociones un tag mutable como `latest`. Conserva la imagen anterior para rollback.
+El script rechaza tags, descarga por digest, ejecuta preflight antes del cambio y health autenticado después. Si health falla, revierte automáticamente solo cuando la imagen anterior también estaba fijada por digest. Nunca promociones `latest`, un tag semántico ni `sha-...`.
+
+Siguen siendo gates externos manuales: aprobación legal, control de GHCR, DNS/TLS/WAF, credenciales de proveedores, entrega real, alertas y restauración comprobada. CI verde no acredita ninguno de ellos.
 
 ## 6. Cloudflare y bloqueo del origen
 
@@ -186,10 +181,17 @@ Prueba `ops/restore-volumes.sh` sobre un volumen vacío antes del lanzamiento y 
 
 ## 9. Rollback
 
-Restaura el tag inmutable anterior en el `.env` del entorno y ejecuta:
+Restaura el digest OCI anterior conocido y aprobado en el archivo del entorno y ejecuta:
 
 ```bash
-sudo bash ops/deploy-environment.sh production /etc/luenio/production.env --no-build
+sudo bash ops/deploy-environment.sh production /etc/luenio/production.env
 ```
 
-Un rollback de imagen no revierte migraciones. Las migraciones destructivas requieren backup y procedimiento probado en staging.
+Un rollback de imagen no revierte migraciones ni datos. Las migraciones destructivas requieren backup y procedimiento probado en staging.
+
+## 10. Evidencia, restore y alertas
+
+- CI conserva 14 días `gate-diagnostics-*`, incluso ante fallo, y 90 días el manifiesto OCI por commit.
+- No adjuntes `.env`, respuestas privadas de health, dumps, cookies ni logs con PII a CI o incidentes.
+- Antes de publicar, dispara una alerta sintética y registra recepción, hora UTC y responsable real.
+- Ejecuta restore trimestral en un volumen vacío. El script valida checksum y paths antes de parar el servicio; si la extracción falla, mantiene el servicio detenido para no arrancar datos parciales.

@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -11,34 +11,41 @@
     <title>Luenio Demo | Inmobiliarias</title>
     <meta
       name="description"
-      content="Demo de IA para inmobiliarias que califica compradores, detecta presupuesto y actualiza CRM."
+      content="Simulación ficticia para inmobiliarias que clasifica consultas mediante reglas y actualiza un CRM ilustrativo."
     />
     <meta
       name="keywords"
-      content="demo IA inmobiliarias, demo CRM inmobiliario, calificación de compradores"
+      content="simulación inmobiliaria, demo CRM inmobiliario, clasificación de compradores"
     />
     <meta name="author" content="Luenio" />
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="canonical" href="https://luenio.com/demos/real-estate" />
+    <link rel="canonical" href="https://luenio.com/demo/real-estate" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content="Luenio" />
     <meta property="og:title" content="Luenio Demo | Inmobiliarias" />
     <meta
       property="og:description"
-      content="Demo de IA para inmobiliarias que califica compradores, detecta presupuesto y actualiza CRM."
+      content="Simulación ficticia para inmobiliarias que clasifica consultas mediante reglas y actualiza un CRM ilustrativo."
     />
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
-    <meta property="og:url" content="https://luenio.com/demos/real-estate" />
+    <meta property="og:url" content="https://luenio.com/demo/real-estate" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Luenio Demo | Inmobiliarias" />
     <meta
       name="twitter:description"
-      content="Demo de IA para inmobiliarias que califica compradores, detecta presupuesto y actualiza CRM."
+      content="Simulación ficticia para inmobiliarias que clasifica consultas mediante reglas y actualiza un CRM ilustrativo."
     />
     <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="/assets/stitch/property-rosales.webp"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -56,13 +63,24 @@
           <a href="/">Luenio</a><span aria-hidden="true">/</span
           ><a href="/inmobiliarias">Hogar Prime</a>
         </div>
-        <div id="industryLinks">
-          <a href="/demo/restaurants">Restaurantes</a
+        <div id="industryLinks" aria-label="Selector de sector">
+          <a href="/demo/agencies">Agencias</a><a href="/demo/ecommerce">Ecommerce</a
+          ><a href="/demo/gym">Gimnasios</a
           ><a class="active" href="/demo/real-estate" aria-current="page">Inmobiliarias</a
-          ><a href="/demo/gym">Gimnasios</a><a href="/demo/ecommerce">Ecommerce</a
-          ><a href="/demo/agencies">Agencias</a>
+          ><a href="/demo/restaurants">Restaurantes</a><a href="/demo/veterinary">Veterinarias</a
+          ><a href="/demo/aesthetics">Estéticas</a>
         </div>
       </nav>
+
+      <p class="simulation-disclosure" role="note">
+        <span class="simulation-disclosure__lead"
+          >Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+          reales.</span
+        >
+        <strong>Simulación ficticia.</strong> Nombres, propiedades, precios, puntajes y escenarios
+        son datos ilustrativos; no representan clientes, listados ni resultados reales. La
+        clasificación mostrada se calcula mediante reglas deterministas, no mediante IA.
+      </p>
 
       <section class="real-estate-hero">
         <div>
@@ -79,7 +97,7 @@
         <aside class="real-estate-live-card" aria-live="polite">
           <span></span>
           <strong id="realEstateLiveStatus">Esperando consulta de cliente</strong>
-          <small>Motor de calificación de compradores</small>
+          <small>Clasificación simulada basada en reglas</small>
         </aside>
       </section>
 
@@ -98,7 +116,7 @@
 
         <section class="real-estate-match-panel" aria-label="Panel de coincidencia de propiedades">
           <p class="eyebrow">Coincidencia de comprador</p>
-          <h2>Presupuesto detectado</h2>
+          <h2>Presupuesto identificado por reglas</h2>
           <div class="real-estate-property-list" id="realEstatePropertyList">
             <p class="simulation-loading">Preparando propiedades de muestra…</p>
           </div>
@@ -111,7 +129,7 @@
             <span>Lead</span><strong id="realEstateLeadName">Esperando consulta</strong>
           </div>
           <div class="real-estate-crm-card">
-            <span>Score</span><strong id="realEstateLeadScore">--</strong>
+            <span>Puntaje ilustrativo</span><strong id="realEstateLeadScore">--</strong>
           </div>
           <div class="real-estate-pipeline" id="realEstatePipeline">
             <article class="active"><span>Nuevo</span><strong>Consulta</strong></article>
@@ -129,11 +147,15 @@
           <p class="eyebrow">Conversión</p>
           <h2>Convierte consultas inmobiliarias en visitas calificadas.</h2>
           <p>
-            Luenio detecta presupuesto, recomienda propiedad, asigna asesor y guarda el comprador en
-            CRM.
+            La simulación clasifica el presupuesto por reglas, muestra propiedades ilustrativas,
+            asigna un asesor y prepara un registro de CRM.
           </p>
         </div>
-        <a class="button button-primary" href="/#contacto">Activar para mi inmobiliaria</a>
+        <a
+          class="button button-primary"
+          href="/cotizacion?sector=inmobiliaria&amp;demo=Hogar+Prime&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+calificar+compradores+y+organizar+el+seguimiento+inmobiliario&amp;source=simulacion_real-estate"
+          >Cotizar un flujo como este</a
+        >
       </section>
       <footer class="legal-bar">
         <a href="/terminos">Términos</a>

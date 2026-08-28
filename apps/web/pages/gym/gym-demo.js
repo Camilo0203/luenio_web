@@ -370,7 +370,8 @@ function renderActiveBooking() {
 
 bookingForm?.addEventListener("submit", (event) => {
   const submitter = event.submitter;
-  if (!(submitter instanceof HTMLButtonElement) || submitter.value !== "confirm") return;
+  if (!(submitter instanceof HTMLButtonElement) || !submitter.matches("[data-simulate-booking]"))
+    return;
   event.preventDefault();
   const validName = validateField(
     nameInput,
@@ -395,6 +396,7 @@ bookingForm?.addEventListener("submit", (event) => {
   };
   saveBooking();
   renderActiveBooking();
+  document.documentElement.dataset.bookingState = "confirmed";
   bookingDialog.close("confirm");
   showToast(
     "Reserva simulada confirmada",
@@ -609,4 +611,5 @@ renderItinerary();
 renderSchedule();
 renderActiveBooking();
 updateClock();
+document.documentElement.dataset.gymDemoReady = "true";
 window.setInterval(updateClock, 30000);

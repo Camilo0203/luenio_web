@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -11,34 +11,41 @@
     <title>Luenio Demo | Restaurantes</title>
     <meta
       name="description"
-      content="Demo de WhatsApp IA para restaurantes que pierden pedidos por responder tarde."
+      content="Simulación ficticia de atención por WhatsApp para restaurantes, basada en reglas deterministas."
     />
     <meta
       name="keywords"
-      content="demo WhatsApp IA restaurantes, demo CRM restaurantes, automatización pedidos WhatsApp"
+      content="simulación WhatsApp restaurantes, demo CRM restaurantes, automatización pedidos WhatsApp"
     />
     <meta name="author" content="Luenio" />
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="canonical" href="https://luenio.com/demos/restaurants" />
+    <link rel="canonical" href="https://luenio.com/demo/restaurants" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content="Luenio" />
     <meta property="og:title" content="Luenio Demo | Restaurantes" />
     <meta
       property="og:description"
-      content="Demo de WhatsApp IA para restaurantes que pierden pedidos por responder tarde."
+      content="Simulación ficticia de atención por WhatsApp para restaurantes, basada en reglas deterministas."
     />
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
-    <meta property="og:url" content="https://luenio.com/demos/restaurants" />
+    <meta property="og:url" content="https://luenio.com/demo/restaurants" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Luenio Demo | Restaurantes" />
     <meta
       name="twitter:description"
-      content="Demo de WhatsApp IA para restaurantes que pierden pedidos por responder tarde."
+      content="Simulación ficticia de atención por WhatsApp para restaurantes, basada en reglas deterministas."
     />
     <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="/assets/stitch/restaurants-01.jpg"
+      as="image"
+      type="image/jpeg"
+      fetchpriority="high"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -56,12 +63,23 @@
           <a href="/">Luenio</a><span aria-hidden="true">/</span
           ><a href="/restaurantes">Sabor &amp; Fuego</a>
         </div>
-        <div id="industryLinks">
-          <a class="active" href="/demo/restaurants" aria-current="page">Restaurantes</a
-          ><a href="/demo/real-estate">Inmobiliarias</a><a href="/demo/gym">Gimnasios</a
-          ><a href="/demo/ecommerce">Ecommerce</a><a href="/demo/agencies">Agencias</a>
+        <div id="industryLinks" aria-label="Selector de sector">
+          <a href="/demo/agencies">Agencias</a><a href="/demo/ecommerce">Ecommerce</a
+          ><a href="/demo/gym">Gimnasios</a><a href="/demo/real-estate">Inmobiliarias</a
+          ><a class="active" href="/demo/restaurants" aria-current="page">Restaurantes</a
+          ><a href="/demo/veterinary">Veterinarias</a><a href="/demo/aesthetics">Estéticas</a>
         </div>
       </nav>
+
+      <p class="simulation-disclosure" role="note">
+        <span class="simulation-disclosure__lead"
+          >Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+          reales.</span
+        >
+        <strong>Simulación ficticia.</strong> Nombres, precios, puntajes y escenarios son datos
+        ilustrativos; no representan clientes ni resultados reales. La clasificación mostrada se
+        calcula mediante reglas deterministas, no mediante IA.
+      </p>
 
       <section class="restaurant-hero">
         <div>
@@ -88,7 +106,7 @@
             <strong>Mesa Norte</strong>
           </div>
           <div class="chat-thread" id="restaurantChatThread">
-            <p class="chat-empty">Presiona Ejecutar Demo en Vivo para simular un cliente real.</p>
+            <p class="chat-empty">Presiona Ejecutar Demo en Vivo para simular un caso ficticio.</p>
           </div>
         </article>
 
@@ -100,7 +118,7 @@
             <strong id="restaurantCaptureStatus">Esperando mensaje</strong>
           </div>
           <div class="restaurant-crm-card">
-            <span>Score</span>
+            <span>Puntaje ilustrativo</span>
             <strong id="restaurantLeadScore">--</strong>
           </div>
           <div class="restaurant-pipeline" id="restaurantPipeline">
@@ -123,7 +141,11 @@
             el pedido para tu equipo.
           </p>
         </div>
-        <a class="button button-primary" href="/#contacto">Activar para mi restaurante</a>
+        <a
+          class="button button-primary"
+          href="/cotizacion?sector=restaurante&amp;demo=Sabor+%26+Fuego&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+organizar+reservas%2C+pedidos+y+seguimiento+desde+WhatsApp&amp;source=simulacion_restaurants"
+          >Cotizar un flujo como este</a
+        >
       </section>
       <footer class="legal-bar">
         <a href="/terminos">Términos</a>

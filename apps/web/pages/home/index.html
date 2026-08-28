@@ -10,7 +10,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" sizes="512x512" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -23,12 +23,21 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
     <script src="/theme-boot.js"></script>
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
     <meta property="og:title" content="Luenio | Soluciones digitales hechas a medida" />
     <meta
       property="og:description"
       content="Páginas web, automatizaciones y acompañamiento para mover tu operación comercial."
     />
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Luenio | Soluciones digitales hechas a medida" />
+    <meta
+      name="twitter:description"
+      content="Páginas web, automatizaciones y acompañamiento para mover tu operación comercial."
+    />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="canonical" href="https://luenio.com/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -47,8 +56,17 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
     <link
       rel="preload"
       as="image"
+      href="/assets/previews/agency-mobile.avif"
+      type="image/avif"
+      media="(max-width: 767px)"
+      fetchpriority="high"
+    />
+    <link
+      rel="preload"
+      as="image"
       href="/assets/previews/agency-desktop.avif"
       type="image/avif"
+      media="(min-width: 768px)"
       fetchpriority="high"
     />
     <link rel="stylesheet" href="/apps/web/src/public-site.css" />
@@ -79,11 +97,15 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
           <a href="#soluciones">Soluciones</a>
           <a href="#proceso">Proceso</a>
           <a href="#nosotros">Nosotros</a>
-          <a href="/cotizacion">Cotización</a>
         </nav>
         <div class="site-header__actions">
-          <a class="button button--primary button--small site-header__cta" href="/cotizacion">
-            Solicitar cotización
+          <a
+            class="button button--primary button--small site-header__cta"
+            href="/cotizacion"
+            data-quote-cta="header"
+            data-cta-location="home_header"
+          >
+            Cotizar mi solución
           </a>
         </div>
         <button
@@ -104,41 +126,37 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
         <div class="hc-hero__glow" aria-hidden="true"></div>
         <div class="hc-container hc-hero__inner">
           <div class="hc-hero__copy">
-            <h1>
-              <span class="hc-visually-hidden">
-                Tu próxima solución digital: funcionando, vendiendo y creciendo.
-              </span>
-              <span class="hc-hero__promise" aria-hidden="true">
-                <span class="hc-hero__promise-prefix">Tu próxima solución</span>
-                <span class="hc-hero__promise-line">
-                  <span>digital,</span>
-                  <span class="hc-promise-motion">
-                    <i data-typewriter data-words="funcionando.|vendiendo.|creciendo.">
-                      funcionando.
-                    </i>
-                  </span>
-                </span>
-              </span>
-            </h1>
+            <h1>Tu próxima solución digital, lista para vender y dar seguimiento.</h1>
             <p class="hc-hero__lead">
-              Creamos páginas web y automatizaciones para la forma en que vendes, atiendes y haces
-              seguimiento.
+              Diseñamos tu web y conectamos cada contacto con WhatsApp, automatizaciones y
+              seguimiento para que tu operación comercial avance.
+            </p>
+            <p class="hc-hero__signal" aria-label="Sistema conectado">
+              <span class="hc-hero__signal-node">Web</span>
+              <span class="hc-hero__signal-arrow" aria-hidden="true">→</span>
+              <span class="hc-hero__signal-node">WhatsApp</span>
+              <span class="hc-hero__signal-arrow" aria-hidden="true">→</span>
+              <span class="hc-hero__signal-node">Automatización</span>
+              <span class="hc-hero__signal-arrow" aria-hidden="true">→</span>
+              <span class="hc-hero__signal-node">Seguimiento</span>
             </p>
             <div class="hc-actions">
-              <a class="hc-button hc-button--primary" href="#demos">
-                Explorar demos
+              <a class="hc-button hc-button--primary" href="/cotizacion" data-quote-cta="hero">
+                Cotizar mi solución
                 <svg viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M4 10h11M11 6l4 4-4 4" />
                 </svg>
               </a>
-              <a class="hc-button hc-button--secondary" href="/cotizacion" data-quote-cta="hero"
-                >Solicitar cotización</a
-              >
+              <a class="hc-button hc-button--secondary" href="#demos">Explorar demos</a>
             </div>
           </div>
 
           <div class="hc-stage-wrap" id="demos" data-hero-stage>
             <div class="hc-stage-aura" aria-hidden="true"></div>
+            <div class="hc-stage-heading" aria-live="polite">
+              <span>Experiencia demostrativa de Luenio</span>
+              <strong data-demo-active-label>Agencias</strong>
+            </div>
             <article class="hc-browser" aria-label="Vista previa de una demo ficticia">
               <div class="hc-browser__bar">
                 <div class="hc-browser__lights" aria-hidden="true"><i></i><i></i><i></i></div>
@@ -162,13 +180,20 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               </div>
               <div class="hc-browser__viewport">
                 <picture>
+                  <source
+                    media="(max-width: 767px)"
+                    srcset="/assets/previews/agency-mobile.avif"
+                    type="image/avif"
+                  />
                   <source srcset="/assets/previews/agency-desktop.avif" type="image/avif" />
                   <img
                     class="hc-demo-shot is-active"
                     src="/assets/previews/agency-desktop.webp"
                     alt="Captura de la demo ficticia para agencias"
                     width="1440"
-                    height="900"
+                    height="1000"
+                    loading="eager"
+                    decoding="async"
                     fetchpriority="high"
                     data-demo-shot="agencias"
                   />
@@ -199,6 +224,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 class="is-active"
                 type="button"
                 data-demo-target="agencias"
+                data-demo-journey-id="agencies"
                 data-demo-href="/agencias"
                 data-demo-case-id="impulso-digital"
                 aria-pressed="true"
@@ -208,6 +234,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <button
                 type="button"
                 data-demo-target="ecommerce"
+                data-demo-journey-id="ecommerce"
                 data-demo-href="/tiendas-online"
                 data-demo-case-id="novastore"
                 aria-pressed="false"
@@ -217,6 +244,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <button
                 type="button"
                 data-demo-target="inmobiliarias"
+                data-demo-journey-id="real-estate"
                 data-demo-href="/inmobiliarias"
                 data-demo-case-id="hogar-prime"
                 aria-pressed="false"
@@ -228,6 +256,15 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <p class="hc-demo-status" aria-live="polite" data-demo-status>
                 Mostrando demo ficticia de Agencias
               </p>
+              <a
+                class="hc-demo-quote"
+                href="/cotizacion?sector=agencia&amp;demo=Impulso+Digital&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+captar+y+calificar+oportunidades+para+los+clientes+de+mi+agencia&amp;source=home_demo"
+                data-demo-quote-link
+                data-quote-cta="home_demo"
+                data-cta-location="home_demo_preview"
+              >
+                Cotizar una experiencia como esta
+              </a>
               <a
                 class="hc-demo-mobile-open"
                 href="/agencias"
@@ -242,7 +279,11 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               </a>
             </div>
             <p class="hc-demo-note">
-              Demos ficticias para explorar posibilidades. No representan clientes reales.
+              Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+              reales.
+            </p>
+            <p class="hc-demo-error" data-demo-error role="alert" hidden>
+              No pudimos cargar esta vista previa. <a href="/demos">Ver el catálogo completo</a>.
             </p>
           </div>
         </div>
@@ -265,8 +306,11 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
             </article>
             <article>
               <span class="hc-flow__icon hc-flow__icon--wa" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M12 3a8.5 8.5 0 0 0-7.2 13L4 20l4.1-.8A8.5 8.5 0 1 0 12 3Z" />
+                <svg viewBox="0 0 32 32">
+                  <path
+                    class="hc-whatsapp-mark"
+                    d="M16.04 3A12.9 12.9 0 0 0 5.1 22.75L3.38 29l6.4-1.68A12.96 12.96 0 1 0 16.04 3Zm0 23.58c-2.02 0-3.98-.55-5.7-1.6l-.41-.24-3.8 1 1.02-3.7-.27-.43A10.55 10.55 0 1 1 16.04 26.58Zm5.79-7.91c-.32-.16-1.87-.92-2.16-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57a9.57 9.57 0 0 1-1.77-2.2c-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.55-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.54-.71-.55h-.61c-.21 0-.55.08-.84.4-.29.32-1.11 1.08-1.11 2.64 0 1.56 1.13 3.06 1.29 3.27.16.21 2.23 3.4 5.4 4.77.75.32 1.34.52 1.8.66.76.24 1.45.21 2 .13.61-.09 1.87-.76 2.13-1.5.26-.74.26-1.37.18-1.5-.08-.14-.29-.21-.61-.37Z"
+                  />
                 </svg>
               </span>
               <h2>WhatsApp</h2>
@@ -290,6 +334,297 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <h2>Seguimiento</h2>
               <p>Información organizada para saber qué oportunidad sigue.</p>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="hc-conversations" id="conversaciones" aria-labelledby="conversations-title">
+        <div class="hc-container">
+          <header class="hc-conversations__intro" data-reveal>
+            <p class="hc-kicker">La conversación también cuenta</p>
+            <h2 id="conversations-title">
+              Tu web inicia la conversación. El chatbot le da continuidad.
+            </h2>
+            <p>
+              Mira cómo una misma intención puede entrar por WhatsApp, Instagram o Facebook y
+              convertirse en un siguiente paso claro para tu equipo.
+            </p>
+          </header>
+
+          <div
+            class="hc-conversations__layout"
+            data-chat-demo
+            data-chat-channel="whatsapp"
+            data-motion-scene
+            data-reveal
+          >
+            <div class="hc-conversations__main">
+              <div class="hc-channel-tabs" role="tablist" aria-label="Ver simulación por canal">
+                <button
+                  id="chat-tab-whatsapp"
+                  type="button"
+                  role="tab"
+                  aria-selected="true"
+                  aria-controls="chat-panel-whatsapp"
+                  tabindex="0"
+                  data-chat-tab="whatsapp"
+                >
+                  <span class="hc-channel-icon hc-channel-icon--whatsapp" aria-hidden="true">
+                    <svg viewBox="0 0 32 32">
+                      <path
+                        class="hc-whatsapp-mark"
+                        d="M16.04 3A12.9 12.9 0 0 0 5.1 22.75L3.38 29l6.4-1.68A12.96 12.96 0 1 0 16.04 3Zm0 23.58c-2.02 0-3.98-.55-5.7-1.6l-.41-.24-3.8 1 1.02-3.7-.27-.43A10.55 10.55 0 1 1 16.04 26.58Zm5.79-7.91c-.32-.16-1.87-.92-2.16-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57a9.57 9.57 0 0 1-1.77-2.2c-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.55-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.54-.71-.55h-.61c-.21 0-.55.08-.84.4-.29.32-1.11 1.08-1.11 2.64 0 1.56 1.13 3.06 1.29 3.27.16.21 2.23 3.4 5.4 4.77.75.32 1.34.52 1.8.66.76.24 1.45.21 2 .13.61-.09 1.87-.76 2.13-1.5.26-.74.26-1.37.18-1.5-.08-.14-.29-.21-.61-.37Z"
+                      />
+                    </svg>
+                  </span>
+                  <span>WhatsApp</span>
+                </button>
+                <button
+                  id="chat-tab-instagram"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="chat-panel-instagram"
+                  tabindex="-1"
+                  data-chat-tab="instagram"
+                >
+                  <span class="hc-channel-icon hc-channel-icon--instagram" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <rect x="4" y="4" width="16" height="16" rx="4" />
+                      <circle cx="12" cy="12" r="3.5" />
+                      <circle cx="17.3" cy="6.8" r=".9" fill="currentColor" stroke="none" />
+                    </svg>
+                  </span>
+                  <span>Instagram</span>
+                </button>
+                <button
+                  id="chat-tab-facebook"
+                  type="button"
+                  role="tab"
+                  aria-selected="false"
+                  aria-controls="chat-panel-facebook"
+                  tabindex="-1"
+                  data-chat-tab="facebook"
+                >
+                  <span class="hc-channel-icon hc-channel-icon--facebook" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path
+                        d="M13.7 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V4a22 22 0 0 0-2.4-.1c-2.4 0-4 1.5-4 4.1V10H8v3h2.6v8h3.1Z"
+                      />
+                    </svg>
+                  </span>
+                  <span>Facebook</span>
+                </button>
+              </div>
+
+              <div class="hc-chat-window" aria-label="Simulación de conversación automatizada">
+                <div
+                  class="hc-chat-panel"
+                  id="chat-panel-whatsapp"
+                  role="tabpanel"
+                  aria-labelledby="chat-tab-whatsapp"
+                  data-chat-panel="whatsapp"
+                  tabindex="0"
+                >
+                  <header class="hc-chat-header">
+                    <span class="hc-channel-avatar hc-channel-avatar--whatsapp" aria-hidden="true">
+                      <svg viewBox="0 0 32 32">
+                        <path
+                          class="hc-whatsapp-mark"
+                          d="M16.04 3A12.9 12.9 0 0 0 5.1 22.75L3.38 29l6.4-1.68A12.96 12.96 0 1 0 16.04 3Zm0 23.58c-2.02 0-3.98-.55-5.7-1.6l-.41-.24-3.8 1 1.02-3.7-.27-.43A10.55 10.55 0 1 1 16.04 26.58Zm5.79-7.91c-.32-.16-1.87-.92-2.16-1.03-.29-.11-.5-.16-.71.16-.21.32-.82 1.03-1 1.24-.19.21-.37.24-.69.08-.32-.16-1.34-.49-2.55-1.57a9.57 9.57 0 0 1-1.77-2.2c-.18-.32-.02-.49.14-.65.14-.14.32-.37.47-.55.16-.19.21-.32.32-.53.1-.21.05-.4-.03-.55-.08-.16-.71-1.71-.98-2.35-.26-.62-.52-.54-.71-.55h-.61c-.21 0-.55.08-.84.4-.29.32-1.11 1.08-1.11 2.64 0 1.56 1.13 3.06 1.29 3.27.16.21 2.23 3.4 5.4 4.77.75.32 1.34.52 1.8.66.76.24 1.45.21 2 .13.61-.09 1.87-.76 2.13-1.5.26-.74.26-1.37.18-1.5-.08-.14-.29-.21-.61-.37Z"
+                        />
+                      </svg>
+                    </span>
+                    <div>
+                      <strong>Conversación nueva</strong>
+                      <span>WhatsApp · ejemplo</span>
+                    </div>
+                    <span class="hc-chat-channel-label">Simulación</span>
+                  </header>
+                  <div class="hc-chat-messages" aria-live="polite">
+                    <div class="hc-chat-message hc-chat-message--incoming">
+                      <span class="hc-chat-message__label">Persona interesada</span>
+                      <p>Hola, vi la página y quiero saber cómo funciona.</p>
+                    </div>
+                    <div class="hc-chat-message hc-chat-message--outgoing">
+                      <span class="hc-chat-message__label">Respuesta sugerida</span>
+                      <p>¡Hola! Te ayudo. ¿Qué te gustaría mejorar primero?</p>
+                    </div>
+                    <div class="hc-chat-message hc-chat-message--incoming">
+                      <span class="hc-chat-message__label">Persona interesada</span>
+                      <p>Quiero responder más rápido y no perder seguimientos.</p>
+                    </div>
+                    <div class="hc-chat-typing" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <div class="hc-chat-suggestion">
+                      <span></span>Respuesta automatizada ilustrativa
+                    </div>
+                  </div>
+                  <div class="hc-chat-composer" aria-hidden="true">
+                    <span>El siguiente paso queda registrado</span>
+                    <span class="hc-chat-composer__send">↗</span>
+                  </div>
+                </div>
+
+                <div
+                  class="hc-chat-panel"
+                  id="chat-panel-instagram"
+                  role="tabpanel"
+                  aria-labelledby="chat-tab-instagram"
+                  data-chat-panel="instagram"
+                  tabindex="0"
+                  hidden
+                >
+                  <header class="hc-chat-header">
+                    <span class="hc-channel-avatar hc-channel-avatar--instagram" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <rect x="4" y="4" width="16" height="16" rx="4" />
+                        <circle cx="12" cy="12" r="3.5" />
+                        <circle cx="17.3" cy="6.8" r=".9" fill="currentColor" stroke="none" />
+                      </svg>
+                    </span>
+                    <div>
+                      <strong>Mensaje directo</strong>
+                      <span>Instagram · ejemplo</span>
+                    </div>
+                    <span class="hc-chat-channel-label">Simulación</span>
+                  </header>
+                  <div class="hc-chat-messages" aria-live="polite">
+                    <div class="hc-chat-message hc-chat-message--incoming">
+                      <span class="hc-chat-message__label">Persona interesada</span>
+                      <p>Hola, ¿me pueden contar qué incluye la solución?</p>
+                    </div>
+                    <div class="hc-chat-message hc-chat-message--outgoing">
+                      <span class="hc-chat-message__label">Respuesta sugerida</span>
+                      <p>
+                        Claro. Revisamos tu web, la atención y el seguimiento en un mismo recorrido.
+                      </p>
+                    </div>
+                    <div class="hc-chat-message hc-chat-message--incoming">
+                      <span class="hc-chat-message__label">Persona interesada</span>
+                      <p>Me interesa ordenar lo que pasa después del primer mensaje.</p>
+                    </div>
+                    <div class="hc-chat-typing" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <div class="hc-chat-suggestion">
+                      <span></span>Objetivo identificado para seguimiento
+                    </div>
+                  </div>
+                  <div class="hc-chat-composer" aria-hidden="true">
+                    <span>El siguiente paso queda registrado</span>
+                    <span class="hc-chat-composer__send">↗</span>
+                  </div>
+                </div>
+
+                <div
+                  class="hc-chat-panel"
+                  id="chat-panel-facebook"
+                  role="tabpanel"
+                  aria-labelledby="chat-tab-facebook"
+                  data-chat-panel="facebook"
+                  tabindex="0"
+                  hidden
+                >
+                  <header class="hc-chat-header">
+                    <span class="hc-channel-avatar hc-channel-avatar--facebook" aria-hidden="true">
+                      <svg viewBox="0 0 24 24">
+                        <path
+                          d="M13.7 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5h1.7V4a22 22 0 0 0-2.4-.1c-2.4 0-4 1.5-4 4.1V10H8v3h2.6v8h3.1Z"
+                        />
+                      </svg>
+                    </span>
+                    <div>
+                      <strong>Mensaje de página</strong>
+                      <span>Facebook · ejemplo</span>
+                    </div>
+                    <span class="hc-chat-channel-label">Simulación</span>
+                  </header>
+                  <div class="hc-chat-messages" aria-live="polite">
+                    <div class="hc-chat-message hc-chat-message--incoming">
+                      <span class="hc-chat-message__label">Persona interesada</span>
+                      <p>Necesito organizar los contactos que llegan desde mis campañas.</p>
+                    </div>
+                    <div class="hc-chat-message hc-chat-message--outgoing">
+                      <span class="hc-chat-message__label">Respuesta sugerida</span>
+                      <p>
+                        Podemos ordenar la entrada, definir preguntas y conectar el seguimiento.
+                      </p>
+                    </div>
+                    <div class="hc-chat-message hc-chat-message--incoming">
+                      <span class="hc-chat-message__label">Persona interesada</span>
+                      <p>Quiero que el equipo sepa qué hacer con cada contacto.</p>
+                    </div>
+                    <div class="hc-chat-typing" aria-hidden="true">
+                      <span></span><span></span><span></span>
+                    </div>
+                    <div class="hc-chat-suggestion">
+                      <span></span>Siguiente paso preparado para el equipo
+                    </div>
+                  </div>
+                  <div class="hc-chat-composer" aria-hidden="true">
+                    <span>El siguiente paso queda registrado</span>
+                    <span class="hc-chat-composer__send">↗</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <aside
+              class="hc-conversations__automation"
+              aria-label="Flujo ilustrativo de automatización"
+            >
+              <div class="hc-automation__status"><span></span>Flujo ilustrativo</div>
+              <h3 data-chat-flow-title>Del mensaje al seguimiento</h3>
+              <p data-chat-flow-copy>
+                La conversación no se queda aislada: conserva la intención y prepara el siguiente
+                paso.
+              </p>
+              <ol class="hc-automation__steps">
+                <li class="is-complete" data-chat-step="entry">
+                  <span>01</span>
+                  <div>
+                    <strong>Entra el mensaje</strong>
+                    <p>La persona escribe desde el canal que ya usa.</p>
+                  </div>
+                </li>
+                <li class="is-complete" data-chat-step="understand">
+                  <span>02</span>
+                  <div>
+                    <strong>Se entiende el objetivo</strong>
+                    <p>El flujo ordena la necesidad antes de responder.</p>
+                  </div>
+                </li>
+                <li class="is-current" data-chat-step="follow-up">
+                  <span>03</span>
+                  <div>
+                    <strong>Se prepara el seguimiento</strong>
+                    <p>El equipo recibe contexto para continuar la conversación.</p>
+                  </div>
+                </li>
+              </ol>
+              <p class="hc-conversations__disclosure">
+                Experiencia demostrativa de Luenio · Conversaciones ilustrativas, no representan
+                clientes reales ni resultados reales.
+              </p>
+            </aside>
+          </div>
+
+          <div class="hc-conversations__footer" data-reveal>
+            <div>
+              <span>Un mismo recorrido, en el canal que usa tu cliente.</span>
+              <strong>Web → conversación → seguimiento.</strong>
+            </div>
+            <a
+              class="hc-button hc-button--primary"
+              href="/cotizacion"
+              data-quote-cta="chatbot"
+              data-cta-location="home_chatbot"
+            >
+              Cotizar mi solución
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 6l4 4-4 4" /></svg>
+            </a>
           </div>
         </div>
       </section>

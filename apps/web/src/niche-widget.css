@@ -364,6 +364,42 @@ body[data-whatsapp-position="fixed"] .luenio-wa__trigger {
     transition: none;
   }
 }
+
+.luenio-demo-disclosure {
+  max-width: 58ch;
+  margin: 14px 0 0;
+  border-inline-start: 2px solid color-mix(in srgb, currentColor 55%, transparent);
+  padding: 7px 0 7px 12px;
+  color: #4f475c;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+html[data-theme="dark"] .luenio-demo-disclosure {
+  color: #d7cadf;
+}
+
+.luenio-contextual-quote {
+  text-wrap: balance;
+}
+
+.demo-button--contextual,
+.luenio-contextual-quote {
+  min-height: 44px;
+}
+
+@media (max-width: 600px) {
+  .luenio-demo-disclosure {
+    margin-top: 12px;
+    font-size: 0.74rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .luenio-contextual-quote {
+    transition: none;
+  }
+}
 .consent-banner {
   position: fixed;
   z-index: 1200;

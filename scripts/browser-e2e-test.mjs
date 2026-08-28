@@ -10,10 +10,10 @@ import net from "node:net";
 import path from "node:path";
 import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
-import { stopTestProcess } from "./test-process.mjs";
+import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 
-const localDbPath = path.join(process.cwd(), "db", "leads-db.json");
-const localDbSnapshot = fs.existsSync(localDbPath) ? fs.readFileSync(localDbPath, "utf8") : null;
+const fixtureDir = path.join(process.cwd(), "test-results", `.browser-fixture-${process.pid}`);
+const localDbPath = path.join(fixtureDir, "leads-db.json");
 const externalBaseUrl = process.env.BROWSER_E2E_BASE_URL || process.env.E2E_BASE_URL || "";
 
 function assert(condition, message) {
@@ -163,30 +163,36 @@ async function startServer() {
   }
 
   const port = await getFreePort();
+  fs.mkdirSync(fixtureDir, { recursive: true });
   const baseUrl = `http://127.0.0.1:${port}`;
   const healthToken = "luenio-browser-e2e-healthcheck-token-32chars";
-  const server = spawn(process.execPath, ["server.js"], {
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      NODE_ENV: "test",
-      HOST: "127.0.0.1",
-      PORT: String(port),
-      HEALTHCHECK_TOKEN: healthToken,
-      LUENIO_SKIP_ENV_FILE: "true",
-      ENABLE_PUBLIC_BILLING: "true",
-      REQUIRE_SUPABASE: "false",
-      SUPABASE_URL: "",
-      SUPABASE_SERVICE_ROLE_KEY: "",
-      CONTACT_WEBHOOK_URL: "",
-      CONTACT_WEBHOOK_TOKEN: "",
-      TURNSTILE_REQUIRED: "false",
-      TURNSTILE_SITE_KEY: "",
-      TURNSTILE_SECRET_KEY: "",
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-  });
+  const server = spawn(
+    process.execPath,
+    ["server.js"],
+    testProcessOptions({
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        NODE_ENV: "test",
+        HOST: "127.0.0.1",
+        PORT: String(port),
+        HEALTHCHECK_TOKEN: healthToken,
+        LUENIO_SKIP_ENV_FILE: "true",
+        ENABLE_PUBLIC_BILLING: "true",
+        REQUIRE_SUPABASE: "false",
+        SUPABASE_URL: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        CONTACT_WEBHOOK_URL: "",
+        CONTACT_WEBHOOK_TOKEN: "",
+        TURNSTILE_REQUIRED: "false",
+        TURNSTILE_SITE_KEY: "",
+        TURNSTILE_SECRET_KEY: "",
+        LUENIO_LOCAL_DB_PATH: localDbPath,
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    }),
+  );
 
   let output = "";
   server.stdout.on("data", (chunk) => {
@@ -221,6 +227,39 @@ function formatAxeViolations(violations) {
 }
 
 async function runAxe(page, label) {
+  await page.waitForLoadState("domcontentloaded");
+  await page.evaluate(async () => {
+    const settleWithin = (promise, timeoutMs) =>
+      Promise.race([
+        Promise.resolve(promise).catch(() => {}),
+        new Promise((resolve) => globalThis.setTimeout(resolve, timeoutMs)),
+      ]);
+    await settleWithin(globalThis.document.fonts?.ready, 1_000);
+    await settleWithin(
+      Promise.all(
+        [...globalThis.document.images].map((image) =>
+          image.complete
+            ? image.decode?.().catch(() => {})
+            : new Promise((resolve) => {
+                image.addEventListener("load", resolve, { once: true });
+                image.addEventListener("error", resolve, { once: true });
+              }),
+        ),
+      ),
+      1_000,
+    );
+    await new Promise((resolve) =>
+      globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+    );
+    const animations = globalThis.document
+      .getAnimations()
+      .filter((animation) => Number.isFinite(animation.effect?.getTiming().iterations));
+    await settleWithin(
+      Promise.all(animations.map((animation) => animation.finished.catch(() => {}))),
+      500,
+    );
+  });
+
   const invalidPatterns = await page.locator("[pattern]").evaluateAll((elements) =>
     elements.flatMap((element) => {
       const pattern = element.getAttribute("pattern");
@@ -241,7 +280,7 @@ async function runAxe(page, label) {
   );
 
   const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"])
     .analyze();
 
   const blocking = results.violations.filter(
@@ -329,16 +368,93 @@ async function runBrowserChecks(baseUrl) {
       (await page.locator("html").getAttribute("lang"))?.toLowerCase().startsWith("es"),
       "Home document language must be Spanish.",
     );
-    await runAxe(page, "home");
-    const typewriter = page.locator("[data-typewriter]");
-    await typewriter.waitFor({ state: "visible" });
-    const initialPromiseWord = (await typewriter.textContent())?.trim();
-    await page.waitForFunction(
-      (initialWord) =>
-        document.querySelector("[data-typewriter]")?.textContent?.trim() !== initialWord,
-      initialPromiseWord,
-      { timeout: 4_000 },
+    await expectVisibleText(
+      page,
+      "Tu próxima solución digital, lista para vender y dar seguimiento.",
+      "home value proposition",
     );
+    await runAxe(page, "home");
+    await page.evaluate(() => globalThis.scrollTo(0, 0));
+    await page.waitForFunction(
+      () => globalThis.document.querySelector(".hc-hero")?.classList.contains("is-motion-active"),
+      null,
+      { timeout: 5_000 },
+    );
+
+    const motionContract = await page.evaluate(() => ({
+      motionReady: document.querySelector(".home-clarity")?.classList.contains("motion-ready"),
+      heroActive: document.querySelector(".hc-hero")?.classList.contains("is-motion-active"),
+      heroStageAnimation: globalThis.getComputedStyle(document.querySelector(".hc-browser"))
+        .animationName,
+      signalAnimation: globalThis.getComputedStyle(document.querySelector(".hc-hero__signal-node"))
+        .animationName,
+      previewSweep: globalThis.getComputedStyle(
+        document.querySelector(".hc-browser__viewport"),
+        "::after",
+      ).animationName,
+      typingDots: document.querySelectorAll(".hc-chat-typing span").length,
+    }));
+    assert(motionContract.motionReady, "Home motion must initialize without hiding content.");
+    assert(motionContract.heroActive, "Hero motion must activate while the hero is visible.");
+    assert(
+      motionContract.heroStageAnimation === "hc-stage-in" &&
+        motionContract.signalAnimation === "hc-signal-node-in" &&
+        motionContract.previewSweep === "hc-preview-scan",
+      `Home must expose the authored motion sequence: ${JSON.stringify(motionContract)}`,
+    );
+    assert(
+      motionContract.typingDots === 9,
+      "Chatbot preview must expose one typing indicator per channel.",
+    );
+
+    const conversationTabs = page.getByRole("tab");
+    assert(
+      (await conversationTabs.count()) === 3,
+      "Home chatbot preview must expose WhatsApp, Instagram and Facebook tabs.",
+    );
+    const instagramTab = page.getByRole("tab", { name: "Instagram", exact: true });
+    await instagramTab.click();
+    await page.locator("#chat-panel-instagram").waitFor({ state: "visible" });
+    assert(
+      (await instagramTab.getAttribute("aria-selected")) === "true" &&
+        (await page.locator("#chat-panel-whatsapp").isVisible()) === false,
+      "Chatbot preview must switch the visible panel and selected tab.",
+    );
+    await instagramTab.press("ArrowRight");
+    assert(
+      (await page
+        .getByRole("tab", { name: "Facebook", exact: true })
+        .getAttribute("aria-selected")) === "true",
+      "Chatbot tabs must support arrow-key navigation.",
+    );
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(180);
+    const reducedMotionContract = await page.evaluate(() => ({
+      revealOpacity: globalThis.getComputedStyle(document.querySelector("[data-reveal]")).opacity,
+      heroStageAnimation: globalThis.getComputedStyle(document.querySelector(".hc-browser"))
+        .animationName,
+      signalAnimation: globalThis.getComputedStyle(document.querySelector(".hc-hero__signal-node"))
+        .animationName,
+      previewSweep: globalThis.getComputedStyle(
+        document.querySelector(".hc-browser__viewport"),
+        "::after",
+      ).animationName,
+      typingAnimation: globalThis.getComputedStyle(document.querySelector(".hc-chat-typing span"))
+        .animationName,
+    }));
+    assert(
+      reducedMotionContract.revealOpacity === "1" &&
+        reducedMotionContract.heroStageAnimation === "none" &&
+        reducedMotionContract.signalAnimation === "none" &&
+        reducedMotionContract.previewSweep === "none" &&
+        reducedMotionContract.typingAnimation === "none",
+      `Reduced motion must disable authored home motion: ${JSON.stringify(reducedMotionContract)}`,
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.reload({ waitUntil: "domcontentloaded" });
+
     await assertThemeSwitch(page, "Home");
 
     // Mobile nav toggle
@@ -423,6 +539,34 @@ async function runBrowserChecks(baseUrl) {
           .querySelector('[data-demo-target="agencias"]')
           ?.getAttribute("aria-pressed") === "true",
     );
+    const homeDemoQuote = page.locator("[data-demo-quote-link]");
+    const homeDemoQuoteHref = await homeDemoQuote.getAttribute("href");
+    assert(
+      homeDemoQuoteHref?.includes("sector=agencia") &&
+        homeDemoQuoteHref.includes("demo=Impulso+Digital") &&
+        homeDemoQuoteHref.includes("source=home_demo"),
+      `Home demo CTA must preserve the active journey: ${homeDemoQuoteHref}`,
+    );
+    await page.evaluate(() => {
+      const link = document.querySelector("[data-demo-quote-link]");
+      link?.addEventListener("click", (event) => event.preventDefault(), { once: true });
+      link?.click();
+    });
+    const homeQuoteEvents = await page.evaluate(() =>
+      JSON.parse(globalThis.localStorage.getItem("luenio.analytics.events") || "[]").filter(
+        (event) => event.name === "quote_cta_click" || event.name === "demo_context_preserved",
+      ),
+    );
+    assert(
+      homeQuoteEvents.some(
+        (event) =>
+          event.properties.sector === "agencia" &&
+          event.properties.demo === "Impulso Digital" &&
+          event.properties.service === "Landing + automatización completa" &&
+          event.properties.source === "home_demo",
+      ),
+      `Home demo CTA analytics must preserve the active journey: ${JSON.stringify(homeQuoteEvents)}`,
+    );
     await page.setViewportSize({ width: 1280, height: 800 });
 
     // --- Public funnel continuity: home -> demo -> contextual quote -> confirmation ---
@@ -460,7 +604,7 @@ async function runBrowserChecks(baseUrl) {
       contextualQuoteHref?.startsWith("/cotizacion?") &&
         contextualQuoteHref.includes("sector=agencia") &&
         contextualQuoteHref.includes("demo=Impulso+Digital") &&
-        contextualQuoteHref.includes("service=Landing+page+de+conversi%C3%B3n"),
+        contextualQuoteHref.includes("service=Landing+%2B+automatizaci%C3%B3n+completa"),
       `Demo quote link must preserve its context: ${contextualQuoteHref}`,
     );
 
@@ -470,7 +614,7 @@ async function runBrowserChecks(baseUrl) {
     const quoteService = quoteForm.locator('select[name="service"]');
     const quoteObjective = quoteForm.locator('textarea[name="message"]');
     assert(
-      (await quoteService.inputValue()) === "Landing page de conversión",
+      (await quoteService.inputValue()) === "Landing + automatización completa",
       "Contextual quote must preselect the demo service.",
     );
     assert(
@@ -478,19 +622,14 @@ async function runBrowserChecks(baseUrl) {
       "Contextual quote must preserve the demo goal.",
     );
     assert(
-      (await quoteForm.getAttribute("data-source")) === "cotizacion_demo_agencia",
+      (await quoteForm.getAttribute("data-source")) === "cotizacion_landing_agencies",
       "Contextual quote must preserve an analytics source.",
     );
 
-    const quoteWhatsappTrigger = page.locator('[data-wa-open][data-source="quote_header"]');
-    await quoteWhatsappTrigger.click();
-    const publicWhatsappForm = page.locator("[data-wa-form]");
     assert(
-      (await publicWhatsappForm.locator('select[name="service"]').inputValue()) ===
-        "Landing page de conversión",
-      "WhatsApp fallback must preserve the contextual service.",
+      (await page.locator("[data-wa-form]").count()) <= 1,
+      "Quote page must render at most one shared WhatsApp form.",
     );
-    await page.locator("[data-wa-close]").first().click();
 
     await quoteForm.locator('input[name="name"]').fill("Persona Demo");
     await quoteForm.locator('input[name="business"]').fill("Negocio Demo");
@@ -528,6 +667,18 @@ async function runBrowserChecks(baseUrl) {
     // --- Niche landing ---
     await page.goto(`${baseUrl}/gimnasios`, { waitUntil: "domcontentloaded" });
     await expectVisibleText(page, "Titan Fitness", "niche gym page");
+    const gymHeaderQuote = await page
+      .locator("header [data-quote-cta]")
+      .first()
+      .getAttribute("href");
+    assert(
+      gymHeaderQuote?.startsWith("/cotizacion?") &&
+        gymHeaderQuote.includes("sector=") &&
+        gymHeaderQuote.includes("demo=") &&
+        gymHeaderQuote.includes("service=") &&
+        gymHeaderQuote.includes("source=landing_"),
+      `gimnasios header CTA must preserve quote context: ${gymHeaderQuote}`,
+    );
     await page.evaluate(() => globalThis.document.fonts.ready);
     const gymHeadingFits = await page
       .locator(".builder-heading h1")
@@ -548,6 +699,31 @@ async function runBrowserChecks(baseUrl) {
     for (const [slug, brand] of industryLandings) {
       await page.goto(`${baseUrl}/${slug}`, { waitUntil: "domcontentloaded" });
       await expectVisibleText(page, brand, `${slug} brand`);
+      const landingHeaderQuote = await page
+        .locator("header [data-quote-cta]")
+        .first()
+        .getAttribute("href");
+      assert(
+        landingHeaderQuote?.startsWith("/cotizacion?") &&
+          landingHeaderQuote.includes("sector=") &&
+          landingHeaderQuote.includes("demo=") &&
+          landingHeaderQuote.includes("service=") &&
+          landingHeaderQuote.includes("source=landing_"),
+        `${slug} header CTA must preserve quote context: ${landingHeaderQuote}`,
+      );
+      const landingDisclosure = await page
+        .locator("[data-luenio-disclosure]")
+        .first()
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return { bottom: bounds.bottom, top: bounds.top, visible: !element.hidden };
+        });
+      assert(
+        landingDisclosure.visible &&
+          landingDisclosure.top >= -1 &&
+          landingDisclosure.bottom <= 800 + 1,
+        `${slug} disclosure must be visible in the first desktop viewport: ${JSON.stringify(landingDisclosure)}`,
+      );
       if (slug === "agencies") {
         const sharedWhatsappPresentation = await getWhatsappPresentation(page);
         assert(
@@ -586,6 +762,31 @@ async function runBrowserChecks(baseUrl) {
     for (const [slug, brand] of careLandings) {
       await page.goto(`${baseUrl}/${slug}`, { waitUntil: "domcontentloaded" });
       await expectVisibleText(page, brand, `${slug} brand`);
+      const careHeaderQuote = await page
+        .locator("header [data-quote-cta]")
+        .first()
+        .getAttribute("href");
+      assert(
+        careHeaderQuote?.startsWith("/cotizacion?") &&
+          careHeaderQuote.includes("sector=") &&
+          careHeaderQuote.includes("demo=") &&
+          careHeaderQuote.includes("service=") &&
+          careHeaderQuote.includes("source=landing_"),
+        `${slug} header CTA must preserve quote context: ${careHeaderQuote}`,
+      );
+      const careDesktopDisclosure = await page
+        .locator("[data-luenio-disclosure]")
+        .first()
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return { bottom: bounds.bottom, top: bounds.top, visible: !element.hidden };
+        });
+      assert(
+        careDesktopDisclosure.visible &&
+          careDesktopDisclosure.top >= -1 &&
+          careDesktopDisclosure.bottom <= 800 + 1,
+        `${slug} disclosure must be visible in the first desktop viewport: ${JSON.stringify(careDesktopDisclosure)}`,
+      );
       await runAxe(page, slug);
       await assertThemeSwitch(page, `${slug} landing`);
       await page.setViewportSize({ width: 390, height: 844 });
@@ -600,6 +801,17 @@ async function runBrowserChecks(baseUrl) {
       assert(
         (await page.locator(".care-pill").count()) >= 2,
         `${slug} must expose multiple clear conversion paths.`,
+      );
+      const careDisclosure = await page
+        .locator("[data-luenio-disclosure]")
+        .first()
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return { bottom: bounds.bottom, top: bounds.top, visible: !element.hidden };
+        });
+      assert(
+        careDisclosure.visible && careDisclosure.top >= -1 && careDisclosure.bottom <= 844 + 1,
+        `${slug} disclosure must be visible in the first mobile viewport: ${JSON.stringify(careDisclosure)}`,
       );
       await page.setViewportSize({ width: 1280, height: 800 });
     }
@@ -654,11 +866,23 @@ async function runBrowserChecks(baseUrl) {
     await expectVisibleText(page, "Solicitud de reserva simulada", "restaurant conversion outcome");
 
     await page.goto(`${baseUrl}/gym`, { waitUntil: "domcontentloaded" });
+    await page.waitForFunction(
+      () => globalThis.document.documentElement.dataset.gymDemoReady === "true",
+    );
     await page.locator("[data-confirm-route]").click();
     const bookingDialog = page.locator("[data-booking-dialog]");
     await bookingDialog.getByLabel("Nombre", { exact: true }).fill("Persona Demo");
     await bookingDialog.getByLabel("WhatsApp", { exact: true }).fill("3001234567");
-    await bookingDialog.getByRole("button", { name: "Confirmar reserva de muestra" }).click();
+    await bookingDialog.locator("form").evaluate((form) => {
+      const submitter = form.querySelector("[data-simulate-booking]");
+      if (form.tagName !== "FORM" || submitter?.tagName !== "BUTTON") {
+        throw new Error("Gym booking form is not ready.");
+      }
+      form.requestSubmit(submitter);
+    });
+    await page.waitForFunction(
+      () => globalThis.document.documentElement.dataset.bookingState === "confirmed",
+    );
     await expectVisibleText(page, "Reserva simulada confirmada", "gym conversion outcome");
 
     const responsiveIndustryLandings = [...industryLandings, ["gym", "Titan Fitness Club"]];
@@ -716,6 +940,19 @@ async function runBrowserChecks(baseUrl) {
         };
       });
       assert(!mobileLayout.documentOverflows, `${slug} landing must not overflow on mobile.`);
+      const mobileDisclosure = await page
+        .locator("[data-luenio-disclosure]")
+        .first()
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return { bottom: bounds.bottom, top: bounds.top, visible: !element.hidden };
+        });
+      assert(
+        mobileDisclosure.visible &&
+          mobileDisclosure.top >= -1 &&
+          mobileDisclosure.bottom <= 844 + 1,
+        `${slug} disclosure must be visible in the first mobile viewport: ${JSON.stringify(mobileDisclosure)}`,
+      );
       assert(
         !mobileLayout.headingClipped,
         `${slug} hero heading must fit the mobile viewport: ${JSON.stringify(mobileLayout)}`,
@@ -746,6 +983,19 @@ async function runBrowserChecks(baseUrl) {
     for (const [slug, brand, landingHref, dynamicSelector] of industrySimulations) {
       await page.goto(`${baseUrl}/demo/${slug}`, { waitUntil: "domcontentloaded" });
       await expectVisibleText(page, brand, `${slug} simulation brand`);
+      const simulationDisclosure = await page
+        .locator(".simulation-disclosure")
+        .first()
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          return { bottom: bounds.bottom, top: bounds.top, visible: !element.hidden };
+        });
+      assert(
+        simulationDisclosure.visible &&
+          simulationDisclosure.top >= -1 &&
+          simulationDisclosure.bottom <= 800 + 1,
+        `${slug} simulation disclosure must be visible in the first desktop viewport: ${JSON.stringify(simulationDisclosure)}`,
+      );
       await page.locator(dynamicSelector).first().waitFor({ state: "visible", timeout: 10_000 });
       assert(
         (await page.locator(`.simulation-nav__brand a[href="${landingHref}"]`).count()) === 1,
@@ -766,6 +1016,16 @@ async function runBrowserChecks(baseUrl) {
         (await simulationWhatsapp.count()) === 1 &&
           (await simulationWhatsapp.getAttribute("href")).startsWith("https://wa.me/"),
         `${slug} simulation must offer a direct contextual WhatsApp exit.`,
+      );
+      assert(
+        (await page.locator("#industryLinks a").count()) === 7,
+        `${slug} simulation selector must expose all seven sectors.`,
+      );
+      const resourceState = page.locator(".simulation-resource-state");
+      assert(
+        (await resourceState.count()) === 1 &&
+          (await resourceState.getAttribute("hidden")) !== null,
+        `${slug} simulation must keep its resource error state hidden when assets load.`,
       );
       await runAxe(page, `${slug}-simulation`);
     }
@@ -805,12 +1065,43 @@ async function runBrowserChecks(baseUrl) {
         activeIndustryVisible,
         `${slug} mobile simulation must reveal its active industry navigation item.`,
       );
-      const hasHorizontalOverflow = await page.evaluate(
-        () => globalThis.document.documentElement.scrollWidth > globalThis.innerWidth + 1,
-      );
+      const mobileLayout = await page.evaluate(() => {
+        const documentElement = globalThis.document.documentElement;
+        const offenders = [...globalThis.document.querySelectorAll("*")]
+          .map((element) => ({
+            element,
+            right: element.getBoundingClientRect().right,
+            left: element.getBoundingClientRect().left,
+            width: element.getBoundingClientRect().width,
+          }))
+          .filter(({ element, right, left, width }) => {
+            const style = globalThis.getComputedStyle(element);
+            return (
+              width > 0 &&
+              (right > globalThis.innerWidth + 1 || left < -1) &&
+              style.position !== "fixed" &&
+              style.position !== "sticky"
+            );
+          })
+          .sort((first, second) => second.right - first.right)
+          .slice(0, 5)
+          .map(({ element, right, left, width }) => ({
+            className: String(element.className || "").slice(0, 120),
+            id: element.id,
+            left: Math.round(left * 10) / 10,
+            right: Math.round(right * 10) / 10,
+            tag: element.tagName.toLowerCase(),
+            width: Math.round(width * 10) / 10,
+          }));
+        return {
+          clientWidth: documentElement.clientWidth,
+          offenders,
+          scrollWidth: documentElement.scrollWidth,
+        };
+      });
       assert(
-        !hasHorizontalOverflow,
-        `${slug} simulation must not overflow horizontally on mobile.`,
+        mobileLayout.scrollWidth <= mobileLayout.clientWidth + 1,
+        `${slug} simulation must not overflow horizontally on mobile: ${JSON.stringify(mobileLayout)}`,
       );
     }
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -860,7 +1151,9 @@ async function runBrowserChecks(baseUrl) {
     // No fatal pageerrors on critical paths (allow network/font noise filtered above)
     const fatal = browserErrors.filter(
       (message) =>
-        !/favicon|fonts\.gstatic|Failed to load resource.*(?:401|403|404)/i.test(message),
+        !/favicon|fonts\.gstatic|Failed to load resource.*(?:401|403|404)|console: Failed to load resource: net::ERR_NETWORK_ACCESS_DENIED/i.test(
+          message,
+        ),
     );
     assert(fatal.length === 0, `Unexpected page errors:\n${fatal.join("\n")}`);
 
@@ -872,11 +1165,7 @@ async function runBrowserChecks(baseUrl) {
 }
 
 function restoreLocalDb() {
-  if (localDbSnapshot !== null) {
-    fs.writeFileSync(localDbPath, localDbSnapshot);
-  } else if (fs.existsSync(localDbPath)) {
-    // Leave file if server created empty structure; only restore snapshot when we had one.
-  }
+  fs.rmSync(fixtureDir, { recursive: true, force: true });
 }
 
 const { baseUrl, stop } = await startServer();

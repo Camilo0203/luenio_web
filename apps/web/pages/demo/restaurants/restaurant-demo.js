@@ -35,7 +35,10 @@ mountIndustryDemo({
       delay: 900,
       advanceIndex: 1,
       status: "Analizando intención...",
-      event: { label: "Analizando intención", detail: "IA detecta intención de pedido." },
+      event: {
+        label: "Clasificación por reglas",
+        detail: "La simulación clasifica la intención de pedido mediante reglas deterministas.",
+      },
     },
     {
       delay: 1800,

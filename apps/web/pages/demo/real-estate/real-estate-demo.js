@@ -53,8 +53,8 @@ mountIndustryDemo({
       advanceIndex: 1,
       status: "Analizando intención...",
       event: {
-        label: "Presupuesto detectado",
-        detail: "IA detecta presupuesto, zona y urgencia de visita.",
+        label: "Presupuesto clasificado por reglas",
+        detail: "La simulación clasifica presupuesto, zona e intención de visita.",
       },
     },
     {

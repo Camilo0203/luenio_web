@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import net from "node:net";
 import { chromium } from "playwright";
-import { stopTestProcess } from "./test-process.mjs";
+import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 
 const ALL_ROUTES = [
   { name: "home", path: "/" },
@@ -70,15 +70,6 @@ function getBudgetFailures(result) {
   return failures;
 }
 
-function getBudgetPressure(result) {
-  return Math.max(
-    result.cls / PERFORMANCE_BUDGETS.cls,
-    result.lcp / PERFORMANCE_BUDGETS.lcp,
-    result.longTaskTotal / PERFORMANCE_BUDGETS.longTaskTotal,
-    result.transferBytes / PERFORMANCE_BUDGETS.transferBytes,
-  );
-}
-
 function getFreePort() {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
@@ -107,29 +98,38 @@ async function waitForServer(baseUrl, timeoutMs = 15_000) {
 async function startServer() {
   const port = await getFreePort();
   const baseUrl = `http://127.0.0.1:${port}`;
-  const server = spawn(process.execPath, ["server.js"], {
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      HOST: "127.0.0.1",
-      PORT: String(port),
-      NODE_ENV: "test",
-      LUENIO_SKIP_ENV_FILE: "true",
-      REQUIRE_SUPABASE: "false",
-      SUPABASE_URL: "",
-      SUPABASE_SERVICE_ROLE_KEY: "",
-      DATABASE_URL: "",
-      NEON_DATABASE_URL: "",
-      CONTACT_WEBHOOK_URL: "",
-      CONTACT_FALLBACK_WEBHOOK_URL: "",
-      TURNSTILE_REQUIRED: "false",
-      ADMIN_MFA_REQUIRED: "false",
-      CONTACT_DELIVERY_WORKER_ENABLED: "false",
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-  });
-  await waitForServer(baseUrl);
+  const server = spawn(
+    process.execPath,
+    ["server.js"],
+    testProcessOptions({
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        HOST: "127.0.0.1",
+        PORT: String(port),
+        NODE_ENV: "test",
+        LUENIO_SKIP_ENV_FILE: "true",
+        REQUIRE_SUPABASE: "false",
+        SUPABASE_URL: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        DATABASE_URL: "",
+        NEON_DATABASE_URL: "",
+        CONTACT_WEBHOOK_URL: "",
+        CONTACT_FALLBACK_WEBHOOK_URL: "",
+        TURNSTILE_REQUIRED: "false",
+        ADMIN_MFA_REQUIRED: "false",
+        CONTACT_DELIVERY_WORKER_ENABLED: "false",
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    }),
+  );
+  try {
+    await waitForServer(baseUrl);
+  } catch (error) {
+    await stopTestProcess(server, { label: "performance test server during readiness" });
+    throw error;
+  }
   return {
     baseUrl,
     stop: () => stopTestProcess(server, { label: "performance test server" }),
@@ -151,151 +151,197 @@ async function launchBrowser() {
   }
 }
 
-async function measureRoute(browser, baseUrl, route) {
+async function measureRouteAttempt(browser, baseUrl, route) {
   const context = await browser.newContext({
     locale: "es-CO",
     reducedMotion: "reduce",
     serviceWorkers: "block",
     viewport: { width: 390, height: 844 },
   });
-  const page = await context.newPage();
-  const externalRequests = new Set();
+  try {
+    const page = await context.newPage();
+    const externalRequests = new Set();
 
-  await context.route("**/*", async (requestRoute) => {
-    const url = requestRoute.request().url();
-    if (url.startsWith(baseUrl) || url.startsWith("data:")) {
-      await requestRoute.continue();
-      return;
-    }
-    externalRequests.add(new URL(url).hostname);
-    await requestRoute.abort();
-  });
-
-  await page.addInitScript(() => {
-    globalThis.__luenioPerformance = {
-      cls: 0,
-      lcp: 0,
-      lcpElement: null,
-      longTasks: [],
-      shifts: [],
-    };
-    try {
-      new PerformanceObserver((list) => {
-        const entries = list.getEntries();
-        const last = entries.at(-1);
-        if (last) {
-          const element = last.element;
-          globalThis.__luenioPerformance.lcp = last.startTime;
-          globalThis.__luenioPerformance.lcpElement = element
-            ? {
-                className: String(element.className || ""),
-                id: element.id || "",
-                tag: element.tagName?.toLowerCase() || "",
-                text: (element.textContent || "").trim().slice(0, 100),
-                url: last.url || "",
-              }
-            : null;
-        }
-      }).observe({ type: "largest-contentful-paint", buffered: true });
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          if (entry.hadRecentInput) continue;
-          globalThis.__luenioPerformance.cls += entry.value;
-          globalThis.__luenioPerformance.shifts.push({
-            value: entry.value,
-            sources: (entry.sources || []).map((source) => ({
-              node: source.node?.id || source.node?.className || source.node?.tagName || "unknown",
-              previousRect: source.previousRect?.toJSON?.() || source.previousRect,
-              currentRect: source.currentRect?.toJSON?.() || source.currentRect,
-            })),
-          });
-        }
-      }).observe({ type: "layout-shift", buffered: true });
-      new PerformanceObserver((list) => {
-        for (const entry of list.getEntries()) {
-          globalThis.__luenioPerformance.longTasks.push(entry.duration);
-        }
-      }).observe({ type: "longtask", buffered: true });
-    } catch {
-      // Older engines still report navigation and paint timing below.
-    }
-  });
-
-  const cdp = await context.newCDPSession(page);
-  await cdp.send("Network.enable");
-  await cdp.send("Network.emulateNetworkConditions", NETWORK);
-  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
-
-  await page.goto(`${baseUrl}${route.path}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 30_000,
-  });
-  await page.evaluate(async () => {
-    const aboveFoldImages = [...globalThis.document.images].filter((image) => {
-      const rect = image.getBoundingClientRect();
-      return image.loading !== "lazy" && rect.top < globalThis.innerHeight * 1.5;
+    await context.route("**/*", async (requestRoute) => {
+      const url = requestRoute.request().url();
+      if (url.startsWith(baseUrl) || url.startsWith("data:")) {
+        await requestRoute.continue();
+        return;
+      }
+      externalRequests.add(new URL(url).hostname);
+      await requestRoute.abort();
     });
-    await Promise.race([
-      Promise.all([
-        globalThis.document.fonts?.ready,
-        ...aboveFoldImages.map((image) =>
-          image.complete
-            ? image.decode?.().catch(() => {})
-            : new Promise((resolve) => {
-                image.addEventListener("load", resolve, { once: true });
-                image.addEventListener("error", resolve, { once: true });
-              }),
-        ),
-      ]),
-      new Promise((resolve) => setTimeout(resolve, 5_000)),
-    ]);
-    await new Promise((resolve) =>
-      globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
-    );
-  });
-  await page.waitForTimeout(1_200);
 
-  const metrics = await page.evaluate(() => {
-    const navigation = performance.getEntriesByType("navigation")[0];
-    const resources = performance.getEntriesByType("resource");
-    const paints = Object.fromEntries(
-      performance.getEntriesByType("paint").map((entry) => [entry.name, entry.startTime]),
-    );
-    const totals = resources.reduce(
-      (result, entry) => {
-        result.bytes += entry.transferSize || 0;
-        result.decodedBytes += entry.decodedBodySize || 0;
-        result.byType[entry.initiatorType] =
-          (result.byType[entry.initiatorType] || 0) + (entry.transferSize || 0);
-        return result;
-      },
-      { bytes: 0, decodedBytes: 0, byType: {} },
-    );
-    const state = globalThis.__luenioPerformance;
+    await page.addInitScript(() => {
+      globalThis.__luenioPerformance = {
+        cls: 0,
+        lcp: 0,
+        lcpElement: null,
+        longTasks: [],
+        shifts: [],
+      };
+      try {
+        new PerformanceObserver((list) => {
+          const entries = list.getEntries();
+          const last = entries.at(-1);
+          if (last) {
+            const element = last.element;
+            globalThis.__luenioPerformance.lcp = last.startTime;
+            globalThis.__luenioPerformance.lcpElement = element
+              ? {
+                  className: String(element.className || ""),
+                  id: element.id || "",
+                  tag: element.tagName?.toLowerCase() || "",
+                  text: (element.textContent || "").trim().slice(0, 100),
+                  url: last.url || "",
+                }
+              : null;
+          }
+        }).observe({ type: "largest-contentful-paint", buffered: true });
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            if (entry.hadRecentInput) continue;
+            globalThis.__luenioPerformance.cls += entry.value;
+            globalThis.__luenioPerformance.shifts.push({
+              value: entry.value,
+              sources: (entry.sources || []).map((source) => ({
+                node:
+                  source.node?.id || source.node?.className || source.node?.tagName || "unknown",
+                previousRect: source.previousRect?.toJSON?.() || source.previousRect,
+                currentRect: source.currentRect?.toJSON?.() || source.currentRect,
+              })),
+            });
+          }
+        }).observe({ type: "layout-shift", buffered: true });
+        new PerformanceObserver((list) => {
+          for (const entry of list.getEntries()) {
+            globalThis.__luenioPerformance.longTasks.push(entry.duration);
+          }
+        }).observe({ type: "longtask", buffered: true });
+      } catch {
+        // Older engines still report navigation and paint timing below.
+      }
+    });
+
+    const cdp = await context.newCDPSession(page);
+    await cdp.send("Network.enable");
+    await cdp.send("Network.emulateNetworkConditions", NETWORK);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
+
+    await page.goto(`${baseUrl}${route.path}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 30_000,
+    });
+    await page.evaluate(async () => {
+      const aboveFoldImages = [...globalThis.document.images].filter((image) => {
+        const rect = image.getBoundingClientRect();
+        return image.loading !== "lazy" && rect.top < globalThis.innerHeight * 1.5;
+      });
+      await Promise.race([
+        Promise.all([
+          globalThis.document.fonts?.ready,
+          ...aboveFoldImages.map((image) =>
+            image.complete
+              ? image.decode?.().catch(() => {})
+              : new Promise((resolve) => {
+                  image.addEventListener("load", resolve, { once: true });
+                  image.addEventListener("error", resolve, { once: true });
+                }),
+          ),
+        ]),
+        new Promise((resolve) => setTimeout(resolve, 5_000)),
+      ]);
+      await new Promise((resolve) =>
+        globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+      );
+    });
+    await page.waitForTimeout(1_200);
+
+    const metrics = await page.evaluate(() => {
+      const navigation = performance.getEntriesByType("navigation")[0];
+      const resources = performance.getEntriesByType("resource");
+      const paints = Object.fromEntries(
+        performance.getEntriesByType("paint").map((entry) => [entry.name, entry.startTime]),
+      );
+      const totals = resources.reduce(
+        (result, entry) => {
+          result.bytes += entry.transferSize || 0;
+          result.decodedBytes += entry.decodedBodySize || 0;
+          result.byType[entry.initiatorType] =
+            (result.byType[entry.initiatorType] || 0) + (entry.transferSize || 0);
+          return result;
+        },
+        { bytes: 0, decodedBytes: 0, byType: {} },
+      );
+      const state = globalThis.__luenioPerformance;
+      return {
+        cls: state.cls,
+        domContentLoaded: navigation?.domContentLoadedEventEnd || 0,
+        domNodes: globalThis.document.getElementsByTagName("*").length,
+        fcp: paints["first-contentful-paint"] || 0,
+        lcp: state.lcp,
+        lcpElement: state.lcpElement,
+        load: navigation?.loadEventEnd || 0,
+        longTaskCount: state.longTasks.length,
+        longTaskTotal: state.longTasks.reduce((sum, duration) => sum + duration, 0),
+        layoutShifts: state.shifts,
+        requestCount: resources.length,
+        transferBytes: totals.bytes,
+        decodedBytes: totals.decodedBytes,
+        transferByType: totals.byType,
+        url: globalThis.location.pathname,
+      };
+    });
+
     return {
-      cls: state.cls,
-      domContentLoaded: navigation?.domContentLoadedEventEnd || 0,
-      domNodes: globalThis.document.getElementsByTagName("*").length,
-      fcp: paints["first-contentful-paint"] || 0,
-      lcp: state.lcp,
-      lcpElement: state.lcpElement,
-      load: navigation?.loadEventEnd || 0,
-      longTaskCount: state.longTasks.length,
-      longTaskTotal: state.longTasks.reduce((sum, duration) => sum + duration, 0),
-      layoutShifts: state.shifts,
-      requestCount: resources.length,
-      transferBytes: totals.bytes,
-      decodedBytes: totals.decodedBytes,
-      transferByType: totals.byType,
-      url: globalThis.location.pathname,
+      name: route.name,
+      externalHosts: [...externalRequests].sort(),
+      ...metrics,
     };
-  });
+  } finally {
+    await context.close();
+  }
+}
 
-  await context.close();
+async function measureRoute(browser, baseUrl, route) {
+  for (let navigationAttempt = 1; navigationAttempt <= 2; navigationAttempt += 1) {
+    try {
+      const result = await measureRouteAttempt(browser, baseUrl, route);
+      return { ...result, navigationAttempts: navigationAttempt };
+    } catch (error) {
+      if (error?.name !== "TimeoutError" || navigationAttempt === 2) throw error;
+      await waitForServer(baseUrl, 5_000);
+    }
+  }
+  throw new Error(`Performance navigation retry exhausted for ${route.path}.`);
+}
+
+function median(values) {
+  const sorted = [...values].sort((left, right) => left - right);
+  return sorted[Math.floor(sorted.length / 2)];
+}
+
+async function measureRouteMedian(browser, baseUrl, route) {
+  const samples = [];
+  for (let sample = 0; sample < 3; sample += 1) {
+    samples.push(await measureRoute(browser, baseUrl, route));
+  }
+  const lcp = median(samples.map((sample) => sample.lcp));
+  const representative = samples.find((sample) => sample.lcp === lcp) || samples[1];
   return {
-    name: route.name,
-    externalHosts: [...externalRequests].sort(),
-    ...metrics,
+    ...representative,
+    cls: median(samples.map((sample) => sample.cls)),
+    lcp,
+    longTaskTotal: median(samples.map((sample) => sample.longTaskTotal)),
+    transferBytes: median(samples.map((sample) => sample.transferBytes)),
+    sampleCount: samples.length,
+    samples: samples.map((sample) => ({
+      cls: sample.cls,
+      lcp: sample.lcp,
+      longTaskTotal: sample.longTaskTotal,
+      navigationAttempts: sample.navigationAttempts,
+      transferBytes: sample.transferBytes,
+    })),
   };
 }
 
@@ -305,16 +351,7 @@ try {
   browser = await launchBrowser();
   const results = [];
   for (const route of ROUTES) {
-    let bestResult = await measureRoute(browser, server.baseUrl, route);
-    let attempts = 1;
-    while (getBudgetFailures(bestResult).length && attempts < 3) {
-      const retryResult = await measureRoute(browser, server.baseUrl, route);
-      attempts += 1;
-      if (getBudgetPressure(retryResult) < getBudgetPressure(bestResult)) {
-        bestResult = retryResult;
-      }
-    }
-    results.push({ ...bestResult, attempts });
+    results.push(await measureRouteMedian(browser, server.baseUrl, route));
   }
   const budgetFailures = results.flatMap((result) => {
     return getBudgetFailures(result).map((failure) => `${result.name}: ${failure}`);

@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
 import { buildQuoteUrl, readJourneyContext } from "../apps/web/src/journey-context.js";
+import { getPublicJourneyById } from "../apps/web/src/public-journeys.js";
 
 const root = process.cwd();
 
@@ -21,6 +22,7 @@ const disclaimer =
 const pages = [
   {
     slug: "gym",
+    journeyId: "gym",
     className: "gym-board",
     brand: "Titan Fitness Club",
     hero: "Construye tu ruta.",
@@ -37,6 +39,7 @@ const pages = [
   },
   {
     slug: "restaurants",
+    journeyId: "restaurants",
     className: "demo-restaurant",
     brand: "Sabor &amp; Fuego",
     hero: "El fuego transforma cada ingrediente.",
@@ -51,6 +54,7 @@ const pages = [
   },
   {
     slug: "real-estate",
+    journeyId: "real-estate",
     className: "demo-real-estate",
     brand: "Hogar Prime",
     hero: "Encuentra un lugar que esté a la altura de tu historia.",
@@ -68,6 +72,7 @@ const pages = [
   },
   {
     slug: "ecommerce",
+    journeyId: "ecommerce",
     className: "demo-ecommerce",
     brand: "NovaStore",
     hero: "Potencia extraordinaria. Diseño esencial.",
@@ -90,6 +95,7 @@ const pages = [
   },
   {
     slug: "agencies",
+    journeyId: "agencies",
     className: "demo-agency",
     brand: "Impulso Digital",
     hero: "Construimos marcas digitales que avanzan.",
@@ -114,6 +120,7 @@ const pages = [
   },
   {
     slug: "veterinary",
+    journeyId: "veterinary",
     className: "care-landing veterinary",
     brand: "Huella Veterinaria",
     hero: "Su bienestar empieza con una conversación.",
@@ -128,6 +135,7 @@ const pages = [
   },
   {
     slug: "aesthetics",
+    journeyId: "aesthetics",
     className: "care-landing aesthetics",
     brand: "Aura Estética",
     hero: "Tu piel no necesita prisa. Necesita atención.",
@@ -174,9 +182,32 @@ for (const page of pages) {
     page.terms.every((term) => html.toLowerCase().includes(term.toLowerCase())),
     `${page.slug} is missing niche-specific commercial content.`,
   );
+  const legacyConversion =
+    html.includes(page.primaryCta) && html.includes(`href="#${page.conversionTarget}"`);
+  const sharedConversion =
+    html.includes("Cotizar mi solución") &&
+    html.includes(`data-quote-cta="landing_${page.journeyId}"`);
   assert(
-    html.includes(page.primaryCta) && html.includes(`href="#${page.conversionTarget}"`),
+    legacyConversion || sharedConversion,
     `${page.slug} must expose a clear primary conversion path.`,
+  );
+  const staticContextualCta = html.match(
+    new RegExp(`<a\\b[^>]*data-quote-cta="landing_${page.journeyId}"[^>]*>`, "s"),
+  )?.[0];
+  const staticContextualHref = staticContextualCta
+    ?.match(/href="([^"]+)"/u)?.[1]
+    ?.replaceAll("&amp;", "&");
+  const staticContext = staticContextualHref
+    ? readJourneyContext(new URL(staticContextualHref, "https://luenio.com").search)
+    : null;
+  const journey = getPublicJourneyById(page.journeyId);
+  assert(
+    journey &&
+      staticContext?.sector === journey.sector &&
+      staticContext.demo === journey.demo &&
+      staticContext.service === journey.quoteService &&
+      staticContext.source === `landing_${page.journeyId}`,
+    `${page.slug} header CTA must preserve context without JavaScript.`,
   );
   assert(
     !page.successMessage || html.includes(`data-demo-success="${page.successMessage}`),
@@ -257,8 +288,8 @@ const contextualQuoteUrl = buildQuoteUrl({
   sector: "agencia",
   demo: "Impulso Digital",
   service: "Landing page de conversión",
-  goal: "Quiero una landing para mi agencia",
-  source: "demo_agencia",
+  goal: "Quiero captar y calificar oportunidades para los clientes de mi agencia",
+  source: "landing_agencies",
 });
 const contextualQuote = readJourneyContext(contextualQuoteUrl.split("?")[1]);
 assert(
@@ -266,7 +297,9 @@ assert(
     contextualQuote.sector === "agencia" &&
     contextualQuote.demo === "Impulso Digital" &&
     contextualQuote.service === "Landing page de conversión" &&
-    contextualQuote.source === "demo_agencia",
+    contextualQuote.goal ===
+      "Quiero captar y calificar oportunidades para los clientes de mi agencia" &&
+    contextualQuote.source === "landing_agencies",
   "Demo-to-quote context must round-trip through the shared contract.",
 );
 assert(

@@ -68,7 +68,7 @@ mountIndustryDemo({
       crm: { stageIndex: 0, activeSequence: 0 },
       event: {
         label: "Intención analizada",
-        detail: "La IA detectó necesidad de adquisición de clientes y crecimiento comercial.",
+        detail: "La simulación clasificó mediante reglas una necesidad de crecimiento comercial.",
       },
     },
     {
@@ -83,7 +83,7 @@ mountIndustryDemo({
         activeSequence: 1,
         event: {
           label: "Actualización de CRM de agencia",
-          detail: "Lead calificado y servicio recomendado: IA + CRM + WhatsApp.",
+          detail: "Lead clasificado por reglas y servicio ilustrativo: CRM + WhatsApp.",
         },
       },
     },

@@ -4,9 +4,10 @@ import { buildReadiness } from "../config/readiness.js";
 import { testStorageConnection } from "../db/storage.js";
 
 const root = process.cwd();
-const envPath = path.join(root, ".env");
-const args = new Set(process.argv.slice(2));
-const checkRemote = args.has("--remote");
+const cliArgs = process.argv.slice(2);
+const checkRemote = cliArgs.includes("--remote");
+const envFileIndex = cliArgs.indexOf("--env-file");
+const envPath = envFileIndex >= 0 ? cliArgs[envFileIndex + 1] : "";
 
 function fail(message) {
   console.error(`\n[production-preflight] ${message}`);
@@ -17,26 +18,44 @@ function assert(condition, message) {
   if (!condition) fail(message);
 }
 
-function mask(value = "") {
-  if (!value) return "";
-  if (value.length <= 8) return "***";
-  return `${value.slice(0, 4)}...${value.slice(-4)}`;
-}
-
 function loadEnvFile() {
-  if (!fs.existsSync(envPath)) return;
+  assert(Boolean(envPath), "Pass an explicit environment file with --env-file /absolute/path.");
+  if (!envPath) return false;
+  assert(path.isAbsolute(envPath), "--env-file must be an absolute path.");
+  assert(fs.existsSync(envPath), "The explicit production environment file does not exist.");
+  if (!path.isAbsolute(envPath) || !fs.existsSync(envPath)) return false;
+
+  const fileStat = fs.statSync(envPath);
+  assert(fileStat.isFile(), "--env-file must reference a regular file.");
+  if (process.platform !== "win32") {
+    assert(
+      (fileStat.mode & 0o077) === 0,
+      "The production environment file must not be accessible by group or others (expected mode 600).",
+    );
+  }
+
+  const loadedKeys = new Set();
   const lines = fs.readFileSync(envPath, "utf8").split(/\r?\n/);
-  lines.forEach((line) => {
+  lines.forEach((line, index) => {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) return;
     const [key, ...valueParts] = trimmed.split("=");
-    if (!process.env[key]) {
-      process.env[key] = valueParts
-        .join("=")
-        .trim()
-        .replace(/^["']|["']$/g, "");
+    const normalizedKey = key.trim();
+    if (!/^[A-Z][A-Z0-9_]*$/.test(normalizedKey)) {
+      fail(`Invalid environment key on line ${index + 1}.`);
+      return;
     }
+    if (loadedKeys.has(normalizedKey)) {
+      fail(`Duplicate environment key ${normalizedKey} on line ${index + 1}.`);
+      return;
+    }
+    loadedKeys.add(normalizedKey);
+    process.env[normalizedKey] = valueParts
+      .join("=")
+      .trim()
+      .replace(/^["']|["']$/g, "");
   });
+  return !process.exitCode;
 }
 
 function hasPlaceholder(value = "") {
@@ -47,6 +66,7 @@ function validateEnv() {
   const required = [
     "NODE_ENV",
     "SERVE_DIST",
+    "PUBLIC_DEMO_MODE",
     "ENABLE_AGENCY_CRM",
     "APP_URL",
     "COOKIE_SECURE",
@@ -91,6 +111,10 @@ function validateEnv() {
 
   assert(process.env.NODE_ENV === "production", "NODE_ENV must be production.");
   assert(process.env.SERVE_DIST === "true", "SERVE_DIST must be true.");
+  assert(
+    process.env.PUBLIC_DEMO_MODE === "true",
+    "PUBLIC_DEMO_MODE must stay true for this public-only release.",
+  );
   assert(process.env.COOKIE_SECURE === "true", "COOKIE_SECURE must be true.");
   assert(process.env.REQUIRE_SUPABASE === "true", "REQUIRE_SUPABASE must be true.");
   assert(process.env.REQUIRE_TRUSTED_PROXY === "true", "REQUIRE_TRUSTED_PROXY must be true.");
@@ -202,22 +226,28 @@ async function validateRemoteHealth() {
   if (!checkRemote) return;
 
   const healthUrl = new URL("/api/health?details=1", process.env.APP_URL).toString();
-  const response = await fetch(healthUrl, {
-    headers: { Authorization: `Bearer ${process.env.HEALTHCHECK_TOKEN}` },
-  });
-  const body = await response.json().catch(() => null);
-  assert(response.ok, `${healthUrl} must return 200.`);
-  assert(
-    body?.readiness?.criticalReady === true,
-    "Remote /api/health must report criticalReady=true.",
-  );
-  assert(
-    body?.storage?.mode === "supabase",
-    "Remote /api/health must report storage.mode=supabase.",
-  );
+  try {
+    const response = await fetch(healthUrl, {
+      headers: { Authorization: `Bearer ${process.env.HEALTHCHECK_TOKEN}` },
+      redirect: "error",
+      signal: AbortSignal.timeout(12_000),
+    });
+    const body = await response.json().catch(() => null);
+    assert(response.ok, "Remote authenticated health must return 200.");
+    assert(
+      body?.readiness?.criticalReady === true,
+      "Remote /api/health must report criticalReady=true.",
+    );
+    assert(
+      body?.storage?.mode === "supabase",
+      "Remote /api/health must report storage.mode=supabase.",
+    );
+  } catch {
+    fail("Remote authenticated health could not be validated.");
+  }
 }
 
-loadEnvFile();
+if (!loadEnvFile()) process.exit(1);
 validateEnv();
 validateBuildArtifacts();
 
@@ -230,8 +260,8 @@ failedCritical.forEach((check) => fail(`${check.label}: ${check.description}`));
 try {
   const connection = await testStorageConnection();
   assert(connection?.ok === true, "Supabase storage connection must be available.");
-} catch (error) {
-  fail(`Supabase storage connection failed: ${error.message}`);
+} catch {
+  fail("Supabase storage connection failed. Inspect protected service logs for details.");
 }
 
 await validateRemoteHealth();
@@ -243,7 +273,7 @@ if (!process.exitCode) {
       {
         appUrl: process.env.APP_URL,
         storage: readiness.storage.mode,
-        contactWebhook: mask(process.env.CONTACT_WEBHOOK_URL),
+        environmentFile: path.basename(envPath),
         publicBillingEnabled: readiness.billing.publicBillingEnabled,
         criticalReady: readiness.criticalReady,
       },

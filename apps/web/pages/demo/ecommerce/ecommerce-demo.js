@@ -33,7 +33,7 @@ mountIndustryDemo({
   resetFields: [
     { selector: "#ecommerceLeadName", value: "Esperando consulta" },
     { selector: "#ecommerceLeadScore", value: "--" },
-    { selector: "#ecommerceConversionValue", value: "Ingreso recuperado: $0" },
+    { selector: "#ecommerceConversionValue", value: "Valor ilustrativo: $0" },
   ],
   initialCrm: {
     stageIndex: 0,
@@ -55,7 +55,7 @@ mountIndustryDemo({
       status: "Rastreando intención de compra...",
       event: {
         label: "Intención de compra detectada",
-        detail: "La IA detectó intención de compra por disponibilidad de producto.",
+        detail: "La simulación clasificó mediante reglas la consulta de disponibilidad.",
       },
     },
     {
@@ -64,7 +64,7 @@ mountIndustryDemo({
       status: (scenario) =>
         `Lead calificado: ${CLASSIFICATION_LABELS[scenario.lead.classification] ?? scenario.lead.classification.toUpperCase()} 🔥`,
       chat: { role: "ai", text: "aiReply" },
-      fields: [{ selector: "#ecommerceConversionValue", value: "Ingreso recuperado: $129" }],
+      fields: [{ selector: "#ecommerceConversionValue", value: "Valor ilustrativo: $129" }],
       crm: {
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,
@@ -90,7 +90,7 @@ mountIndustryDemo({
       delay: 3900,
       advanceIndex: 4,
       status: "Automatización de conversión activada",
-      fields: [{ selector: "#ecommerceConversionValue", value: "Ingreso recuperado: $258" }],
+      fields: [{ selector: "#ecommerceConversionValue", value: "Valor ilustrativo: $258" }],
       crm: {
         leadName: (scenario) => scenario.lead.name,
         score: (scenario) => `${scenario.lead.score}/100 CALIENTE`,

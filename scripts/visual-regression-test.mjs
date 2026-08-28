@@ -5,51 +5,46 @@ import net from "node:net";
 import path from "node:path";
 import sharp from "sharp";
 import { chromium } from "playwright";
-import { stopTestProcess } from "./test-process.mjs";
+import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 
 const UPDATE_BASELINES = process.argv.includes("--update");
 const scenarioArg = process.argv.find((argument) => argument.startsWith("--scenario="));
 const requestedScenario = scenarioArg?.slice("--scenario=".length).trim() || null;
 const baselineDir = path.join(process.cwd(), "tests", "visual-baselines");
-const resultsDir = path.join(process.cwd(), "test-results", "visual");
-const localDbPath = path.join(process.cwd(), "db", "leads-db.json");
-const localDbSnapshot = fs.existsSync(localDbPath) ? fs.readFileSync(localDbPath, "utf8") : null;
+const finalResultsDir = path.join(process.cwd(), "test-results", "visual");
+const resultsDir = path.join(process.cwd(), "test-results", `.visual-${process.pid}`);
+const fixtureDir = path.join(process.cwd(), "test-results", `.visual-fixture-${process.pid}`);
+const localDbPath = path.join(fixtureDir, "leads-db.json");
 const maxDiffRatio = 0.005;
 // Chromium and system Chrome rasterize scaled AVIF text edges slightly differently.
 // Keep geometry strict (0.5% of pixels) while ignoring imperceptible edge antialiasing.
 const channelTolerance = 48;
 
+const publicSurfaceScenarios = [
+  ["catalog", "/demos"],
+  ["agencies", "/agencias"],
+  ["ecommerce", "/tiendas-online"],
+  ["gym", "/gimnasios"],
+  ["real-estate", "/inmobiliarias"],
+  ["restaurants", "/restaurantes"],
+  ["veterinary", "/veterinarias"],
+  ["aesthetics", "/esteticas"],
+  ["simulation-agencies", "/demo/agencies"],
+  ["simulation-ecommerce", "/demo/ecommerce"],
+  ["simulation-gym", "/demo/gym"],
+  ["simulation-real-estate", "/demo/real-estate"],
+  ["simulation-restaurants", "/demo/restaurants"],
+  ["simulation-veterinary", "/demo/veterinary"],
+  ["simulation-aesthetics", "/demo/aesthetics"],
+].flatMap(([name, route]) => [
+  { name: `${name}-light-desktop`, path: route, theme: "light", width: 1280, height: 800 },
+  { name: `${name}-dark-mobile`, path: route, theme: "dark", width: 390, height: 844 },
+]);
+
 const scenarios = [
   { name: "home-light-desktop", path: "/", theme: "light", width: 1280, height: 800 },
   { name: "home-dark-mobile", path: "/", theme: "dark", width: 390, height: 844 },
-  {
-    name: "veterinary-light-desktop",
-    path: "/veterinarias",
-    theme: "light",
-    width: 1280,
-    height: 800,
-  },
-  {
-    name: "veterinary-dark-mobile",
-    path: "/veterinarias",
-    theme: "dark",
-    width: 390,
-    height: 844,
-  },
-  {
-    name: "aesthetics-light-desktop",
-    path: "/esteticas",
-    theme: "light",
-    width: 1280,
-    height: 800,
-  },
-  {
-    name: "aesthetics-dark-mobile",
-    path: "/esteticas",
-    theme: "dark",
-    width: 390,
-    height: 844,
-  },
+  ...publicSurfaceScenarios,
   {
     name: "quote-light-desktop",
     path: "/cotizacion?sector=agencia&demo=Impulso+Digital&service=Página+web+a+medida&source=visual_test",
@@ -143,7 +138,7 @@ function getFreePort() {
   });
 }
 
-async function waitForServer(baseUrl, timeoutMs = 15_000) {
+async function waitForServer(baseUrl, timeoutMs = 45_000) {
   const startedAt = Date.now();
   while (Date.now() - startedAt < timeoutMs) {
     try {
@@ -159,30 +154,36 @@ async function waitForServer(baseUrl, timeoutMs = 15_000) {
 
 async function startServer() {
   const port = await getFreePort();
+  fs.mkdirSync(fixtureDir, { recursive: true });
   const baseUrl = `http://127.0.0.1:${port}`;
-  const server = spawn(process.execPath, ["server.js"], {
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      HOST: "127.0.0.1",
-      PORT: String(port),
-      NODE_ENV: "test",
-      ENABLE_AGENCY_CRM: "true",
-      LUENIO_SKIP_ENV_FILE: "true",
-      REQUIRE_SUPABASE: "false",
-      SUPABASE_URL: "",
-      SUPABASE_SERVICE_ROLE_KEY: "",
-      DATABASE_URL: "",
-      NEON_DATABASE_URL: "",
-      CONTACT_WEBHOOK_URL: "",
-      CONTACT_FALLBACK_WEBHOOK_URL: "",
-      TURNSTILE_REQUIRED: "false",
-      ADMIN_MFA_REQUIRED: "false",
-      CONTACT_DELIVERY_WORKER_ENABLED: "false",
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-  });
+  const server = spawn(
+    process.execPath,
+    ["server.js"],
+    testProcessOptions({
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        HOST: "127.0.0.1",
+        PORT: String(port),
+        NODE_ENV: "test",
+        ENABLE_AGENCY_CRM: "true",
+        LUENIO_SKIP_ENV_FILE: "true",
+        REQUIRE_SUPABASE: "false",
+        SUPABASE_URL: "",
+        SUPABASE_SERVICE_ROLE_KEY: "",
+        DATABASE_URL: "",
+        NEON_DATABASE_URL: "",
+        CONTACT_WEBHOOK_URL: "",
+        CONTACT_FALLBACK_WEBHOOK_URL: "",
+        TURNSTILE_REQUIRED: "false",
+        ADMIN_MFA_REQUIRED: "false",
+        CONTACT_DELIVERY_WORKER_ENABLED: "false",
+        LUENIO_LOCAL_DB_PATH: localDbPath,
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    }),
+  );
 
   let output = "";
   server.stdout.on("data", (chunk) => {
@@ -467,26 +468,30 @@ async function run() {
   fs.rmSync(resultsDir, { recursive: true, force: true });
   fs.mkdirSync(resultsDir, { recursive: true });
 
-  const server = await startServer();
-  const browser = await launchBrowser();
-  const contextOptions = {
-    locale: "es-CO",
-    reducedMotion: "reduce",
-    serviceWorkers: "block",
-  };
-  const publicContext = await browser.newContext(contextOptions);
-  const authenticatedContext = await browser.newContext(contextOptions);
-  const keepLocalRequests = async (route) => {
-    if (route.request().url().startsWith(server.baseUrl)) {
-      await route.continue();
-      return;
-    }
-    await route.abort();
-  };
-  await publicContext.route("**/*", keepLocalRequests);
-  await authenticatedContext.route("**/*", keepLocalRequests);
-
+  let server;
+  let browser;
+  let publicContext;
+  let authenticatedContext;
+  let completed = false;
   try {
+    server = await startServer();
+    browser = await launchBrowser();
+    const contextOptions = {
+      locale: "es-CO",
+      reducedMotion: "reduce",
+      serviceWorkers: "block",
+    };
+    publicContext = await browser.newContext(contextOptions);
+    authenticatedContext = await browser.newContext(contextOptions);
+    const keepLocalRequests = async (route) => {
+      if (route.request().url().startsWith(server.baseUrl)) {
+        await route.continue();
+        return;
+      }
+      await route.abort();
+    };
+    await publicContext.route("**/*", keepLocalRequests);
+    await authenticatedContext.route("**/*", keepLocalRequests);
     await authenticateContext(authenticatedContext, server.baseUrl);
     for (const scenario of selectedScenarios) {
       console.info(`[visual] capture: ${scenario.name}`);
@@ -547,15 +552,18 @@ async function run() {
         await page.close();
       }
     }
+    completed = true;
   } finally {
-    await publicContext.close();
-    await authenticatedContext.close();
-    await browser.close();
-    await server.stop();
-    if (localDbSnapshot === null) {
-      if (fs.existsSync(localDbPath)) fs.unlinkSync(localDbPath);
+    await publicContext?.close();
+    await authenticatedContext?.close();
+    await browser?.close();
+    await server?.stop();
+    fs.rmSync(fixtureDir, { recursive: true, force: true });
+    if (completed) {
+      fs.rmSync(finalResultsDir, { recursive: true, force: true });
+      fs.renameSync(resultsDir, finalResultsDir);
     } else {
-      fs.writeFileSync(localDbPath, localDbSnapshot);
+      fs.rmSync(resultsDir, { recursive: true, force: true });
     }
   }
 

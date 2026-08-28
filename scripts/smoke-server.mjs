@@ -238,7 +238,7 @@ async function runSmoke() {
       legacyDemo.status === 301 && legacyDemo.headers.get("location") === "/demos",
       "/demo must permanently redirect to the canonical /demos route.",
     );
-    const demosAliasHtml = await expectTextRoute(baseUrl, "/demos", "Explorar demo");
+    const demosAliasHtml = await expectTextRoute(baseUrl, "/demos", "Explorar experiencia");
     assert(
       demosAliasHtml.includes("Demos por sector") &&
         demosAliasHtml.includes('content="index, follow"') &&

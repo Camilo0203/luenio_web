@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   gate:
     name: Production gate
@@ -16,28 +19,115 @@ jobs:
     timeout-minutes: 25
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: |
+          mkdir -p test-results/ci
+          set -o pipefail
+          npm ci 2>&1 | tee test-results/ci/npm-ci.log
 
       - name: Install Playwright Chromium
         run: npx playwright install chromium --with-deps
 
       - name: Audit (high+)
-        run: npm audit --audit-level=high
+        run: |
+          set -o pipefail
+          npm audit --audit-level=high 2>&1 | tee test-results/ci/npm-audit.log
 
       - name: Lint
-        run: npm run lint
+        run: |
+          set -o pipefail
+          npm run lint 2>&1 | tee test-results/ci/lint.log
 
       - name: Format check
-        run: npm run format:check
+        run: |
+          set -o pipefail
+          npm run format:check 2>&1 | tee test-results/ci/format.log
 
       - name: Test suite
-        run: npm test
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee test-results/ci/test.log
+
+      - name: Upload gate diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: gate-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  image:
+    name: Immutable OCI image
+    needs: gate
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.reference.outputs.image }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Set immutable image reference
+        id: reference
+        shell: bash
+        run: |
+          repository="${GITHUB_REPOSITORY,,}"
+          echo "image=ghcr.io/${repository}" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build and push once
+        id: build
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.reference.outputs.image }}:${{ steps.reference.outputs.tag }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          provenance: mode=max
+          sbom: true
+
+      - name: Write promotion manifest
+        shell: bash
+        env:
+          IMAGE: ${{ steps.reference.outputs.image }}
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p release
+          printf 'LUENIO_IMAGE=%s@%s\nGIT_SHA=%s\n' "$IMAGE" "$DIGEST" "$GITHUB_SHA" \
+            > "release/oci-image-${GITHUB_SHA}.env"
+          cat "release/oci-image-${GITHUB_SHA}.env" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload promotion manifest
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: oci-image-${{ github.sha }}
+          path: release/oci-image-${{ github.sha }}.env
+          retention-days: 90

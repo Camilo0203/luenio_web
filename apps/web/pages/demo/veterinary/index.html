@@ -2,12 +2,27 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <script src="/theme-boot.js"></script>
     <title>Luenio Demo | Veterinarias</title>
     <meta name="description" content="Demo de atención y agenda para veterinarias." />
     <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="https://luenio.com/demo/veterinary" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Luenio Demo | Veterinarias" />
+    <meta
+      property="og:description"
+      content="Simulación ficticia de un flujo de orientación, agenda y seguimiento para veterinarias."
+    />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/demo/veterinary" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Luenio Demo | Veterinarias" />
+    <meta name="twitter:description" content="Simulación ficticia de un flujo para veterinarias." />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="stylesheet" href="/apps/web/src/style.css" />
     <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
     <link rel="stylesheet" href="/apps/web/src/industry-simulations.css" />
@@ -18,10 +33,25 @@
       <nav class="demo-nav">
         <div class="simulation-nav__brand">
           <a href="/">Luenio</a><span aria-hidden="true">/</span
-          ><a href="/demos/veterinary">Huella Veterinaria</a>
+          ><a href="/veterinarias">Huella Veterinaria</a>
         </div>
-        <div id="industryLinks"></div>
+        <div id="industryLinks" aria-label="Selector de sector">
+          <a href="/demo/agencies">Agencias</a><a href="/demo/ecommerce">Ecommerce</a
+          ><a href="/demo/gym">Gimnasios</a><a href="/demo/real-estate">Inmobiliarias</a
+          ><a href="/demo/restaurants">Restaurantes</a
+          ><a class="active" href="/demo/veterinary" aria-current="page">Veterinarias</a
+          ><a href="/demo/aesthetics">Estéticas</a>
+        </div>
       </nav>
+      <p class="simulation-disclosure" role="note">
+        <span class="simulation-disclosure__lead"
+          >Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+          reales.</span
+        >
+        <strong>Simulación ficticia.</strong> Nombres, servicios, puntajes y escenarios son datos
+        ilustrativos; no representan clientes ni resultados reales. La clasificación mostrada se
+        calcula mediante reglas deterministas, no mediante IA.
+      </p>
       <section class="gym-hero">
         <div>
           <p class="eyebrow">Demo en vivo · Veterinarias</p>
@@ -57,7 +87,7 @@
             <span>Familia</span><strong id="vetLeadName">Esperando consulta</strong>
           </div>
           <div class="gym-crm-card">
-            <span>Prioridad</span><strong id="vetLeadScore">--</strong>
+            <span>Prioridad ilustrativa</span><strong id="vetLeadScore">--</strong>
           </div>
           <div class="gym-pipeline" id="vetPipeline">
             <article class="active"><span>Nuevo</span><strong>WhatsApp</strong></article>
@@ -74,10 +104,16 @@
           <p class="eyebrow">Conversión con cuidado</p>
           <h2>Más citas atendidas. Menos familias esperando.</h2>
           <p>
-            Luenio detecta urgencia, propone horario, crea el registro y deja listo el seguimiento.
+            La simulación prioriza el contacto mediante reglas, propone un horario y prepara el
+            seguimiento. No realiza diagnóstico ni determina urgencia médica; ante síntomas
+            preocupantes, consulta a un profesional veterinario.
           </p>
         </div>
-        <a class="button button-primary" href="/#contacto">Activar para mi veterinaria</a>
+        <a
+          class="button button-primary"
+          href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=simulacion_veterinary"
+          >Cotizar un flujo como este</a
+        >
       </section>
       <footer class="legal-bar">
         <a href="/terminos">Términos</a><a href="/privacidad">Privacidad</a

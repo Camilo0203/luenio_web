@@ -1,6 +1,8 @@
-import { advanceScenario, createDemoScenario, demoTypes } from "../../src/demo-engine/index.js";
+import { advanceScenario, createDemoScenario } from "../../src/demo-engine/index.js";
 import { submitPublicInquiry } from "../../src/api-client.js";
 import { protectContactForm } from "../../src/contact-security.js";
+import { initAnalytics, trackEvent } from "../../src/analytics.js";
+import { getPublicJourneyBySimulationType, PUBLIC_JOURNEYS } from "../../src/public-journeys.js";
 import { initThemeControl } from "../../src/theme-control.js";
 
 initThemeControl();
@@ -8,6 +10,7 @@ initThemeControl();
 const root = document.querySelector("[data-demo-type]");
 const selectedType = root?.dataset.demoType || "restaurants";
 const scenario = createDemoScenario(selectedType);
+const journey = getPublicJourneyBySimulationType(selectedType);
 
 const state = {
   scenario,
@@ -35,13 +38,11 @@ function renderIndustryLinks() {
   const nav = document.querySelector("#industryLinks");
   if (!nav) return;
 
-  nav.innerHTML = demoTypes
-    .map((type) => {
-      const href = type === "restaurants" ? "/demo/restaurants" : `/demo/${type}`;
-      const isActive = type === selectedType;
-      return `<a class="${isActive ? "active" : ""}" href="${href}">${escapeHtml(createDemoScenario(type).label)}</a>`;
-    })
-    .join("");
+  nav.setAttribute("aria-label", "Selector de sector");
+  nav.innerHTML = PUBLIC_JOURNEYS.map((journey) => {
+    const isActive = journey.simulationPath.endsWith(`/${selectedType}`);
+    return `<a class="${isActive ? "active" : ""}" href="${journey.simulationPath}"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(journey.label)}</a>`;
+  }).join("");
 }
 
 function renderScenario(nextScenario = state.scenario) {
@@ -109,10 +110,10 @@ function renderLeadCapture() {
       <label>Nombre<input name="name" type="text" placeholder="Tu nombre" autocomplete="name" required /></label>
       <label>Negocio<input name="business" type="text" placeholder="Nombre del negocio" autocomplete="organization" required /></label>
       <label>WhatsApp<input name="phone" type="tel" placeholder="+57 300 000 0000" autocomplete="tel" required /></label>
-      <input name="service" type="hidden" value="${escapeHtml(state.scenario.label)}" />
+      <input name="service" type="hidden" value="${escapeHtml(journey?.quoteService || "Landing + automatización completa")}" />
       <input name="source" type="hidden" value="industry_demo_${escapeHtml(selectedType)}" />
       <label class="wide">Mensaje<textarea name="message" rows="3" placeholder="Qué quieres automatizar después de ver esta demo"></textarea></label>
-      <button class="button button-primary wide" type="submit">Convertir esta demo en mi CRM</button>
+      <button class="button button-primary wide" type="submit">Cotizar un flujo como este</button>
       <p class="form-status wide" role="status" aria-live="polite" hidden></p>
     </form>
   `,
@@ -130,7 +131,7 @@ function getCapturePayload(form) {
     name: String(data.get("name") || "").trim(),
     business: String(data.get("business") || "").trim(),
     phone: String(data.get("phone") || "").trim(),
-    service: String(data.get("service") || "").trim(),
+    service: journey?.quoteService || "Landing + automatización completa",
     source: String(data.get("source") || "").trim(),
     message: message || `Vi la demo de ${state.scenario.label} y quiero automatizar mi negocio.`,
   };
@@ -142,7 +143,7 @@ function setCaptureStatus(form, stateName, message) {
   form.dataset.state = stateName;
   if (button) {
     button.disabled = stateName === "loading";
-    button.textContent = stateName === "loading" ? "Enviando..." : "Convertir esta demo en mi CRM";
+    button.textContent = stateName === "loading" ? "Enviando..." : "Cotizar un flujo como este";
   }
   if (status) {
     status.hidden = !message;
@@ -153,31 +154,62 @@ function setCaptureStatus(form, stateName, message) {
 async function submitDemoCapture(event) {
   event.preventDefault();
   const form = event.currentTarget;
-  const payload = {
-    ...getCapturePayload(form),
-    ...(await captureSecurity).payload(),
-  };
+  if (form.dataset.state === "loading") return;
+  form.dataset.state = "loading";
+  const basePayload = getCapturePayload(form);
 
   if (
-    payload.name.length < 2 ||
-    payload.business.length < 2 ||
-    payload.phone.replace(/\D/g, "").length < 8
+    basePayload.name.length < 2 ||
+    basePayload.business.length < 2 ||
+    basePayload.phone.replace(/\D/g, "").length < 8
   ) {
     setCaptureStatus(form, "error", "Completa nombre, negocio y WhatsApp para continuar.");
+    trackEvent("quote_error", {
+      sector: journey?.sector,
+      demo: journey?.demo,
+      service: basePayload.service,
+      source: `industry_demo_${selectedType}`,
+      cta_location: "demo_capture",
+    });
     return;
   }
 
   setCaptureStatus(form, "loading", "Enviando solicitud...");
+  trackEvent("quote_submit", {
+    sector: journey?.sector,
+    demo: journey?.demo,
+    source: `industry_demo_${selectedType}`,
+    service: basePayload.service,
+    cta_location: "demo_capture",
+  });
   try {
+    const payload = {
+      ...basePayload,
+      ...(await captureSecurity).payload(),
+    };
     await submitPublicInquiry(payload);
     setCaptureStatus(
       form,
       "success",
-      "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.",
+      "Solicitud recibida. Te contactaremos para adaptar este flujo a tu negocio.",
     );
+    trackEvent("quote_success", {
+      sector: journey?.sector,
+      demo: journey?.demo,
+      source: `industry_demo_${selectedType}`,
+      service: basePayload.service,
+      cta_location: "demo_capture",
+    });
     form.reset();
     (await captureSecurity).reset();
   } catch {
+    trackEvent("quote_error", {
+      sector: journey?.sector,
+      demo: journey?.demo,
+      service: basePayload.service,
+      source: `industry_demo_${selectedType}`,
+      cta_location: "demo_capture",
+    });
     setCaptureStatus(
       form,
       "error",
@@ -235,3 +267,4 @@ renderIndustryLinks();
 renderScenario();
 renderLeadCapture();
 document.querySelector("#runDemo")?.addEventListener("click", runDemo);
+void initAnalytics();

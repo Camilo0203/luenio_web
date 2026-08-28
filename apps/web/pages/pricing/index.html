@@ -2,11 +2,12 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#071a33" />
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
     <script src="/theme-boot.js"></script>
     <title>Cotización gratuita | Luenio</title>
     <meta
@@ -32,7 +33,6 @@
       content="Diagnóstico gratuito para landings y automatización con IA."
     />
     <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
-    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
   </head>
   <body
     class="quote-page"
@@ -57,17 +57,16 @@
           <a href="/#soluciones">Soluciones</a>
           <a href="/#proceso">Proceso</a>
           <a href="/#nosotros">Nosotros</a>
-          <a href="/cotizacion" aria-current="page">Cotización</a>
         </nav>
         <div class="site-header__actions">
-          <button
+          <a
             class="button button--primary button--small site-header__cta"
-            type="button"
-            data-wa-open
-            data-source="quote_header"
+            href="#cotizar"
+            data-quote-cta="header"
+            data-cta-location="quote_header"
           >
-            Escribir por WhatsApp
-          </button>
+            Cotizar mi solución
+          </a>
         </div>
         <button
           class="menu-toggle"
@@ -96,6 +95,9 @@
             <span>Alcance y tiempos claros</span>
             <span>Acompañamiento humano</span>
           </div>
+          <a class="button button--primary quote-hero__cta" href="#cotizar" data-quote-cta="hero">
+            Solicitar cotización gratis
+          </a>
         </div>
       </section>
 
@@ -125,15 +127,11 @@
             <article class="quote-step">
               <span>03</span>
               <div>
-                <h3>Diseñamos el alcance</h3>
-                <p>Definimos entregables, fases, tiempos y responsabilidades de cada parte.</p>
-              </div>
-            </article>
-            <article class="quote-step">
-              <span>04</span>
-              <div>
-                <h3>Recibes tu propuesta</h3>
-                <p>Te entregamos una cotización única para decidir con información clara.</p>
+                <h3>Recibes una propuesta clara</h3>
+                <p>
+                  Definimos entregables, fases, tiempos y responsabilidades para que decidas con
+                  información suficiente.
+                </p>
               </div>
             </article>
           </div>
@@ -151,6 +149,7 @@
         </div>
 
         <form
+          id="cotizar"
           class="lead-form quote-form"
           data-lead-form
           data-source="cotizacion"
@@ -167,6 +166,12 @@
           <p class="quote-form__lead wide">
             Con este contexto podremos preparar mejor la primera conversación.
           </p>
+          <p class="quote-draft-status wide" data-quote-draft-status hidden>
+            Guardamos un borrador solo durante esta sesión en este navegador.
+          </p>
+          <button class="quote-draft-clear wide" type="button" data-draft-clear hidden>
+            Borrar borrador
+          </button>
           <div class="quote-context wide" data-quote-context hidden>
             <span aria-hidden="true"></span>
             <p data-quote-context-copy></p>

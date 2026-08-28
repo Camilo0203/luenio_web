@@ -1,6 +1,8 @@
 import { spawn } from "node:child_process";
+import fs from "node:fs";
 import net from "node:net";
-import { stopTestProcess } from "./test-process.mjs";
+import path from "node:path";
+import { CleanupVerificationError, stopTestProcess, testProcessOptions } from "./test-process.mjs";
 
 const isolatedTestEnv = {
   LUENIO_SKIP_ENV_FILE: "true",
@@ -36,12 +38,28 @@ const isolatedTestEnv = {
 const npmCliPath = process.env.npm_execpath || null;
 
 async function run(command, args, options = {}) {
-  const child = spawn(command, args, {
-    cwd: process.cwd(),
-    env: { ...process.env, ...isolatedTestEnv, ...(options.env || {}) },
-    stdio: options.stdio || "inherit",
-    windowsHide: true,
-  });
+  const cleanupFailureFile = path.join(
+    process.cwd(),
+    "test-results",
+    `.cleanup-failure-${process.pid}-${Date.now()}`,
+  );
+  fs.mkdirSync(path.dirname(cleanupFailureFile), { recursive: true });
+  fs.rmSync(cleanupFailureFile, { force: true });
+  const child = spawn(
+    command,
+    args,
+    testProcessOptions({
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        ...isolatedTestEnv,
+        LUENIO_CLEANUP_FAILURE_FILE: cleanupFailureFile,
+        ...(options.env || {}),
+      },
+      stdio: options.stdio || "inherit",
+      windowsHide: true,
+    }),
+  );
   const timeoutMs = options.timeoutMs || 4 * 60_000;
   let timeout;
   const outcome = await Promise.race([
@@ -54,6 +72,13 @@ async function run(command, args, options = {}) {
     }),
   ]);
   clearTimeout(timeout);
+
+  if (fs.existsSync(cleanupFailureFile)) {
+    const cleanupMessage = fs.readFileSync(cleanupFailureFile, "utf8");
+    fs.rmSync(cleanupFailureFile, { force: true });
+    throw new CleanupVerificationError(cleanupMessage);
+  }
+  fs.rmSync(cleanupFailureFile, { force: true });
 
   if (outcome.timedOut) {
     await stopTestProcess(child, { label: `${command} ${args.join(" ")}`, timeoutMs: 3_000 });
@@ -103,20 +128,24 @@ async function runE2EWithServer() {
   const port = await getFreePort();
   const baseUrl = `http://127.0.0.1:${port}`;
   const e2eHealthcheckToken = "luenio-e2e-healthcheck-token-at-least-32-chars";
-  const server = spawn(process.execPath, ["server.js"], {
-    cwd: process.cwd(),
-    env: {
-      ...process.env,
-      ...isolatedTestEnv,
-      NODE_ENV: "test",
-      HOST: "127.0.0.1",
-      PORT: String(port),
-      HEALTHCHECK_TOKEN: e2eHealthcheckToken,
-      ENABLE_PUBLIC_BILLING: "true",
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-    windowsHide: true,
-  });
+  const server = spawn(
+    process.execPath,
+    ["server.js"],
+    testProcessOptions({
+      cwd: process.cwd(),
+      env: {
+        ...process.env,
+        ...isolatedTestEnv,
+        NODE_ENV: "test",
+        HOST: "127.0.0.1",
+        PORT: String(port),
+        HEALTHCHECK_TOKEN: e2eHealthcheckToken,
+        ENABLE_PUBLIC_BILLING: "true",
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    }),
+  );
 
   let output = "";
   server.stdout.on("data", (chunk) => {
@@ -144,6 +173,9 @@ async function runE2EWithServer() {
 
 const steps = [
   ["Build", () => runNpmScript("build")],
+  ["Runner process-tree cleanup", () => runNpmScript("test:runner-cleanup")],
+  ["Storage fixture isolation", () => runNpmScript("test:storage-fixture")],
+  ["UI performance budgets", () => runNpmScript("test:performance", { timeoutMs: 10 * 60_000 })],
   ["Architecture boundaries", () => runNpmScript("test:architecture")],
   ["API error boundary", () => runNpmScript("test:api-errors")],
   ["Automation privacy", () => runNpmScript("test:automation")],
@@ -171,10 +203,10 @@ const steps = [
   ["Production server smoke", () => runNpmScript("test:smoke:prod")],
   ["Full SaaS E2E", runE2EWithServer],
   ["UI hardening", () => runNpmScript("test:ui-hardening")],
-  ["Browser E2E + a11y", () => runNpmScript("test:browser")],
+  ["Browser E2E + a11y", () => runNpmScript("test:browser", { timeoutMs: 8 * 60_000 })],
+  ["Responsive matrix", () => runNpmScript("test:responsive")],
   ["Visual regression", () => runNpmScript("test:visual")],
   ["Light/dark theme audit", () => runNpmScript("test:theme")],
-  ["UI performance budgets", () => runNpmScript("test:performance", { timeoutMs: 10 * 60_000 })],
 ];
 
 const results = [];
@@ -190,6 +222,10 @@ for (const [label, step] of steps) {
     hasFailure = true;
     results.push({ label, status: "failed", error, durationMs: Date.now() - startedAt });
     console.error(`[production-gate] ${label} failed: ${error.message}`);
+    if (error instanceof CleanupVerificationError) {
+      console.error("[production-gate] Aborting: test isolation could not be restored.");
+      break;
+    }
   }
 }
 

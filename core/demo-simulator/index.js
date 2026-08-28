@@ -66,11 +66,19 @@ const demoConfigs = {
     crmStage: "Pipeline de compradores",
     pain: "Cuando una inmobiliaria responde tarde, pierde compradores con presupuesto claro y alta intención de visita.",
     properties: [
-      { name: "Apartamento Norte", status: "Coincidencia", detail: "2 habitaciones · $318k" },
-      { name: "Proyecto Cedro", status: "Alternativa", detail: "Entrega 2027 · $305k" },
+      {
+        name: "Apartamento Norte · ejemplo ficticio",
+        status: "Coincidencia",
+        detail: "2 habitaciones · valor ilustrativo: $318k",
+      },
+      {
+        name: "Proyecto Cedro · ejemplo ficticio",
+        status: "Alternativa",
+        detail: "Entrega ilustrativa 2027 · valor ilustrativo: $305k",
+      },
       { name: "Visita", status: "Siguiente paso", detail: "Asesor asignado" },
     ],
-    automation: ["Detectar presupuesto", "Asignar asesor", "Crear oportunidad en CRM"],
+    automation: ["Clasificar presupuesto por reglas", "Asignar asesor", "Crear oportunidad en CRM"],
   },
   gym: {
     label: "Gimnasios",
@@ -91,9 +99,9 @@ const demoConfigs = {
     crmStage: "Leads interesados",
     pain: "Responder tarde una pregunta de precio deja que el interesado se enfríe o se inscriba en otro gimnasio.",
     pricing: [
-      { name: "Mensual", price: "$39", detail: "Acceso libre" },
-      { name: "Trimestral", price: "$99", detail: "Ahorro + seguimiento" },
-      { name: "Premium", price: "$149", detail: "Clases + evaluación" },
+      { name: "Mensual", price: "$39 ilustrativo", detail: "Acceso libre" },
+      { name: "Trimestral", price: "$99 ilustrativo", detail: "Ahorro + seguimiento" },
+      { name: "Premium", price: "$149 ilustrativo", detail: "Clases + evaluación" },
     ],
     automation: ["Enviar planes", "Sugerir visita", "Crear seguimiento de inscripción"],
   },
@@ -129,7 +137,7 @@ const demoConfigs = {
   },
   agencies: {
     label: "Agencias",
-    headline: "Califica leads de clientes y revende automatización IA.",
+    headline: "Clasifica leads mediante reglas y ofrece automatización como servicio.",
     lead: {
       name: "Nicolás Prieto",
       business: "BrandOps",
@@ -141,18 +149,26 @@ const demoConfigs = {
       classification: "hot",
     },
     aiReply:
-      "Entiendo. Tu oportunidad es convertir cada lead de campaña en una conversación atendida. Te recomiendo WhatsApp IA + calificación automática + pipeline para venderlo como servicio mensual.",
+      "Entiendo. Tu oportunidad es convertir cada lead de campaña en una conversación atendida. Esta simulación muestra WhatsApp, clasificación por reglas y pipeline como ejemplo de un servicio mensual.",
     captureLabel: "Cliente de alto valor",
     crmStage: "Pipeline de agencia",
     pain: "Una agencia pierde margen cuando califica leads manualmente para cada cliente y no convierte esa operación en un servicio recurrente.",
     clients: [
       {
-        name: "Clínica Nova",
+        name: "Clínica Nova · cuenta ficticia",
         status: "Anuncios de leads",
         detail: "Calificación automática activa",
       },
-      { name: "LegalHub", status: "WhatsApp", detail: "Briefing comercial programado" },
-      { name: "Studio Vega", status: "CRM", detail: "Pipeline de cliente actualizado" },
+      {
+        name: "LegalHub · cuenta ficticia",
+        status: "WhatsApp",
+        detail: "Briefing comercial simulado",
+      },
+      {
+        name: "Studio Vega · cuenta ficticia",
+        status: "CRM",
+        detail: "Pipeline ilustrativo actualizado",
+      },
     ],
     automation: [
       "Analizar intención",
@@ -185,7 +201,7 @@ const demoConfigs = {
       { name: "Seguimiento", detail: "Mensaje postconsulta", status: "Automático" },
     ],
     automation: [
-      "Detectar urgencia",
+      "Priorizar contacto por reglas",
       "Proponer horario",
       "Crear cita en CRM",
       "Programar recordatorio",
@@ -267,13 +283,13 @@ export function createDemoScenario(type = "restaurants") {
         key: "intent",
         label: "Analizando intención...",
         stage: "new",
-        event: "IA detectando intención comercial y urgencia",
+        event: "Clasificación simulada de intención mediante reglas deterministas",
       },
       {
         key: "score",
         label: `Lead calificado: ${CLASSIFICATION_LABELS[lead.classification] ?? lead.classification.toUpperCase()}${lead.classification === "hot" ? " 🔥" : ""}`,
         stage: "qualified",
-        event: `Score ${lead.score}/100`,
+        event: `Puntaje ilustrativo ${lead.score}/100`,
       },
       {
         key: "crm",

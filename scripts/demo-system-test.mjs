@@ -1,6 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createDemoScenario, demoTypes, normalizeDemoType } from "../core/demo-simulator/index.js";
+import { buildQuoteUrl, readJourneyContext } from "../apps/web/src/journey-context.js";
+import { PUBLIC_JOURNEYS } from "../apps/web/src/public-journeys.js";
+import { sanitizeAnalyticsProperties } from "../apps/web/src/analytics.js";
 
 const root = process.cwd();
 
@@ -11,6 +14,94 @@ function assert(condition, message) {
 function readText(filePath) {
   return fs.readFileSync(path.join(root, filePath), "utf8");
 }
+
+const disclosureText =
+  "Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.";
+
+assert(PUBLIC_JOURNEYS.length === 7, "Public journey metadata must register seven sectors.");
+PUBLIC_JOURNEYS.forEach((journey) => {
+  const contextUrl = buildQuoteUrl({
+    sector: journey.sector,
+    demo: journey.demo,
+    service: journey.quoteService,
+    goal: journey.goal,
+    source: `simulacion_${journey.id}`,
+  });
+  const roundTrip = readJourneyContext(contextUrl.split("?")[1]);
+  assert(
+    roundTrip.sector === journey.sector &&
+      roundTrip.demo === journey.demo &&
+      roundTrip.service === journey.quoteService &&
+      roundTrip.goal === journey.goal &&
+      roundTrip.source === `simulacion_${journey.id}`,
+    `${journey.id} quote context must round-trip through the canonical metadata.`,
+  );
+
+  const landingHtml = readText(`apps/web/pages/${journey.id}/index.html`);
+  const simulationHtml = readText(`apps/web/pages${journey.simulationPath}/index.html`);
+  assert(landingHtml.includes(disclosureText), `${journey.id} landing must show its disclosure.`);
+  assert(
+    simulationHtml.includes(disclosureText),
+    `${journey.id} simulation must show its disclosure.`,
+  );
+  assert(
+    (simulationHtml.match(/href="\/demo\//gu) || []).length >= 7,
+    `${journey.id} simulation must expose all seven sector experiences in its selector.`,
+  );
+});
+
+const conflictingContext = buildQuoteUrl({
+  sector: "agencia",
+  demo: "Huella Veterinaria",
+  service: "Landing + automatización completa",
+  goal: "Quiero captar y calificar oportunidades para los clientes de mi agencia",
+  source: "simulacion_agencies",
+});
+assert(
+  conflictingContext === "/cotizacion",
+  "Quote context must reject known sector/demo combinations from different journeys.",
+);
+assert(
+  readJourneyContext("?goal=objetivo%20arbitrario&source=simulacion_agencies").sector === "",
+  "Quote context must reject a goal without a valid canonical journey.",
+);
+const veterinaryOption = buildQuoteUrl({
+  sector: "veterinaria",
+  demo: "Huella Veterinaria",
+  goal: "Quiero una landing para mi veterinaria enfocada en prevención",
+  source: "landing_veterinary",
+});
+assert(
+  readJourneyContext(veterinaryOption.split("?")[1]).goal.includes("prevención"),
+  "Veterinary interactive goals must remain canonical and round-trip to the quote flow.",
+);
+const aestheticsOption = buildQuoteUrl({
+  sector: "estética",
+  demo: "Aura Estética",
+  goal: "Quiero una landing para mi estética enfocada en consultas de luminosidad",
+  source: "landing_aesthetics",
+});
+assert(
+  readJourneyContext(aestheticsOption.split("?")[1]).goal.includes("luminosidad"),
+  "Aesthetics interactive goals must remain canonical and round-trip to the quote flow.",
+);
+
+const sanitizedAnalytics = sanitizeAnalyticsProperties({
+  sector: "agencia",
+  demo: "Impulso Digital",
+  service: "Landing + automatización completa",
+  source: "test",
+  cta_location: "quote_form",
+  name: "No debe salir",
+  phone: "+57 300 000 0000",
+  message: "Tampoco debe salir",
+});
+assert(
+  !("name" in sanitizedAnalytics) &&
+    !("phone" in sanitizedAnalytics) &&
+    !("message" in sanitizedAnalytics),
+  "Analytics properties must exclude PII fields.",
+);
 
 [
   "apps/web/pages/home",
@@ -47,6 +138,7 @@ const webDemoEngineSource = readText("apps/web/src/demo-engine/index.js");
 const compatibilityDemoEngineSource = readText("apps/web/demo-engine/index.js");
 const industryDemoRuntimeSource = readText("apps/web/src/demo-engine/industry-demo-runtime.js");
 const industrySimulationSource = readText("apps/web/src/industry-simulations.js");
+const themeControlSource = readText("apps/web/src/theme-control.js");
 const coreDemoEngineSource = readText("core/demo-simulator/index.js");
 assert(
   webDemoEngineSource.includes("../../../../core/demo-simulator/index.js"),
@@ -75,6 +167,10 @@ assert(
 assert(
   industryDemoRuntimeSource.includes("demoCaptureForm"),
   "Industry demo runtime must render a shared lead capture form.",
+);
+assert(
+  themeControlSource.includes('document.body.matches(".simulation-page")'),
+  "Fixed-palette legacy simulations must not expose a misleading theme toggle.",
 );
 assert(
   industryDemoRuntimeSource.includes("industry_demo_"),
@@ -162,6 +258,21 @@ assert(
 
     const pagePath = `apps/web/pages/demo/${type}/index.html`;
     const html = readText(pagePath);
+    const normalizedHtml = html.replace(/\s+/gu, " ");
+    assert(
+      normalizedHtml.includes("Simulación ficticia.") &&
+        normalizedHtml.includes("datos ilustrativos") &&
+        normalizedHtml.includes("reglas deterministas, no mediante IA"),
+      `${pagePath} must disclose fictional content, illustrative data and rule-based classification.`,
+    );
+    assert(
+      !/\b(?:la\s+)?IA\s+(?:detect\w*|calific\w*)/iu.test(html),
+      `${pagePath} must not claim that AI detects or qualifies leads.`,
+    );
+    assert(
+      !html.replaceAll(disclosureText, "").includes("cliente real"),
+      `${pagePath} must not present a fictional user as real.`,
+    );
     assert(
       html.includes('content="noindex, nofollow"'),
       `${pagePath} must stay noindex while demos are campaign/internal assets.`,
@@ -244,7 +355,8 @@ const viteSource = readText("vite.config.js");
 
 const landingSource = readText("apps/web/pages/home/index.html");
 assert(
-  landingSource.includes("Tu próxima solución digital") && landingSource.includes("funcionando."),
+  landingSource.includes("Tu próxima solución digital, lista para vender y dar seguimiento.") &&
+    landingSource.includes("conectamos cada contacto con WhatsApp"),
   "Landing must open with a clear trust-first value proposition.",
 );
 assert(
@@ -276,7 +388,7 @@ assert(
   "Demo selector must clearly invite users to try an industry demo.",
 );
 assert(
-  demoSelectorSource.includes("Explorar demo") && !demoSelectorSource.includes(">Ver demo<"),
+  demoSelectorSource.includes("Explorar experiencia") && !demoSelectorSource.includes(">Ver demo<"),
   "Demo selector must use clear exploratory CTAs.",
 );
 assert(
@@ -286,6 +398,27 @@ assert(
 assert(
   demoSelectorSource.includes("WhatsApp y automatizaciones trabajando juntas"),
   "Demo selector must explain the connected Luenio experience.",
+);
+const catalogLandingRoutes = [
+  "/agencias",
+  "/tiendas-online",
+  "/gimnasios",
+  "/inmobiliarias",
+  "/restaurantes",
+  "/veterinarias",
+  "/esteticas",
+];
+catalogLandingRoutes.forEach((route) => {
+  assert(
+    demoSelectorSource.includes(`href="${route}"`),
+    `Demo selector must link its primary card to the modern landing ${route}.`,
+  );
+});
+assert(
+  !/href="\/demos?\/(?:restaurants|real-estate|gym|ecommerce|agencies|veterinary|aesthetics)"/u.test(
+    demoSelectorSource,
+  ),
+  "Demo selector must not send primary cards to legacy simulations.",
 );
 
 const sharedDemoPageSource = readText("apps/web/pages/demo/demo-page.js");
@@ -612,8 +745,27 @@ assert(
 );
 assert(agencyScenario.clients.length >= 3, "Agency demo must include multi-client dashboard data.");
 assert(
+  agencyScenario.clients.every((client) => client.name.includes("cuenta ficticia")),
+  "Agency demo must label every sample account as fictional.",
+);
+assert(
   agencyScenario.automation.some((step) => step.toLowerCase().includes("alto valor")),
   "Agency demo must include high-value client tagging.",
+);
+
+const veterinaryDemoHtml = readText("apps/web/pages/demo/veterinary/index.html");
+assert(
+  veterinaryDemoHtml
+    .replace(/\s+/gu, " ")
+    .includes(
+      "No realiza diagnóstico ni determina urgencia médica; ante síntomas preocupantes, consulta a un profesional veterinario.",
+    ),
+  "Veterinary demo must include the exact clinical safety disclaimer.",
+);
+assert(
+  !/\bIA\s+(?:detect\w*|calific\w*)/iu.test(coreDemoEngineSource) &&
+    !coreDemoEngineSource.includes("Detectar urgencia"),
+  "Core demo scenarios must describe deterministic classification without false AI or clinical claims.",
 );
 
 console.info("Industry demo system guard passed");

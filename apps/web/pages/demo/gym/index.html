@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -11,34 +11,41 @@
     <title>Luenio Demo | Gimnasios</title>
     <meta
       name="description"
-      content="Demo de WhatsApp IA para gimnasios que pierden membresías por responder tarde."
+      content="Simulación ficticia de atención por WhatsApp para gimnasios, basada en reglas deterministas."
     />
     <meta
       name="keywords"
-      content="demo WhatsApp IA gimnasios, demo CRM gimnasios, automatización membresías"
+      content="simulación WhatsApp gimnasios, demo CRM gimnasios, automatización membresías"
     />
     <meta name="author" content="Luenio" />
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="canonical" href="https://luenio.com/demos/gym" />
+    <link rel="canonical" href="https://luenio.com/demo/gym" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content="Luenio" />
     <meta property="og:title" content="Luenio Demo | Gimnasios" />
     <meta
       property="og:description"
-      content="Demo de WhatsApp IA para gimnasios que pierden membresías por responder tarde."
+      content="Simulación ficticia de atención por WhatsApp para gimnasios, basada en reglas deterministas."
     />
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
-    <meta property="og:url" content="https://luenio.com/demos/gym" />
+    <meta property="og:url" content="https://luenio.com/demo/gym" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Luenio Demo | Gimnasios" />
     <meta
       name="twitter:description"
-      content="Demo de WhatsApp IA para gimnasios que pierden membresías por responder tarde."
+      content="Simulación ficticia de atención por WhatsApp para gimnasios, basada en reglas deterministas."
     />
     <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="/assets/stitch/gym-01.jpg"
+      as="image"
+      type="image/jpeg"
+      fetchpriority="high"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;500;600;700&family=Oswald:wght@400;500;600;700&display=swap"
       rel="stylesheet"
@@ -56,12 +63,23 @@
           <a href="/">Luenio</a><span aria-hidden="true">/</span
           ><a href="/gimnasios">Titan Fitness Club</a>
         </div>
-        <div id="industryLinks">
-          <a href="/demo/restaurants">Restaurantes</a><a href="/demo/real-estate">Inmobiliarias</a
+        <div id="industryLinks" aria-label="Selector de sector">
+          <a href="/demo/agencies">Agencias</a><a href="/demo/ecommerce">Ecommerce</a
           ><a class="active" href="/demo/gym" aria-current="page">Gimnasios</a
-          ><a href="/demo/ecommerce">Ecommerce</a><a href="/demo/agencies">Agencias</a>
+          ><a href="/demo/real-estate">Inmobiliarias</a><a href="/demo/restaurants">Restaurantes</a
+          ><a href="/demo/veterinary">Veterinarias</a><a href="/demo/aesthetics">Estéticas</a>
         </div>
       </nav>
+
+      <p class="simulation-disclosure" role="note">
+        <span class="simulation-disclosure__lead"
+          >Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+          reales.</span
+        >
+        <strong>Simulación ficticia.</strong> Nombres, precios, puntajes y escenarios son datos
+        ilustrativos; no representan clientes ni resultados reales. La clasificación mostrada se
+        calcula mediante reglas deterministas, no mediante IA.
+      </p>
 
       <section class="gym-hero">
         <div>
@@ -90,7 +108,7 @@
         </article>
 
         <section class="gym-pricing-panel" aria-label="Tarjetas de precios">
-          <p class="eyebrow">Respuesta de IA</p>
+          <p class="eyebrow">Respuesta simulada</p>
           <h2>Planes enviados automáticamente</h2>
           <div class="gym-pricing-cards" id="gymPricingCards">
             <p class="simulation-loading">Preparando planes de muestra…</p>
@@ -103,7 +121,9 @@
           <div class="gym-crm-card">
             <span>Lead</span><strong id="gymLeadName">Esperando consulta</strong>
           </div>
-          <div class="gym-crm-card"><span>Score</span><strong id="gymLeadScore">--</strong></div>
+          <div class="gym-crm-card">
+            <span>Puntaje ilustrativo</span><strong id="gymLeadScore">--</strong>
+          </div>
           <div class="gym-pipeline" id="gymPipeline">
             <article class="active"><span>Nuevo</span><strong>WhatsApp</strong></article>
             <article><span>CALIENTE</span><strong>Leads interesados</strong></article>
@@ -120,11 +140,15 @@
           <p class="eyebrow">Conversión</p>
           <h2>Automatiza consultas y vende más membresías.</h2>
           <p>
-            Luenio responde precios, sugiere visita, detecta intención y crea seguimiento para que
-            el lead no se enfríe.
+            La simulación responde precios ilustrativos, sugiere una visita, clasifica la intención
+            mediante reglas y prepara el seguimiento del equipo.
           </p>
         </div>
-        <a class="button button-primary" href="/#contacto">Activar para mi gimnasio</a>
+        <a
+          class="button button-primary"
+          href="/cotizacion?sector=gimnasio&amp;demo=Titan+Fitness+Club&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+por+precio+en+visitas+y+membres%C3%ADas&amp;source=simulacion_gym"
+          >Cotizar un flujo como este</a
+        >
       </section>
       <footer class="legal-bar">
         <a href="/terminos">Términos</a>

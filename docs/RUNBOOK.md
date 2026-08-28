@@ -32,7 +32,7 @@ Producción requiere `criticalReady: true` y `storage.mode: "supabase"`. Revisa 
 
 1. Genera valores nuevos con `openssl rand -hex 32`.
 2. Cambia solo `/etc/luenio/<entorno>.env` y su correspondiente secreto edge.
-3. Ejecuta `npm run preflight:production` y `npm run preflight:edge`.
+3. Ejecuta `npm run preflight:production -- --env-file /etc/luenio/<entorno>.env` y `npm run preflight:edge -- /etc/luenio/edge.env`.
 4. Redeploy del entorno; recarga edge si cambió proxy.
 5. Actualiza Header Auth en esa instancia n8n y revoca sesiones si aplica.
 6. Registra hora UTC y alcance sin PII.
@@ -62,12 +62,22 @@ Restaura siempre en un volumen vacío y ensaya trimestralmente. Sin el `N8N_ENCR
 ## Deploy y rollback
 
 ```bash
-sudo bash ops/deploy-environment.sh staging /etc/luenio/staging.env --build
-# aprobar staging y mantener el mismo LUENIO_IMAGE
-sudo bash ops/deploy-environment.sh production /etc/luenio/production.env --no-build
+sudo bash ops/deploy-environment.sh staging /etc/luenio/staging.env
+# aprobar staging y mantener exactamente el mismo LUENIO_IMAGE por digest
+sudo bash ops/deploy-environment.sh production /etc/luenio/production.env
 ```
 
-Para rollback, cambia `LUENIO_IMAGE` por el tag inmutable anterior y repite con `--no-build`.
+Para rollback, cambia `LUENIO_IMAGE` por el digest OCI anterior y repite el comando. El despliegue valida health autenticado y solo revierte automáticamente a una referencia anterior también fijada por digest.
+
+## Promoción por digest
+
+1. Ubica una ejecución CI verde de `main` o `master` para el commit aprobado.
+2. Descarga `oci-image-<git-sha>` y verifica que `GIT_SHA` sea el commit revisado.
+3. Configura su `ghcr.io/...@sha256:...` en staging y completa preflight y pruebas externas.
+4. Registra commit, digest, aprobación y hora UTC.
+5. Copia el mismo digest a producción. Nunca reconstruyas ni uses un tag durante promoción.
+
+No hay despliegue automático desde CI. Si el gate falla, usa `gate-diagnostics-*`; no adjuntes `.env`, dumps, cookies, headers ni respuestas privadas de health.
 
 ## Analytics y observabilidad
 
@@ -85,3 +95,13 @@ Para rollback, cambia `LUENIO_IMAGE` por el tag inmutable anterior y repite con 
 | Supabase                   | Pendiente de completar |
 | Cloudflare / DNS           | Pendiente de completar |
 | Resend / observabilidad    | Pendiente de completar |
+
+La publicación está bloqueada mientras cualquiera de estos responsables o canales siga pendiente. No se sustituyen con datos inventados.
+
+## Incidentes y alertas
+
+1. Confirma alcance con health público y luego health autenticado desde el host protegido.
+2. Registra inicio UTC, digest y síntomas sin PII ni secretos.
+3. Si el cambio causó el incidente, vuelve al digest anterior; no reviertas datos automáticamente.
+4. Si afecta almacenamiento, detén escrituras y sigue el restore validado. Una extracción fallida debe permanecer detenida.
+5. Prueba el canal de alertas antes del lanzamiento y trimestralmente. No recibirla es un bloqueo operativo.

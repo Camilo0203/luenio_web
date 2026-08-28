@@ -1,7 +1,9 @@
-import { advanceScenario, createDemoScenario, demoTypes } from "./index.js";
+import { advanceScenario, createDemoScenario } from "./index.js";
 import { submitPublicInquiry } from "../api-client.js";
 import { protectContactForm } from "../contact-security.js";
+import { trackEvent } from "../analytics.js";
 import { initThemeControl } from "../theme-control.js";
+import { getPublicJourneyBySimulationType, PUBLIC_JOURNEYS } from "../public-journeys.js";
 
 const fontStylesheet = document.querySelector("[data-font-stylesheet]");
 if (fontStylesheet?.media === "print") {
@@ -33,13 +35,11 @@ function renderIndustryLinks(activeType, selector = "#industryLinks") {
   const nav = document.querySelector(selector);
   if (!nav) return;
 
-  nav.innerHTML = demoTypes
-    .map((type) => {
-      const href = `/demo/${type}`;
-      const active = type === activeType;
-      return `<a class="${active ? "active" : ""}" href="${href}"${active ? ' aria-current="page"' : ""}>${escapeHtml(createDemoScenario(type).label)}</a>`;
-    })
-    .join("");
+  nav.setAttribute("aria-label", "Selector de sector");
+  nav.innerHTML = PUBLIC_JOURNEYS.map((journey) => {
+    const active = journey.simulationPath.endsWith(`/${activeType}`);
+    return `<a class="${active ? "active" : ""}" href="${journey.simulationPath}"${active ? ' aria-current="page"' : ""}>${escapeHtml(journey.label)}</a>`;
+  }).join("");
 
   const activeLink = nav.querySelector('[aria-current="page"]');
   if (activeLink && globalThis.matchMedia("(max-width: 560px)").matches) {
@@ -115,11 +115,12 @@ function clearTimers(state) {
 function getCapturePayload(form, scenario) {
   const data = new FormData(form);
   const message = String(data.get("message") || "").trim();
+  const journey = getPublicJourneyBySimulationType(scenario.type);
   return {
     name: String(data.get("name") || "").trim(),
     business: String(data.get("business") || "").trim(),
     phone: String(data.get("phone") || "").trim(),
-    service: scenario.label,
+    service: journey?.quoteService || "Landing + automatización completa",
     source: `industry_demo_${scenario.type}`,
     message: message || `Vi la demo de ${scenario.label} y quiero convertirla en mi flujo real.`,
   };
@@ -131,7 +132,7 @@ function setCaptureStatus(form, stateName, message) {
   form.dataset.state = stateName;
   if (button) {
     button.disabled = stateName === "loading";
-    button.textContent = stateName === "loading" ? "Enviando..." : "Convertir esta demo en mi CRM";
+    button.textContent = stateName === "loading" ? "Enviando..." : "Cotizar un flujo como este";
   }
   if (status) {
     status.hidden = !message;
@@ -146,12 +147,12 @@ function renderLeadCapture(config, state) {
   cta.insertAdjacentHTML(
     "beforeend",
     `
-    <form class="demo-capture-form" id="demoCaptureForm" novalidate>
+    <form class="demo-capture-form" id="demoCaptureForm" data-state="idle" novalidate>
       <label>Nombre<input name="name" type="text" placeholder="Tu nombre" autocomplete="name" required /></label>
       <label>Negocio<input name="business" type="text" placeholder="Nombre del negocio" autocomplete="organization" required /></label>
       <label>WhatsApp<input name="phone" type="tel" placeholder="+57 300 000 0000" autocomplete="tel" required /></label>
       <label class="wide">Mensaje<textarea name="message" rows="3" placeholder="Qué quieres automatizar después de ver esta demo"></textarea></label>
-      <button class="button button-primary wide" type="submit">Convertir esta demo en mi CRM</button>
+      <button class="button button-primary wide" type="submit">Cotizar un flujo como este</button>
       <p class="form-status wide" role="status" aria-live="polite" hidden></p>
     </form>
   `,
@@ -159,31 +160,53 @@ function renderLeadCapture(config, state) {
 
   const captureForm = cta.querySelector("#demoCaptureForm");
   const securityPromise = protectContactForm(captureForm);
+  const getAnalyticsProperties = () => {
+    const journey = getPublicJourneyBySimulationType(state.scenario.type);
+    return {
+      sector: journey?.sector || "",
+      demo: journey?.demo || state.scenario.label,
+      service: journey?.quoteService || "Landing + automatización completa",
+      source: `industry_demo_${state.scenario.type}`,
+      cta_location: "demo_capture",
+    };
+  };
+  let formStarted = false;
+  captureForm?.addEventListener("input", () => {
+    if (formStarted) return;
+    formStarted = true;
+    trackEvent("quote_form_start", getAnalyticsProperties());
+  });
   captureForm?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;
-    const payload = {
-      ...getCapturePayload(form, state.scenario),
-      ...(await securityPromise).payload(),
-    };
+    if (form.dataset.state === "loading") return;
+    form.dataset.state = "loading";
+    const basePayload = getCapturePayload(form, state.scenario);
 
     if (
-      payload.name.length < 2 ||
-      payload.business.length < 2 ||
-      payload.phone.replace(/\D/g, "").length < 8
+      basePayload.name.length < 2 ||
+      basePayload.business.length < 2 ||
+      basePayload.phone.replace(/\D/g, "").length < 8
     ) {
       setCaptureStatus(form, "error", "Completa nombre, negocio y WhatsApp para continuar.");
+      trackEvent("quote_error", getAnalyticsProperties());
       return;
     }
 
     setCaptureStatus(form, "loading", "Enviando solicitud...");
+    trackEvent("quote_submit", { ...getAnalyticsProperties(), service: basePayload.service });
     try {
+      const payload = {
+        ...basePayload,
+        ...(await securityPromise).payload(),
+      };
       await submitPublicInquiry(payload);
       setCaptureStatus(
         form,
         "success",
-        "Solicitud recibida. Te contactaremos para convertir esta demo en tu flujo real.",
+        "Solicitud recibida. Te contactaremos para adaptar este flujo a tu negocio.",
       );
+      trackEvent("quote_success", { ...getAnalyticsProperties(), service: basePayload.service });
       form.reset();
       (await securityPromise).reset();
     } catch {
@@ -192,6 +215,7 @@ function renderLeadCapture(config, state) {
         "error",
         "No pudimos enviar la solicitud. Inténtalo de nuevo en unos minutos.",
       );
+      trackEvent("quote_error", getAnalyticsProperties());
     }
   });
 }

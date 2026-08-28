@@ -9,16 +9,33 @@ FORM: “ruta de barrio”, propuesta V2 aprobada por el usuario; composición d
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <script src="/theme-boot.js"></script>
-    <title>Huella Veterinaria | Cuidado que se entiende</title>
+    <title>Luenio | Demo de experiencia para veterinarias</title>
     <meta
       name="description"
-      content="Demo de una web veterinaria que orienta la consulta y conecta una agenda clara."
+      content="Experiencia demostrativa de Luenio para explorar una ruta digital de orientación, agenda y seguimiento para veterinarias."
     />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://luenio.com/veterinarias" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Luenio | Demo de experiencia para veterinarias" />
+    <meta
+      property="og:description"
+      content="Experiencia demostrativa de Luenio para explorar orientación, agenda y seguimiento para veterinarias."
+    />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/veterinarias" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Luenio | Demo de experiencia para veterinarias" />
+    <meta
+      name="twitter:description"
+      content="Experiencia demostrativa de Luenio para veterinarias."
+    />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -45,11 +62,15 @@ FORM: “ruta de barrio”, propuesta V2 aprobada por el usuario; composición d
         <span aria-hidden="true">H<i></i></span><strong>Huella <small>Veterinaria</small></strong>
       </a>
       <nav aria-label="Navegación principal">
-        <a href="#servicios">Servicios</a><a href="#equipo">Nuestro enfoque</a
-        ><a href="#agenda">Agenda</a>
+        <a href="/demos">Demos</a><a href="/#soluciones">Soluciones</a
+        ><a href="/#proceso">Proceso</a><a href="/#nosotros">Nosotros</a>
       </nav>
-      <a class="vet-button vet-button--nav care-pill" href="#agenda"
-        ><span aria-hidden="true">＋</span> Agendar consulta</a
+      <a
+        class="vet-button vet-button--nav care-pill"
+        href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=landing_veterinary"
+        data-quote-cta="landing_veterinary"
+        data-cta-location="landing_header"
+        >Cotizar mi solución</a
       >
     </header>
 
@@ -80,6 +101,9 @@ FORM: “ruta de barrio”, propuesta V2 aprobada por el usuario; composición d
           <a class="vet-button vet-button--yellow care-pill" href="#agenda"
             >Agendar consulta <span aria-hidden="true">→</span></a
           >
+          <p class="luenio-demo-disclosure" data-luenio-disclosure role="note">
+            Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.
+          </p>
           <small>Experiencia demostrativa · no realiza diagnóstico médico.</small>
         </div>
 

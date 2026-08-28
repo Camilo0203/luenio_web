@@ -3,19 +3,18 @@ set -euo pipefail
 
 ENVIRONMENT="${1:-}"
 ENV_FILE="${2:-}"
-MODE="${3:---no-build}"
 PROJECT_DIR="${PROJECT_DIR:-/opt/luenio}"
 
 if [[ "$ENVIRONMENT" != "staging" && "$ENVIRONMENT" != "production" ]]; then
-  echo "Usage: $0 <staging|production> </absolute/env-file> [--build|--no-build]" >&2
+  echo "Usage: $0 <staging|production> </absolute/env-file>" >&2
   exit 1
 fi
 [[ "$ENV_FILE" = /* && -f "$ENV_FILE" ]] || {
   echo "Environment file must be an existing absolute path." >&2
   exit 1
 }
-[[ "$MODE" == "--build" || "$MODE" == "--no-build" ]] || {
-  echo "Third argument must be --build or --no-build." >&2
+[[ "$#" -eq 2 ]] || {
+  echo "Images are built by CI only; this command accepts exactly two arguments." >&2
   exit 1
 }
 
@@ -46,8 +45,12 @@ set +a
   echo "N8N_EDGE_ALIAS must be n8n-$ENVIRONMENT." >&2
   exit 1
 }
+[[ "$LUENIO_IMAGE" =~ ^ghcr\.io/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]] || {
+  echo "LUENIO_IMAGE must be an immutable lowercase GHCR reference with an sha256 digest." >&2
+  exit 1
+}
 
-node scripts/production-preflight.mjs
+node scripts/production-preflight.mjs --env-file "$ENV_FILE"
 
 docker network inspect "$EDGE_NETWORK" >/dev/null 2>&1 ||
   docker network create "$EDGE_NETWORK" >/dev/null
@@ -55,14 +58,45 @@ docker network inspect "$EDGE_NETWORK" >/dev/null 2>&1 ||
 compose=(docker compose -p "luenio-$ENVIRONMENT" --env-file "$ENV_FILE" -f docker-compose.yml)
 "${compose[@]}" config --quiet
 
-if [[ "$MODE" == "--build" ]]; then
-  "${compose[@]}" build app
-else
-  docker image inspect "$LUENIO_IMAGE" >/dev/null 2>&1 || {
-    echo "Image $LUENIO_IMAGE is not present; build and validate it in staging first." >&2
-    exit 1
-  }
-fi
+docker pull "$LUENIO_IMAGE"
+docker image inspect "$LUENIO_IMAGE" >/dev/null
+
+container_name="luenio-$ENVIRONMENT-app-1"
+previous_image="$(docker inspect --format '{{.Config.Image}}' "$container_name" 2>/dev/null || true)"
 
 "${compose[@]}" up -d --remove-orphans
 "${compose[@]}" ps
+
+wait_for_remote_health() {
+  local attempts="${1:-12}"
+  local delay_seconds="${2:-5}"
+  local attempt
+  for ((attempt = 1; attempt <= attempts; attempt += 1)); do
+    if node scripts/production-preflight.mjs --env-file "$ENV_FILE" --remote; then
+      return 0
+    fi
+    if ((attempt < attempts)); then
+      sleep "$delay_seconds"
+    fi
+  done
+  return 1
+}
+
+if ! wait_for_remote_health 12 5; then
+  echo "Post-deploy health failed." >&2
+  if [[ "$previous_image" =~ ^ghcr\.io/[a-z0-9._/-]+@sha256:[a-f0-9]{64}$ ]]; then
+    echo "Rolling back to the previously running immutable image." >&2
+    LUENIO_IMAGE="$previous_image" "${compose[@]}" up -d --remove-orphans app
+    LUENIO_IMAGE="$previous_image" "${compose[@]}" ps
+    if ! LUENIO_IMAGE="$previous_image" wait_for_remote_health 12 5; then
+      echo "Rollback image did not recover authenticated health." >&2
+      exit 2
+    fi
+    echo "Rollback verified healthy at $previous_image." >&2
+  else
+    echo "No previous digest-qualified image was available for automatic rollback." >&2
+  fi
+  exit 1
+fi
+
+echo "Deployment verified: $ENVIRONMENT uses $LUENIO_IMAGE"

@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -11,34 +11,41 @@
     <title>Luenio Demo | Agencias</title>
     <meta
       name="description"
-      content="Demo de IA para agencias que automatiza calificación de leads y permite revender Luenio como servicio."
+      content="Simulación ficticia para agencias que clasifica leads mediante reglas y muestra un flujo de servicio."
     />
     <meta
       name="keywords"
-      content="demo IA para agencias, demo revender automatización, calificación de leads para clientes"
+      content="simulación para agencias, demo de automatización, clasificación de leads"
     />
     <meta name="author" content="Luenio" />
     <meta name="robots" content="noindex, nofollow" />
-    <link rel="canonical" href="https://luenio.com/demos/agencies" />
+    <link rel="canonical" href="https://luenio.com/demo/agencies" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content="Luenio" />
     <meta property="og:title" content="Luenio Demo | Agencias" />
     <meta
       property="og:description"
-      content="Demo de IA para agencias que automatiza calificación de leads y permite revender Luenio como servicio."
+      content="Simulación ficticia para agencias que clasifica leads mediante reglas y muestra un flujo de servicio."
     />
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
-    <meta property="og:url" content="https://luenio.com/demos/agencies" />
+    <meta property="og:url" content="https://luenio.com/demo/agencies" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Luenio Demo | Agencias" />
     <meta
       name="twitter:description"
-      content="Demo de IA para agencias que automatiza calificación de leads y permite revender Luenio como servicio."
+      content="Simulación ficticia para agencias que clasifica leads mediante reglas y muestra un flujo de servicio."
     />
     <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      href="/assets/stitch/agency-hero.webp"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
@@ -56,20 +63,31 @@
           <a href="/">Luenio</a><span aria-hidden="true">/</span
           ><a href="/agencias">Impulso Digital</a>
         </div>
-        <div id="industryLinks">
-          <a href="/demo/restaurants">Restaurantes</a><a href="/demo/real-estate">Inmobiliarias</a
-          ><a href="/demo/gym">Gimnasios</a><a href="/demo/ecommerce">Ecommerce</a
-          ><a class="active" href="/demo/agencies" aria-current="page">Agencias</a>
+        <div id="industryLinks" aria-label="Selector de sector">
+          <a class="active" href="/demo/agencies" aria-current="page">Agencias</a
+          ><a href="/demo/ecommerce">Ecommerce</a><a href="/demo/gym">Gimnasios</a
+          ><a href="/demo/real-estate">Inmobiliarias</a><a href="/demo/restaurants">Restaurantes</a
+          ><a href="/demo/veterinary">Veterinarias</a><a href="/demo/aesthetics">Estéticas</a>
         </div>
       </nav>
+
+      <p class="simulation-disclosure" role="note">
+        <span class="simulation-disclosure__lead"
+          >Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+          reales.</span
+        >
+        <strong>Simulación ficticia.</strong> Las cuentas, nombres, puntajes, precios y escenarios
+        son datos ilustrativos; no representan clientes ni resultados reales. La clasificación
+        mostrada se calcula mediante reglas deterministas, no mediante IA.
+      </p>
 
       <section class="agency-hero">
         <div>
           <p class="eyebrow">Demo en Vivo de Agencias</p>
           <h1>Califica leads para tus clientes y véndelo como servicio.</h1>
           <p id="agencyPain">
-            Una agencia puede convertir la calificación manual en una oferta recurrente con IA, CRM
-            y automatizaciones listas para cada cliente.
+            Una agencia puede convertir la clasificación manual en una oferta recurrente con CRM y
+            automatizaciones configuradas para cada operación.
           </p>
           <button class="button button-primary" id="runAgencyDemo" type="button">
             Ejecutar Demo en Vivo
@@ -84,7 +102,7 @@
 
       <section class="agency-workspace">
         <article class="agency-client-panel" aria-label="Panel multicliente">
-          <p class="eyebrow">Cuentas de clientes</p>
+          <p class="eyebrow">Cuentas ficticias de muestra</p>
           <h2>Panel multicliente</h2>
           <div class="agency-client-list" id="agencyClientList">
             <p class="simulation-loading">Preparando cuentas de muestra…</p>
@@ -99,14 +117,14 @@
             <span>Lead</span><strong id="agencyLeadName">Esperando lead</strong>
           </div>
           <div class="agency-crm-card">
-            <span>Calificación</span><strong id="agencyLeadScore">--</strong>
+            <span>Puntaje ilustrativo</span><strong id="agencyLeadScore">--</strong>
           </div>
           <div class="agency-pipeline" id="agencyPipeline">
             <article class="active">
               <span>Nuevo lead</span><strong>Cliente potencial</strong>
             </article>
             <article><span>Calificado</span><strong>Cliente de alto valor</strong></article>
-            <article><span>Servicio</span><strong>IA + CRM + Ads</strong></article>
+            <article><span>Servicio</span><strong>Reglas + CRM + Ads</strong></article>
           </div>
         </section>
 
@@ -127,11 +145,15 @@
           <p class="eyebrow">Ingresos por socios</p>
           <h2>Convierte Luenio en una línea de servicio para tu agencia.</h2>
           <p>
-            Califica leads, crea oportunidades y entrega automatización IA como servicio recurrente
-            para tus clientes.
+            Clasifica leads mediante reglas, crea oportunidades y entrega automatización como
+            servicio recurrente para tus clientes.
           </p>
         </div>
-        <a class="button button-primary" href="/#contacto">Activar para mi agencia</a>
+        <a
+          class="button button-primary"
+          href="/cotizacion?sector=agencia&amp;demo=Impulso+Digital&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+captar+y+calificar+oportunidades+para+los+clientes+de+mi+agencia&amp;source=simulacion_agencies"
+          >Cotizar un flujo como este</a
+        >
       </section>
       <footer class="legal-bar">
         <a href="/terminos">Términos</a>

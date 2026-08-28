@@ -2,12 +2,19 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="theme-color" content="#071a33" />
     <script src="/theme-boot.js"></script>
+    <link
+      rel="preload"
+      as="image"
+      href="/assets/previews/restaurants-desktop.avif"
+      type="image/avif"
+      fetchpriority="high"
+    />
     <title>Demos por sector | Luenio</title>
     <meta
       name="description"
@@ -53,11 +60,15 @@
           <a href="/#soluciones">Soluciones</a>
           <a href="/#proceso">Proceso</a>
           <a href="/#nosotros">Nosotros</a>
-          <a href="/cotizacion">Cotización</a>
         </nav>
         <div class="site-header__actions">
-          <a class="button button--primary button--small" href="/cotizacion">
-            Solicitar cotización
+          <a
+            class="button button--primary button--small"
+            href="/cotizacion"
+            data-quote-cta="catalog_header"
+            data-cta-location="catalog_header"
+          >
+            Cotizar mi solución
           </a>
         </div>
         <button
@@ -100,54 +111,150 @@
           </div>
           <div class="catalog-grid">
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/restaurants-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/restaurants-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="eager"
+                  decoding="async"
+                  fetchpriority="high"
+                  alt="Vista ilustrativa de una experiencia para restaurantes"
+                />
+              </picture>
               <span class="catalog-card__index">01</span>
               <h3>Restaurantes</h3>
-              <p>Pedidos, reservas y consultas organizados en un flujo más claro.</p>
-              <a class="button button--outline button--small" href="/demos/restaurants"
-                >Explorar demo</a
+              <p>
+                <strong>Problema:</strong> pedidos y reservas que se pierden entre conversaciones.
+              </p>
+              <a class="button button--outline button--small" href="/restaurantes"
+                >Explorar experiencia</a
               >
             </article>
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/real-estate-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/real-estate-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="lazy"
+                  alt="Vista ilustrativa de una experiencia para inmobiliarias"
+                />
+              </picture>
               <span class="catalog-card__index">02</span>
               <h3>Inmobiliarias</h3>
-              <p>Propiedades, compradores y seguimiento reunidos en una sola experiencia.</p>
-              <a class="button button--outline button--small" href="/demos/real-estate"
-                >Explorar demo</a
+              <p>
+                <strong>Problema:</strong> compradores con intención que llegan sin contexto al
+                equipo.
+              </p>
+              <a class="button button--outline button--small" href="/inmobiliarias"
+                >Explorar experiencia</a
               >
             </article>
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/gym-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/gym-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="lazy"
+                  alt="Vista ilustrativa de una experiencia para gimnasios"
+                />
+              </picture>
               <span class="catalog-card__index">03</span>
               <h3>Gimnasios</h3>
-              <p>Planes, clases y conversaciones pensados para facilitar la decisión.</p>
-              <a class="button button--outline button--small" href="/gimnasios">Explorar demo</a>
+              <p>
+                <strong>Problema:</strong> consultas por precio sin un siguiente paso hacia la
+                visita.
+              </p>
+              <a class="button button--outline button--small" href="/gimnasios"
+                >Explorar experiencia</a
+              >
             </article>
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/ecommerce-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/ecommerce-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="lazy"
+                  alt="Vista ilustrativa de una experiencia para ecommerce"
+                />
+              </picture>
               <span class="catalog-card__index">04</span>
               <h3>Ecommerce</h3>
-              <p>Productos, preguntas y recuperación de oportunidades en contexto.</p>
-              <a class="button button--outline button--small" href="/demos/ecommerce"
-                >Explorar demo</a
+              <p>
+                <strong>Problema:</strong> preguntas de compra que quedan abiertas antes del
+                checkout.
+              </p>
+              <a class="button button--outline button--small" href="/tiendas-online"
+                >Explorar experiencia</a
               >
             </article>
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/agency-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/agency-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="lazy"
+                  alt="Vista ilustrativa de una experiencia para agencias"
+                />
+              </picture>
               <span class="catalog-card__index">05</span>
               <h3>Agencias</h3>
-              <p>Servicios, proyectos y calificación de prospectos con una narrativa editorial.</p>
-              <a class="button button--outline button--small" href="/demos/agencies"
-                >Explorar demo</a
+              <p>
+                <strong>Problema:</strong> briefs dispersos y oportunidades difíciles de calificar.
+              </p>
+              <a class="button button--outline button--small" href="/agencias"
+                >Explorar experiencia</a
               >
             </article>
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/veterinary-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/veterinary-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="lazy"
+                  alt="Vista ilustrativa de una experiencia para veterinarias"
+                />
+              </picture>
               <span class="catalog-card__index">06</span>
               <h3>Veterinarias</h3>
-              <p>Servicios, orientación y citas para acompañar mejor a cada familia.</p>
-              <a class="button button--outline button--small" href="/veterinarias">Explorar demo</a>
+              <p>
+                <strong>Problema:</strong> familias que necesitan orientación y una cita con
+                contexto.
+              </p>
+              <a class="button button--outline button--small" href="/veterinarias"
+                >Explorar experiencia</a
+              >
             </article>
             <article class="catalog-card">
+              <picture class="catalog-card__visual">
+                <source srcset="/assets/previews/aesthetics-desktop.avif" type="image/avif" />
+                <img
+                  src="/assets/previews/aesthetics-desktop.webp"
+                  width="1440"
+                  height="900"
+                  loading="lazy"
+                  alt="Vista ilustrativa de una experiencia para estéticas"
+                />
+              </picture>
               <span class="catalog-card__index">07</span>
               <h3>Estéticas</h3>
-              <p>Tratamientos, valoraciones y reservas dentro de una experiencia cuidada.</p>
-              <a class="button button--outline button--small" href="/esteticas">Explorar demo</a>
+              <p>
+                <strong>Problema:</strong> consultas de tratamientos que no llegan a valoración.
+              </p>
+              <a class="button button--outline button--small" href="/esteticas"
+                >Explorar experiencia</a
+              >
             </article>
           </div>
         </div>
@@ -159,7 +266,9 @@
             <p class="eyebrow">Hecho a tu medida</p>
             <h2>Tu proyecto no tiene que verse como una plantilla.</h2>
           </div>
-          <a class="button button--primary" href="/cotizacion">Conversemos sobre tu proyecto</a>
+          <a class="button button--primary" href="/cotizacion" data-quote-cta="catalog_footer"
+            >Cotizar mi solución</a
+          >
         </div>
       </section>
     </main>

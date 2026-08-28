@@ -893,7 +893,7 @@ html[data-theme] .demo-restaurant {
   .demo-ecommerce .demo-header__inner,
   .demo-real-estate .demo-header__inner,
   .demo-restaurant .demo-header__inner {
-    width: min(100% - 28px, 1440px);
+    width: min(calc(100% - 28px), 1440px);
   }
 
   .demo-agency .demo-hero,
@@ -914,7 +914,7 @@ html[data-theme] .demo-restaurant {
   .demo-ecommerce .demo-hero__content,
   .demo-real-estate .demo-hero__content,
   .demo-restaurant .demo-hero__content {
-    width: min(100% - 28px, 1440px);
+    width: min(calc(100% - 28px), 1440px);
     height: auto;
     min-height: auto;
     padding: 390px 0 32px;
@@ -936,7 +936,7 @@ html[data-theme] .demo-restaurant {
     right: auto;
     bottom: auto;
     left: auto;
-    width: min(100% - 28px, 640px);
+    width: min(calc(100% - 28px), 640px);
     margin: 24px auto 42px;
     transform: none;
   }
@@ -979,7 +979,7 @@ html[data-theme] .demo-restaurant {
   .gym-board .operations-grid,
   .gym-board .class-board,
   .gym-board .trainer-grid {
-    width: min(100% - 20px, 1500px);
+    width: min(calc(100% - 20px), 1500px);
   }
 
   .gym-board .builder-heading h1 {

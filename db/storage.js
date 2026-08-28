@@ -1,8 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getSupabaseEnv, isProduction } from "../config/env.js";
+import { getLocalStorageEnv, getSupabaseEnv, isProduction } from "../config/env.js";
 
-const dbPath = path.join(process.cwd(), "db", "leads-db.json");
+const defaultDbPath = path.join(process.cwd(), "db", "leads-db.json");
+const { fixturePath: fixtureDbPath, fixtureAllowed } = getLocalStorageEnv();
+if (fixtureDbPath && !fixtureAllowed) {
+  throw new Error("LUENIO_LOCAL_DB_PATH is restricted to NODE_ENV=test.");
+}
+const dbPath = fixtureDbPath ? path.resolve(fixtureDbPath) : defaultDbPath;
 const DUPLICATE_WINDOW_MS = 90_000;
 
 export function getSupabaseConfig() {

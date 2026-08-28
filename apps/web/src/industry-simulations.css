@@ -221,8 +221,114 @@ body.simulation-page .demo-nav {
   position: relative;
   z-index: 5;
   min-height: 74px;
-  padding-right: 64px;
   border-bottom: 1px solid var(--sim-line);
+}
+
+body.simulation-page .simulation-disclosure {
+  max-width: 78ch;
+  margin: 18px 0 0;
+  border: 1px solid var(--sim-line);
+  border-radius: max(2px, calc(var(--sim-radius) - 4px));
+  padding: 12px 16px;
+  color: var(--sim-soft);
+  background: var(--sim-panel);
+  font-size: 0.875rem;
+  line-height: 1.55;
+}
+
+body.simulation-page .simulation-disclosure strong {
+  color: var(--sim-text);
+}
+
+body.simulation-page .simulation-disclosure__lead {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--sim-accent-label, var(--sim-accent));
+  font-weight: 700;
+}
+
+body.simulation-page .simulation-runtime-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
+  color: var(--sim-accent-label, var(--sim-accent));
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+body.simulation-page .simulation-runtime-state::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  content: "";
+}
+
+body.simulation-page .simulation-runtime-state[data-state="running"]::before {
+  animation: simulation-pulse 1.2s ease-in-out infinite;
+}
+
+body.simulation-page .simulation-runtime-state[data-state="completed"] {
+  color: var(--sim-accent-label, var(--sim-accent));
+}
+
+body.simulation-page .simulation-runtime-state[data-state="interrupted"] {
+  color: var(--sim-secondary);
+}
+
+@keyframes simulation-pulse {
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+body.simulation-page .simulation-resource-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  border: 1px solid var(--sim-line);
+  border-radius: max(2px, calc(var(--sim-radius) - 4px));
+  padding: 12px 14px;
+  color: var(--sim-text);
+  background: color-mix(in srgb, var(--sim-secondary) 14%, var(--sim-panel));
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+body.simulation-page .simulation-resource-state[hidden] {
+  display: none;
+}
+
+body.simulation-page .simulation-resource-state button {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--sim-line);
+  border-radius: 999px;
+  padding: 6px 14px;
+  color: var(--sim-text);
+  background: transparent;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+body.simulation-page .simulation-resource-state button:hover,
+body.simulation-page .simulation-resource-state button:focus-visible {
+  color: var(--sim-accent-ink);
+  background: var(--sim-accent);
+  border-color: var(--sim-accent);
+}
+
+/* Keep foreground/background contrast stable while interactive states change. */
+body.simulation-page :is(.button, .demo-nav a, article) {
+  transition-property: transform, box-shadow;
 }
 
 .simulation-nav__brand {
@@ -242,11 +348,13 @@ body.simulation-page .simulation-nav__brand a {
 }
 
 .simulation-nav__brand a:first-child {
+  min-height: 44px;
   color: var(--sim-muted);
   font-size: 12px;
 }
 
 .simulation-nav__brand a:last-child {
+  min-height: 44px;
   color: var(--sim-text);
   font-family: var(--sim-heading);
   font-size: 18px;
@@ -257,9 +365,13 @@ body.simulation-page .simulation-nav__brand a {
 }
 
 body.simulation-page #industryLinks {
+  max-width: 100%;
+  min-width: 0;
+  min-height: 44px;
   flex-wrap: nowrap;
   overflow-x: auto;
   overscroll-behavior-inline: contain;
+  scroll-padding-inline: 24px;
   scroll-snap-type: inline proximity;
   scrollbar-width: none;
 }
@@ -267,6 +379,7 @@ body.simulation-page #industryLinks {
 body.simulation-page #industryLinks a {
   flex: 0 0 auto;
   scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 body.simulation-page #industryLinks::-webkit-scrollbar {
@@ -661,8 +774,9 @@ body.simulation-page .legal-bar {
 }
 
 body.simulation-page :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--sim-accent) 65%, white);
+  outline: 3px solid #000000;
   outline-offset: 3px;
+  box-shadow: 0 0 0 6px #ffffff;
 }
 
 @keyframes simulation-scan {
@@ -676,14 +790,13 @@ body.simulation-page :focus-visible {
 
 @media (max-width: 900px) {
   body.simulation-page .demo-page {
-    width: min(100% - 28px, 1280px);
+    width: min(calc(100% - 28px), 1280px);
   }
 
   body.simulation-page .demo-nav {
     display: grid;
     gap: 14px;
     padding-block: 16px;
-    padding-right: 58px;
   }
 
   body.simulation-page #industryLinks {
@@ -724,7 +837,7 @@ body.simulation-page :focus-visible {
 
 @media (max-width: 560px) {
   body.simulation-page .demo-page {
-    width: min(100% - 20px, 1280px);
+    width: min(calc(100% - 20px), 1280px);
   }
 
   .simulation-nav__brand a:first-child,
@@ -735,6 +848,11 @@ body.simulation-page :focus-visible {
   body.simulation-page .demo-nav a {
     min-height: 44px;
     padding: 8px 12px;
+  }
+
+  body.simulation-page #industryLinks {
+    padding-inline: 24px;
+    scroll-padding-inline: 24px;
   }
 
   body.simulation-page
@@ -769,6 +887,10 @@ body.simulation-page :focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  body.simulation-page .simulation-runtime-state[data-state="running"]::before {
+    animation: none;
+  }
+
   body.simulation-page
     .demo-page.is-running
     :is(

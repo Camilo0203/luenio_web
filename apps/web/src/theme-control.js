@@ -87,6 +87,10 @@ export function initThemeControl() {
   if (document.querySelector("[data-theme-toggle]")) return;
 
   normalizeBrandMarks();
+  // Legacy simulations are intentionally fixed sector worlds. A theme toggle would
+  // change its label/state without changing their authored palette.
+  if (document.body.matches(".simulation-page")) return;
+
   const control = document.createElement("button");
   control.className = "theme-control";
   control.type = "button";

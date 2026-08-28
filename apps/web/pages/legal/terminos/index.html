@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
@@ -26,6 +26,12 @@
     <meta property="og:image" content="https://luenio.com/og-luenio.png" />
     <meta property="og:url" content="https://luenio.com/terminos" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Términos de Servicio | Luenio" />
+    <meta
+      name="twitter:description"
+      content="Condiciones de uso y contratación de los servicios de Luenio."
+    />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
     <link rel="stylesheet" href="/apps/web/src/public-site.css" />
   </head>
   <body data-whatsapp-widget="false">
@@ -42,13 +48,18 @@
           data-open="false"
           aria-label="Navegación principal"
         >
-          <a href="/#demos">Demos</a><a href="/#soluciones">Soluciones</a
-          ><a href="/#proceso">Proceso</a><a href="/#nosotros">Nosotros</a
-          ><a href="/cotizacion">Cotización</a>
+          <a href="/#demos">Demos</a>
+          <a href="/#soluciones">Soluciones</a>
+          <a href="/#proceso">Proceso</a>
+          <a href="/#nosotros">Nosotros</a>
         </nav>
         <div class="site-header__actions">
-          <a class="button button--primary button--small site-header__cta" href="/cotizacion"
-            >Solicitar cotización gratis</a
+          <a
+            class="button button--primary button--small site-header__cta"
+            href="/cotizacion"
+            data-quote-cta="header"
+            data-cta-location="legal_header"
+            >Cotizar mi solución</a
           >
         </div>
         <button
@@ -66,6 +77,7 @@
     <main id="contenido">
       <section class="legal-hero">
         <div class="legal-hero__inner">
+          <a class="legal-back" href="/">← Volver a Luenio</a>
           <p class="eyebrow">Información legal</p>
           <h1>Términos de Servicio</h1>
           <p class="legal-date">Última actualización: 10 de julio de 2026</p>

@@ -43,6 +43,19 @@ checksum_file="$ARCHIVE.sha256"
 [[ -f "$checksum_file" ]] || { echo "Checksum file not found: $checksum_file" >&2; exit 1; }
 (cd "$(dirname "$ARCHIVE")" && sha256sum --check "$(basename "$checksum_file")")
 
+# Validate that the encrypted payload is a readable gzip tar and cannot escape
+# the target volume before stopping any service or extracting any file.
+if ! age --decrypt --identity "$AGE_IDENTITY_FILE" "$ARCHIVE" |
+  tar tzf - |
+  awk '
+    /^\// { bad = 1 }
+    { count = split($0, parts, "/"); for (i = 1; i <= count; i += 1) if (parts[i] == "..") bad = 1 }
+    END { exit bad }
+  '; then
+  echo "Archive validation failed or contains an unsafe path; nothing was restored." >&2
+  exit 1
+fi
+
 docker image inspect "$HELPER_IMAGE" >/dev/null 2>&1 || docker pull "$HELPER_IMAGE"
 if ! docker run --rm --read-only --security-opt no-new-privileges --cap-drop ALL \
   -v "$volume:/target:ro" "$HELPER_IMAGE" sh -c 'test -z "$(ls -A /target)"'; then
@@ -51,12 +64,22 @@ if ! docker run --rm --read-only --security-opt no-new-privileges --cap-drop ALL
 fi
 
 compose=(docker compose -p "$project" --env-file "$env_file" -f "$compose_file")
+container_id="$("${compose[@]}" ps -q "$service")"
+was_running="false"
+if [[ -n "$container_id" ]]; then
+  was_running="$(docker inspect --format '{{.State.Running}}' "$container_id")"
+fi
 "${compose[@]}" stop "$service"
-restart_service() { "${compose[@]}" start "$service"; }
-trap restart_service EXIT INT TERM
 
-age --decrypt --identity "$AGE_IDENTITY_FILE" "$ARCHIVE" |
+if ! age --decrypt --identity "$AGE_IDENTITY_FILE" "$ARCHIVE" |
   docker run --rm -i --read-only --security-opt no-new-privileges --cap-drop ALL \
-    -v "$volume:/target" "$HELPER_IMAGE" tar xzf - -C /target
+    -v "$volume:/target" "$HELPER_IMAGE" tar xzf - -C /target; then
+  echo "Restore failed. The service remains stopped and the target may be partial; inspect it before retrying." >&2
+  exit 1
+fi
+
+if [[ "$was_running" == "true" ]]; then
+  "${compose[@]}" start "$service"
+fi
 
 echo "Restored $TARGET from encrypted archive $ARCHIVE"

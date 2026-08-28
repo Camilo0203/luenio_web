@@ -20,7 +20,6 @@ body.simulation-page .demo-page {
 
 body.simulation-page .demo-nav {
   min-height: 80px;
-  padding-right: 62px;
 }
 
 body.simulation-page .demo-nav a {
@@ -693,7 +692,7 @@ body.simulation-restaurant .restaurant-events {
 
 @media (max-width: 640px) {
   body.simulation-page .demo-page {
-    width: min(100% - 20px, 1500px);
+    width: min(calc(100% - 20px), 1500px);
   }
 
   body.simulation-page .demo-nav {

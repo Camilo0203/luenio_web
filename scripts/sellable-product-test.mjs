@@ -66,7 +66,7 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
       !landingHtml.includes("Laura Méndez") &&
       !landingHtml.includes("+30%") &&
       landingHtml.includes("ficticias") &&
-      landingHtml.includes("No representan clientes reales"),
+      landingHtml.includes("No representan resultados ni clientes reales"),
   ],
   [
     "demonstrative cases",
@@ -81,7 +81,7 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   [
     "landing conversion CTA",
     landingHtml.includes("Explorar demos") &&
-      landingHtml.includes("Solicitar cotización") &&
+      landingHtml.includes("Cotizar mi solución") &&
       landingHtml.includes('href="/cotizacion"'),
   ],
   [
@@ -99,7 +99,8 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
   ],
   [
     "landing value proposition",
-    landingHtml.includes("Tu próxima solución digital") && landingHtml.includes("funcionando."),
+    landingHtml.includes("Tu próxima solución digital, lista para vender y dar seguimiento.") &&
+      landingHtml.includes("conectamos cada contacto con WhatsApp"),
   ],
   [
     "production contact data",

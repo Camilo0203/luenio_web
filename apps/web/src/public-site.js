@@ -3,10 +3,13 @@ import { brandConfig } from "./brand-config.js";
 import { initAnalytics, trackEvent } from "./analytics.js";
 import { protectContactForm } from "./contact-security.js";
 import { journeyAnalyticsProperties, readJourneyContext } from "./journey-context.js";
+import { getPublicJourneyById } from "./public-journeys.js";
 import { initThemeControl } from "./theme-control.js";
 
 const body = document.body;
 const journeyContext = readJourneyContext();
+const quoteDraftStorageKey = "luenio.quote.draft";
+const quoteDraftFields = ["name", "business", "service", "message"];
 let lastFocusedElement = null;
 
 const whatsappIcon = `
@@ -82,12 +85,76 @@ function normalize(value) {
   return String(value || "").trim();
 }
 
+function readQuoteDraft() {
+  try {
+    const draft = JSON.parse(sessionStorage.getItem(quoteDraftStorageKey) || "null");
+    if (!draft || typeof draft !== "object") return null;
+    return Object.fromEntries(
+      quoteDraftFields
+        .map((field) => [field, normalize(draft[field]).slice(0, field === "message" ? 600 : 120)])
+        .filter(([, value]) => value),
+    );
+  } catch {
+    return null;
+  }
+}
+
+function updateQuoteDraftNotice(form, hasDraft) {
+  const notice = form.querySelector("[data-quote-draft-status]");
+  const clearButton = form.querySelector("[data-draft-clear]");
+  if (notice) notice.hidden = !hasDraft;
+  if (clearButton) clearButton.hidden = !hasDraft;
+}
+
+function persistQuoteDraft(form) {
+  const draft = Object.fromEntries(
+    quoteDraftFields
+      .map((field) => [
+        field,
+        normalize(form.elements[field]?.value).slice(0, field === "message" ? 600 : 120),
+      ])
+      .filter(([, value]) => value),
+  );
+  try {
+    if (Object.keys(draft).length)
+      sessionStorage.setItem(quoteDraftStorageKey, JSON.stringify(draft));
+    else sessionStorage.removeItem(quoteDraftStorageKey);
+  } catch {
+    // A blocked sessionStorage must never interrupt the quote path.
+  }
+  updateQuoteDraftNotice(form, Object.keys(draft).length > 0);
+}
+
+function clearQuoteDraft(form) {
+  try {
+    sessionStorage.removeItem(quoteDraftStorageKey);
+  } catch {
+    // Storage cleanup is best effort.
+  }
+  updateQuoteDraftNotice(form, false);
+}
+
+function restoreQuoteDraft(form) {
+  const draft = readQuoteDraft();
+  if (!draft) {
+    updateQuoteDraftNotice(form, false);
+    return;
+  }
+  quoteDraftFields.forEach((field) => {
+    const control = form.elements[field];
+    if (!control || control.value || (field === "service" && journeyContext.service)) return;
+    if (field === "message" && journeyContext.goal) return;
+    control.value = draft[field] || "";
+  });
+  updateQuoteDraftNotice(form, true);
+}
+
 function applyQuoteJourneyContext() {
   const form = document.querySelector(".quote-page .lead-form");
   const contextBox = document.querySelector("[data-quote-context]");
   const hasContext =
     journeyContext.sector || journeyContext.demo || journeyContext.service || journeyContext.goal;
-  if (!form || !hasContext) return;
+  if (!form) return;
 
   const service = form.elements.service;
   const message = form.elements.message;
@@ -102,16 +169,18 @@ function applyQuoteJourneyContext() {
     message.value = journeyContext.goal;
   }
 
-  form.dataset.source = journeyContext.source
-    ? `cotizacion_${journeyContext.source}`
-    : "cotizacion_contexto";
-
-  const origin = journeyContext.demo || journeyContext.sector;
-  if (origin) {
-    body.dataset.pageContext = `Cotización desde ${origin}`;
+  if (hasContext) {
+    form.dataset.source = journeyContext.source
+      ? `cotizacion_${journeyContext.source}`
+      : "cotizacion_contexto";
   }
 
-  if (contextBox) {
+  if (hasContext) {
+    const origin = journeyContext.demo || journeyContext.sector;
+    if (origin) body.dataset.pageContext = `Cotización desde ${origin}`;
+  }
+
+  if (contextBox && hasContext) {
     const copy = contextBox.querySelector("[data-quote-context-copy]");
     const sectorLabel = journeyContext.sector
       ? journeyContext.sector.charAt(0).toUpperCase() + journeyContext.sector.slice(1)
@@ -124,10 +193,19 @@ function applyQuoteJourneyContext() {
     contextBox.hidden = false;
   }
 
-  trackEvent("quote_context_applied", {
-    service: journeyContext.service,
-    ...journeyAnalyticsProperties(journeyContext),
-  });
+  restoreQuoteDraft(form);
+  if (hasContext) {
+    trackEvent("quote_context_applied", {
+      ...journeyAnalyticsProperties(journeyContext),
+      cta_location: "contextual_quote",
+    });
+    if (journeyContext.demo || journeyContext.sector) {
+      trackEvent("demo_context_preserved", {
+        ...journeyAnalyticsProperties(journeyContext),
+        cta_location: "contextual_quote",
+      });
+    }
+  }
 }
 
 function setFormState(form, state, message) {
@@ -136,8 +214,11 @@ function setFormState(form, state, message) {
   form.dataset.state = state;
   if (button) {
     button.disabled = state === "loading";
-    button.querySelector("span").textContent =
-      state === "loading" ? "Enviando solicitud..." : "Solicitar cotización gratis";
+    const label = button.querySelector("span");
+    if (label) {
+      label.textContent =
+        state === "loading" ? "Enviando solicitud..." : "Solicitar cotización gratis";
+    }
   }
   if (status) {
     status.setAttribute("role", state === "error" ? "alert" : "status");
@@ -164,8 +245,34 @@ function bindLeadForms() {
       }
       if (started) return;
       started = true;
-      trackEvent("form_start", { source: form.dataset.source || "contacto" });
+      const source = form.dataset.source || "contacto";
+      trackEvent("form_start", { source });
+      trackEvent("quote_form_start", {
+        source,
+        service: normalize(form.elements.service?.value),
+        cta_location: form.classList.contains("quote-form") ? "quote_form" : "public_form",
+        ...journeyAnalyticsProperties(journeyContext),
+      });
     });
+
+    if (form.classList.contains("quote-form")) {
+      form.addEventListener("input", () => persistQuoteDraft(form));
+      form.querySelector("[data-draft-clear]")?.addEventListener("click", () => {
+        quoteDraftFields.forEach((field) => {
+          const control = form.elements[field];
+          if (
+            control &&
+            !(
+              (field === "service" && journeyContext.service) ||
+              (field === "message" && journeyContext.goal)
+            )
+          ) {
+            control.value = "";
+          }
+        });
+        clearQuoteDraft(form);
+      });
+    }
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
@@ -178,7 +285,6 @@ function bindLeadForms() {
         service: normalize(data.get("service")),
         message: normalize(data.get("message")),
         source: form.dataset.source || "contacto",
-        ...(await securityPromise).payload(),
       };
 
       form
@@ -203,6 +309,13 @@ function bindLeadForms() {
         );
         form.querySelector('[aria-invalid="true"]')?.focus();
         trackEvent("form_error", { source: lead.source, reason: "validation" });
+        if (form.classList.contains("quote-form")) {
+          trackEvent("quote_error", {
+            source: lead.source,
+            cta_location: "quote_form",
+            ...journeyAnalyticsProperties(journeyContext),
+          });
+        }
         return;
       }
 
@@ -210,9 +323,11 @@ function bindLeadForms() {
       trackEvent("quote_submit", {
         source: lead.source,
         service: lead.service,
+        cta_location: form.classList.contains("quote-form") ? "quote_form" : "public_form",
         ...journeyAnalyticsProperties(journeyContext),
       });
       try {
+        Object.assign(lead, (await securityPromise).payload());
         await submitPublicInquiry(lead);
         trackEvent("generate_lead", {
           source: lead.source,
@@ -222,6 +337,7 @@ function bindLeadForms() {
         trackEvent("quote_success", {
           source: lead.source,
           service: lead.service,
+          cta_location: form.classList.contains("quote-form") ? "quote_form" : "public_form",
           ...journeyAnalyticsProperties(journeyContext),
         });
         setFormState(
@@ -230,12 +346,17 @@ function bindLeadForms() {
           "Solicitud recibida. Te contactaremos por WhatsApp para preparar tu diagnóstico gratuito.",
         );
         form.reset();
+        if (form.classList.contains("quote-form")) clearQuoteDraft(form);
         (await securityPromise).reset();
         status?.focus();
       } catch (error) {
         console.warn("[Luenio] Contact endpoint unavailable.", error);
         trackEvent("form_error", { source: lead.source, reason: "api" });
-        trackEvent("quote_error", { source: lead.source, reason: "api" });
+        trackEvent("quote_error", {
+          source: lead.source,
+          cta_location: form.classList.contains("quote-form") ? "quote_form" : "public_form",
+          ...journeyAnalyticsProperties(journeyContext),
+        });
         setFormState(
           form,
           "error",
@@ -323,6 +444,7 @@ function createWhatsappWidget() {
       lastFocusedElement = document.activeElement;
       trackEvent("whatsapp_open", {
         source,
+        cta_location: source,
         ...journeyAnalyticsProperties(journeyContext),
       });
       window.setTimeout(() => form.querySelector("input")?.focus(), 30);
@@ -335,9 +457,10 @@ function createWhatsappWidget() {
     trigger.addEventListener("click", () => {
       const willOpen = modal.getAttribute("aria-hidden") !== "false";
       if (willOpen) {
+        const quoteForm = trigger.closest(".quote-form");
         applyWhatsappJourneyContext({
-          service: trigger.dataset.service,
-          goal: trigger.dataset.goal,
+          service: trigger.dataset.service || quoteForm?.elements.service?.value,
+          goal: trigger.dataset.goal || quoteForm?.elements.message?.value,
         });
       }
       setOpen(willOpen, trigger.dataset.source || "floating");
@@ -381,12 +504,11 @@ function createWhatsappWidget() {
       return;
     }
     const objective = normalize(data.get("objective"));
-    const context = normalize(body.dataset.pageContext || document.title);
     const message = [
       `Hola Luenio, soy ${name} de ${business}.`,
       `Me interesa: ${service}.`,
       objective ? `Mi objetivo es: ${objective}.` : "",
-      `Llegué desde: ${context}.`,
+      `Llegué desde: ${normalize(body.dataset.pageContext || document.title)}.`,
       "Quiero solicitar una cotización gratuita y personalizada.",
     ]
       .filter(Boolean)
@@ -394,7 +516,7 @@ function createWhatsappWidget() {
     trackEvent("whatsapp_submit", {
       service,
       source: activeWhatsappSource,
-      context,
+      cta_location: activeWhatsappSource,
       ...journeyAnalyticsProperties(journeyContext),
     });
     window.open(
@@ -430,7 +552,22 @@ function bindCaseTracking() {
 function bindConversionTracking() {
   document.querySelectorAll("[data-quote-cta]").forEach((link) => {
     link.addEventListener("click", () => {
-      trackEvent("quote_cta_click", { source: link.dataset.quoteCta || "public" });
+      const linkedJourney = getPublicJourneyById(link.dataset.demoContext || "");
+      const clickContext = linkedJourney
+        ? {
+            sector: linkedJourney.sector,
+            demo: linkedJourney.demo,
+            service: linkedJourney.quoteService,
+            source: link.dataset.quoteCta || "home_demo",
+          }
+        : journeyContext;
+      const properties = {
+        ...journeyAnalyticsProperties(clickContext),
+        source: link.dataset.quoteCta || clickContext.source || "public",
+        cta_location: link.dataset.ctaLocation || link.dataset.quoteCta || "public",
+      };
+      trackEvent("quote_cta_click", properties);
+      if (linkedJourney) trackEvent("demo_context_preserved", properties);
     });
   });
   document.querySelectorAll("[data-all-demos-open]").forEach((link) => {

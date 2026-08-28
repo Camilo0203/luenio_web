@@ -1,5 +1,6 @@
 import { initAnalytics, trackEvent } from "./analytics.js";
 import { buildQuoteUrl } from "./journey-context.js";
+import { getPublicJourneyByDemo, getPublicJourneyBySector } from "./public-journeys.js";
 import { initThemeControl } from "./theme-control.js";
 
 const body = document.body;
@@ -9,6 +10,8 @@ const menuToggle = document.querySelector("[data-menu-toggle]");
 const navigation = document.querySelector("[data-navigation]");
 const demoForms = document.querySelectorAll("[data-demo-form]");
 const defaultWhatsappPhone = ["57", "319", "320", "3702"].join("");
+const journey =
+  getPublicJourneyBySector(body.dataset.demoType) || getPublicJourneyByDemo(body.dataset.demoName);
 let lastFocusedElement = null;
 
 if (fontStylesheet?.media === "print") {
@@ -24,25 +27,57 @@ const whatsappIcon = `
 
 function closeMenu() {
   if (!menuToggle || !navigation) return;
+  const isMobile = window.matchMedia("(max-width: 980px)").matches;
   menuToggle.setAttribute("aria-expanded", "false");
   menuToggle.setAttribute("aria-label", "Abrir menú");
   navigation.dataset.open = "false";
+  navigation.toggleAttribute("inert", isMobile);
+  if (isMobile) navigation.setAttribute("aria-hidden", "true");
+  else navigation.removeAttribute("aria-hidden");
+  document.querySelector("main")?.removeAttribute("inert");
+  document.querySelector("footer")?.removeAttribute("inert");
+  body.classList.remove("mobile-menu-open");
 }
 
 if (menuToggle && navigation) {
+  const mobileMenu = window.matchMedia("(max-width: 980px)");
+  const backgroundRegions = [
+    document.querySelector("main"),
+    document.querySelector("footer"),
+  ].filter(Boolean);
+  const setMenuState = (open, returnFocus = false) => {
+    const isOpen = mobileMenu.matches && open;
+    menuToggle.setAttribute("aria-expanded", String(isOpen));
+    menuToggle.setAttribute("aria-label", isOpen ? "Cerrar menú" : "Abrir menú");
+    navigation.dataset.open = String(isOpen);
+    navigation.toggleAttribute("inert", mobileMenu.matches && !isOpen);
+    if (mobileMenu.matches) navigation.setAttribute("aria-hidden", String(!isOpen));
+    else navigation.removeAttribute("aria-hidden");
+    backgroundRegions.forEach((region) => region.toggleAttribute("inert", isOpen));
+    body.classList.toggle("mobile-menu-open", isOpen);
+    if (returnFocus) menuToggle.focus();
+  };
+
   menuToggle.addEventListener("click", () => {
     const open = menuToggle.getAttribute("aria-expanded") === "true";
-    menuToggle.setAttribute("aria-expanded", String(!open));
-    menuToggle.setAttribute("aria-label", open ? "Abrir menú" : "Cerrar menú");
-    navigation.dataset.open = String(!open);
+    setMenuState(!open);
+  });
+  navigation.addEventListener("click", (event) => {
+    if (event.target.closest("a")) setMenuState(false);
   });
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && menuToggle.getAttribute("aria-expanded") === "true") {
-      closeMenu();
-      menuToggle.focus();
+      setMenuState(false, true);
     }
   });
+  document.addEventListener("pointerdown", (event) => {
+    if (navigation.dataset.open !== "true") return;
+    if (navigation.contains(event.target) || menuToggle.contains(event.target)) return;
+    setMenuState(false);
+  });
+  mobileMenu.addEventListener?.("change", () => setMenuState(false));
+  setMenuState(false);
 }
 
 document.querySelectorAll('a[href^="#"]').forEach((link) => {
@@ -61,6 +96,78 @@ document.querySelectorAll('a[href^="#"]').forEach((link) => {
     target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
   });
 });
+
+function ensurePublicJourneyBridge() {
+  if (!journey) return;
+  const hero = document.querySelector(".demo-hero, .session-deck, .vet-stage, .aura-lab");
+  if (!hero) return;
+
+  const content = hero.querySelector(
+    ".demo-hero__content, .builder-heading, .vet-promise, .aura-lab__copy",
+  );
+  if (content && !content.querySelector("[data-luenio-disclosure]")) {
+    const disclosure = document.createElement("p");
+    disclosure.className = "luenio-demo-disclosure";
+    disclosure.dataset.luenioDisclosure = "";
+    disclosure.textContent =
+      "Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.";
+    content.append(disclosure);
+  }
+
+  const quoteUrl = buildQuoteUrl({
+    sector: journey.sector,
+    demo: journey.demo,
+    service: journey.quoteService,
+    goal: journey.goal || body.dataset.demoGoal,
+    source: `landing_${journey.id}`,
+  });
+  document.querySelectorAll(`[data-quote-cta="landing_${journey.id}"]`).forEach((link) => {
+    link.href = quoteUrl;
+    link.dataset.demoContext = journey.id;
+  });
+  const actions = hero.querySelector(".demo-actions, .gym-hero-actions");
+  let quoteLink = hero.querySelector("[data-luenio-contextual-quote]");
+  const primary = actions?.querySelector('a[href^="#"]');
+  if (primary) {
+    quoteLink = primary;
+    quoteLink.dataset.luenioContextualQuote = "";
+  } else if (!quoteLink && actions) {
+    quoteLink = document.createElement("a");
+    quoteLink.className = "demo-button demo-button--contextual";
+    quoteLink.dataset.luenioContextualQuote = "";
+    actions.append(quoteLink);
+  } else if (!quoteLink && content) {
+    quoteLink = document.createElement("a");
+    quoteLink.className = "vet-button aura-button luenio-contextual-quote care-pill";
+    quoteLink.dataset.luenioContextualQuote = "";
+    content.append(quoteLink);
+  }
+  if (quoteLink) {
+    quoteLink.classList.add("luenio-contextual-quote");
+    quoteLink.href = quoteUrl;
+    quoteLink.textContent = "Cotizar una experiencia como esta";
+    quoteLink.dataset.quoteCta = `landing_${journey.id}`;
+    quoteLink.dataset.demoContext = journey.id;
+  }
+}
+
+function bindNicheQuoteTracking() {
+  if (!journey) return;
+  document.querySelectorAll("[data-quote-cta]").forEach((link) => {
+    const source = link.dataset.quoteCta || `landing_${journey.id}`;
+    const properties = {
+      sector: journey.sector,
+      demo: journey.demo,
+      service: journey.quoteService,
+      source,
+      cta_location: link.dataset.ctaLocation || source,
+    };
+    link.addEventListener("click", () => {
+      trackEvent("quote_cta_click", properties);
+      if (link.dataset.demoContext) trackEvent("demo_context_preserved", properties);
+    });
+  });
+}
 
 demoForms.forEach((form) => {
   form.addEventListener("submit", (event) => {
@@ -82,12 +189,12 @@ demoForms.forEach((form) => {
 function createWhatsappWidget() {
   const demoName = body.dataset.demoName || "esta landing";
   const demoType = body.dataset.demoType || "negocio";
-  const goal = body.dataset.demoGoal || `Quiero una landing para mi ${demoType}`;
-  const quoteSource = `demo_${demoType}`;
+  const goal = journey?.goal || body.dataset.demoGoal || `Quiero una landing para mi ${demoType}`;
+  const quoteSource = `landing_${journey?.id || demoType}`;
   const quoteUrl = buildQuoteUrl({
-    sector: demoType,
-    demo: demoName,
-    service: "Landing page de conversión",
+    sector: journey?.sector || demoType,
+    demo: journey?.demo || demoName,
+    service: journey?.quoteService || "Landing page de conversión",
     goal,
     source: quoteSource,
   });
@@ -131,6 +238,7 @@ function createWhatsappWidget() {
   const floatingTrigger = document.querySelector(".luenio-wa__trigger");
   const closeButtons = document.querySelectorAll("[data-luenio-close]");
   const hasFixedWhatsappPosition = body.dataset.whatsappPosition === "fixed";
+  let activeWhatsappSource = "floating";
 
   window.addEventListener("luenio:demo-goal-change", (event) => {
     const nextGoal = String(event.detail?.goal || "").trim();
@@ -144,9 +252,18 @@ function createWhatsappWidget() {
     }
     form?.querySelectorAll("[data-quote-link]").forEach((link) => {
       link.href = buildQuoteUrl({
-        sector: demoType,
-        demo: demoName,
-        service: "Landing page de conversión",
+        sector: journey?.sector || demoType,
+        demo: journey?.demo || demoName,
+        service: journey?.quoteService || "Landing page de conversión",
+        goal: nextGoal,
+        source: quoteSource,
+      });
+    });
+    document.querySelectorAll(`[data-quote-cta="landing_${journey?.id || ""}"]`).forEach((link) => {
+      link.href = buildQuoteUrl({
+        sector: journey?.sector || demoType,
+        demo: journey?.demo || demoName,
+        service: journey?.quoteService || "Landing page de conversión",
         goal: nextGoal,
         source: quoteSource,
       });
@@ -225,13 +342,20 @@ function createWhatsappWidget() {
     collisionFrame = window.requestAnimationFrame(updateTriggerPosition);
   };
 
-  const setOpen = (open) => {
+  const setOpen = (open, source = "direct") => {
     modal?.setAttribute("aria-hidden", String(!open));
     triggers.forEach((trigger) => trigger.setAttribute("aria-expanded", String(open)));
     body.classList.toggle("luenio-modal-open", open);
     if (open) {
+      activeWhatsappSource = source;
       lastFocusedElement = document.activeElement;
-      trackEvent("luenio_widget_open", { niche: demoType, demo: demoName });
+      trackEvent("luenio_widget_open", {
+        niche: demoType,
+        demo: demoName,
+        service: journey?.quoteService || "Landing page de conversión",
+        source: activeWhatsappSource,
+        cta_location: activeWhatsappSource,
+      });
       window.setTimeout(() => form?.querySelector("input")?.focus(), 20);
     } else if (lastFocusedElement instanceof HTMLElement) {
       lastFocusedElement.focus();
@@ -241,7 +365,11 @@ function createWhatsappWidget() {
 
   triggers.forEach((trigger) => {
     trigger.addEventListener("click", () => {
-      setOpen(modal?.getAttribute("aria-hidden") !== "false");
+      const willOpen = modal?.getAttribute("aria-hidden") !== "false";
+      setOpen(
+        willOpen,
+        trigger.dataset.source || (trigger === floatingTrigger ? "floating" : "landing_inline"),
+      );
     });
   });
   closeButtons.forEach((button) => button.addEventListener("click", () => setOpen(false)));
@@ -309,7 +437,13 @@ function createWhatsappWidget() {
       .filter(Boolean)
       .join(" ");
 
-    trackEvent("whatsapp_submit", { niche: demoType, demo: demoName });
+    trackEvent("whatsapp_submit", {
+      niche: demoType,
+      demo: demoName,
+      service: journey?.quoteService || "Landing page de conversión",
+      source: quoteSource,
+      cta_location: activeWhatsappSource,
+    });
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
     setOpen(false);
   });
@@ -326,6 +460,15 @@ function createWhatsappWidget() {
       niche: demoType,
       demo: demoName,
       source: quoteSource,
+      service: journey?.quoteService || "Landing page de conversión",
+      cta_location: "whatsapp_modal",
+    });
+    trackEvent("demo_context_preserved", {
+      sector: journey?.sector || demoType,
+      demo: journey?.demo || demoName,
+      service: journey?.quoteService || "Landing page de conversión",
+      source: quoteSource,
+      cta_location: "whatsapp_modal",
     });
   });
 
@@ -342,5 +485,7 @@ function createWhatsappWidget() {
   queueTriggerPosition();
 }
 
+ensurePublicJourneyBridge();
+bindNicheQuoteTracking();
 createWhatsappWidget();
 initAnalytics();

@@ -51,7 +51,7 @@ mountIndustryDemo({
       status: "Analizando intención...",
       event: {
         label: "Interés detectado",
-        detail: "La IA detectó intención por precio y posible visita.",
+        detail: "La simulación clasificó mediante reglas la consulta de precio y posible visita.",
       },
     },
     {

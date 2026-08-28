@@ -10,9 +10,15 @@ function fail(message) {
   console.error(`[edge-preflight] ${message}`);
 }
 
-if (!envPath || !fs.existsSync(envPath)) {
-  fail("Provide an existing edge env path as the first argument or EDGE_ENV_FILE.");
+if (!envPath || !path.isAbsolute(envPath) || !fs.existsSync(envPath)) {
+  fail("Provide an existing absolute edge env path as the first argument or EDGE_ENV_FILE.");
 } else {
+  const fileStat = fs.statSync(envPath);
+  if (!fileStat.isFile()) fail("The edge env path must reference a regular file.");
+  if (process.platform !== "win32" && (fileStat.mode & 0o077) !== 0) {
+    fail("The edge env file must not be accessible by group or others (expected mode 600).");
+  }
+  const seenKeys = new Set();
   const values = Object.fromEntries(
     fs
       .readFileSync(envPath, "utf8")
@@ -21,7 +27,17 @@ if (!envPath || !fs.existsSync(envPath)) {
       .filter((line) => line && !line.startsWith("#") && line.includes("="))
       .map((line) => {
         const separator = line.indexOf("=");
-        return [line.slice(0, separator), line.slice(separator + 1)];
+        const key = line.slice(0, separator).trim();
+        if (!/^[A-Z][A-Z0-9_]*$/.test(key)) fail("The edge env file contains an invalid key.");
+        if (seenKeys.has(key)) fail(`The edge env file contains duplicate key ${key}.`);
+        seenKeys.add(key);
+        return [
+          key,
+          line
+            .slice(separator + 1)
+            .trim()
+            .replace(/^["']|["']$/g, ""),
+        ];
       }),
   );
   const required = [
@@ -54,4 +70,7 @@ for (const relativePath of ["Caddyfile", "ops/edge-compose.yml", "docker-compose
 }
 
 if (failed) process.exitCode = 1;
-else console.info("[edge-preflight] Shared VPS edge configuration is ready.");
+else
+  console.info(
+    "[edge-preflight] Shared VPS edge configuration is ready; no secret values were printed.",
+  );

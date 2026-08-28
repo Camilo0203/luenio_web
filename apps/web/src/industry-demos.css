@@ -68,9 +68,6 @@
   font-size: 12px;
   font-weight: 750;
   transition:
-    color 180ms ease,
-    background 180ms ease,
-    border-color 180ms ease,
     box-shadow 180ms ease,
     transform 180ms var(--industry-ease);
 }
@@ -723,7 +720,7 @@ html[data-theme="dark"] .restaurant-pass .demo-choice.is-selected {
 @media (max-width: 680px) {
   .demo-page:not(.gym-board) .demo-shell,
   .demo-page:not(.gym-board) .demo-hero__content {
-    width: min(100% - 32px, var(--shell));
+    width: min(calc(100% - 32px), var(--shell));
   }
 
   .demo-page:not(.gym-board) .demo-hero,
