@@ -1045,6 +1045,17 @@ async function runBrowserChecks(baseUrl) {
       await page.goto(`${baseUrl}/demo/${slug}`, { waitUntil: "commit", timeout: 10_000 });
       await expectVisibleText(page, brand, `${slug} mobile simulation brand`);
       await page.locator("main h1").waitFor({ state: "visible", timeout: 10_000 });
+      // The sector links in #industryLinks are a horizontal scroller whose item
+      // widths change when the custom font swaps in. Measuring scrollWidth before
+      // that lands makes this overflow assertion intermittently fail.
+      await page.evaluate(
+        () =>
+          new Promise((resolve) => {
+            const done = () => resolve();
+            Promise.resolve(globalThis.document.fonts?.ready).then(done, done);
+            globalThis.setTimeout(done, 3_000);
+          }),
+      );
       await page.waitForFunction(
         () => {
           const link = globalThis.document.querySelector('#industryLinks a[aria-current="page"]');

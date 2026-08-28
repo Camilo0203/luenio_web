@@ -1,13 +1,12 @@
 User-agent: *
 Allow: /
-Disallow: /demo/
-Disallow: /gym
-Disallow: /restaurants
-Disallow: /real-estate
-Disallow: /ecommerce
-Disallow: /agencies
-Disallow: /veterinary
-Disallow: /aesthetics
+
+# The seven simulations under /demo/ (and their /demos/<sector> aliases) ship
+# <meta name="robots" content="noindex, nofollow">, and the English sector
+# aliases (/gym, /restaurants, /real-estate, /ecommerce, /agencies, /veterinary,
+# /aesthetics) carry a canonical pointing at their Spanish URL. Both directives
+# only work if the page can be fetched, so they are deliberately not disallowed
+# here: a Disallow would leave them unread and let the URLs surface anyway.
 Disallow: /login
 Disallow: /dashboard
 Disallow: /admin

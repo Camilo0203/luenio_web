@@ -44,7 +44,6 @@ PUBLIC_JOURNEYS.forEach((journey) => {
     `${journey.id} quote context must round-trip through the canonical metadata.`,
   );
 
-  const landingHtml = readText(`apps/web/pages/${journey.id}/index.html`);
   const simulationHtml = readText(`apps/web/pages${journey.simulationPath}/index.html`);
   assert(
     readCollapsedText(`apps/web/pages/${journey.id}/index.html`).includes(disclosureText),

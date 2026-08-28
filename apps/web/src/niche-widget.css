@@ -400,3 +400,34 @@ html[data-theme="dark"] .luenio-demo-disclosure {
     transition: none;
   }
 }
+
+/* Legal access for the seven public sector landings. They are indexable, listed
+   in the sitemap, carry quote CTAs and collect contact details, so they need the
+   same Terms / Privacy / Refunds links the rest of the public surface has.
+   Defined here because niche-widget.css is the only stylesheet all seven load,
+   and it inherits colour so it reads correctly on every sector palette and in
+   both themes. */
+.legal-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 24px;
+  justify-content: center;
+  padding: 20px;
+  color: inherit;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.legal-bar a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: inherit;
+  text-decoration: none;
+}
+
+.legal-bar a:hover,
+.legal-bar a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

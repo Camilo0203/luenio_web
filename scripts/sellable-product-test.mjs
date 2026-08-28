@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { demoTypes } from "../core/demo-simulator/index.js";
 
 const root = process.cwd();
 
@@ -161,9 +162,16 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
       privacyHtml.includes("contacto@luenio.com"),
   ],
   [
+    // Index boundaries are enforced by per-page directives, not by robots.txt:
+    // noindex on the simulations and a canonical on the English aliases. Both
+    // require the page to stay crawlable, so robots.txt must NOT disallow them.
     "search index boundaries",
-    robotsTxt.includes("Disallow: /demo/") &&
-      robotsTxt.includes("Disallow: /gym") &&
+    !robotsTxt.includes("Disallow: /demo/") &&
+      !robotsTxt.includes("Disallow: /gym") &&
+      robotsTxt.includes("Disallow: /dashboard") &&
+      demoTypes.every((type) =>
+        readText(`apps/web/pages/demo/${type}/index.html`).includes('content="noindex, nofollow"'),
+      ) &&
       sitemapXml.includes("https://luenio.com/") &&
       sitemapXml.includes("https://luenio.com/cotizacion") &&
       sitemapXml.includes("https://luenio.com/demos") &&
