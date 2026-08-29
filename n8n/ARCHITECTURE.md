@@ -3,7 +3,7 @@
 Generado por `scripts/n8n-sync.mjs` desde la instancia real. No editar a mano:
 se sobrescribe en cada sincronización.
 
-Workflows: **41** — 16 de producción, 11 de staging, 14 de laboratorio.
+Workflows: **27** — 16 de producción, 11 de staging, 0 de laboratorio.
 
 ## Camino de un mensaje
 
@@ -54,7 +54,7 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 | Luenio Error Log | activo | errorTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO], Luenio Chatbot [STAGING PROFESSIONAL], Luenio Followup 2h+24h, Luenio LUNA | Vigilar SLA handoff |
 | Luenio Followup 2h+24h | activo | scheduleTrigger | — |
 | Luenio Insights | Consolidar diario | activo | manualTrigger | — |
-| Luenio Insights | Registrar evento | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO], Luenio Chatbot [STAGING PROFESSIONAL], Luenio Followup 2h+24h, LUNA Insights Probe |
+| Luenio Insights | Registrar evento | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO], Luenio Chatbot [STAGING PROFESSIONAL], Luenio Followup 2h+24h |
 | Luenio LUNA | Consultar KB y objeciones | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3, Luenio LUNA | Orquestar turno v3 [STAGING] |
 | Luenio LUNA | Decidir turno | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3, Luenio LUNA | Orquestar turno v3 [STAGING] |
 | Luenio LUNA | Generar propuesta PDF | inactivo | executeWorkflowTrigger | — |
@@ -87,18 +87,4 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 
 | Workflow | Estado | Disparador | Invocado por |
 | --- | --- | --- | --- |
-| Luenio Evaluations | Limpiar casos seed | inactivo | manualTrigger | — |
-| Luenio HMAC Self-Test [STAGING] | inactivo | webhook | — |
-| Luenio Insights | Inicializar encabezados | inactivo | manualTrigger | — |
-| Luenio Insights | Inicializar hoja | inactivo | manualTrigger | — |
-| Luenio Schedule Probe | inactivo | scheduleTrigger | — |
-| Luenio Trigger Probe | inactivo | manualTrigger | — |
-| Luenio Trigger Probe Output | inactivo | manualTrigger | — |
-| Luenio Webhook Probe | inactivo | webhook | — |
-| LUNA Error Handling STAGING Test | inactivo | webhook | — |
-| LUNA Eval Maintenance | Limpiar casos | inactivo | manualTrigger | — |
-| LUNA Insights Cleanup | inactivo | manualTrigger | — |
-| LUNA Insights Daily Inspect | inactivo | manualTrigger | — |
-| LUNA Insights Probe | inactivo | manualTrigger | — |
-| LUNA Insights Read Probe | inactivo | manualTrigger | — |
 
