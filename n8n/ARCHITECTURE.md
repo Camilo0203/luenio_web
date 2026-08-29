@@ -36,8 +36,12 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 
 `date`, `schema_version`, `unique_conversations`, `inbound_messages`, `processed_messages`, `duplicate_messages`, `blocked_messages`, `discovery_completed`, `solutions_confirmed`, `price_requests`, `proposal_requests`, `proposals_sent`, `proposals_accepted`, `handoffs`, `opt_outs`, `followups_dry_run`, `followups_sent`, `followups_failed`, `critical_errors`, `secondary_errors`, `avg_turns_to_discovery`, `avg_minutes_to_proposal`, `catalog_unavailable_count`, `generated_at`, `source_version`, `status`
 
-> Dos nodos referencian la pestaña **por nombre** y el resto por identificador:
-> renombrarla rompería esos dos.
+> 1 nodo(s) referencian su pestaña **por nombre**; el resto usa el
+> identificador, que sobrevive a un renombrado. Estos no:
+> - Luenio Catalogo Sync [STAGING] / 02 Sheets | Leer catalogo_luna -> `catalogo_luna`
+
+> El nombre en caché que guarda n8n puede estar desfasado respecto al nombre real
+> de la pestaña; no es un fallo mientras la referencia sea por identificador.
 
 ## Huecos detectados
 

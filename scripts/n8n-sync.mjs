@@ -179,9 +179,30 @@ function renderDoc(workflows, calledBy) {
     lines.push([...columns].map((column) => `\`${column}\``).join(", "));
     lines.push("");
   }
+  const porNombre = [];
+  for (const workflow of workflows) {
+    for (const node of workflow.nodes || []) {
+      if (!/googleSheets/i.test(node.type)) continue;
+      const ref = node.parameters?.sheetName;
+      const mode = typeof ref === "object" ? ref.mode : "cadena";
+      if (mode === "name" || mode === "cadena") {
+        porNombre.push(`${workflow.name} / ${node.name} -> \`${ref?.value ?? ref}\``);
+      }
+    }
+  }
+  if (porNombre.length) {
+    lines.push(
+      `> ${porNombre.length} nodo(s) referencian su pestaña **por nombre**; el resto usa el`,
+      "> identificador, que sobrevive a un renombrado. Estos no:",
+    );
+    porNombre.forEach((entry) => lines.push(`> - ${entry}`));
+  } else {
+    lines.push("> Todos los nodos referencian su pestaña por identificador.");
+  }
   lines.push(
-    "> Dos nodos referencian la pestaña **por nombre** y el resto por identificador:",
-    "> renombrarla rompería esos dos.",
+    "",
+    "> El nombre en caché que guarda n8n puede estar desfasado respecto al nombre real",
+    "> de la pestaña; no es un fallo mientras la referencia sea por identificador.",
   );
   lines.push("");
 
