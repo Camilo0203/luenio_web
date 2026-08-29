@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import http from "node:http";
 import { stopTestProcess } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
+import { SECTORS, nichePath } from "../config/sectors.js";
 
 const isProductionSmoke = process.argv.includes("--production");
 const testProxySecret = "luenio-production-smoke-proxy-secret-123456789";
@@ -220,42 +221,18 @@ async function runSmoke() {
         demosAliasHtml.includes('rel="canonical" href="https://luenio.com/demos"'),
       "/demos must render the complete indexable demo catalog.",
     );
-    for (const demoRoute of [
-      "/demos/restaurants",
-      "/demos/real-estate",
-      "/demos/gym",
-      "/demos/ecommerce",
-      "/demos/agencies",
-      "/demos/veterinary",
-      "/demos/aesthetics",
-    ]) {
+    for (const demoRoute of SECTORS.map((sector) => `/demos/${sector.id}`)) {
       const demoHtml = await expectTextRoute(baseUrl, demoRoute, "Ejecutar Demo en Vivo");
       assert(
         demoHtml.includes('content="noindex, nofollow"'),
         `${demoRoute} must be noindex for the lead-gen launch.`,
       );
     }
-    for (const nicheRoute of [
-      "/gym",
-      "/restaurants",
-      "/real-estate",
-      "/ecommerce",
-      "/agencies",
-      "/veterinary",
-      "/aesthetics",
-    ]) {
+    for (const nicheRoute of SECTORS.map((sector) => `/${sector.id}`)) {
       const nicheHtml = await expectTextRoute(baseUrl, nicheRoute, "Luenio");
       assert(nicheHtml.includes('content="index, follow"'), `${nicheRoute} must be indexable.`);
     }
-    for (const aliasRoute of [
-      "/gimnasios",
-      "/restaurantes",
-      "/inmobiliarias",
-      "/tiendas-online",
-      "/agencias",
-      "/veterinarias",
-      "/esteticas",
-    ]) {
+    for (const aliasRoute of SECTORS.map(nichePath)) {
       const aliasHtml = await expectTextRoute(baseUrl, aliasRoute, "Luenio");
       assert(aliasHtml.includes('content="index, follow"'), `${aliasRoute} must be indexable.`);
     }
@@ -401,6 +378,24 @@ async function runSmoke() {
     assert(
       disabledCrmApiBody.error === "Agency CRM is not enabled.",
       "Disabled Agency CRM API must return an explicit JSON error.",
+    );
+
+    // The 404 page is sent outside the static handler, so it needs its own check
+    // that the shared chrome made it in: the include directive is expanded when
+    // the source tree is served, and never reaches the browser.
+    const unknownPage = await fetch(`${baseUrl}/ruta-que-no-existe`, {
+      headers: { Accept: "text/html" },
+    });
+    const unknownPageHtml = await unknownPage.text();
+    assert(unknownPage.status === 404, "Unknown HTML route must return 404.");
+    assert(
+      unknownPageHtml.includes("site-header__inner") &&
+        unknownPageHtml.includes("site-footer__bottom"),
+      "The 404 page must be served with the shared header and footer.",
+    );
+    assert(
+      !unknownPageHtml.includes("<!-- include:"),
+      "The 404 page must not ship an unexpanded include directive.",
     );
 
     const unknownApi = await fetch(`${baseUrl}/api/nope`);

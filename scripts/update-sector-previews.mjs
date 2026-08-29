@@ -2,19 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
 import { chromium } from "playwright";
+import { SECTORS, nichePath } from "../config/sectors.js";
 
 const baseUrl = process.env.PREVIEW_BASE_URL || "http://127.0.0.1:4180";
 const outputDirectory = path.resolve("public/assets/previews");
 const temporaryDirectory = path.resolve("test-results/sector-previews");
-const allSectors = [
-  ["agency", "/agencias"],
-  ["ecommerce", "/tiendas-online"],
-  ["gym", "/gimnasios"],
-  ["real-estate", "/inmobiliarias"],
-  ["restaurants", "/restaurantes"],
-  ["veterinary", "/veterinarias"],
-  ["aesthetics", "/esteticas"],
-];
+// previewSlug names the files under public/assets/previews.
+const allSectors = SECTORS.map((sector) => [sector.previewSlug, nichePath(sector)]);
 const requestedSectors = new Set(
   (process.env.PREVIEW_SECTORS || "")
     .split(",")

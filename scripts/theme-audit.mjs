@@ -4,26 +4,15 @@ import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
+import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
 
 let baseUrl = process.env.THEME_AUDIT_BASE_URL || "";
 const defaultRoutes = [
   "/",
   "/cotizacion",
-  "/gimnasios",
-  "/restaurantes",
-  "/inmobiliarias",
-  "/tiendas-online",
-  "/agencias",
-  "/veterinarias",
-  "/esteticas",
+  ...SECTORS.map(nichePath),
   "/demo",
-  "/demo/gym",
-  "/demo/restaurants",
-  "/demo/real-estate",
-  "/demo/ecommerce",
-  "/demo/agencies",
-  "/demo/veterinary",
-  "/demo/aesthetics",
+  ...SECTORS.map(demoPath),
   "/privacidad",
   "/terminos",
   "/reembolsos",

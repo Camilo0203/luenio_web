@@ -1,5 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
+import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
+import { canonicalPublicPaths, getDemoPagePath, getNichePagePath } from "../lib/public-routes.js";
+import { expandIncludes, hasIncludeDirectives } from "../lib/html-includes.js";
 
 const root = process.cwd();
 
@@ -67,9 +70,57 @@ assert(
   "Production security validation must run before loading Sentry and the API graph.",
 );
 assert(
-  serverSource.includes('"/demos": "index.html"'),
+  getDemoPagePath("/demos") === "index.html",
   "The public demo catalog must support the /demos route.",
 );
+assert(
+  !/getDemoPagePath\(pathname\) \{/.test(serverSource),
+  "Public routes must be derived from config/sectors.js, not restated in server.js.",
+);
+SECTORS.forEach((sector) => {
+  assert(getNichePagePath(nichePath(sector)), `Missing route for ${nichePath(sector)}.`);
+  assert(getDemoPagePath(demoPath(sector)), `Missing route for ${demoPath(sector)}.`);
+});
+
+// The sitemap is the one public artefact the sector table cannot generate, so it
+// is checked against the table instead of being kept in step by hand.
+const sitemapUrls = [...readText("public/sitemap.xml").matchAll(/<loc>([^<]+)<\/loc>/g)].map(
+  (match) => new URL(match[1]).pathname.replace(/(.)\/$/, "$1"),
+);
+assert(
+  sitemapUrls.join(" ") === canonicalPublicPaths().join(" "),
+  `public/sitemap.xml must list exactly the canonical public paths.
+  sitemap: ${sitemapUrls.join(" ")}
+  table:   ${canonicalPublicPaths().join(" ")}`,
+);
+
+// Shared chrome lives in apps/web/partials and reaches pages through an include
+// directive. Every page that uses one must expand, and the public pages must end
+// up with the header, footer and legal bar they declare.
+const partialsDir = path.join(root, "apps", "web", "partials");
+const pageFiles = listFiles("apps/web/pages").filter((filePath) => filePath.endsWith(".html"));
+let expandedPages = 0;
+for (const filePath of pageFiles) {
+  const source = readText(filePath);
+  if (!hasIncludeDirectives(source)) continue;
+  const rendered = expandIncludes(source, { partialsDir, sourceLabel: filePath });
+  assert(
+    !hasIncludeDirectives(rendered),
+    `${filePath} still contains an include directive after expansion.`,
+  );
+  if (source.includes("include: site-header")) {
+    assert(
+      rendered.includes('class="site-header') && rendered.includes("site-header__inner"),
+      `${filePath} must render the shared header.`,
+    );
+    assert(
+      rendered.includes("site-footer__inner") && /class="footer-group"/.test(rendered),
+      `${filePath} must render the shared footer with its link groups.`,
+    );
+  }
+  expandedPages += 1;
+}
+assert(expandedPages === 21, `Expected 21 pages to use the shared chrome, found ${expandedPages}.`);
 const productCss = readText("apps/web/src/style.css");
 assert(
   /\.brand\s*\{[\s\S]*?border:\s*0;/.test(productCss),

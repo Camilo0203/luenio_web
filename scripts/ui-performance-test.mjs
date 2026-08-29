@@ -2,25 +2,14 @@ import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
+import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
 
 const ALL_ROUTES = [
   { name: "home", path: "/" },
   { name: "quote", path: "/cotizacion" },
-  { name: "gym", path: "/gimnasios" },
-  { name: "restaurants", path: "/restaurantes" },
-  { name: "real-estate", path: "/inmobiliarias" },
-  { name: "ecommerce", path: "/tiendas-online" },
-  { name: "agencies", path: "/agencias" },
-  { name: "veterinary", path: "/veterinarias" },
-  { name: "aesthetics", path: "/esteticas" },
+  ...SECTORS.map((sector) => ({ name: sector.id, path: nichePath(sector) })),
   { name: "demo", path: "/demo" },
-  { name: "demo-gym", path: "/demo/gym" },
-  { name: "demo-restaurants", path: "/demo/restaurants" },
-  { name: "demo-real-estate", path: "/demo/real-estate" },
-  { name: "demo-ecommerce", path: "/demo/ecommerce" },
-  { name: "demo-agencies", path: "/demo/agencies" },
-  { name: "demo-veterinary", path: "/demo/veterinary" },
-  { name: "demo-aesthetics", path: "/demo/aesthetics" },
+  ...SECTORS.map((sector) => ({ name: `demo-${sector.id}`, path: demoPath(sector) })),
   { name: "privacy", path: "/privacidad" },
   { name: "terms", path: "/terminos" },
   { name: "refunds", path: "/reembolsos" },

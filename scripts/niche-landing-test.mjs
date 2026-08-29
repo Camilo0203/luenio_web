@@ -3,6 +3,9 @@ import path from "node:path";
 import sharp from "sharp";
 import { buildQuoteUrl, readJourneyContext } from "../apps/web/src/journey-context.js";
 import { getPublicJourneyById } from "../apps/web/src/public-journeys.js";
+import { readPageHtml } from "./page-source.mjs";
+import { SECTORS, getSector, nichePath } from "../config/sectors.js";
+import { getNichePagePath, publicPageEntries } from "../lib/public-routes.js";
 
 const root = process.cwd();
 
@@ -11,6 +14,9 @@ function assert(condition, message) {
 }
 
 function readText(filePath) {
+  // Pages declare their shared chrome with an include directive; read them
+  // expanded so assertions see the markup that actually ships.
+  if (filePath.endsWith(".html")) return readPageHtml(filePath);
   return fs.readFileSync(path.join(root, filePath), "utf8");
 }
 
@@ -19,12 +25,18 @@ const legalNotice =
 const disclaimer =
   "Las marcas, nombres, testimonios y datos mostrados son ficticios y se presentan únicamente con fines demostrativos.";
 
+// Identity comes from the shared sector table; everything else in `pages` is
+// what this test expects that landing to show. `brand` is compared against
+// markup, so the ampersand arrives escaped.
+function sectorIdentity(id) {
+  const sector = getSector(id);
+  return { slug: sector.id, journeyId: sector.id, brand: sector.brand.replace(/&/g, "&amp;") };
+}
+
 const pages = [
   {
-    slug: "gym",
-    journeyId: "gym",
+    ...sectorIdentity("gym"),
     className: "gym-board",
-    brand: "Titan Fitness Club",
     hero: "Construye tu ruta.",
     minSections: 5,
     ids: ["constructor", "itinerario", "clases", "zonas", "entrenadores"],
@@ -38,10 +50,8 @@ const pages = [
     disclaimer: "Esta demo no representa un cliente ni resultados reales.",
   },
   {
-    slug: "restaurants",
-    journeyId: "restaurants",
+    ...sectorIdentity("restaurants"),
     className: "demo-restaurant",
-    brand: "Sabor &amp; Fuego",
     hero: "El fuego transforma cada ingrediente.",
     minSections: 10,
     ids: ["historia", "carta", "experiencia", "chef", "reservas", "ubicacion"],
@@ -53,10 +63,8 @@ const pages = [
     heroAsset: "/assets/demo-premium/restaurant-hero.webp",
   },
   {
-    slug: "real-estate",
-    journeyId: "real-estate",
+    ...sectorIdentity("real-estate"),
     className: "demo-real-estate",
-    brand: "Hogar Prime",
     hero: "Encuentra un lugar que esté a la altura de tu historia.",
     minSections: 5,
     maxSections: 5,
@@ -71,10 +79,8 @@ const pages = [
       "Hogar Prime es una marca demostrativa. Las propiedades y precios son ejemplos y no corresponden a listados inmobiliarios vigentes.",
   },
   {
-    slug: "ecommerce",
-    journeyId: "ecommerce",
+    ...sectorIdentity("ecommerce"),
     className: "demo-ecommerce",
-    brand: "NovaStore",
     hero: "Potencia extraordinaria. Diseño esencial.",
     minSections: 9,
     ids: [
@@ -94,10 +100,8 @@ const pages = [
     heroAsset: "/assets/demo-premium/ecommerce-hero.webp",
   },
   {
-    slug: "agencies",
-    journeyId: "agencies",
+    ...sectorIdentity("agencies"),
     className: "demo-agency",
-    brand: "Impulso Digital",
     hero: "Construimos marcas digitales que avanzan.",
     minSections: 7,
     maxSections: 7,
@@ -119,10 +123,8 @@ const pages = [
       "Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son ejemplos y no representan proyectos ni resultados de clientes reales.",
   },
   {
-    slug: "veterinary",
-    journeyId: "veterinary",
+    ...sectorIdentity("veterinary"),
     className: "care-landing veterinary",
-    brand: "Huella Veterinaria",
     hero: "Su bienestar empieza con una conversación.",
     minSections: 4,
     ids: ["servicios", "agenda", "equipo", "contacto"],
@@ -134,10 +136,8 @@ const pages = [
     css: "/apps/web/src/care-landings.css",
   },
   {
-    slug: "aesthetics",
-    journeyId: "aesthetics",
+    ...sectorIdentity("aesthetics"),
     className: "care-landing aesthetics",
-    brand: "Aura Estética",
     hero: "Tu piel no necesita prisa. Necesita atención.",
     minSections: 4,
     ids: ["tratamientos", "agenda", "filosofia", "contacto"],
@@ -351,13 +351,20 @@ const publicSources = [
 ].join("\n");
 assert(!publicSources.includes("Luenio Agency"), "The retired public brand must not return.");
 
-const serverSource = readText("server.js");
-const viteSource = readText("vite.config.js");
-["/gym", "/restaurants", "/real-estate", "/ecommerce", "/agencies"].forEach((route) =>
-  assert(serverSource.includes(route), `Server must route ${route}.`),
-);
-["nicheGym", "nicheRestaurants", "nicheRealEstate", "nicheEcommerce", "nicheAgencies"].forEach(
-  (entry) => assert(viteSource.includes(entry), `Vite must build ${entry}.`),
-);
+// Routes and build entries are derived from config/sectors.js, so assert the
+// derivation rather than the text that used to be typed out in both files.
+const buildEntries = new Set(Object.values(publicPageEntries()));
+SECTORS.forEach((sector) => {
+  assert(getNichePagePath(`/${sector.id}`), `Server must route /${sector.id}.`);
+  assert(getNichePagePath(nichePath(sector)), `Server must route ${nichePath(sector)}.`);
+  assert(
+    buildEntries.has(`apps/web/pages/${sector.id}/index.html`),
+    `Vite must build the ${sector.id} landing.`,
+  );
+  assert(
+    buildEntries.has(`apps/web/pages/demo/${sector.id}/index.html`),
+    `Vite must build the ${sector.id} simulation.`,
+  );
+});
 
 console.info("Niche landing conversion guard passed");

@@ -23,17 +23,40 @@ El scoring es **por reglas** (léxico de intención), no un LLM. Las landings de
 ## Estructura
 
 ```text
-apps/web      Sitio público, demos y nichos
-apps/admin    Login, invitaciones, CRM
-api/          Handlers HTTP y servicios
-core/         Scoring, pipeline, eventos
-db/           Frontera de almacenamiento
-config/       Env y readiness
-scripts/      Tests y preflight
-n8n/          Workflows importables
-ops/          Firewall, backup, monitores
-supabase/     schema.sql
+apps/web           Sitio público, demos y nichos
+apps/web/partials  Cabecera, pie y barra legal compartidos
+apps/admin         Login, invitaciones, CRM
+api/               Handlers HTTP y servicios
+core/              Scoring, pipeline, eventos
+db/                Frontera de almacenamiento
+config/            Env, readiness y tabla de sectores
+lib/               Includes HTML y rutas públicas derivadas
+scripts/           Tests y preflight
+n8n/               Workflows importables
+ops/               Firewall, backup, monitores
+supabase/          schema.sql
 ```
+
+### Añadir un sector
+
+`config/sectors.js` es la única lista de los siete sectores. De ella se derivan
+las rutas del servidor (`/gimnasios`, `/gym`, `/demo/gym` y sus alias), las
+entradas de build de Vite, las URLs del sitemap y las listas de los tests. Añadir
+un sector es una fila en esa tabla más las dos páginas
+(`apps/web/pages/<id>/` y `apps/web/pages/demo/<id>/`).
+
+### Cabecera y pie compartidos
+
+Las páginas públicas declaran su chrome en vez de repetirlo:
+
+```html
+<!-- include: site-header nav="site" ctaHref="/cotizacion" quoteCta="header" ctaLocation="legal_header" -->
+```
+
+Los bloques viven en `apps/web/partials/`. La expansión ocurre en el build (plugin
+de Vite) y al servir el árbol de fuentes (`server.js`), con el mismo módulo
+`lib/html-includes.js`, así que fuente y `dist/` no pueden divergir. Un parámetro
+que falte o una directiva mal escrita fallan de inmediato.
 
 ## Arranque local
 

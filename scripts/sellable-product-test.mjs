@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { demoTypes } from "../core/demo-simulator/index.js";
+import { readPageHtml } from "./page-source.mjs";
 
 const root = process.cwd();
 
@@ -11,6 +12,9 @@ function assert(condition, message) {
 // Normalise CRLF: with core.autocrlf=true a fresh Windows checkout hands us
 // \r\n, and several assertions below match multi-line source snippets literally.
 function readText(filePath) {
+  // Pages declare their shared chrome with an include directive; read them
+  // expanded so assertions see the markup that actually ships.
+  if (filePath.endsWith(".html")) return readPageHtml(filePath);
   return fs.readFileSync(path.join(root, filePath), "utf8").replaceAll("\r\n", "\n");
 }
 

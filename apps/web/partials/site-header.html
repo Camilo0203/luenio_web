@@ -1,0 +1,61 @@
+{{!--
+  Shared public header. Parameters:
+    nav          "home" for same-page anchors, "site" for absolute links. Home
+                 keeps bare "#" hrefs because public-site.js binds smooth
+                 scrolling and focus movement to a[href^="#"] only.
+    ctaHref      Destination of the header CTA.
+    quoteCta     data-quote-cta value; public-site.js reports it as the analytics source.
+    ctaLocation  data-cta-location value; this page's analytics label.
+    currentDemos Present on the catalog, the one page that marks its own nav entry.
+
+  The toggle carries a single <span>: .menu-toggle draws its other two bars with
+  ::before and ::after, and the open state animates those into an X while hiding
+  the span. More spans render extra bars.
+--}}
+<header class="site-header{{#if nav=home}} site-header--home{{/if}}"{{#if nav=home}} data-home-header{{/if}}>
+  <div class="site-header__inner">
+    <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
+      <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+      <span>Luenio</span>
+    </a>
+    <nav
+      class="site-nav"
+      id="site-navigation"
+      aria-label="Navegación principal"
+      data-navigation
+      data-open="false"
+    >
+      {{#if nav=home}}
+      <a href="#demos">Demos</a>
+      <a href="#soluciones">Soluciones</a>
+      <a href="#proceso">Proceso</a>
+      <a href="#nosotros">Nosotros</a>
+      {{else}}
+      <a href="/demos"{{#if currentDemos}} aria-current="page"{{/if}}>Demos</a>
+      <a href="/#soluciones">Soluciones</a>
+      <a href="/#proceso">Proceso</a>
+      <a href="/#nosotros">Nosotros</a>
+      {{/if}}
+    </nav>
+    <div class="site-header__actions">
+      <a
+        class="button button--primary button--small site-header__cta"
+        href="{{ctaHref}}"
+        data-quote-cta="{{quoteCta}}"
+        data-cta-location="{{ctaLocation}}"
+      >
+        Cotizar mi solución
+      </a>
+    </div>
+    <button
+      class="menu-toggle"
+      type="button"
+      data-menu-toggle
+      aria-controls="site-navigation"
+      aria-expanded="false"
+      aria-label="Abrir menú"
+    >
+      <span></span>
+    </button>
+  </div>
+</header>

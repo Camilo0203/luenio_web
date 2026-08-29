@@ -49,44 +49,7 @@
   </head>
   <body data-whatsapp-widget="false">
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <header class="site-header">
-      <div class="site-header__inner">
-        <a class="brand-lockup" href="/" aria-label="Luenio, inicio"
-          ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
-        >
-        <nav
-          class="site-nav"
-          id="site-navigation"
-          data-navigation
-          data-open="false"
-          aria-label="Navegación principal"
-        >
-          <a href="/demos">Demos</a>
-          <a href="/#soluciones">Soluciones</a>
-          <a href="/#proceso">Proceso</a>
-          <a href="/#nosotros">Nosotros</a>
-        </nav>
-        <div class="site-header__actions">
-          <a
-            class="button button--primary button--small site-header__cta"
-            href="/cotizacion"
-            data-quote-cta="header"
-            data-cta-location="notfound_header"
-            >Cotizar mi solución</a
-          >
-        </div>
-        <button
-          class="menu-toggle"
-          type="button"
-          data-menu-toggle
-          aria-controls="site-navigation"
-          aria-expanded="false"
-          aria-label="Abrir menú"
-        >
-          <span></span>
-        </button>
-      </div>
-    </header>
+    <!-- include: site-header nav="site" ctaHref="/cotizacion" quoteCta="header" ctaLocation="notfound_header" -->
     <main id="contenido">
       <section class="notfound">
         <div class="notfound__inner">
@@ -118,28 +81,7 @@
         </div>
       </section>
     </main>
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <div class="site-footer__intro">
-          <a class="brand-lockup" href="/" aria-label="Luenio, inicio"
-            ><img src="/brand/isotipo.svg" width="454" height="478" alt="" /><span>Luenio</span></a
-          >
-          <p>Páginas web y automatizaciones hechas a medida para negocios reales.</p>
-        </div>
-        <nav class="footer-group" aria-label="Legal">
-          <strong>Documentos</strong><a href="/terminos">Términos</a
-          ><a href="/privacidad">Privacidad</a><a href="/reembolsos">Reembolsos</a
-          ><a href="/cotizacion">Cotización</a>
-        </nav>
-        <div class="footer-group">
-          <strong>Contacto</strong><a href="mailto:contacto@luenio.com">contacto@luenio.com</a
-          ><span>+57 319 320 3702</span><span>Bogotá D.C., Colombia</span>
-        </div>
-      </div>
-      <div class="site-footer__bottom">
-        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
-      </div>
-    </footer>
+    <!-- include: site-footer variant="legal" -->
     <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

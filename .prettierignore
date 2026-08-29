@@ -6,3 +6,5 @@ db/leads-db.json
 apps/web/pages/gym/.impeccable
 tmp
 test-results
+
+apps/web/partials

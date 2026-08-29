@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import net from "node:net";
 import path from "node:path";
+import { Readable } from "node:stream";
 import zlib from "node:zlib";
 import {
   getContactEnv,
@@ -18,6 +19,8 @@ import {
   isDigestDeliveryConfigured,
   isProduction,
 } from "./config/env.js";
+import { expandIncludes, hasIncludeDirectives } from "./lib/html-includes.js";
+import { getDemoPagePath, getInfoPagePath, getNichePagePath } from "./lib/public-routes.js";
 
 function loadEnvFile() {
   const envPath = path.join(process.cwd(), ".env");
@@ -236,6 +239,7 @@ const port = serverConfig.port;
 const root = process.cwd();
 const distRoot = path.join(root, "dist");
 const publicRoot = path.join(root, "public");
+const partialsDir = path.join(root, "apps", "web", "partials");
 const rateLimitWindowMs = 60_000;
 const rateLimitMax = serverConfig.rateLimitMax;
 const sensitiveRateLimitMax = serverConfig.sensitiveRateLimitMax;
@@ -417,12 +421,26 @@ function wantsHtml(request) {
   return String(request.headers.accept || "").includes("text/html");
 }
 
+/**
+ * Reads an HTML document as it should be served.
+ *
+ * Serving the source tree (development) means the shared chrome is still an
+ * `<!-- include: … -->` directive; `dist/` was expanded at build time by the
+ * Vite plugin. A malformed directive throws, and the request boundary turns
+ * that into a 500: a page without its header is not servable.
+ */
+function readHtmlDocument(filePath) {
+  const raw = fs.readFileSync(filePath, "utf8");
+  if (serverConfig.serveDist || !hasIncludeDirectives(raw)) return Buffer.from(raw);
+  return Buffer.from(expandIncludes(raw, { partialsDir, sourceLabel: filePath }));
+}
+
 function sendNotFound(request, response) {
   if (wantsHtml(request)) {
     const appRoot = serverConfig.serveDist ? distRoot : root;
     const notFoundPage = path.join(appRoot, "apps", "web", "pages", "404", "index.html");
     if (fs.existsSync(notFoundPage)) {
-      const body = fs.readFileSync(notFoundPage);
+      const body = readHtmlDocument(notFoundPage);
       response.writeHead(404, {
         "Content-Type": "text/html; charset=utf-8",
         "Content-Length": body.length,
@@ -472,6 +490,9 @@ function serveStatic(request, response, pathname) {
   }
 
   const extension = path.extname(resolvedPath);
+  const htmlBody =
+    !serverConfig.serveDist && extension === ".html" ? readHtmlDocument(resolvedPath) : null;
+
   const headers = {
     "Content-Type": mimeTypes[extension] || "application/octet-stream",
   };
@@ -509,7 +530,7 @@ function serveStatic(request, response, pathname) {
     return;
   }
 
-  const source = fs.createReadStream(resolvedPath);
+  const source = htmlBody ? Readable.from([htmlBody]) : fs.createReadStream(resolvedPath);
   if (contentEncoding === "br") {
     source
       .pipe(
@@ -654,97 +675,6 @@ function blockDisabledClientPortal(request, response, pathname) {
   });
   response.end();
   return true;
-}
-
-function getDemoPagePath(pathname) {
-  const demoRoutes = {
-    "/demo": "index.html",
-    "/demo/": "index.html",
-    "/demos": "index.html",
-    "/demos/": "index.html",
-    "/demo/restaurants": path.join("restaurants", "index.html"),
-    "/demo/restaurants/": path.join("restaurants", "index.html"),
-    "/demos/restaurants": path.join("restaurants", "index.html"),
-    "/demos/restaurants/": path.join("restaurants", "index.html"),
-    "/demo/real-estate": path.join("real-estate", "index.html"),
-    "/demo/real-estate/": path.join("real-estate", "index.html"),
-    "/demos/real-estate": path.join("real-estate", "index.html"),
-    "/demos/real-estate/": path.join("real-estate", "index.html"),
-    "/demo/gym": path.join("gym", "index.html"),
-    "/demo/gym/": path.join("gym", "index.html"),
-    "/demos/gym": path.join("gym", "index.html"),
-    "/demos/gym/": path.join("gym", "index.html"),
-    "/demo/ecommerce": path.join("ecommerce", "index.html"),
-    "/demo/ecommerce/": path.join("ecommerce", "index.html"),
-    "/demos/ecommerce": path.join("ecommerce", "index.html"),
-    "/demos/ecommerce/": path.join("ecommerce", "index.html"),
-    "/demo/agencies": path.join("agencies", "index.html"),
-    "/demo/agencies/": path.join("agencies", "index.html"),
-    "/demos/agencies": path.join("agencies", "index.html"),
-    "/demos/agencies/": path.join("agencies", "index.html"),
-    "/demo/veterinary": path.join("veterinary", "index.html"),
-    "/demo/veterinary/": path.join("veterinary", "index.html"),
-    "/demos/veterinary": path.join("veterinary", "index.html"),
-    "/demos/veterinary/": path.join("veterinary", "index.html"),
-    "/demo/aesthetics": path.join("aesthetics", "index.html"),
-    "/demo/aesthetics/": path.join("aesthetics", "index.html"),
-    "/demos/aesthetics": path.join("aesthetics", "index.html"),
-    "/demos/aesthetics/": path.join("aesthetics", "index.html"),
-  };
-
-  return demoRoutes[pathname] || null;
-}
-
-function getInfoPagePath(pathname) {
-  const infoRoutes = {
-    "/terminos": path.join("legal", "terminos", "index.html"),
-    "/terminos/": path.join("legal", "terminos", "index.html"),
-    "/privacidad": path.join("legal", "privacidad", "index.html"),
-    "/privacidad/": path.join("legal", "privacidad", "index.html"),
-    "/reembolsos": path.join("legal", "reembolsos", "index.html"),
-    "/reembolsos/": path.join("legal", "reembolsos", "index.html"),
-    "/cotizacion": path.join("pricing", "index.html"),
-    "/cotizacion/": path.join("pricing", "index.html"),
-    "/precios": path.join("pricing", "index.html"),
-    "/precios/": path.join("pricing", "index.html"),
-  };
-
-  return infoRoutes[pathname] || null;
-}
-
-function getNichePagePath(pathname) {
-  const nicheRoutes = {
-    "/gym": path.join("gym", "index.html"),
-    "/gym/": path.join("gym", "index.html"),
-    "/gimnasios": path.join("gym", "index.html"),
-    "/gimnasios/": path.join("gym", "index.html"),
-    "/restaurants": path.join("restaurants", "index.html"),
-    "/restaurants/": path.join("restaurants", "index.html"),
-    "/restaurantes": path.join("restaurants", "index.html"),
-    "/restaurantes/": path.join("restaurants", "index.html"),
-    "/real-estate": path.join("real-estate", "index.html"),
-    "/real-estate/": path.join("real-estate", "index.html"),
-    "/inmobiliarias": path.join("real-estate", "index.html"),
-    "/inmobiliarias/": path.join("real-estate", "index.html"),
-    "/ecommerce": path.join("ecommerce", "index.html"),
-    "/ecommerce/": path.join("ecommerce", "index.html"),
-    "/tiendas-online": path.join("ecommerce", "index.html"),
-    "/tiendas-online/": path.join("ecommerce", "index.html"),
-    "/agencies": path.join("agencies", "index.html"),
-    "/agencies/": path.join("agencies", "index.html"),
-    "/agencias": path.join("agencies", "index.html"),
-    "/agencias/": path.join("agencies", "index.html"),
-    "/veterinary": path.join("veterinary", "index.html"),
-    "/veterinary/": path.join("veterinary", "index.html"),
-    "/veterinarias": path.join("veterinary", "index.html"),
-    "/veterinarias/": path.join("veterinary", "index.html"),
-    "/aesthetics": path.join("aesthetics", "index.html"),
-    "/aesthetics/": path.join("aesthetics", "index.html"),
-    "/esteticas": path.join("aesthetics", "index.html"),
-    "/esteticas/": path.join("aesthetics", "index.html"),
-  };
-
-  return nicheRoutes[pathname] || null;
 }
 
 function resolvePublicFile(pathname) {

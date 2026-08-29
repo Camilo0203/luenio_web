@@ -150,46 +150,7 @@
   </head>
   <body class="catalog-page">
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <header class="site-header">
-      <div class="site-header__inner">
-        <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
-          <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
-          <span>Luenio</span>
-        </a>
-        <nav
-          class="site-nav"
-          id="site-navigation"
-          data-navigation
-          data-open="false"
-          aria-label="Navegación principal"
-        >
-          <a href="/demos" aria-current="page">Demos</a>
-          <a href="/#soluciones">Soluciones</a>
-          <a href="/#proceso">Proceso</a>
-          <a href="/#nosotros">Nosotros</a>
-        </nav>
-        <div class="site-header__actions">
-          <a
-            class="button button--primary button--small site-header__cta"
-            href="/cotizacion"
-            data-quote-cta="catalog_header"
-            data-cta-location="catalog_header"
-          >
-            Cotizar mi solución
-          </a>
-        </div>
-        <button
-          class="menu-toggle"
-          type="button"
-          data-menu-toggle
-          aria-controls="site-navigation"
-          aria-expanded="false"
-          aria-label="Abrir menú"
-        >
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-    </header>
+    <!-- include: site-header nav="site" ctaHref="/cotizacion" quoteCta="catalog_header" ctaLocation="catalog_header" currentDemos="true" -->
 
     <main id="contenido">
       <section class="catalog-hero">
@@ -415,35 +376,7 @@
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <div class="site-footer__intro">
-          <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
-            <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
-            <span>Luenio</span>
-          </a>
-          <p>Páginas web y automatizaciones hechas a medida para negocios reales.</p>
-        </div>
-        <nav class="footer-group" aria-label="Navegación">
-          <strong>Explorar</strong>
-          <a href="/#soluciones">Soluciones</a>
-          <a href="/demos">Demos</a>
-          <a href="/cotizacion">Cotización</a>
-        </nav>
-        <nav class="footer-group" aria-label="Contacto y legal">
-          <strong>Contacto</strong>
-          <a href="mailto:contacto@luenio.com">contacto@luenio.com</a>
-          <span>+57 319 320 3702</span>
-          <span>Bogotá D.C., Colombia</span>
-          <a href="/terminos">Términos</a>
-          <a href="/privacidad">Privacidad</a>
-          <a href="/reembolsos">Reembolsos</a>
-        </nav>
-      </div>
-      <div class="site-footer__bottom">
-        <span>© 2026 Luenio. Todos los derechos reservados.</span><span>luenio.com</span>
-      </div>
-    </footer>
+    <!-- include: site-footer variant="explore" -->
     <script type="module" src="/apps/web/src/public-site.js"></script>
   </body>
 </html>

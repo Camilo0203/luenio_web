@@ -11,6 +11,7 @@ import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
+import { SECTORS, getSector, nichePath } from "../config/sectors.js";
 
 const fixtureDir = path.join(process.cwd(), "test-results", `.browser-fixture-${process.pid}`);
 const localDbPath = path.join(fixtureDir, "leads-db.json");
@@ -659,12 +660,12 @@ async function runBrowserChecks(baseUrl) {
     const gymWhatsappPresentation = await getWhatsappPresentation(page);
 
     // --- Interactive industry landings ---
-    const industryLandings = [
-      ["agencies", "Impulso Digital"],
-      ["ecommerce", "NovaStore"],
-      ["real-estate", "Hogar Prime"],
-      ["restaurants", "Sabor & Fuego"],
-    ];
+    // A deliberate subset: gym, veterinary and aesthetics are covered above with
+    // their own assertions. Brands come from the shared sector table.
+    const industryLandings = ["agencies", "ecommerce", "real-estate", "restaurants"].map((id) => {
+      const sector = getSector(id);
+      return [sector.id, sector.brand];
+    });
     for (const [slug, brand] of industryLandings) {
       await page.goto(`${baseUrl}/${slug}`, { waitUntil: "domcontentloaded" });
       await expectVisibleText(page, brand, `${slug} brand`);
@@ -940,15 +941,23 @@ async function runBrowserChecks(baseUrl) {
     await page.setViewportSize({ width: 1280, height: 800 });
 
     // --- Industry simulations connected to their landings ---
-    const industrySimulations = [
-      ["agencies", "Impulso Digital", "/agencias", ".agency-client-list article"],
-      ["ecommerce", "NovaStore", "/tiendas-online", ".ecommerce-inventory-list article"],
-      ["gym", "Titan Fitness Club", "/gimnasios", ".gym-pricing-cards article"],
-      ["real-estate", "Hogar Prime", "/inmobiliarias", ".real-estate-property-list article"],
-      ["restaurants", "Sabor & Fuego", "/restaurantes", ".restaurant-pipeline article"],
-      ["veterinary", "Huella Veterinaria", "/veterinarias", "#vetServices article"],
-      ["aesthetics", "Aura Estética", "/esteticas", "#aestheticServices article"],
-    ];
+    // Identity and landing route come from the sector table; the selector is the
+    // one piece that is specific to this test.
+    const simulationSelectors = {
+      agencies: ".agency-client-list article",
+      ecommerce: ".ecommerce-inventory-list article",
+      gym: ".gym-pricing-cards article",
+      "real-estate": ".real-estate-property-list article",
+      restaurants: ".restaurant-pipeline article",
+      veterinary: "#vetServices article",
+      aesthetics: "#aestheticServices article",
+    };
+    const industrySimulations = SECTORS.map((sector) => [
+      sector.id,
+      sector.brand,
+      nichePath(sector),
+      simulationSelectors[sector.id],
+    ]);
     for (const [slug, brand, landingHref, dynamicSelector] of industrySimulations) {
       await page.goto(`${baseUrl}/demo/${slug}`, { waitUntil: "domcontentloaded" });
       await expectVisibleText(page, brand, `${slug} simulation brand`);

@@ -4,6 +4,9 @@ import { createDemoScenario, demoTypes, normalizeDemoType } from "../core/demo-s
 import { buildQuoteUrl, readJourneyContext } from "../apps/web/src/journey-context.js";
 import { PUBLIC_JOURNEYS } from "../apps/web/src/public-journeys.js";
 import { sanitizeAnalyticsProperties } from "../apps/web/src/analytics.js";
+import { readPageHtml } from "./page-source.mjs";
+import { SECTORS, demoPath } from "../config/sectors.js";
+import { getDemoPagePath, publicPageEntries } from "../lib/public-routes.js";
 
 const root = process.cwd();
 
@@ -11,7 +14,10 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+// HTML pages declare their shared chrome with an include directive; read them
+// expanded so assertions see the markup that actually ships.
 function readText(filePath) {
+  if (filePath.endsWith(".html")) return readPageHtml(filePath);
   return fs.readFileSync(path.join(root, filePath), "utf8");
 }
 
@@ -333,31 +339,16 @@ assert(
   },
 );
 
-const serverSource = readText("server.js");
-[
-  "/demo",
-  "/demo/restaurants",
-  "/demo/real-estate",
-  "/demo/gym",
-  "/demo/ecommerce",
-  "/demo/agencies",
-  "/demo/veterinary",
-  "/demo/aesthetics",
-].forEach((route) => {
-  assert(serverSource.includes(route), `Server must route ${route}.`);
-});
-
-const viteSource = readText("vite.config.js");
-[
-  "demoRestaurants",
-  "demoRealEstate",
-  "demoGym",
-  "demoEcommerce",
-  "demoAgencies",
-  "demoVeterinary",
-  "demoAesthetics",
-].forEach((entryName) => {
-  assert(viteSource.includes(entryName), `Vite build must include ${entryName}.`);
+// Simulation routes and build entries are derived from config/sectors.js; assert
+// the derivation instead of the literals that used to live in both files.
+assert(getDemoPagePath("/demo") === "index.html", "Server must route the demo catalog.");
+const demoBuildEntries = new Set(Object.values(publicPageEntries()));
+SECTORS.forEach((sector) => {
+  assert(getDemoPagePath(demoPath(sector)), `Server must route ${demoPath(sector)}.`);
+  assert(
+    demoBuildEntries.has(`apps/web/pages/demo/${sector.id}/index.html`),
+    `Vite build must include the ${sector.id} simulation.`,
+  );
 });
 
 const landingSource = readText("apps/web/pages/home/index.html");

@@ -6,6 +6,7 @@ import sharp from "sharp";
 import { chromium } from "playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
+import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
 
 const UPDATE_BASELINES = process.argv.includes("--update");
 const scenarioArg = process.argv.find((argument) => argument.startsWith("--scenario="));
@@ -20,22 +21,12 @@ const maxDiffRatio = 0.005;
 // Keep geometry strict (0.5% of pixels) while ignoring imperceptible edge antialiasing.
 const channelTolerance = 48;
 
+// Scenario names key the baseline PNGs in tests/visual-baselines, so they stay
+// the sector id; only the list itself is derived.
 const publicSurfaceScenarios = [
   ["catalog", "/demos"],
-  ["agencies", "/agencias"],
-  ["ecommerce", "/tiendas-online"],
-  ["gym", "/gimnasios"],
-  ["real-estate", "/inmobiliarias"],
-  ["restaurants", "/restaurantes"],
-  ["veterinary", "/veterinarias"],
-  ["aesthetics", "/esteticas"],
-  ["simulation-agencies", "/demo/agencies"],
-  ["simulation-ecommerce", "/demo/ecommerce"],
-  ["simulation-gym", "/demo/gym"],
-  ["simulation-real-estate", "/demo/real-estate"],
-  ["simulation-restaurants", "/demo/restaurants"],
-  ["simulation-veterinary", "/demo/veterinary"],
-  ["simulation-aesthetics", "/demo/aesthetics"],
+  ...SECTORS.map((sector) => [sector.id, nichePath(sector)]),
+  ...SECTORS.map((sector) => [`simulation-${sector.id}`, demoPath(sector)]),
 ].flatMap(([name, route]) => [
   { name: `${name}-light-desktop`, path: route, theme: "light", width: 1280, height: 800 },
   { name: `${name}-dark-mobile`, path: route, theme: "dark", width: 390, height: 844 },

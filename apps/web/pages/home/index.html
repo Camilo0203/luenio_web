@@ -149,46 +149,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
   >
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
 
-    <header class="site-header site-header--home" data-home-header>
-      <div class="site-header__inner">
-        <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
-          <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
-          <span>Luenio</span>
-        </a>
-        <nav
-          class="site-nav"
-          id="site-navigation"
-          aria-label="Navegación principal"
-          data-navigation
-          data-open="false"
-        >
-          <a href="#demos">Demos</a>
-          <a href="#soluciones">Soluciones</a>
-          <a href="#proceso">Proceso</a>
-          <a href="#nosotros">Nosotros</a>
-        </nav>
-        <div class="site-header__actions">
-          <a
-            class="button button--primary button--small site-header__cta"
-            href="/cotizacion"
-            data-quote-cta="header"
-            data-cta-location="home_header"
-          >
-            Cotizar mi solución
-          </a>
-        </div>
-        <button
-          class="menu-toggle"
-          type="button"
-          data-menu-toggle
-          aria-controls="site-navigation"
-          aria-expanded="false"
-          aria-label="Abrir menú"
-        >
-          <span></span>
-        </button>
-      </div>
-    </header>
+    <!-- include: site-header nav="home" ctaHref="/cotizacion" quoteCta="header" ctaLocation="home_header" -->
 
     <main id="contenido">
       <section class="hc-hero" id="inicio" data-motion-scene>
@@ -952,36 +913,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <div class="site-footer__intro">
-          <a class="brand-lockup" href="/" aria-label="Luenio, inicio">
-            <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
-            <span>Luenio</span>
-          </a>
-          <p>Páginas web y automatizaciones hechas a medida para negocios reales.</p>
-        </div>
-        <nav class="footer-group" aria-label="Navegación">
-          <strong>Explorar</strong>
-          <a href="#soluciones">Soluciones</a>
-          <a href="#demos">Demos</a>
-          <a href="#proceso">Proceso</a>
-          <a href="/cotizacion">Cotización</a>
-        </nav>
-        <nav class="footer-group" aria-label="Contacto y legal">
-          <strong>Contacto</strong>
-          <a href="mailto:contacto@luenio.com">contacto@luenio.com</a>
-          <span>+57 319 320 3702</span>
-          <a href="/terminos">Términos</a>
-          <a href="/privacidad">Privacidad</a>
-          <a href="/reembolsos">Reembolsos</a>
-        </nav>
-      </div>
-      <div class="site-footer__bottom">
-        <span>© 2026 Luenio. Todos los derechos reservados.</span>
-        <span>Bogotá D.C., Colombia</span>
-      </div>
-    </footer>
+    <!-- include: site-footer variant="home" -->
 
     <script type="module" src="/apps/web/src/public-site.js"></script>
     <script type="module" src="/apps/web/src/home-clarity.js"></script>

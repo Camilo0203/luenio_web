@@ -4,26 +4,9 @@ import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
+import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
 
-const ROUTES = [
-  "/",
-  "/demos",
-  "/cotizacion",
-  "/agencias",
-  "/tiendas-online",
-  "/gimnasios",
-  "/inmobiliarias",
-  "/restaurantes",
-  "/veterinarias",
-  "/esteticas",
-  "/demo/agencies",
-  "/demo/ecommerce",
-  "/demo/gym",
-  "/demo/real-estate",
-  "/demo/restaurants",
-  "/demo/veterinary",
-  "/demo/aesthetics",
-];
+const ROUTES = ["/", "/demos", "/cotizacion", ...SECTORS.map(nichePath), ...SECTORS.map(demoPath)];
 const VIEWPORTS = [
   { name: "phone-320", width: 320, height: 844 },
   { name: "phone-375", width: 375, height: 844 },
