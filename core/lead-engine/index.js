@@ -8,6 +8,7 @@ export const leadFieldLimits = {
   name: 80,
   business: 120,
   phone: 32,
+  email: 160,
   service: 120,
   message: 1000,
   source: 40,

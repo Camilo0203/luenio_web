@@ -193,6 +193,7 @@ create table if not exists public.contact_inquiries (
   business text not null,
   phone text not null,
   phone_normalized text,
+  email text,
   service text not null,
   message text,
   source text,
@@ -589,7 +590,11 @@ begin
 end;
 $$;
 
+-- La firma gana un p_email. Sin soltar además la versión anterior, una base ya
+-- desplegada conservaría las dos sobrecargas y la llamada quedaría ambigua.
 drop function if exists public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, timestamptz, integer);
+drop function if exists public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, text, timestamptz, integer);
+drop function if exists public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, text, text, timestamptz, integer);
 
 create or replace function public.luenio_store_contact_inquiry(
   p_id text,
@@ -598,6 +603,7 @@ create or replace function public.luenio_store_contact_inquiry(
   p_business text,
   p_phone text,
   p_phone_normalized text,
+  p_email text,
   p_service text,
   p_message text,
   p_source text,
@@ -627,9 +633,10 @@ begin
   end if;
 
   insert into public.contact_inquiries (
-    id, name, business, phone, phone_normalized, service, message, source, created_at
+    id, name, business, phone, phone_normalized, email, service, message, source, created_at
   ) values (
-    p_id, p_name, p_business, p_phone, p_phone_normalized, p_service, p_message, p_source, p_created_at
+    p_id, p_name, p_business, p_phone, p_phone_normalized, nullif(p_email, ''), p_service,
+    p_message, p_source, p_created_at
   );
 
   insert into public.contact_deliveries (
@@ -643,6 +650,10 @@ begin
 end;
 $$;
 
+-- El tipo de retorno gana inquiry_email, y `create or replace` no puede cambiar
+-- el retorno de una función existente: hay que soltarla primero.
+drop function if exists public.luenio_claim_contact_deliveries(timestamptz, integer, integer, text);
+
 create or replace function public.luenio_claim_contact_deliveries(
   p_now timestamptz,
   p_limit integer,
@@ -655,6 +666,7 @@ returns table (
   inquiry_name text,
   inquiry_business text,
   inquiry_phone text,
+  inquiry_email text,
   inquiry_service text,
   inquiry_message text,
   inquiry_source text,
@@ -699,6 +711,7 @@ begin
     inquiry.name,
     inquiry.business,
     inquiry.phone,
+    inquiry.email,
     inquiry.service,
     inquiry.message,
     inquiry.source,
@@ -915,7 +928,7 @@ grant usage on schema public to service_role;
 revoke all on function public.luenio_register_auth_failure(text, timestamptz, integer, integer, integer) from public, anon, authenticated;
 revoke all on function public.luenio_accept_invitation(text, text, text, text, timestamptz) from public, anon, authenticated;
 revoke all on function public.luenio_consume_password_reset(text, text, timestamptz) from public, anon, authenticated;
-revoke all on function public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, text, timestamptz, integer) from public, anon, authenticated;
+revoke all on function public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, text, text, timestamptz, integer) from public, anon, authenticated;
 revoke all on function public.luenio_claim_contact_deliveries(timestamptz, integer, integer, text) from public, anon, authenticated;
 revoke all on function public.luenio_complete_contact_delivery(text, boolean, integer, timestamptz) from public, anon, authenticated;
 revoke all on function public.luenio_consume_mfa_challenge(text, text, timestamptz, integer) from public, anon, authenticated;
@@ -923,7 +936,7 @@ revoke all on function public.luenio_security_maintenance() from public, anon, a
 grant execute on function public.luenio_register_auth_failure(text, timestamptz, integer, integer, integer) to service_role;
 grant execute on function public.luenio_accept_invitation(text, text, text, text, timestamptz) to service_role;
 grant execute on function public.luenio_consume_password_reset(text, text, timestamptz) to service_role;
-grant execute on function public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, text, timestamptz, integer) to service_role;
+grant execute on function public.luenio_store_contact_inquiry(text, text, text, text, text, text, text, text, text, text, timestamptz, integer) to service_role;
 grant execute on function public.luenio_claim_contact_deliveries(timestamptz, integer, integer, text) to service_role;
 grant execute on function public.luenio_complete_contact_delivery(text, boolean, integer, timestamptz) to service_role;
 grant execute on function public.luenio_consume_mfa_challenge(text, text, timestamptz, integer) to service_role;

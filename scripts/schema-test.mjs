@@ -176,10 +176,15 @@ try {
   const storedInquiry = await database.query(`
     select * from public.luenio_store_contact_inquiry(
       'inquiry_test', 'delivery_test', 'Camilo Test', 'Test Business', '+57 300 000 0000',
-      '573000000000', 'Automation', 'Secure delivery test', 'schema_test', now(), 90
+      '573000000000', 'camilo@example.test', 'Automation', 'Secure delivery test',
+      'schema_test', now(), 90
     )
   `);
   assert(storedInquiry.rows.length === 1, "Contact inquiry and outbox creation must be atomic.");
+  assert(
+    storedInquiry.rows[0]?.email === "camilo@example.test",
+    "The optional contact email must persist with the inquiry.",
+  );
 
   const claimed = await database.query(`
     select * from public.luenio_claim_contact_deliveries(now(), 10, 300, 'inquiry_test')
@@ -187,6 +192,12 @@ try {
   assert(
     claimed.rows[0]?.delivery_id === "delivery_test" && claimed.rows[0]?.delivery_attempts === 1,
     "Contact delivery claims must be atomic and increment attempts.",
+  );
+  // Un reintento debe poder entregar el correo: si no viaja en la reclamación,
+  // se pierde justo en el caso en que el webhook falló la primera vez.
+  assert(
+    claimed.rows[0]?.inquiry_email === "camilo@example.test",
+    "A retried delivery must carry the optional email to the webhook.",
   );
   const completed = await database.query(`
     select * from public.luenio_complete_contact_delivery('delivery_test', true, 200, now())

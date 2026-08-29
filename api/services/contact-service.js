@@ -26,6 +26,7 @@ function normalizeInquiry(body = {}) {
     name: normalizeTextField(body.name, leadFieldLimits.name),
     business: normalizeTextField(body.business, leadFieldLimits.business),
     phone: normalizeTextField(body.phone, leadFieldLimits.phone),
+    email: normalizeTextField(body.email, leadFieldLimits.email).toLowerCase(),
     service: normalizeTextField(body.service, leadFieldLimits.service),
     message: normalizeTextField(body.message, leadFieldLimits.message),
     source: normalizeTextField(body.source, leadFieldLimits.source) || "landing",
@@ -33,12 +34,18 @@ function normalizeInquiry(body = {}) {
   };
 }
 
+// WhatsApp sigue siendo el canal obligatorio: es como opera el negocio. El correo
+// es opcional y solo se rechaza si viene y está mal formado, para no descartar un
+// lead válido por un campo que nadie estaba obligado a llenar.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
 function validateInquiry(inquiry) {
   const missingFields = [];
   if (inquiry.name.length < 2) missingFields.push("name");
   if (inquiry.business.length < 2) missingFields.push("business");
   if (inquiry.phone.replace(/\D/g, "").length < 8) missingFields.push("phone");
   if (!inquiry.service) missingFields.push("service");
+  if (inquiry.email && !EMAIL_PATTERN.test(inquiry.email)) missingFields.push("email");
   return missingFields;
 }
 
