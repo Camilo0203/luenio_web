@@ -75,6 +75,11 @@ function categoryOf(workflow) {
   return "prod";
 }
 
+/**
+ * Quién invoca a quién. `activos` guarda solo los invocadores publicados: un
+ * sub-workflow al que únicamente llama un workflow apagado no se ejecuta nunca,
+ * y contarlo como invocado esconde justo el hueco que este mapa busca.
+ */
 function buildCallGraph(workflows) {
   const calledBy = new Map();
   for (const workflow of workflows) {
@@ -82,8 +87,9 @@ function buildCallGraph(workflows) {
       if (!/executeWorkflow$/i.test(node.type)) continue;
       const id = node.parameters?.workflowId?.value ?? node.parameters?.workflowId;
       if (!id) continue;
-      if (!calledBy.has(id)) calledBy.set(id, new Set());
-      calledBy.get(id).add(workflow.name);
+      if (!calledBy.has(id)) calledBy.set(id, { todos: new Set(), activos: new Set() });
+      calledBy.get(id).todos.add(workflow.name);
+      if (workflow.active) calledBy.get(id).activos.add(workflow.name);
     }
   }
   return calledBy;
@@ -122,8 +128,15 @@ function findGaps(workflows, calledBy) {
     if (category === "prod" && /scheduleTrigger/i.test(trigger) && !workflow.active) {
       gaps.push([workflow.name, "programado pero **apagado**: nunca se ejecuta"]);
     }
-    if (category === "prod" && /executeWorkflowTrigger/i.test(trigger) && !callers) {
-      gaps.push([workflow.name, "sub-workflow que **nadie invoca**"]);
+    if (category === "prod" && /executeWorkflowTrigger/i.test(trigger)) {
+      if (!callers) {
+        gaps.push([workflow.name, "sub-workflow que **nadie invoca**"]);
+      } else if (!callers.activos.size) {
+        gaps.push([
+          workflow.name,
+          `solo lo invocan workflows **apagados** (${[...callers.todos].join(", ")}): no se ejecuta`,
+        ]);
+      }
     }
   }
   return gaps;
@@ -229,7 +242,11 @@ function renderDoc(workflows, calledBy) {
       const callers = calledBy.get(workflow.id);
       lines.push(
         `| ${workflow.name} | ${workflow.active ? "activo" : "inactivo"} | ${triggerOf(workflow)} | ${
-          callers ? [...callers].join(", ") : "—"
+          callers
+            ? [...callers.todos]
+                .map((name) => (callers.activos.has(name) ? name : `${name} (apagado)`))
+                .join(", ")
+            : "—"
         } |`,
       );
     }

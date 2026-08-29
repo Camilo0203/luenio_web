@@ -1,6 +1,6 @@
 {
   "name": "Luenio LUNA | Procesar multimedia",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "id": "media-trigger",

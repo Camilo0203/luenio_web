@@ -1,6 +1,6 @@
 {
   "name": "Luenio LUNA | Gestionar aprobaciones",
-  "active": false,
+  "active": true,
   "nodes": [
     {
       "id": "ap-trigger",

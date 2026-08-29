@@ -161,7 +161,7 @@
           "conditions": [
             {
               "id": "has-row",
-              "leftValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.row_number }}",
+              "leftValue": "={{ $('02b Audit | Permitir envío').item.json.row_number }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
@@ -267,7 +267,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const audits = $input.all();\nconst originals = $('03 Filtro | Leads con follow-up vencido').all();\nconst out = [];\nfor (let i = 0; i < audits.length; i++) {\n  const audit = audits[i]?.json || {};\n  const original = originals[i]?.json || {};\n  const status = String(audit.status || '').toLowerCase().trim();\n  const isDryRun = String(original.dry_run || 'false').toLowerCase() === 'true';\n  if (original._meta === true || !String(original.conversation_id || '').trim()) continue;\n  if (status === 'attempting' || status === 'sent' || (status === 'dry_run' && isDryRun)) continue;\n  out.push({ json: { ...original, audit_status: status || 'new' } });\n}\nreturn out;",
+        "jsCode": "const audits = $input.all();\nconst originals = $('03 Filtro | Leads con follow-up vencido').all();\n\n// Índice por dedupe_key. Emparejar por posición era el bug: 02a devuelve una\n// fila por acierto y un único item vacío cuando no acierta ninguna, así que las\n// posiciones no se corresponden con los leads y los sobrantes se perdían.\nconst porClave = new Map();\nfor (const audit of audits) {\n  const clave = String(audit?.json?.dedupe_key ?? '').trim();\n  if (clave) porClave.set(clave, audit.json);\n}\n\nconst out = [];\nfor (const item of originals) {\n  const original = item?.json || {};\n  if (original._meta === true || !String(original.conversation_id || '').trim()) continue;\n\n  const audit = porClave.get(String(original.dedupe_key ?? '').trim()) || {};\n  const status = String(audit.status || '').toLowerCase().trim();\n  const isDryRun = String(original.dry_run || 'false').toLowerCase() === 'true';\n  if (status === 'attempting' || status === 'sent' || (status === 'dry_run' && isDryRun)) continue;\n\n  // pairedItem apunta al único item de 02a: nada aguas abajo necesita resolver\n  // hacia atrás más allá de este nodo, porque todos los campos del lead viajan\n  // ya dentro de $json.\n  out.push({ json: { ...original, audit_status: status || 'new' }, pairedItem: { item: 0 } });\n}\nreturn out;",
         "language": "javaScript"
       }
     },
@@ -295,7 +295,7 @@
             {
               "keyName": "dedupe_key",
               "condition": "eq",
-              "keyValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}"
+              "keyValue": "={{ $('02b Audit | Permitir envío').item.json.dedupe_key }}"
             }
           ]
         },
@@ -341,7 +341,7 @@
             {
               "keyName": "dedupe_key",
               "condition": "eq",
-              "keyValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}"
+              "keyValue": "={{ $('02b Audit | Permitir envío').item.json.dedupe_key }}"
             }
           ]
         },
@@ -400,22 +400,22 @@
           "value": {
             "audited_at": "={{ $now.toISO() }}",
             "classification": "followup",
-            "reason": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind }}",
-            "due_types": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind }}",
-            "oldest_scheduled_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.scheduled_at }}",
-            "pipeline_stage": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.pipeline_stage || '' }}",
-            "lead_status": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.lead_status || '' }}",
-            "score": "={{ Number($('03 Filtro | Leads con follow-up vencido').item.json._score || 0) }}",
+            "reason": "={{ $json.followup_kind }}",
+            "due_types": "={{ $json.followup_kind }}",
+            "oldest_scheduled_at": "={{ $json.scheduled_at }}",
+            "pipeline_stage": "={{ $json.pipeline_stage || '' }}",
+            "lead_status": "={{ $json.lead_status || '' }}",
+            "score": "={{ Number($json._score || 0) }}",
             "approved": false,
             "contains_pii": false,
-            "dry_run": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.dry_run || 'false') === 'true' }}",
-            "source_row": "={{ Number($('03 Filtro | Leads con follow-up vencido').item.json.row_number || 0) }}",
-            "notes": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.followup_message || '').slice(0, 1000) }}",
-            "conversation_id": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.conversation_id }}",
-            "dedupe_key": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}",
-            "followup_kind": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind }}",
-            "scheduled_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.scheduled_at }}",
-            "status": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.dry_run || 'false') === 'true' ? 'dry_run' : 'attempting' }}",
+            "dry_run": "={{ String($json.dry_run || 'false') === 'true' }}",
+            "source_row": "={{ Number($json.row_number || 0) }}",
+            "notes": "={{ String($json.followup_message || '').slice(0, 1000) }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "dedupe_key": "={{ $json.dedupe_key }}",
+            "followup_kind": "={{ $json.followup_kind }}",
+            "scheduled_at": "={{ $json.scheduled_at }}",
+            "status": "={{ String($json.dry_run || 'false') === 'true' ? 'dry_run' : 'attempting' }}",
             "attempted_at": "={{ $now.toISO() }}",
             "sent_at": "={{ null }}",
             "execution_id": "={{ $execution.id }}",
@@ -461,19 +461,19 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "row_number": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.row_number }}",
-            "conversation_id": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.conversation_id }}",
-            "followup_status": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_status_next }}",
-            "followup_count": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_count_next }}",
-            "followup_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind === '24h' ? ($('03 Filtro | Leads con follow-up vencido').item.json.followup_at_next || '') : ($('03 Filtro | Leads con follow-up vencido').item.json.followup_at || '') }}",
-            "followup_2h_status": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_2h_status_next }}",
-            "followup_2h_count": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_2h_count_next }}",
-            "followup_2h_at": "={{ ($('03 Filtro | Leads con follow-up vencido').item.json.clear_2h_at === true || $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind === '2h') ? '' : ($('03 Filtro | Leads con follow-up vencido').item.json.followup_2h_at || '') }}",
-            "last_ai_response": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_message }}",
-            "last_message": "={{ '[followup_' + $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind + ']' }}",
-            "updated_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_sent_at }}",
-            "next_action": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind === '2h' ? 'Esperar respuesta post follow-up 2h' : 'Esperar respuesta post follow-up 24h' }}",
-            "notes": "={{ (($('03 Filtro | Leads con follow-up vencido').item.json.notes || '') + ' | Follow-up ' + $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind + ' enviado ' + $('03 Filtro | Leads con follow-up vencido').item.json.followup_sent_at).slice(-1900) }}"
+            "row_number": "={{ $('02b Audit | Permitir envío').item.json.row_number }}",
+            "conversation_id": "={{ $('02b Audit | Permitir envío').item.json.conversation_id }}",
+            "followup_status": "={{ $('02b Audit | Permitir envío').item.json.followup_status_next }}",
+            "followup_count": "={{ $('02b Audit | Permitir envío').item.json.followup_count_next }}",
+            "followup_at": "={{ $('02b Audit | Permitir envío').item.json.followup_kind === '24h' ? ($('02b Audit | Permitir envío').item.json.followup_at_next || '') : ($('02b Audit | Permitir envío').item.json.followup_at || '') }}",
+            "followup_2h_status": "={{ $('02b Audit | Permitir envío').item.json.followup_2h_status_next }}",
+            "followup_2h_count": "={{ $('02b Audit | Permitir envío').item.json.followup_2h_count_next }}",
+            "followup_2h_at": "={{ ($('02b Audit | Permitir envío').item.json.clear_2h_at === true || $('02b Audit | Permitir envío').item.json.followup_kind === '2h') ? '' : ($('02b Audit | Permitir envío').item.json.followup_2h_at || '') }}",
+            "last_ai_response": "={{ $('02b Audit | Permitir envío').item.json.followup_message }}",
+            "last_message": "={{ '[followup_' + $('02b Audit | Permitir envío').item.json.followup_kind + ']' }}",
+            "updated_at": "={{ $('02b Audit | Permitir envío').item.json.followup_sent_at }}",
+            "next_action": "={{ $('02b Audit | Permitir envío').item.json.followup_kind === '2h' ? 'Esperar respuesta post follow-up 2h' : 'Esperar respuesta post follow-up 24h' }}",
+            "notes": "={{ (($('02b Audit | Permitir envío').item.json.notes || '') + ' | Follow-up ' + $('02b Audit | Permitir envío').item.json.followup_kind + ' enviado ' + $('02b Audit | Permitir envío').item.json.followup_sent_at).slice(-1900) }}"
           },
           "matchingColumns": [
             "row_number"
@@ -510,14 +510,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "event_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_dry_run'; } catch (e) { return ''; } })() }}",
+            "event_id": "={{ (() => { try { const r = $json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_dry_run'; } catch (e) { return ''; } })() }}",
             "event_type": "followup_dry_run",
-            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
-            "message_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
+            "conversation_id": "={{ (() => { try { const r = $json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "message_id": "={{ (() => { try { const r = $json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
             "occurred_at": "={{ $now.toISO() }}",
             "workflow_id": "WXd1LnLLBRXIqvj5",
             "execution_id": "={{ String($execution.id || '') }}",
-            "snapshot": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
+            "snapshot": "={{ (() => { try { const r = $json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
             "reply_status": "dry_run",
             "reply_hash": "followup_dry_run",
             "duration_ms": 0,
@@ -634,14 +634,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "event_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_sent'; } catch (e) { return ''; } })() }}",
+            "event_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_sent'; } catch (e) { return ''; } })() }}",
             "event_type": "followup_sent",
-            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
-            "message_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
+            "conversation_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "message_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
             "occurred_at": "={{ $now.toISO() }}",
             "workflow_id": "WXd1LnLLBRXIqvj5",
             "execution_id": "={{ String($execution.id || '') }}",
-            "snapshot": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
+            "snapshot": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
             "reply_status": "sent",
             "reply_hash": "followup_sent",
             "duration_ms": 0,
@@ -758,14 +758,14 @@
         "workflowInputs": {
           "mappingMode": "defineBelow",
           "value": {
-            "event_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_failed'; } catch (e) { return ''; } })() }}",
+            "event_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_failed'; } catch (e) { return ''; } })() }}",
             "event_type": "followup_failed",
-            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
-            "message_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
+            "conversation_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "message_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
             "occurred_at": "={{ $now.toISO() }}",
             "workflow_id": "WXd1LnLLBRXIqvj5",
             "execution_id": "={{ String($execution.id || '') }}",
-            "snapshot": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
+            "snapshot": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
             "reply_status": "failed",
             "reply_hash": "followup_failed",
             "duration_ms": 0,
@@ -881,7 +881,7 @@
           "conditions": [
             {
               "id": "followup-dry",
-              "leftValue": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.dry_run || '').toLowerCase() === 'true' }}",
+              "leftValue": "={{ String($json.dry_run || '').toLowerCase() === 'true' }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -919,7 +919,7 @@
           "value": {
             "severity": "secondary",
             "source": "continuation",
-            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "conversation_id": "={{ (() => { try { const r = $('02b Audit | Permitir envío').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
             "workflow_id": "WXd1LnLLBRXIqvj5",
             "workflow_name": "Luenio Followup 2h+24h",
             "execution_id": "={{ String($execution.id || '') }}",
