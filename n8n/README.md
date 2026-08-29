@@ -52,6 +52,33 @@ El contacto se guarda en Supabase antes de invocar n8n. Los workflows no conserv
 - Conserva `N8N_ENCRYPTION_KEY` fuera del VPS; sin ella no pueden restaurarse las credenciales.
 - Revisa cambios de workflow y credenciales desde una cuenta con MFA.
 
+## Probar el chatbot antes de tocar producción
+
+El cerebro de LUNA vive en tres sub-workflows (`Interpretar mensaje`,
+`Consultar KB`, `Decidir turno`) que orquesta `Orquestar turno v3`. El chatbot
+de producción lo llama desde su nodo `14c`, y lo que sale de ahí es literalmente
+lo que el nodo `16` manda al cliente por WhatsApp. Se puede conversar con ese
+mismo cerebro sin mandar un solo mensaje real:
+
+```bash
+N8N_URL=https://n8n.ejemplo.com node n8n/conversar.mjs
+```
+
+Trece guiones, cada uno sacado de una forma real de escribir por WhatsApp. El
+script marca `⚠️ RESPUESTA REPETIDA` cuando el bot contesta dos veces lo mismo,
+que es el fallo que más rápido pierde a un cliente. No toda repetición es un
+defecto: dos mensajes ininteligibles seguidos merecen la misma orientación.
+
+Antes hay que activar `ZZ TEMP | Banco de conversación LUNA`, y **apagarlo al
+terminar**: su webhook no pide autenticación.
+
+Dos cosas que muerden:
+
+- n8n guarda en memoria la definición de un workflow activo. Un `PUT` solo no
+  surte efecto: hay que desactivar y volver a activar.
+- Aun reactivando, la primera ejecución puede atender con la definición vieja.
+  Manda un mensaje de calentamiento antes de fiarte de lo que leas.
+
 ## Backup
 
 El backup de producción es cifrado y offsite:

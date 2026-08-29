@@ -223,7 +223,7 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "const cmd=$('02 Seguridad | Validar comando humano').first().json||{}; const rows=$input.all().map(i=>i.json||{}).filter(r=>String(r.proposal_id||'')===String(cmd.request_id||'')); const ok=rows.length===1&&String(rows[0].status||'')==='pending_approval'; return [{json:{...cmd,ok,reason_code:ok?'PROPOSAL_APPROVAL_READY':rows.length>1?'PROPOSAL_DUPLICATE_REQUEST':rows.length===0?'PROPOSAL_NOT_FOUND':'PROPOSAL_NOT_PENDING',next_status:cmd.action==='approve'?'approved':'rejected'}}];"
+        "jsCode": "// Estados desde los que un humano puede decidir. 'requested' es el que escribe\n// producción hoy; 'pending_approval' llegará cuando el PDF se renderice solo.\nconst APROBABLES = new Set(['requested', 'pending_approval']);\n\nconst cmd = $('02 Seguridad | Validar comando humano').first().json || {};\nconst rows = $input\n  .all()\n  .map((i) => i.json || {})\n  .filter((r) => String(r.proposal_id || '') === String(cmd.request_id || ''));\n\nconst estado = rows.length === 1 ? String(rows[0].status || '') : '';\nconst ok = rows.length === 1 && APROBABLES.has(estado);\n\nlet reason_code;\nif (ok) reason_code = 'PROPOSAL_APPROVAL_READY';\nelse if (rows.length > 1) reason_code = 'PROPOSAL_DUPLICATE_REQUEST';\nelse if (rows.length === 0) reason_code = 'PROPOSAL_NOT_FOUND';\nelse reason_code = 'PROPOSAL_NOT_PENDING:' + (estado || 'sin_estado');\n\nreturn [{\n  json: {\n    ...cmd,\n    ok,\n    found_status: estado,\n    reason_code,\n    next_status: cmd.action === 'approve' ? 'approved' : 'rejected',\n  },\n}];"
       }
     },
     {
