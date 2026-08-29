@@ -1,0 +1,156 @@
+{
+  "name": "ZZ TEMP | Banco de conversación LUNA (borrar)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luna-conversar",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "fffffff1-0000-4000-8000-000000000001",
+      "name": "Entrada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "fffffff1-0000-4000-8000-000000000009"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "dHq0lZMoxBUYfBnZ"
+        },
+        "returnAll": true
+      },
+      "id": "fffffff1-0000-4000-8000-000000000002",
+      "name": "Catalogo",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        200,
+        0
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $('Entrada').first().json.body || {};\nconst ctx = body.context && typeof body.context === 'object' ? body.context : {};\nconst filas = $input.all().map((i) => i.json).filter((r) => r && r.record_key);\n\n// Se replica la forma que arma 08b en el chatbot: renderCatalog exige\n// catalog_ready y los paquetes indexados por SKU, no una lista suelta.\nconst paquetes = {};\nfor (const r of filas) {\n  if (String(r.category) !== 'package') continue;\n  paquetes[String(r.sku)] = {\n    sku: r.sku, name: r.name,\n    price_project: Number(r.price_project || 0),\n    price_monthly: Number(r.price_monthly || 0),\n    includes_text: r.includes_text || '',\n  };\n}\nconst catalogo = {\n  catalog_ready: Object.keys(paquetes).length > 0,\n  catalog_source: 'banco',\n  catalog_version: filas[0]?.version || 'test',\n  catalog_packages: paquetes,\n  catalog_price_map: {},\n  catalog_domains: filas.filter(r=>String(r.category)==='domain'),\n  catalog_addons: filas.filter(r=>String(r.category)==='addon'),\n  catalog_rules: filas.filter(r=>String(r.category)==='rule'),\n};\nreturn [{ json: {\n  user_message: String(body.user_message || ''),\n  message_type: 'text',\n  context_json: JSON.stringify({ schema_version: '3.0', conversation_id: 'test-1', ...ctx }),\n  catalog_json: JSON.stringify(catalogo),\n  source_hash: 'banco-de-pruebas',\n  environment: 'staging',\n}}];"
+      },
+      "id": "fffffff1-0000-4000-8000-000000000003",
+      "name": "Preparar turno",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "roa83xYOinxUEhRN",
+          "cachedResultName": "Luenio LUNA | Orquestar turno v3"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_message": "={{ $json.user_message }}",
+            "message_type": "={{ $json.message_type }}",
+            "context_json": "={{ $json.context_json }}",
+            "catalog_json": "={{ $json.catalog_json }}",
+            "source_hash": "={{ $json.source_hash }}",
+            "environment": "={{ $json.environment }}"
+          },
+          "schema": [],
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "fffffff1-0000-4000-8000-000000000004",
+      "name": "LUNA",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json || {};\nconst campos = ['business_type','project_goal','pain_point','current_process','impact','desired_outcome','discovery_urgency','discovery_depth','discovery_done','last_question_code','recommended_solution','selected_solution','solution_confirmed','price_requested','proposal_requested','pipeline_stage','lead_status','first_name','name','email','objection_code','handoff_reason'];\nconst estado = {};\nfor (const c of campos) if (r[c] !== undefined && r[c] !== '') estado[c] = r[c];\nreturn [{ json: {\n  reply: String(r.final_reply || r.reply || ''),\n  intent: r.interpretation?.intent || '',\n  next_question_code: r.next_question_code || '',\n  action: r.action_request?.type || 'none',\n  reason_code: r.reason_code || '',\n  estado,\n}}];"
+      },
+      "id": "fffffff1-0000-4000-8000-000000000005",
+      "name": "Salida",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "Catalogo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Catalogo": {
+      "main": [
+        [
+          {
+            "node": "Preparar turno",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar turno": {
+      "main": [
+        [
+          {
+            "node": "LUNA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LUNA": {
+      "main": [
+        [
+          {
+            "node": "Salida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null
+}

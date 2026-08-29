@@ -25,7 +25,7 @@
       "parameters": {
         "resource": "sheet",
         "operation": "read",
-        "authentication": "oAuth2",
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
           "mode": "id",

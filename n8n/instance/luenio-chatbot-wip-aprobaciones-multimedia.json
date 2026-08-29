@@ -222,7 +222,8 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
@@ -1205,7 +1206,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
@@ -1909,7 +1911,8 @@
         },
         "options": {
           "valueInputMode": "USER_ENTERED"
-        }
+        },
+        "authentication": "serviceAccount"
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
@@ -2440,7 +2443,8 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       },
       "id": "3dff512f-21c2-45cb-8d52-c6447be8bd9c",
       "name": "05a CRM | Buscar lead (mute handoff)",
@@ -3194,7 +3198,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       },
       "id": "c3edcbc2-3728-4753-8bd0-0cf26e13eee4",
       "name": "05d CRM | Mutear lead (handoff)",
@@ -3889,7 +3894,8 @@
         },
         "options": {
           "valueInputMode": "USER_ENTERED"
-        }
+        },
+        "authentication": "serviceAccount"
       },
       "id": "5b9c3e81-0c9c-4ba8-a412-655a1060e775",
       "name": "05e CRM | Crear lead muteado (handoff)",
@@ -5801,7 +5807,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       },
       "id": "f060e9a1-2629-426a-aaa2-5312b3f804ab",
       "name": "25r CRM | Vaciar lead (update)",

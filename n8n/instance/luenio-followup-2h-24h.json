@@ -47,7 +47,8 @@
           }
         },
         "resource": "sheet",
-        "operation": "read"
+        "operation": "read",
+        "authentication": "serviceAccount"
       },
       "id": "23a1d48a-ea21-40e0-9224-794194859972",
       "name": "02 CRM | Leer todos los leads",
@@ -267,7 +268,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const audits = $input.all();\nconst originals = $('03 Filtro | Leads con follow-up vencido').all();\n\n// Índice por dedupe_key. Emparejar por posición era el bug: 02a devuelve una\n// fila por acierto y un único item vacío cuando no acierta ninguna, así que las\n// posiciones no se corresponden con los leads y los sobrantes se perdían.\nconst porClave = new Map();\nfor (const audit of audits) {\n  const clave = String(audit?.json?.dedupe_key ?? '').trim();\n  if (clave) porClave.set(clave, audit.json);\n}\n\nconst out = [];\nfor (const item of originals) {\n  const original = item?.json || {};\n  if (original._meta === true || !String(original.conversation_id || '').trim()) continue;\n\n  const audit = porClave.get(String(original.dedupe_key ?? '').trim()) || {};\n  const status = String(audit.status || '').toLowerCase().trim();\n  const isDryRun = String(original.dry_run || 'false').toLowerCase() === 'true';\n  if (status === 'attempting' || status === 'sent' || (status === 'dry_run' && isDryRun)) continue;\n\n  // pairedItem apunta al único item de 02a: nada aguas abajo necesita resolver\n  // hacia atrás más allá de este nodo, porque todos los campos del lead viajan\n  // ya dentro de $json.\n  out.push({ json: { ...original, audit_status: status || 'new' }, pairedItem: { item: 0 } });\n}\nreturn out;",
+        "jsCode": "const audits = $input.all();\nconst originals = $('03 Filtro | Leads con follow-up vencido').all();\n\n// Índice por dedupe_key. Emparejar por posición era el bug: 02a devuelve una\n// fila por acierto y un único item vacío cuando no acierta ninguna, así que las\n// posiciones no se corresponden con los leads y los sobrantes se perdían.\nconst porClave = new Map();\nfor (const audit of audits) {\n  const clave = String(audit?.json?.dedupe_key ?? '').trim();\n  if (clave) porClave.set(clave, audit.json);\n}\n\nconst out = [];\nfor (let indice = 0; indice < originals.length; indice += 1) {\n  const item = originals[indice];\n  const original = item?.json || {};\n  if (original._meta === true || !String(original.conversation_id || '').trim()) continue;\n\n  const audit = porClave.get(String(original.dedupe_key ?? '').trim()) || {};\n  const status = String(audit.status || '').toLowerCase().trim();\n  const isDryRun = String(original.dry_run || 'false').toLowerCase() === 'true';\n  if (status === 'attempting' || status === 'sent' || (status === 'dry_run' && isDryRun)) continue;\n\n  // El linaje se ancla al nodo del que salen realmente estos datos, con el\n  // índice del lead. Apuntar al item 0 de la entrada (02a) dejaba la cadena\n  // ambigua en cuanto había más de un lead vencido, y 02c fallaba entero con\n  // 'Multiple matches found' sin enviar ningún follow-up.\n  out.push({\n    json: { ...original, audit_status: status || 'new' },\n    pairedItem: {\n      item: indice,\n      sourceOverwrite: {\n        previousNode: '03 Filtro | Leads con follow-up vencido',\n        previousNodeRun: 0,\n      },\n    },\n  });\n}\nreturn out;",
         "language": "javaScript"
       }
     },
@@ -482,7 +483,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": true
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       },
       "onError": "stopWorkflow",
       "retryOnFail": true,

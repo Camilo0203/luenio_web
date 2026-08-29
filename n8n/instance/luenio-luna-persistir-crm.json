@@ -157,7 +157,8 @@
             }
           ]
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       }
     },
     {
@@ -922,7 +923,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       }
     },
     {
@@ -1623,7 +1625,8 @@
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
-        "options": {}
+        "options": {},
+        "authentication": "serviceAccount"
       }
     },
     {

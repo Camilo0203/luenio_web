@@ -3,7 +3,7 @@
 Generado por `scripts/n8n-sync.mjs` desde la instancia real. No editar a mano:
 se sobrescribe en cada sincronización.
 
-Workflows: **28** — 17 de producción, 11 de staging, 0 de laboratorio.
+Workflows: **29** — 18 de producción, 11 de staging, 0 de laboratorio.
 
 ## Camino de un mensaje
 
@@ -36,8 +36,9 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 
 `date`, `schema_version`, `unique_conversations`, `inbound_messages`, `processed_messages`, `duplicate_messages`, `blocked_messages`, `discovery_completed`, `solutions_confirmed`, `price_requests`, `proposal_requests`, `proposals_sent`, `proposals_accepted`, `handoffs`, `opt_outs`, `followups_dry_run`, `followups_sent`, `followups_failed`, `critical_errors`, `secondary_errors`, `avg_turns_to_discovery`, `avg_minutes_to_proposal`, `catalog_unavailable_count`, `generated_at`, `source_version`, `status`
 
-> 1 nodo(s) referencian su pestaña **por nombre**; el resto usa el
+> 2 nodo(s) referencian su pestaña **por nombre**; el resto usa el
 > identificador, que sobrevive a un renombrado. Estos no:
+> - Luenio Catalogo Sync [STAGING] / 02 Sheets | Leer catalogo_luna -> `catalogo_luna`
 > - Luenio Catalogo Sync [STAGING] / 02 Sheets | Leer catalogo_luna -> `catalogo_luna`
 
 > El nombre en caché que guarda n8n puede estar desfasado respecto al nombre real
@@ -57,21 +58,22 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 | --- | --- | --- | --- |
 | Luenio Chatbot | activo | webhook | — |
 | Luenio Chatbot [WIP aprobaciones + multimedia] | inactivo | webhook | — |
-| Luenio Error Log | activo | errorTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO] (apagado), Luenio Chatbot [STAGING PROFESSIONAL] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio Followup 2h+24h, Luenio LUNA | Vigilar SLA handoff |
+| Luenio Error Log | activo | errorTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio Followup 2h+24h, Luenio LUNA | Vigilar SLA handoff |
 | Luenio Followup 2h+24h | activo | scheduleTrigger | — |
 | Luenio Insights | Consolidar diario | activo | manualTrigger | — |
-| Luenio Insights | Registrar evento | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO] (apagado), Luenio Chatbot [STAGING PROFESSIONAL] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio Followup 2h+24h |
+| Luenio Insights | Registrar evento | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING AUTO] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio Followup 2h+24h |
 | Luenio LUNA | Consultar KB y objeciones | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3, Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
 | Luenio LUNA | Decidir turno | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3, Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
 | Luenio LUNA | Generar propuesta PDF | inactivo | executeWorkflowTrigger | — |
 | Luenio LUNA | Gestionar agenda | inactivo | executeWorkflowTrigger | — |
 | Luenio LUNA | Gestionar aprobaciones | activo | executeWorkflowTrigger | Luenio Chatbot [WIP aprobaciones + multimedia] (apagado) |
 | Luenio LUNA | Interpretar mensaje | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3, Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
-| Luenio LUNA | Orquestar turno v3 | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING PROFESSIONAL] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado) |
+| Luenio LUNA | Orquestar turno v3 | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), ZZ TEMP | Banco de conversación LUNA (borrar) (apagado) |
 | Luenio LUNA | Persistir CRM | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
 | Luenio LUNA | Procesar multimedia | activo | executeWorkflowTrigger | Luenio Chatbot [WIP aprobaciones + multimedia] (apagado) |
-| Luenio LUNA | Registrar acción operativa | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING PROFESSIONAL] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
+| Luenio LUNA | Registrar acción operativa | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
 | Luenio LUNA | Vigilar SLA handoff | activo | scheduleTrigger | — |
+| ZZ TEMP | Banco de conversación LUNA (borrar) | inactivo | webhook | — |
 
 ## Staging
 
@@ -80,8 +82,8 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 | Luenio Advanced Waves [STAGING] | inactivo | manualTrigger | — |
 | Luenio Catalog Context [STAGING] | inactivo | manualTrigger | — |
 | Luenio Catalogo Sync [STAGING] | inactivo | manualTrigger | — |
+| Luenio Catalogo Sync [STAGING] | inactivo | manualTrigger | — |
 | Luenio Chatbot [STAGING AUTO] | inactivo | webhook | — |
-| Luenio Chatbot [STAGING PROFESSIONAL] | inactivo | webhook | — |
 | Luenio Evaluations [STAGING] | inactivo | manualTrigger | — |
 | Luenio Evaluations v3 [STAGING] | inactivo | manualTrigger | — |
 | Luenio Insights | Consolidar diario v3 [STAGING] | inactivo | manualTrigger | — |

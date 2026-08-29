@@ -554,7 +554,7 @@
       "parameters": {
         "resource": "sheet",
         "operation": "appendOrUpdate",
-        "authentication": "oAuth2",
+        "authentication": "serviceAccount",
         "documentId": {
           "__rl": true,
           "mode": "id",
