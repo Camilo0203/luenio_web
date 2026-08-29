@@ -49,3 +49,10 @@ desktop.ini
 
 .sentry-local.log
 .neon
+
+# Design working files: mockups, image sources and design-tool state. They are
+# kept on disk and stay recoverable from history (git show <rev>:<path>), but
+# they are never deployed and were adding ~43 MB to every clone.
+design-proposals/
+source-assets/
+.impeccable/

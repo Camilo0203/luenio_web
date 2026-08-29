@@ -111,7 +111,6 @@ trackedFiles.forEach((filePath) => {
 const mojibakePatterns = ["\u00c3", "\u00c2", "\u00ef\u00bf\u00bd", "\uFFFD"];
 
 for (const relativePath of sourceFiles) {
-  if (relativePath.startsWith(".impeccable/questions/")) continue;
   const filePath = path.join(root, relativePath);
   if (!fs.existsSync(filePath)) continue;
   const extension = path.extname(filePath);
