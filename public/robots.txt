@@ -11,4 +11,8 @@ Disallow: /login
 Disallow: /dashboard
 Disallow: /admin
 
+# Los rastreadores de IA entran bajo la regla User-agent: * de arriba. No hay
+# bloqueo para ninguno; el resumen del sitio en lenguaje natural está en
+# https://luenio.com/llms.txt
+
 Sitemap: https://luenio.com/sitemap.xml

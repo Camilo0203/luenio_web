@@ -153,8 +153,16 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
       brandConfig.includes('["57", "319", "320", "3702"]'),
   ],
   [
+    // The bracket check looks for unreplaced [placeholders] in the copy a reader
+    // sees, so strip script blocks first: JSON-LD arrays are full of legitimate
+    // square brackets and would otherwise read as a page shipped with template
+    // markers still in it.
     "legal pages production copy",
-    !/\[[^\]]+\]/.test(`${termsHtml}\n${privacyHtml}\n${refundsHtml}`) &&
+    !/\[[^\]]+\]/.test(
+      [termsHtml, privacyHtml, refundsHtml]
+        .map((html) => html.replace(/<script[\s\S]*?<\/script>/gu, " "))
+        .join("\n"),
+    ) &&
       termsHtml.includes("10 de julio de 2026") &&
       privacyHtml.includes("10 de julio de 2026") &&
       refundsHtml.includes("10 de julio de 2026") &&

@@ -277,6 +277,19 @@ async function runSmoke() {
       "/precios must redirect to /cotizacion.",
     );
     await expectTextRoute(baseUrl, "/robots.txt", "Sitemap: https://luenio.com/sitemap.xml");
+    // The natural-language site summary for language models. Keep it served and
+    // pointing at the real routes, or it silently rots into a dead reference.
+    const llmsTxt = await expectTextRoute(baseUrl, "/llms.txt", "# Luenio");
+    ["/cotizacion", "/demos", "/terminos", "/privacidad", "/reembolsos"].forEach((route) => {
+      assert(
+        llmsTxt.includes(`https://luenio.com${route}`),
+        `llms.txt must list ${route} so models can reach the real page.`,
+      );
+    });
+    assert(
+      llmsTxt.includes("ficticias") && llmsTxt.includes("reglas deterministas"),
+      "llms.txt must keep the fictional-demo and rule-based-scoring disclosures.",
+    );
     const sitemapResponse = await expectOkRoute(baseUrl, "/sitemap.xml", "application/xml");
     const sitemapXml = await sitemapResponse.text();
     assert(sitemapXml.includes("https://luenio.com/"), "Sitemap must include the homepage.");

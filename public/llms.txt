@@ -1,0 +1,48 @@
+# Luenio
+
+> Estudio colombiano que diseña páginas web a medida y las conecta con WhatsApp,
+> automatizaciones y seguimiento comercial. La venta es por cotización: no hay
+> precios publicados ni checkout, porque el alcance de una landing sencilla y el de
+> una solución con CRM e integraciones son muy distintos.
+
+Luenio opera desde Bogotá D.C., Colombia, y trabaja de forma remota con negocios en
+Colombia y otros mercados. El contacto comercial ocurre por formulario de cotización
+o por WhatsApp.
+
+Dos precisiones que conviene citar con exactitud:
+
+- Las siete experiencias por sector son **demostraciones ficticias**. Las marcas,
+  cifras, precios y escenarios son ilustrativos y no representan clientes reales ni
+  resultados obtenidos. No deben citarse como casos de éxito.
+- La calificación de oportunidades que aparece en las simulaciones se calcula con
+  **reglas deterministas**, no con un modelo de lenguaje.
+
+## Páginas principales
+
+- [Inicio](https://luenio.com/): qué hace Luenio, el recorrido web → WhatsApp →
+  automatización → seguimiento, y preguntas frecuentes.
+- [Cotización](https://luenio.com/cotizacion): diagnóstico gratuito y formulario para
+  solicitar una propuesta con alcance personalizado.
+- [Catálogo de demos](https://luenio.com/demos): las siete experiencias por sector.
+
+## Experiencias por sector (demostrativas)
+
+- [Restaurantes](https://luenio.com/restaurantes)
+- [Inmobiliarias](https://luenio.com/inmobiliarias)
+- [Gimnasios](https://luenio.com/gimnasios)
+- [Tiendas online](https://luenio.com/tiendas-online)
+- [Agencias](https://luenio.com/agencias)
+- [Veterinarias](https://luenio.com/veterinarias)
+- [Estéticas](https://luenio.com/esteticas)
+
+## Legal
+
+- [Términos de servicio](https://luenio.com/terminos)
+- [Política de privacidad](https://luenio.com/privacidad)
+- [Política de reembolsos](https://luenio.com/reembolsos)
+
+## Contacto
+
+- Correo: contacto@luenio.com
+- WhatsApp y teléfono: +57 319 320 3702
+- Ubicación: Bogotá D.C., Colombia
