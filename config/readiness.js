@@ -40,7 +40,14 @@ function readPublicPage(relativePath, serveDist) {
 
 export function evaluateLegalContent(pages) {
   const missing = pages.some((content) => content === null);
-  const hasPlaceholder = pages.some((content) => content !== null && /\[[^\]]+\]/.test(content));
+  // The bracket scan looks for unreplaced [placeholders] in the copy a reader
+  // sees. Script blocks have to come out first: JSON-LD is full of legitimate
+  // square brackets, and counting those would report a launch-blocking failure
+  // on pages whose text is finished.
+  const hasPlaceholder = pages.some(
+    (content) =>
+      content !== null && /\[[^\]]+\]/.test(content.replace(/<script[\s\S]*?<\/script>/gu, " ")),
+  );
 
   return {
     legalPagesFound: !missing,

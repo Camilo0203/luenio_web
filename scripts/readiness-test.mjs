@@ -220,6 +220,26 @@ try {
     "Legal pages with no [placeholder] tokens must pass the legal content check.",
   );
 
+  const structuredDataLegal = evaluateLegalContent([
+    '<script type="application/ld+json">{"@graph":[{"@type":"WebPage"}]}</script><p>Copia lista.</p>',
+    "<p>Sin placeholders aquí.</p>",
+    "<p>Otra página sin placeholders.</p>",
+  ]);
+  assert(
+    structuredDataLegal.legalPlaceholdersReplaced === true,
+    "JSON-LD arrays must not be mistaken for unreplaced [placeholder] tokens.",
+  );
+
+  const scriptHidingPlaceholder = evaluateLegalContent([
+    '<script type="application/ld+json">{"@graph":[]}</script><p>Contacto: [TU EMAIL]</p>',
+    "<p>Sin placeholders aquí.</p>",
+    "<p>Otra página sin placeholders.</p>",
+  ]);
+  assert(
+    scriptHidingPlaceholder.legalPlaceholdersReplaced === false,
+    "Stripping scripts must not stop the check from seeing placeholders in the visible copy.",
+  );
+
   const missingLegal = evaluateLegalContent([null, "<p>Sin placeholders aquí.</p>", null]);
   assert(
     missingLegal.legalPagesFound === false && missingLegal.legalPlaceholdersReplaced === false,
