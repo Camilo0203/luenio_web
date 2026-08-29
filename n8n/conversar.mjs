@@ -103,13 +103,7 @@ const GUIONES = {
     "venden computadores?",
     "👍",
   ],
-  "vuelve despues": [
-    "hola",
-    "tengo una floristeria",
-    "quiero vender online",
-    "hola",
-    "seguimos?",
-  ],
+  "vuelve despues": ["hola", "tengo una floristeria", "quiero vender online", "hola", "seguimos?"],
 };
 
 const turno = async (mensaje, contexto) => {
@@ -137,9 +131,7 @@ for (const [nombre, guion] of Object.entries(GUIONES)) {
     const r = await turno(mensaje, contexto);
     contexto = { ...contexto, ...(r.estado || {}) };
     console.log(`\n👤 ${mensaje}`);
-    console.log(
-      `🤖 ${String(r.reply || "(sin respuesta)").replace(/\n/g, "\n   ")}`,
-    );
+    console.log(`🤖 ${String(r.reply || "(sin respuesta)").replace(/\n/g, "\n   ")}`);
     const meta = [
       r.intent && `intent=${r.intent}`,
       r.next_question_code && `pregunta=${r.next_question_code}`,
@@ -155,7 +147,5 @@ for (const [nombre, guion] of Object.entries(GUIONES)) {
     vistas.push(clave);
     await new Promise((r) => setTimeout(r, 900));
   }
-  console.log(
-    `\n   estado final: ${JSON.stringify(contexto).slice(0, 220)}`,
-  );
+  console.log(`\n   estado final: ${JSON.stringify(contexto).slice(0, 220)}`);
 }

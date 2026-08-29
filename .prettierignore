@@ -12,3 +12,7 @@ apps/web/partials
 # Generado por scripts/n8n-sync.mjs desde la instancia real
 n8n/instance
 n8n/ARCHITECTURE.md
+
+# Definiciones exportadas de n8n: se importan tal cual, el formato lo pone n8n
+n8n/archive
+n8n/restaurar-staging-professional.json

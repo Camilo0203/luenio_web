@@ -23,6 +23,7 @@ export default [
       "core/**/*.{js,mjs}",
       "db/**/*.{js,mjs}",
       "lib/**/*.{js,mjs}",
+      "n8n/**/*.{js,mjs}",
       "scripts/**/*.{js,mjs}",
       "server.js",
       "vite.config.js",
