@@ -7,6 +7,20 @@ import { journeyAnalyticsProperties, readJourneyContext } from "./journey-contex
 import { getPublicJourneyById } from "./public-journeys.js";
 import { initThemeControl } from "./theme-control.js";
 
+// The font stylesheet ships as media="print" so it does not block the first
+// paint, and is switched on once it has loaded. home-clarity.js and
+// niche-landing.js already did this; without it here the catalog, the quote page
+// and the legal pages declared Manrope but never downloaded it, so their header
+// rendered in a different typeface from the rest of the site.
+const fontStylesheet = document.querySelector("[data-font-stylesheet]");
+if (fontStylesheet) {
+  const activateFontStylesheet = () => {
+    fontStylesheet.media = "all";
+  };
+  if (fontStylesheet.sheet) activateFontStylesheet();
+  else fontStylesheet.addEventListener("load", activateFontStylesheet, { once: true });
+}
+
 const body = document.body;
 const journeyContext = readJourneyContext();
 const quoteDraftStorageKey = "luenio.quote.draft";

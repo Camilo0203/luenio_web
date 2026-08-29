@@ -76,8 +76,12 @@ body.home-clarity {
   box-sizing: border-box;
 }
 
-.home-clarity button,
-.home-clarity a {
+/* Native controls do not inherit the page font, so normalise them — but leave the
+   shared .button component alone. This rule outweighs .button, and it was resetting
+   the header CTA on the home to 16px/400 while every other page rendered the same
+   markup at 13px/750, which made the home header read as a different bar. */
+.home-clarity button:not(.button),
+.home-clarity a:not(.button) {
   font: inherit;
 }
 

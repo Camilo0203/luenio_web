@@ -22,7 +22,10 @@
   --radius-sm: var(--luenio-radius-operate-card);
   --radius-md: var(--luenio-radius-public-control);
   --container: var(--luenio-public-container);
-  --header-container: 1320px;
+  /* The header shares the content container. At 1320px it was 120px wider, so the
+     brand sat 60px left of where every section below it starts and the CTA 60px
+     right — the whole bar read as shifted against the page. */
+  --header-container: var(--luenio-public-container);
 }
 
 * {
