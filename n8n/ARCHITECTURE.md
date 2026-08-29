@@ -49,7 +49,6 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 - **Luenio LUNA | Gestionar agenda** — sub-workflow que **nadie invoca**
 - **Luenio LUNA | Gestionar aprobaciones** — solo lo invocan workflows **apagados** (Luenio Chatbot [WIP aprobaciones + multimedia]): no se ejecuta
 - **Luenio LUNA | Persistir CRM** — solo lo invocan workflows **apagados** (Luenio LUNA | Orquestar turno v3 [STAGING]): no se ejecuta
-- **Luenio LUNA | Procesar multimedia** — solo lo invocan workflows **apagados** (Luenio Chatbot [WIP aprobaciones + multimedia]): no se ejecuta
 
 ## Producción
 
@@ -69,7 +68,7 @@ son código determinista sin llamadas externas. OpenRouter solo aparece en
 | Luenio LUNA | Interpretar mensaje | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3, Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
 | Luenio LUNA | Orquestar turno v3 | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING PROFESSIONAL] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), ZZ TEMP | Banco de conversación LUNA (borrar) (apagado) |
 | Luenio LUNA | Persistir CRM | activo | executeWorkflowTrigger | Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
-| Luenio LUNA | Procesar multimedia | activo | executeWorkflowTrigger | Luenio Chatbot [WIP aprobaciones + multimedia] (apagado) |
+| Luenio LUNA | Procesar multimedia | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [WIP aprobaciones + multimedia] (apagado) |
 | Luenio LUNA | Registrar acción operativa | activo | executeWorkflowTrigger | Luenio Chatbot, Luenio Chatbot [STAGING PROFESSIONAL] (apagado), Luenio Chatbot [WIP aprobaciones + multimedia] (apagado), Luenio LUNA | Orquestar turno v3 [STAGING] (apagado) |
 | Luenio LUNA | Vigilar SLA handoff | activo | scheduleTrigger | — |
 | ZZ TEMP | Banco de conversación LUNA (borrar) | inactivo | webhook | — |

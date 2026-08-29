@@ -52,6 +52,23 @@ El contacto se guarda en Supabase antes de invocar n8n. Los workflows no conserv
 - Conserva `N8N_ENCRYPTION_KEY` fuera del VPS; sin ella no pueden restaurarse las credenciales.
 - Revisa cambios de workflow y credenciales desde una cuenta con MFA.
 
+## Aprobaciones: pendiente a propósito
+
+Los cuatro nodos `02p`–`02s` (comando `/luna aprobar|rechazar …` como nota
+privada) están montados y probados, pero **siguen fuera de producción**. La
+razón no es técnica: aprobar solo marca la fila en `luenio_proposal_requests` y
+te confirma por Chatwoot. No envía nada, porque quien genera la propuesta es
+`Generar propuesta PDF`, que está inactivo.
+
+Entran el día que exista ese render. Viven en
+`Luenio Chatbot [WIP aprobaciones + multimedia]`, respaldado en
+`n8n/instance/`; cuelgan de la salida **falsa** de `02 Filtro | Validar mensaje
+entrante`, que hoy no va a ninguna parte, así que la promoción es aditiva.
+
+El aprobador ya acepta el estado `requested` además de `pending_approval`:
+`requested` es el único que la topología activa alcanza hoy, y sin renderizador
+ES el estado que espera a un humano.
+
 ## Probar el chatbot antes de tocar producción
 
 El cerebro de LUNA vive en tres sub-workflows (`Interpretar mensaje`,
