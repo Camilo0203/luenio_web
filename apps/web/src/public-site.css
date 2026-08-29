@@ -701,10 +701,6 @@ select {
   padding: 92px 0;
 }
 
-.quote-hero__inner {
-  padding-block: 80px;
-}
-
 .quote-hero h1,
 .legal-hero h1 {
   max-width: 780px;
@@ -720,11 +716,18 @@ select {
   line-height: 1.7;
 }
 
+/* Marca el único campo que no es obligatorio: WhatsApp sigue siendo el canal
+   del negocio y el correo es una alternativa, no un requisito. */
+.form-optional {
+  color: var(--muted);
+  font-weight: 400;
+}
+
 .quote-confidence {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
-  margin-top: 40px;
+  margin-top: 28px;
   background: rgba(255, 255, 255, 0.16);
 }
 
@@ -1442,18 +1445,18 @@ body.modal-open .wa-widget__trigger {
     flex-direction: column;
   }
 
-  .quote-hero__inner,
   .legal-hero__inner {
     padding-block: 68px;
   }
 
-  .quote-hero__inner {
-    padding-block: 56px;
-  }
-
   .quote-confidence {
     grid-template-columns: 1fr;
-    margin-top: 32px;
+    margin-top: 24px;
+  }
+
+  /* Apiladas, las tres condiciones costaban 150px antes del formulario. */
+  .quote-confidence span {
+    padding: 12px 14px;
   }
 
   .quote-form__intro {
@@ -1736,8 +1739,11 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
     var(--luenio-night-section);
 }
 
+/* La primera tarjeta de sector empezaba en 1044px con un viewport de 800px: el
+   catálogo no mostraba ni una demo en ningún tamaño de pantalla. El encabezado
+   sigue teniendo aire, pero deja de ocupar la pantalla entera él solo. */
 .catalog-hero .catalog-shell {
-  padding: clamp(84px, 9vw, 124px) 0 clamp(72px, 8vw, 104px);
+  padding: clamp(56px, 5vw, 72px) 0 clamp(40px, 3.5vw, 56px);
 }
 
 .catalog-hero .eyebrow,
@@ -1745,11 +1751,13 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
   color: #8eb7ff;
 }
 
+/* A 76px el titular ocupaba tres líneas y 223px. En la escala headline del
+   sistema entra en dos sin perder presencia. */
 .catalog-hero h1 {
   max-width: 900px;
-  margin: 18px 0 24px;
+  margin: 12px 0 20px;
   color: #fff;
-  font-size: clamp(42px, 6vw, 76px);
+  font-size: clamp(38px, 4.5vw, 64px);
   line-height: 0.98;
   letter-spacing: -0.052em;
 }
@@ -1764,15 +1772,17 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
 
 .catalog-disclaimer {
   max-width: 760px;
-  margin: 30px 0 0;
+  margin: 20px 0 0;
   padding-left: 18px;
   border-left: 2px solid rgba(142, 183, 255, 0.54);
   color: #9fb0c6;
   font-size: 14px;
 }
 
+/* El encabezado del catálogo repetía el ritmo del héroe: 115px de aire sobre un
+   bloque que ya venía precedido por otro de 102px. */
 .catalog-section {
-  padding: clamp(76px, 9vw, 116px) 0;
+  padding: clamp(36px, 3.5vw, 56px) 0 clamp(56px, 6vw, 88px);
   background: var(--canvas);
 }
 
@@ -1781,7 +1791,7 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
   grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
   align-items: end;
   gap: 48px;
-  margin-bottom: 48px;
+  margin-bottom: 24px;
 }
 
 .catalog-heading h2,
@@ -1947,8 +1957,31 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
   margin-left: 0;
 }
 
+/* `.site-nav { margin-inline: auto }` centra el menú en el espacio libre entre
+   la marca y las acciones, no en la página. Como las acciones miden 217px y la
+   marca 91px, ese centro caía 63px a la izquierda del centro real y la barra se
+   leía descuadrada. Igualar los dos laterales devuelve el menú al centro del
+   contenedor, que es lo que pretendía la rejilla de tres columnas de más arriba
+   antes de que el `display: flex` de este bloque la anulara.
+   Solo escritorio: por debajo de 981px manda el menú desplegable. */
+@media (min-width: 981px) {
+  .site-header .brand-lockup,
+  .site-header__actions {
+    flex: 1 1 0;
+  }
+
+  .site-header__actions {
+    justify-content: flex-end;
+  }
+}
+
+/* Esta es la única regla de padding del héroe de cotización que llega a
+   aplicarse: está fuera de toda media query y es posterior a las de arriba, y
+   como las media queries no suman especificidad, ganaba en todos los anchos.
+   Las que ajustaban este bloque por viewport estaban muertas. Ahora es fluida,
+   que era lo que aquellas intentaban conseguir. */
 .quote-hero__inner {
-  padding-block: 56px 44px;
+  padding-block: clamp(36px, 3.2vw, 48px) clamp(28px, 2.6vw, 40px);
 }
 
 .quote-hero__cta {
@@ -1958,7 +1991,7 @@ html[data-theme="dark"] .lead-form[data-state="error"] .form-status {
 .quote-page .quote-layout {
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 56px;
-  padding-block: 64px 96px;
+  padding-block: 40px 96px;
 }
 
 .quote-page .quote-layout > div {

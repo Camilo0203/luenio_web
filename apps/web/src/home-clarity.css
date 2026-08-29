@@ -281,6 +281,37 @@ body.home-clarity {
   animation: hc-fade-up 800ms 260ms var(--hc-ease) both;
 }
 
+/* Las tres condiciones que /cotizacion ya promete, en el primer viewport: el
+   visitante decidía sin saber si preguntar costaba algo. Son compromisos
+   verificables, no métricas: este producto no tiene resultados publicables. */
+.hc-hero__assurances {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 22px;
+  margin: 20px 0 0;
+  padding: 0;
+  animation: hc-fade-up 800ms 320ms var(--hc-ease) both;
+  color: var(--hc-muted);
+  font-size: 0.82rem;
+  list-style: none;
+}
+
+.hc-hero__assurances li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hc-hero__assurances li::before {
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  content: "";
+  background: var(--hc-action-deep);
+}
+
 .home-clarity .hc-button--primary {
   color: #fff;
   background: var(--hc-action-solid);
@@ -998,9 +1029,12 @@ body.home-clarity {
   font-size: 0.76rem;
 }
 
+/* El margen negativo subía la nota sobre el hueco del contenedor y la dejaba
+   solapando la caja del botón (-2px medidos a 1280px). Una nota bajo un control
+   necesita aire propio, no menos del que ya trae la fila. */
 .hc-close .hc-wa-hint {
   flex-basis: 100%;
-  margin-top: -2px;
+  margin-top: 6px;
   text-align: center;
 }
 
@@ -1477,6 +1511,24 @@ body.home-clarity {
   text-underline-offset: 5px;
 }
 
+/* En escritorio el hueco de la fila no llega a este grupo, así que la nota y el
+   correo quedaban a 7px y 2px del elemento anterior: tres líneas leídas como un
+   bloque apretado. En móvil sí se aplica y ya tienen aire, por eso solo se
+   corrige de 981px hacia arriba. */
+@media (min-width: 981px) {
+  .hc-close .hc-wa-hint {
+    margin-top: 18px;
+  }
+
+  /* En escritorio .hc-actions computa como bloque, así que el correo queda
+     `display: inline` y un margen vertical no le aplica. Como inline-block sí
+     lo respeta y sigue centrado por el bloque padre. */
+  .hc-close__mail {
+    display: inline-block;
+    margin-top: 14px;
+  }
+}
+
 .home-clarity .signed-in-copy {
   display: none;
 }
@@ -1723,6 +1775,14 @@ html[data-signed-in="1"] .home-clarity .signed-in-copy {
     grid-template-columns: 1fr;
   }
 
+  /* En teléfono la fila se parte en varias líneas; ajusta su aire para no
+     empujar el marco de demo fuera del primer viewport. */
+  .hc-hero__assurances {
+    gap: 4px 16px;
+    margin-top: 14px;
+    font-size: 0.78rem;
+  }
+
   .hc-actions .hc-button {
     width: 100%;
   }
@@ -1941,10 +2001,13 @@ html[data-signed-in="1"] .home-clarity .signed-in-copy {
     font-size: 3rem;
   }
 
+  /* El enlace ocupa toda la celda de la rejilla y, como contenedor flex, dejaba
+     su texto pegado a la izquierda mientras el resto del panel iba centrado. */
   .hc-close__mail {
     display: inline-flex;
     min-height: 44px;
     align-items: center;
+    justify-content: center;
   }
 }
 
@@ -1978,6 +2041,14 @@ html[data-signed-in="1"] .home-clarity .signed-in-copy {
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* La flecha viaja con el nodo que introduce. Sueltas en el flex, una flecha
+   podía quedar colgando al final de la línea cuando la cadena se parte. */
+.hc-hero__signal-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .hc-hero__signal-arrow {
@@ -2376,6 +2447,31 @@ html[data-theme="dark"] .hc-demo-error {
   line-height: 1.5;
 }
 
+/* La conversación se representa a sí misma: puntos de "escribiendo" y después
+   la burbuja entrando entera, caja y texto a la vez.
+   El estado por defecto es visible; el atributo de secuencia lo pone
+   home-clarity.js, así que sin JavaScript o con movimiento reducido los tres
+   mensajes se leen completos y quietos. */
+.hc-chat-panel[data-sequence="on"] .hc-chat-message:not(.is-sent),
+.hc-chat-panel[data-sequence="on"] .hc-chat-suggestion:not(.is-sent) {
+  display: none;
+}
+
+/* Cada mensaje entra al enviarse, no escalonado con los demás: pasar de
+   `display: none` a visible reinicia su animación de entrada. */
+.hc-chat-panel[data-sequence="on"] .hc-chat-message {
+  animation-delay: 0ms;
+}
+
+.hc-chat-typing[hidden] {
+  display: none;
+}
+
+/* Los puntos se colocan del lado del mensaje que está por llegar. */
+.hc-chat-typing.is-outgoing {
+  align-self: flex-end;
+}
+
 .hc-chat-suggestion {
   display: inline-flex;
   align-items: center;
@@ -2726,32 +2822,33 @@ html[data-theme="dark"] .hc-demo-error {
   animation: hc-signal-node-in 620ms var(--hc-ease) both;
 }
 
-.hc-hero.is-motion-active .hc-hero__signal-node:nth-of-type(3) {
-  animation-delay: 120ms;
-}
-
-.hc-hero.is-motion-active .hc-hero__signal-node:nth-of-type(5) {
-  animation-delay: 240ms;
-}
-
-.hc-hero.is-motion-active .hc-hero__signal-node:nth-of-type(7) {
-  animation-delay: 360ms;
-}
-
 .hc-hero.is-motion-active .hc-hero__signal-arrow {
   animation: hc-signal-arrow-flow 480ms var(--hc-ease) both;
 }
 
-.hc-hero.is-motion-active .hc-hero__signal-arrow:nth-of-type(2) {
+/* Cada paso entra detrás del anterior: flecha y después su nodo. */
+.hc-hero.is-motion-active .hc-hero__signal > :nth-child(2) .hc-hero__signal-arrow {
   animation-delay: 80ms;
 }
 
-.hc-hero.is-motion-active .hc-hero__signal-arrow:nth-of-type(4) {
+.hc-hero.is-motion-active .hc-hero__signal > :nth-child(2) .hc-hero__signal-node {
+  animation-delay: 120ms;
+}
+
+.hc-hero.is-motion-active .hc-hero__signal > :nth-child(3) .hc-hero__signal-arrow {
   animation-delay: 200ms;
 }
 
-.hc-hero.is-motion-active .hc-hero__signal-arrow:nth-of-type(6) {
+.hc-hero.is-motion-active .hc-hero__signal > :nth-child(3) .hc-hero__signal-node {
+  animation-delay: 240ms;
+}
+
+.hc-hero.is-motion-active .hc-hero__signal > :nth-child(4) .hc-hero__signal-arrow {
   animation-delay: 320ms;
+}
+
+.hc-hero.is-motion-active .hc-hero__signal > :nth-child(4) .hc-hero__signal-node {
+  animation-delay: 360ms;
 }
 
 .hc-hero.is-motion-active .hc-stage-aura {
@@ -2845,6 +2942,19 @@ html[data-theme="dark"] .hc-demo-error {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  /* Cinturón y tirantes: el script no arranca la secuencia con movimiento
+     reducido, pero si el atributo quedara puesto, la conversación debe verse
+     completa igualmente. */
+  .hc-chat-panel[data-sequence="on"] .hc-chat-message {
+    display: block;
+    animation: none;
+  }
+
+  .hc-chat-panel[data-sequence="on"] .hc-chat-suggestion {
+    display: inline-flex;
+    animation: none;
+  }
+
   .js .home-clarity.motion-ready [data-reveal] {
     opacity: 1;
     transform: none;

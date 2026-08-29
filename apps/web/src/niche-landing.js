@@ -202,7 +202,15 @@ function createWhatsappWidget() {
   });
 
   const wrapper = document.createElement("div");
+  // Estas siete landings están indexadas: Google manda visitantes directos a la
+  // marca ficticia del sector, sin ninguna forma de saber de quién es el trabajo
+  // ni de volver. La firma es la capa externa de Luenio sobre el mundo sectorial;
+  // niche-widget.css ya la tenía diseñada y nunca se había renderizado.
   wrapper.innerHTML = `
+    <a class="luenio-signature" href="/" data-luenio-signature>
+      <img src="/brand/isotipo.svg" width="454" height="478" alt="" />
+      <span>Demo de Luenio</span>
+    </a>
     <aside class="luenio-wa" id="luenio-whatsapp" aria-hidden="true">
       <button class="luenio-wa__backdrop" type="button" data-luenio-close aria-label="Cerrar formulario"></button>
       <section class="luenio-wa__panel" role="dialog" aria-modal="true" aria-labelledby="luenio-wa-title">

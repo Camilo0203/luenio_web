@@ -305,6 +305,120 @@ if (root) {
       });
     });
 
+    // --- La conversación se representa a sí misma -------------------------
+    //
+    // Antes de cada mensaje aparecen los puntos de "escribiendo"; al enviarse,
+    // la burbuja entra completa —caja y texto a la vez— desde abajo, como en un
+    // chat real. Los mensajes que aún no se han enviado no ocupan espacio, así
+    // que se apilan hacia arriba sobre el borde inferior del panel.
+    //
+    // El panel tiene alto propio (520px) y la zona de mensajes es su fila
+    // flexible, de modo que mostrarlos de uno en uno no mueve nada fuera: el
+    // presupuesto de CLS no se toca.
+    //
+    // El estado base es "todo visible": la clase de secuencia la pone este
+    // script, así que sin JavaScript o con `prefers-reduced-motion` la
+    // conversación se lee entera y estática.
+    const COMPOSE_MIN_MS = 620;
+    const COMPOSE_PER_CHAR_MS = 13;
+    const COMPOSE_MAX_MS = 1500;
+    const AFTER_SEND_MS = 420;
+    const HOLD_MS = 4200;
+    let sequenceTimers = [];
+
+    const clearSequence = () => {
+      sequenceTimers.forEach((timer) => clearTimeout(timer));
+      sequenceTimers = [];
+    };
+
+    const composeTime = (message) =>
+      Math.min(
+        COMPOSE_MAX_MS,
+        COMPOSE_MIN_MS + message.textContent.trim().length * COMPOSE_PER_CHAR_MS,
+      );
+
+    const resetPanel = (panel) => {
+      panel
+        .querySelectorAll(".hc-chat-message.is-sent, .hc-chat-suggestion.is-sent")
+        .forEach((node) => node.classList.remove("is-sent"));
+      const dots = panel.querySelector(".hc-chat-typing");
+      if (dots) {
+        dots.hidden = true;
+        dots.classList.remove("is-outgoing");
+      }
+    };
+
+    const playSequence = (panel) => {
+      clearSequence();
+      const messages = [...panel.querySelectorAll(".hc-chat-message")];
+      const dots = panel.querySelector(".hc-chat-typing");
+      const suggestion = panel.querySelector(".hc-chat-suggestion");
+      if (!messages.length) return;
+
+      panel.dataset.sequence = "on";
+      resetPanel(panel);
+
+      let at = 320;
+      messages.forEach((message) => {
+        const wait = composeTime(message);
+        const outgoing = message.classList.contains("hc-chat-message--outgoing");
+        sequenceTimers.push(
+          setTimeout(() => {
+            if (!dots) return;
+            dots.hidden = false;
+            dots.classList.toggle("is-outgoing", outgoing);
+          }, at),
+        );
+        at += wait;
+        sequenceTimers.push(
+          setTimeout(() => {
+            if (dots) dots.hidden = true;
+            message.classList.add("is-sent");
+          }, at),
+        );
+        at += AFTER_SEND_MS;
+      });
+
+      if (suggestion) {
+        sequenceTimers.push(setTimeout(() => suggestion.classList.add("is-sent"), at));
+      }
+      sequenceTimers.push(setTimeout(() => playSequence(panel), at + HOLD_MS));
+    };
+
+    const stopSequence = () => {
+      clearSequence();
+      chatPanels.forEach((panel) => {
+        delete panel.dataset.sequence;
+        resetPanel(panel);
+      });
+    };
+
+    const activePanel = () =>
+      chatPanels.find((panel) => panel.dataset.chatPanel === chatDemo.dataset.chatChannel);
+
+    const syncSequence = () => {
+      if (reduceMotion) return;
+      const panel = activePanel();
+      if (!chatDemo.classList.contains("is-motion-active") || document.hidden || !panel) {
+        stopSequence();
+        return;
+      }
+      chatPanels.forEach((other) => {
+        if (other === panel) return;
+        delete other.dataset.sequence;
+        resetPanel(other);
+      });
+      playSequence(panel);
+    };
+
+    if (!reduceMotion && "IntersectionObserver" in window) {
+      new MutationObserver(syncSequence).observe(chatDemo, {
+        attributes: true,
+        attributeFilter: ["class", "data-chat-channel"],
+      });
+      document.addEventListener("visibilitychange", syncSequence);
+    }
+
     setChatChannel(chatDemo.dataset.chatChannel || "whatsapp");
   }
 

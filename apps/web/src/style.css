@@ -1291,6 +1291,13 @@ textarea:focus {
   align-items: center;
   color: var(--muted);
 }
+/* La marca ancla la barra: en móvil la firma flotante no se muestra, así que
+   esta es la única vuelta a Luenio desde una landing de sector. */
+.legal-bar__brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
 .legal-bar a:hover {
   color: var(--text-soft);
 }
