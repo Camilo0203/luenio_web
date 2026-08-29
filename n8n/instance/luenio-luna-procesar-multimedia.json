@@ -1,0 +1,82 @@
+{
+  "name": "Luenio LUNA | Procesar multimedia",
+  "active": false,
+  "nodes": [
+    {
+      "id": "media-trigger",
+      "name": "01 Entrada | Binario temporal",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "passthrough"
+      }
+    },
+    {
+      "id": "media-validate",
+      "name": "02 Multimedia | Validar límites y privacidad",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const PROPOSAL_STATUSES = new Set(['none','requested','rendering','pending_approval','approved','rejected','sending','partially_sent','sent','failed','blocked_after_send_failure']);\nconst APPOINTMENT_STATUSES = new Set(['requested','availability_checked','pending_confirmation','pending_approval','confirmed','cancelled','expired','failed']);\n\nfunction text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\nfunction stableHash(value) {\n  let h1 = 0xdeadbeef ^ text(value).length;\n  let h2 = 0x41c6ce57 ^ text(value).length;\n  for (let index = 0; index < text(value).length; index += 1) {\n    const code = text(value).charCodeAt(index);\n    h1 = Math.imul(h1 ^ code, 2654435761);\n    h2 = Math.imul(h2 ^ code, 1597334677);\n  }\n  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);\n  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);\n  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');\n}\n\nfunction sanitizeProposalSnapshot(context, catalog) {\n  const allowedContext = ['business_type','project_goal','pain_point','current_process','impact','desired_outcome','discovery_urgency','recommended_solution','selected_solution','solution_confirmed','conversation_summary'];\n  const snapshot = { schema_version: '3.0', context: {}, catalog: { version: text(catalog && catalog.version), packages: {} } };\n  for (const key of allowedContext) snapshot.context[key] = typeof context?.[key] === 'boolean' ? context[key] : text(context?.[key]);\n  const packages = catalog?.catalog_packages || {};\n  for (const key of ['PKG-ESSENTIAL','PKG-PROFESSIONAL']) {\n    const row = packages[key] || {};\n    snapshot.catalog.packages[key] = { name: text(row.name), price_project: Number(row.price_project || 0), price_monthly: Number(row.price_monthly || 0) };\n  }\n  return snapshot;\n}\n\nfunction buildProposalRequest(input) {\n  const context = input?.context || {};\n  const catalog = input?.catalog || {};\n  const errors = [];\n  if (!bool(context.discovery_done)) errors.push('discovery_incomplete');\n  if (!bool(context.solution_confirmed)) errors.push('solution_unconfirmed');\n  if (!bool(context.proposal_requested)) errors.push('proposal_not_requested');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  if (catalog.catalog_ready !== true) errors.push('catalog_unavailable');\n  const snapshot = sanitizeProposalSnapshot(context, catalog);\n  const snapshot_json = JSON.stringify(snapshot);\n  const requestKey = `${text(context.conversation_id)}|${text(input.message_id)}|proposal`;\n  return {\n    ok: errors.length === 0,\n    proposal_id: `prop_${stableHash(requestKey)}`,\n    request_key: requestKey,\n    conversation_id: text(context.conversation_id),\n    message_id: text(input.message_id),\n    status: errors.length ? 'failed' : 'requested',\n    snapshot_json,\n    snapshot_hash: stableHash(snapshot_json),\n    recipient_email_hash: '',\n    catalog_version: text(catalog.version),\n    proposal_version: 1,\n    requested_at: text(input.now || new Date().toISOString()),\n    updated_at: text(input.now || new Date().toISOString()),\n    environment: text(input.environment || 'staging'),\n    source_version: text(input.source_version || '3.0'),\n    last_error_code: errors.join(','),\n  };\n}\n\nfunction parseApprovalCommand(input) {\n  const body = text(input?.content || input?.message);\n  const privateNote = bool(input?.private_note || input?.private);\n  const human = bool(input?.human_sender) && !bool(input?.sender_is_bot);\n  const hmac = bool(input?.hmac_valid);\n  const match = body.match(/^\\/luna\\s+(aprobar|rechazar)\\s+(propuesta|cita)\\s+([a-z0-9_-]+)(?:\\s+(.+))?$/i);\n  if (!hmac) return { ok: false, reason_code: 'INVALID_SIGNATURE' };\n  if (!privateNote) return { ok: false, reason_code: 'COMMAND_NOT_PRIVATE' };\n  if (!human) return { ok: false, reason_code: 'COMMAND_SENDER_NOT_HUMAN' };\n  if (!match) return { ok: false, reason_code: 'COMMAND_INVALID' };\n  const action = match[1].toLowerCase();\n  const request_type = match[2].toLowerCase() === 'propuesta' ? 'proposal' : 'appointment';\n  if (action === 'rechazar' && !text(match[4])) return { ok: false, reason_code: 'REJECTION_REASON_REQUIRED' };\n  return { ok: true, action: action === 'aprobar' ? 'approve' : 'reject', request_type, request_id: match[3], reason: text(match[4]), reason_code: 'APPROVAL_COMMAND_VALID' };\n}\n\nfunction validateMedia(input) {\n  const mime = text(input?.mime_type).toLowerCase();\n  const bytes = Number(input?.size_bytes || 0);\n  const duration = Number(input?.duration_seconds || 0);\n  const audio = ['audio/ogg','audio/mpeg','audio/mp4','audio/webm'].includes(mime);\n  const image = ['image/jpeg','image/png','image/webp'].includes(mime);\n  if (!audio && !image) return { ok: false, kind: 'unsupported', reason_code: 'MEDIA_MIME_UNSUPPORTED' };\n  if (audio && bytes > 10 * 1024 * 1024) return { ok: false, kind: 'audio', reason_code: 'MEDIA_TOO_LARGE' };\n  if (audio && duration > 300) return { ok: false, kind: 'audio', reason_code: 'MEDIA_TOO_LONG' };\n  if (image && bytes > 8 * 1024 * 1024) return { ok: false, kind: 'image', reason_code: 'MEDIA_TOO_LARGE' };\n  return { ok: true, kind: audio ? 'audio' : 'image', reason_code: 'MEDIA_ACCEPTED' };\n}\n\nfunction validateAppointment(input) {\n  const context = input?.context || {};\n  const status = text(input?.status || 'requested');\n  const errors = [];\n  if (!APPOINTMENT_STATUSES.has(status)) errors.push('appointment_status_invalid');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  if (!bool(input?.consent_explicit)) errors.push('consent_required');\n  if (text(input?.timezone || 'America/Bogota') !== 'America/Bogota') errors.push('timezone_invalid');\n  return { ok: errors.length === 0, status: errors.length ? 'failed' : status, duration_minutes: 30, buffer_minutes: 15, timezone: 'America/Bogota', reason_code: errors.join(',') || 'APPOINTMENT_VALID' };\n}\n\nfunction transitionProposal(current, event) {\n  const status = PROPOSAL_STATUSES.has(text(current)) ? text(current) : 'none';\n  const transitions = {\n    none: { request: 'requested' }, requested: { render: 'rendering', fail: 'failed' }, rendering: { rendered: 'pending_approval', fail: 'failed' },\n    pending_approval: { approve: 'approved', reject: 'rejected' }, approved: { send: 'sending' }, sending: { partial: 'partially_sent', delivered: 'sent', fail_after_send: 'blocked_after_send_failure', fail: 'failed' },\n    partially_sent: { delivered: 'sent', fail_after_send: 'blocked_after_send_failure' }, rejected: {}, sent: {}, failed: {}, blocked_after_send_failure: {},\n  };\n  const next = transitions[status]?.[text(event)];\n  return { ok: Boolean(next), previous_status: status, status: next || status, proposal_sent_this_turn: next === 'sent' && status !== 'sent', reason_code: next ? 'PROPOSAL_TRANSITION_OK' : 'PROPOSAL_TRANSITION_BLOCKED' };\n}\n\n\nconst item=$input.first()||{json:{},binary:{}}; const json=item.json||{}; const binary=item.binary||{};\nconst property=String(json.binary_property||Object.keys(binary)[0]||''); const meta=property&&binary[property]?binary[property]:{};\nconst validation=validateMedia({mime_type:json.mime_type||meta.mimeType,size_bytes:json.size_bytes||meta.fileSize||0,duration_seconds:json.duration_seconds||0});\nconst fallback='Puedo ayudarte mejor si me escribes qué necesitas resolver y a qué se dedica tu negocio.';\nif(!validation.ok) return [{json:{ok:false,content_type:validation.kind,processing_status:'rejected',media_hash:String(json.media_hash||''),reason_code:validation.reason_code,reply:fallback,persist_binary:false,provider_call:false,environment:String(json.environment||'staging'),source_hash:String(json.source_hash||'')}}];\nreturn [{json:{ok:true,content_type:validation.kind,processing_status:'blocked_missing_openai_credential',binary_property:property,media_hash:String(json.media_hash||''),reason_code:'OPENAI_CREDENTIAL_REQUIRED',reply:fallback,persist_binary:false,provider_call:false,environment:String(json.environment||'staging'),source_hash:String(json.source_hash||'')},binary}];"
+      }
+    },
+    {
+      "id": "media-output",
+      "name": "03 Salida | Fallback seguro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const item=$input.first()||{json:{}}; const j=item.json||{}; const output={ok:Boolean(j.ok),content_type:String(j.content_type||'unsupported'),processing_status:String(j.processing_status||'failed'),media_hash:String(j.media_hash||''),reason_code:String(j.reason_code||'MEDIA_PROCESSING_FAILED'),reply:String(j.reply||''),persist_binary:false,provider_call:false,environment:String(j.environment||'staging'),source_hash:String(j.source_hash||'')}; return [{json:output}];"
+      }
+    }
+  ],
+  "connections": {
+    "01 Entrada | Binario temporal": {
+      "main": [
+        [
+          {
+            "node": "02 Multimedia | Validar límites y privacidad",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Multimedia | Validar límites y privacidad": {
+      "main": [
+        [
+          {
+            "node": "03 Salida | Fallback seguro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

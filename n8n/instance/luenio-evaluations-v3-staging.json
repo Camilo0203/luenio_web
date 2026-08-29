@@ -1,0 +1,762 @@
+{
+  "name": "Luenio Evaluations v3 [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "eval-v3-manual",
+      "name": "00 Trigger | Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "eval-v3-webhook",
+      "name": "00 Trigger | MCP test",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        170
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luna-professional-evals-v3-7b59f0d4",
+        "responseMode": "lastNode",
+        "options": {},
+        "authentication": "headerAuth"
+      },
+      "webhookId": "0c1d31bc-b7a0-4c07-b961-413c93c40502"
+    },
+    {
+      "id": "eval-v3-normalize",
+      "name": "01 Entrada | Inicializar run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        85
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{ json: { started_at: new Date().toISOString() } }];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-read",
+      "name": "02 Datos | Leer 128 casos",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        85
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "YGUSwblitjjmADX0",
+          "cachedResultName": "luenio_eval_cases_v3"
+        },
+        "returnAll": true
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "eval-v3-base",
+      "name": "03 Evaluación | 65 controles base",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        730,
+        -30
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst rows = $input.all().map((item) => item.json || {}).filter((row) => row.enabled !== false && !String(row.case_id || '').startsWith('pro_v3_'));\nconst SOURCE_HASH = '0ba97ce90f4b62d21f15492f54ada491eaa63773d0bd34ee6ca1448752aca857';\nconst LEGACY_SOURCE_HASH = '27b0dfe58c248c2a914ba01fc7ca5d299c2cc281965dd9c33f00279b6e7659c3';\nconst COMPAT_SOURCE_HASHES = new Set([SOURCE_HASH]);\nconst SUITE_VERSION = '3.0.3';\nconst forbiddenEventFields = ['body','message_text','history','email','phone','name','conversation_summary','raw_error','full_prompt','full_reply'];\nconst hash = (value) => {\n  let h = 2166136261;\n  for (const ch of String(value || '')) {\n    h ^= ch.charCodeAt(0);\n    h = Math.imul(h, 16777619);\n  }\n  return ('00000000' + (h >>> 0).toString(16)).slice(-8);\n};\nconst parseJson = (value, label, failures) => {\n  try { return JSON.parse(String(value || '{}')); }\n  catch (error) { failures.push(label + '_JSON_INVALID'); return {}; }\n};\nconst hasExpected = (expected, key) => Array.isArray(expected[key]) && expected[key].length > 0;\nconst hasText = (expected, key, matcher) => hasExpected(expected, key) && expected[key].some((value) => matcher.test(String(value)));\nconst runCase = (row) => {\n  const failures = [];\n  let output = '';\n  let summary = '';\n  let resultState = {};\n  const input = parseJson(row.input_json, 'input', failures);\n  const expected = parseJson(row.expected_json, 'expected', failures);\n  const kind = String(input.kind || '');\n  const context = input.context && typeof input.context === 'object' ? input.context : {};\n  const action = String(input.action || '');\n  const emailValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(context.email || ''));\n  if (!row.case_id) failures.push('CASE_ID_REQUIRED');\n  const legacyFixture = String(row.suite_version || '') === '1.0.0' && String(row.source_hash || '') === LEGACY_SOURCE_HASH;\n  const compatibleSource = COMPAT_SOURCE_HASHES.has(String(row.source_hash || ''));\n  if (!legacyFixture && String(row.suite_version || '') !== SUITE_VERSION) failures.push('SUITE_VERSION_MISMATCH');\n  if (!legacyFixture && !compatibleSource) failures.push('SOURCE_HASH_MISMATCH');\n  if (!['discovery','catalog','solution','proposal','controls','idempotency','crm','insights','followup','integrity','objections','deduplication','selection'].includes(String(row.category || ''))) failures.push('CATEGORY_INVALID');\n  if (!['critical','secondary'].includes(String(row.severity || ''))) failures.push('SEVERITY_INVALID');\n  if (kind === 'discovery_missing') {\n    if (!hasExpected(expected, 'contains')) failures.push('DISCOVERY_QUESTION_MISSING');\n    if (!hasExpected(expected, 'notContains')) failures.push('DISCOVERY_NEGATIVE_ASSERTIONS_MISSING');\n    if (context.business_type && context.project_goal && (!context.pain_point || /algo digital|algo|ayuda/i.test(String(context.project_goal)))) {\n      if (!hasText(expected, 'contains', /qué (está pasando|quieres resolver)/i)) failures.push('DISCOVERY_AMBIGUOUS_GUARD_MISSING');\n    }\n  } else if (kind === 'discovery_complete') {\n    if (Number(expected.summaryMax || 0) > 420) failures.push('SUMMARY_LIMIT_INVALID');\n    if (!hasExpected(expected, 'contains') && !hasExpected(expected, 'notContains')) failures.push('DISCOVERY_COMPLETE_ASSERTIONS_MISSING');\n  } else if (kind === 'profile') {\n    if (!Array.isArray(expected.fields) || expected.fields.length < 3) failures.push('PROFILE_FIELDS_INCOMPLETE');\n    if (!String(input.input || '').trim()) failures.push('PROFILE_INPUT_REQUIRED');\n  } else if (kind === 'price_gate') {\n    if (!hasText(expected, 'notContains', /\\$1\\.550\\.000|\\$2\\.100\\.000/)) failures.push('PRICE_GATE_MISSING');\n  } else if (kind === 'no_inference') {\n    if (!hasText(expected, 'notContains', /pc|hardware|computador/i)) failures.push('NO_INFERENCE_GUARD_MISSING');\n  } else if (kind === 'solution') {\n    const solution = String(input.solution || '');\n    if (!solution) {\n      if (!hasText(expected, 'contains', /qué prefieres priorizar/i)) failures.push('SOLUTION_CONFIRMATION_MISSING');\n    } else if (solution === 'chatbot_whatsapp_ia') {\n      if (!hasText(expected, 'contains', /chatbot/i) || !hasText(expected, 'notContains', /\\$1\\.550\\.000/)) failures.push('CHATBOT_SCOPE_RULE_INVALID');\n    } else if (solution === 'web_catalogo') {\n      if (!hasText(expected, 'contains', /catálogo web/i) || !hasText(expected, 'notContains', /\\$1\\.550\\.000/)) failures.push('WEB_SCOPE_RULE_INVALID');\n    } else if (solution === 'pack_web_chatbot') {\n      if (!hasText(expected, 'contains', /catálogo web y chatbot|catálogo web \\+ chatbot|combinación/i)) failures.push('PACK_SCOPE_RULE_INVALID');\n    } else {\n      failures.push('SOLUTION_VALUE_INVALID');\n    }\n  } else if (kind === 'prices') {\n    const catalog = input.catalog && typeof input.catalog === 'object' ? input.catalog : {};\n    if (catalog.catalog_ready === true) {\n      const packages = catalog.catalog_packages || {};\n      const essential = Number(packages['PKG-ESSENTIAL']?.price_project || 0);\n      const professional = Number(packages['PKG-PROFESSIONAL']?.price_project || 0);\n      if (essential <= 0 || professional <= 0) {\n        if (!hasText(expected, 'notContains', /\\$0/)) failures.push('MISSING_PRICE_FALLBACK_INVALID');\n      } else if (!hasText(expected, 'contains', /\\$1\\.550\\.000/) || !hasText(expected, 'contains', /\\$2\\.100\\.000/)) {\n        failures.push('CATALOG_PRICE_ASSERTIONS_INCOMPLETE');\n      }\n    } else if (!hasExpected(expected, 'contains') ||\n      !expected.contains.some((value) => String(value).toLowerCase().includes('antes de mostrarte precios')) ||\n      !hasExpected(expected, 'notContains') ||\n      !expected.notContains.some((value) => String(value).includes('$1.550.000')) ||\n      !expected.notContains.some((value) => String(value).includes('$2.100.000'))) {\n      failures.push('CATALOG_UNAVAILABLE_GUARD_INVALID');\n    }\n  } else if (kind === 'source_scan') {\n    if (!hasExpected(expected, 'notContains') || expected.notContains.length < 5) failures.push('LEGACY_PRICE_ASSERTIONS_INCOMPLETE');\n  } else if (kind === 'proposal_prereqs') {\n    const canSendExpected = expected.canSend === true;\n    const canSendActual = emailValid && Boolean(context.discovery_done) && Boolean(context.solution_shown);\n    if (canSendExpected !== canSendActual) failures.push('PROPOSAL_PREREQUISITES_INVALID');\n  } else if (kind === 'proposal_flag') {\n    if (expected.before !== 'false' || expected.after !== 'true') failures.push('PROPOSAL_FLAG_TRANSITION_INVALID');\n  } else if (kind === 'summary') {\n    if (Number(expected.max || 0) > 420 || !hasExpected(expected, 'notContains')) failures.push('SUMMARY_CONTRACT_INVALID');\n  } else if (kind === 'event_schema') {\n    if (!Array.isArray(expected.forbidden) || expected.forbidden.length !== forbiddenEventFields.length) failures.push('EVENT_PRIVACY_CONTRACT_INVALID');\n  } else if (kind === 'event_idempotence') {\n    if (expected.unique !== true) failures.push('EVENT_IDEMPOTENCE_CONTRACT_INVALID');\n  } else if (kind === 'daily_aggregation') {\n    for (const key of ['unique_conversations','processed_messages','duplicate_messages','handoffs']) {\n      if (!Number.isFinite(Number(expected[key]))) failures.push('DAILY_ASSERTION_INVALID_' + key);\n    }\n  } else if (kind === 'followup') {\n    if (expected.dry_run !== true || expected.sent !== false) failures.push('FOLLOWUP_DRY_RUN_CONTRACT_INVALID');\n  } else if (kind === 'error_policy') {\n    if (expected.critical !== 'stopWorkflow' || expected.secondary !== 'continueErrorOutput') failures.push('ERROR_POLICY_CONTRACT_INVALID');\n  } else if (kind === 'advanced_wave') {\n    const feature = String(input.feature || '').toLowerCase();\n    const advancedInput = input.input && typeof input.input === 'object' ? input.input : {};\n    const bool = (value) => value === true || value === 1 || String(value || '').toLowerCase() === 'true';\n    const result = {\n      feature,\n      active: false,\n      staging_only: true,\n      external_call: false,\n      pii_persisted: false,\n      status: 'blocked_until_staging_approval',\n      reason_code: 'STAGING_CONTRACT_READY'\n    };\n    if (feature === 'media') {\n      const supported = /^(audio|image)\\//i.test(String(advancedInput.mime_type || ''));\n      result.status = supported ? 'staging_media_contract_ready' : 'fallback_required';\n      result.reason_code = supported ? 'MEDIA_MIME_ACCEPTED_NO_PROVIDER_CALL' : 'MEDIA_MIME_UNSUPPORTED';\n    } else if (feature === 'calendar') {\n      const consent = bool(advancedInput.consent);\n      result.status = consent ? 'pending_confirmation' : 'consent_required';\n      result.appointment_status = consent ? 'requested' : 'none';\n      result.appointment_timezone = 'America/Bogota';\n    } else if (feature === 'pdf') {\n      const ready = bool(advancedInput.discovery_done) && bool(advancedInput.solution_confirmed) && bool(advancedInput.catalog_ready) && bool(advancedInput.proposal_requested);\n      result.status = ready ? 'staging_pdf_contract_ready' : 'preconditions_required';\n      result.reason_code = ready ? 'PDF_PRECONDITIONS_MET_NO_FILE_CREATED' : 'PDF_PRECONDITIONS_MISSING';\n    } else if (feature === 'multichannel') {\n      result.channel = String(advancedInput.channel || 'whatsapp').toLowerCase();\n      result.status = result.channel === 'whatsapp' ? 'whatsapp_adapter_ready' : 'adapter_not_active';\n      result.reason_code = result.channel === 'whatsapp' ? 'WHATSAPP_ONLY_ACTIVE_CHANNEL' : 'CHANNEL_DISABLED';\n    } else if (feature === 'followup') {\n      result.status = 'dry_run_only';\n      result.dry_run = true;\n      result.max_per_run = 3;\n      result.reason_code = 'FOLLOWUP_REAL_SEND_BLOCKED';\n    }\n    for (const [key, value] of Object.entries(expected)) {\n      if (result[key] !== undefined && result[key] !== value) failures.push(key.toUpperCase() + '_INVALID');\n    }\n    output = JSON.stringify(result);\n  } else if (kind === 'contract_v2') {\n    const sourceText = Array.isArray(input.sequence) && input.sequence.length ? input.sequence.join(' \\n ') : String(input.input || '');\n    const lowerText = sourceText.toLowerCase();\n    const has = (...values) => values.some((value) => lowerText.includes(value));\n    const explicitPack = has('pack', 'ambos', 'los dos', 'web + chatbot', 'web y chatbot', 'chatbot + web', 'chatbot y web');\n    const explicitChatbot = has('solo chatbot', 'necesito un chatbot', 'quiero un chatbot', 'chatbot whatsapp');\n    const explicitWeb = has('solo web', 'solo la web', 'necesito una web', 'necesito una página', 'quiero una web', 'quiero web', 'catálogo web');\n    const selected = explicitPack ? 'pack_web_chatbot' : explicitChatbot ? 'chatbot_whatsapp_ia' : explicitWeb ? 'web_catalogo' : '';\n    const businessKnown = !lowerText.includes('tengo un negocio') && has('ropa', 'tienda', 'retail', 'restaurante', 'inmobiliaria', 'pcs', 'hardware', 'clínica', 'clinica', 'servicio');\n    const goalKnown = has('chatbot', 'whatsapp', 'web', 'página', 'pagina', 'catálogo', 'catalogo', 'automatiz');\n    const painKnown = has('pierdo', 'perdemos', 'no respondo', 'no respondemos', 'ventas', 'problema', 'dolor');\n    const currentKnown = has('manual', 'manualmente', 'por whatsapp', 'atendemos', 'atiendo', 'sin sistema', 'redes');\n    const outcomeKnown = has('quiero responder', 'quiero vender', 'responder más rápido', 'responder mas rapido', 'mejorar', 'no perder');\n    const discoveryDone = businessKnown && goalKnown && painKnown && currentKnown && outcomeKnown;\n    const objection = has('muy caro', 'está caro', 'esta caro', 'costoso') ? 'price_high' : '';\n    const result = {\n      discovery_done: discoveryDone,\n      selected_solution: selected,\n      proposal_sent: false,\n      proposal_delivery_status: String(context.proposal_delivery_status || 'none'),\n      proposal_accepted: false,\n      objection_code: objection,\n      human_required: /asesor|humano|persona real/.test(lowerText),\n      bot_muted: /asesor|humano|persona real/.test(lowerText),\n      opt_out: /no molestar|no me escribas|\\bstop\\b|\\bbaja\\b/.test(lowerText),\n      pipeline_stage: /asesor|humano|persona real/.test(lowerText) ? 'handoff' : /no molestar|no me escribas/.test(lowerText) ? 'cerrado' : discoveryDone ? 'calificado' : 'descubrimiento'\n    };\n    if (action === 'proposal_gate' && result.proposal_delivery_status === 'sent') result.proposal_sent = true;\n    if (action === 'proposal_gate' && result.proposal_delivery_status !== 'prepared') failures.push('PROPOSAL_STATUS_FIXTURE_INVALID');\n    if (action === 'privacy' && /@/.test(JSON.stringify(result))) failures.push('PII_IN_EVENT_OUTPUT');\n    if (action === 'multi_field' && (!businessKnown || !goalKnown || !painKnown || !currentKnown || !outcomeKnown)) failures.push('MULTI_FIELD_DISCOVERY_INCOMPLETE');\n    if (action === 'ambiguous' && (businessKnown || goalKnown || selected)) failures.push('AMBIGUOUS_MESSAGE_ADVANCED');\n    if (action === 'selection' && !selected) failures.push('EXPLICIT_SELECTION_MISSING');\n    if (action === 'objection' && objection !== 'price_high') failures.push('OBJECTION_NOT_CLASSIFIED');\n    output = JSON.stringify(result);\n    for (const value of expected.notContains || []) if (output.includes(String(value))) failures.push('FORBIDDEN_TEXT_' + String(value));\n\n  } else if (kind === 'closure_flow') {\n    let state = { ...(context || {}) };\n    const normalize = (value) => String(value || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '');\n    const parseTurn = (message) => {\n      const raw = String(message || '').trim();\n      const text = normalize(raw);\n      const turn = {};\n      if (/\\b(vendo|tengo|manejo|es una)\\b.*\\b(ropa|tienda|retail)\\b|\\btienda de ropa\\b/.test(text)) turn.business_type = 'tienda / retail';\n      if (/^ventas?$/.test(text) || /\\bventas\\b/.test(text) && !/pierdo|perdemos/.test(text)) turn.project_goal = 'ventas';\n      else if (/^atencion$/.test(text)) turn.project_goal = 'atención';\n      else if (/^catalogo$/.test(text)) turn.project_goal = 'catalogo';\n      else if (/^seguimiento$/.test(text)) turn.project_goal = 'seguimiento';\n      if (/necesito\\s+(un\\s+)?chatbot|quiero\\s+(un\\s+)?chatbot|chatbot\\s+para\\s+whatsapp/.test(text)) {\n        turn.project_goal = turn.project_goal || 'chatbot';\n        turn.selected_solution = 'chatbot_whatsapp_ia';\n      }\n      if (/solo\\s+chatbot/.test(text)) {\n        turn.selected_solution = 'chatbot_whatsapp_ia';\n        turn.solution_confirmed = true;\n      }\n      if (/solo\\s+(la\\s+)?web|solo\\s+catalogo/.test(text)) {\n        turn.selected_solution = 'web_catalogo';\n        turn.solution_confirmed = true;\n      }\n      if (/quiero\\s+el\\s+pack|quiero\\s+ambos|web\\s+y\\s+chatbot|chatbot\\s+y\\s+web/.test(text)) {\n        turn.selected_solution = 'pack_web_chatbot';\n        turn.solution_confirmed = true;\n      }\n      if (/pierdo\\s+ventas|perdemos\\s+ventas|no\\s+respondo\\s+(a\\s+)?tiempo|respondo\\s+tarde/.test(text)) {\n        turn.pain_point = /no\\s+respondo|respondo\\s+tarde/.test(text) ? 'no respondo a tiempo' : 'pierdo ventas';\n        turn.impact = /pierdo\\s+ventas|perdemos\\s+ventas/.test(text) ? 'pierdo ventas' : turn.impact;\n      }\n      if (/respondemos\\s+manualmente\\s+por\\s+whatsapp|atendemos\\s+manualmente|atencion\\s+manual/.test(text)) turn.current_process = 'Respondemos manualmente por WhatsApp';\n      if (/quiero\\s+responder\\s+mas\\s+rapido|necesito\\s+contestar\\s+rapido|quiero\\s+contestar\\s+mas\\s+rapido/.test(text)) turn.desired_outcome = 'Quiero responder más rápido';\n      return turn;\n    };\n    for (const message of (Array.isArray(input.sequence) ? input.sequence : [])) {\n      const turn = parseTurn(message);\n      for (const key of ['business_type','project_goal','pain_point','current_process','impact','desired_outcome','selected_solution']) {\n        if (turn[key]) state[key] = turn[key];\n      }\n      if (turn.solution_confirmed === true) state.solution_confirmed = true;\n    }\n    const hasPainImpact = Boolean(state.pain_point) && (Boolean(state.impact) || /pierdo|ventas|perdemos/.test(normalize(state.pain_point)));\n    const discoveryDone = Boolean(state.business_type && state.project_goal && state.pain_point && state.current_process && state.desired_outcome);\n    state.discovery_done = discoveryDone;\n    state.discovery_depth = [state.business_type,state.project_goal,state.pain_point,state.current_process,state.impact,state.desired_outcome].filter(Boolean).length;\n    const nextQuestion = !state.business_type ? 'business_type' : !state.project_goal ? 'project_goal' : !state.pain_point ? 'pain_point' : !state.current_process ? 'current_process' : !hasPainImpact && !state.discovery_urgency ? 'impact' : !state.desired_outcome ? 'desired_outcome' : 'solution';\n    const questionText = {\n      business_type: '¿A qué se dedica tu negocio?',\n      project_goal: '¿Qué quieres resolver primero?',\n      pain_point: '¿Qué está pasando hoy que te llevó a buscarlo?',\n      current_process: '¿Cómo lo están resolviendo hoy y en qué momento se complica más?',\n      impact: '¿Qué impacto tiene hoy en tu negocio o qué tan urgente es resolverlo?',\n      desired_outcome: 'Si esto funcionara bien, ¿qué tendría que cambiar primero para ti?',\n      solution: '¿Prefieres priorizar chatbot, catálogo web o ambos?'\n    }[nextQuestion];\n    summary = 'Entiendo: tienes ' + (state.business_type || 'un negocio') + ', quieres resolver ' + (state.project_goal || 'una necesidad') + (state.pain_point ? ' porque ' + state.pain_point : '') + (state.current_process ? '; hoy ' + state.current_process.toLowerCase() : '') + (state.desired_outcome ? ' y buscas ' + state.desired_outcome.toLowerCase() : '') + '.';\n    summary = summary.slice(0, 420);\n    resultState = { ...state, next_question_code: nextQuestion, next_question: questionText, summary };\n    output = summary + '\\n' + questionText;\n  } else if (kind === 'closure_duplicate') {\n    const seen = new Set();\n    const claim = (event) => {\n      const conversation = String(event.conversation_id || '').trim();\n      const message = String(event.message_id || '').trim();\n      const key = message ? conversation + '|' + message : conversation + '|fallback:' + String(event.body_hash || '') + ':' + String(event.minute_bucket || '');\n      if (!conversation || seen.has(key)) return false;\n      seen.add(key);\n      return true;\n    };\n    const first = claim({ conversation_id: '9', message_id: 'm1', body_hash: 'same', minute_bucket: '1' });\n    const repeated = claim({ conversation_id: '9', message_id: 'm1', body_hash: 'same', minute_bucket: '1' });\n    const sameTextDifferentId = claim({ conversation_id: '9', message_id: 'm2', body_hash: 'same', minute_bucket: '1' });\n    const fallbackFirst = claim({ conversation_id: '9', message_id: '', body_hash: 'fallback', minute_bucket: '2' });\n    const fallbackRepeated = claim({ conversation_id: '9', message_id: '', body_hash: 'fallback', minute_bucket: '2' });\n    resultState = { same_id_first: first, same_id_repeated: repeated, same_text_different_id: sameTextDifferentId, fallback_first: fallbackFirst, fallback_repeated: fallbackRepeated, accepted_count: [first,repeated,sameTextDifferentId,fallbackFirst,fallbackRepeated].filter(Boolean).length };\n    output = JSON.stringify(resultState);\n  } else if (kind === 'closure_price_gate') {\n    const selected = String(context.selected_solution || '');\n    const confirmed = context.solution_confirmed === true || String(context.solution_confirmed || '').toLowerCase() === 'true';\n    const requested = context.price_requested === true || String(context.price_requested || '').toLowerCase() === 'true';\n    const catalog = input.catalog && typeof input.catalog === 'object' ? input.catalog : {};\n    const ready = catalog.catalog_ready === true && Number(catalog.catalog_packages?.['PKG-ESSENTIAL']?.price_project || 0) > 0 && Number(catalog.catalog_packages?.['PKG-PROFESSIONAL']?.price_project || 0) > 0;\n    if (!confirmed || !requested || !ready) resultState = { can_show_prices: false, reason_code: 'DISCOVERY_OR_SELECTION_REQUIRED' };\n    else if (selected === 'chatbot_whatsapp_ia' || selected === 'web_catalogo') resultState = { can_show_prices: false, reason_code: 'NO_INDEPENDENT_SKU', selected_solution: selected };\n    else if (selected === 'pack_web_chatbot') {\n      resultState = { can_show_prices: true, reason_code: 'PACK_CATALOG_READY', selected_solution: selected };\n      output = 'Esencial: $1.550.000 + $220.000/mes\\nProfesional: $2.100.000 + $280.000/mes';\n    } else resultState = { can_show_prices: false, reason_code: 'SOLUTION_REQUIRED' };\n    if (!output) output = JSON.stringify(resultState);\n  } else if (kind === 'closure_proposal_gate') {\n    const requested = context.proposal_requested === true || String(context.proposal_requested || '').toLowerCase() === 'true';\n    const confirmed = context.solution_confirmed === true || String(context.solution_confirmed || '').toLowerCase() === 'true';\n    const emailValid = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(context.email || ''));\n    const deliveryStatus = String(context.proposal_delivery_status || 'none').toLowerCase();\n    resultState = { proposal_requested: requested, solution_confirmed: confirmed, email_valid: emailValid, delivery_status: deliveryStatus, proposal_sent: requested && confirmed && emailValid && deliveryStatus === 'sent' };\n    output = JSON.stringify(resultState);\n  } else if (kind === 'controls' || kind === 'duplicate' || kind === 'media') {\n    if (!expected || typeof expected !== 'object' || !Object.keys(expected).length) failures.push('CONTROL_ASSERTIONS_MISSING');\n  } else {\n    failures.push('CASE_KIND_UNSUPPORTED');\n  }\n  const eventSample = {event_id:String(row.case_id || ''),event_type:'turn_processed',conversation_id:'synthetic',occurred_at:'2026-08-20T00:00:00-05:00'};\n  for (const field of forbiddenEventFields) {\n    if (Object.prototype.hasOwnProperty.call(eventSample, field)) failures.push('EVENT_PII_FIELD_' + field);\n  }\n  const outputSchemaOk = Boolean(row.case_id) && typeof row.category === 'string' && typeof expected === 'object';\n  const eventSchemaOk = !forbiddenEventFields.some((field) => Object.prototype.hasOwnProperty.call(eventSample, field));\n  return {\n    case_id:String(row.case_id || ''),\n    category:String(row.category || ''),\n    passed:failures.length === 0,\n    output_schema_ok:outputSchemaOk,\n    event_schema_ok:eventSchemaOk,\n    failed_assertions:failures.join(' | '),\n    reply_hash:'fnv1a:' + hash(String(row.case_id || '') + '|' + String(row.expected_json || '')),\n    duration_ms:0,\n    error_code:failures[0] || ''\n  };\n};\nconst results = rows.map(runCase);\nconst failed = results.filter((result) => !result.passed);\nconst startedAt = new Date().toISOString();\nconst runId = 'staging-' + Date.now() + '-' + hash(rows.map((row) => row.case_id).join('|'));\nreturn [{\n  json: {\n    run_id:runId,\n    started_at:startedAt,\n    finished_at:new Date().toISOString(),\n    suite_version:SUITE_VERSION,\n    source_hash:SOURCE_HASH,\n    mode:'staging',\n    workflow_id:String($workflow.id || ''),\n    execution_id:String($execution.id || ''),\n    total_cases:results.length,\n    passed:results.filter((result) => result.passed).length,\n    failed:failed.length,\n    status:failed.length ? 'failed' : 'passed',\n    error_message:failed.length ? failed.slice(0,5).map((result) => result.case_id + ':' + result.error_code).join('; ') : '',\n    results\n  }\n}];\n"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-pro",
+      "name": "04 Evaluación | 63 casos profesionales",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        730,
+        200
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const SOURCE_HASH = '0ba97ce90f4b62d21f15492f54ada491eaa63773d0bd34ee6ca1448752aca857';\nconst SUITE_VERSION = '3.0.3';\nconst interpretV3 = (function(){ const module={exports:{}}; const exports=module.exports;\n'use strict';\n\nconst SOLUTIONS = new Set(['web_catalogo', 'chatbot_whatsapp_ia', 'pack_web_chatbot', 'asesor']);\n\nfunction clean(value) {\n  return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim();\n}\n\nfunction normalized(value) {\n  return clean(value).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase();\n}\n\nfunction pickMatch(text, expressions) {\n  for (const expression of expressions) {\n    const match = text.match(expression);\n    if (match) return clean(match[1] || match[0]);\n  }\n  return '';\n}\n\nfunction canonicalBusiness(raw) {\n  const value = normalized(raw);\n  if (!value) return '';\n  if (/ropa|moda|prendas|boutique|tienda/.test(value)) return 'tienda / retail';\n  if (/restaurante|comidas?|cafeteria|panaderia/.test(value)) return 'gastronomía';\n  if (/servicios?|consultoria|agencia/.test(value)) return clean(raw);\n  return clean(raw).slice(0, 120);\n}\n\nfunction detectIntent(message, messageType) {\n  const text = normalized(message);\n  if (messageType && messageType !== 'text') return 'media';\n  if (/^reset$|^reiniciar$|^borrar memoria$/.test(text)) return 'reset';\n  if (/^activar luna$|^reactivar luna$|^volver con luna$/.test(text)) return 'activate';\n  if (/^no molestar$|no me (?:escribas|contactes)|no quiero mensajes|darme de baja/.test(text)) return 'opt_out';\n  if (/\\b(?:asesor|humano|persona|hablar con alguien)\\b/.test(text)) return 'handoff';\n  if (/\\b(?:agendar|agenda|reunion|cita|horario)\\b/.test(text)) return 'appointment';\n  if (/\\b(?:propuesta|cotizacion|cotizar|armar los numeros)\\b/.test(text)) return 'proposal';\n  if (/\\b(?:precio|precios|cuanto cuesta|valor|inversion)\\b/.test(text)) return 'price';\n  if (/\\b(?:quiero el pack|quiero ambos|web y chatbot|chatbot y web)\\b/.test(text)) return 'select_pack';\n  if (/\\b(?:solo chatbot|solamente chatbot)\\b/.test(text)) return 'confirm_chatbot';\n  if (/\\b(?:solo web|solamente web|solo catalogo)\\b/.test(text)) return 'confirm_web';\n  if (/\\b(?:necesito|quiero|busco)\\b.*\\bchatbot\\b|^chatbot$/.test(text)) return 'select_chatbot';\n  if (/\\b(?:necesito|quiero|busco)\\b.*\\b(?:web|catalogo)\\b|^(?:web|catalogo)$/.test(text)) return 'select_web';\n  if (/^(?:menu|menú)$/.test(clean(message).toLowerCase())) return 'menu';\n  if (/^(?:hola|buenas|buenos dias|buenas tardes|buenas noches|hey)$/.test(text)) return 'greeting';\n  if (/caro|costoso|muy alto/.test(text)) return 'objection_price_high';\n  if (/lo voy a pensar|dejamelo pensar|necesito pensarlo/.test(text)) return 'objection_need_to_think';\n  if (/solo (?:quiero )?informacion/.test(text)) return 'objection_only_information';\n  if (/no tengo presupuesto|sin presupuesto/.test(text)) return 'objection_no_budget';\n  return 'general';\n}\n\nfunction extractFields(message, prior) {\n  const raw = clean(message);\n  const text = normalized(raw);\n  const context = prior && typeof prior === 'object' ? prior : {};\n  const fields = {};\n\n  const emailMatch = raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/i);\n  if (emailMatch) fields.email = emailMatch[0].toLowerCase();\n\n  const business = pickMatch(raw, [\n    /(?:me dedico a|mi negocio es|tengo (?:una?|un)|vendo)\\s+(.{2,100})/i,\n    /(?:somos (?:una?|un))\\s+(.{2,100})/i,\n  ]);\n  if (business && !/^(?:chatbot|web|catalogo|pack)$/i.test(business)) fields.business_type = canonicalBusiness(business);\n\n  if (/^(?:ventas?|vender mas)$/.test(text)) fields.project_goal = 'ventas';\n  else if (/^(?:atencion|atender|servicio al cliente)$/.test(text)) fields.project_goal = 'atención';\n  else if (/^(?:catalogo|mostrar productos?)$/.test(text)) fields.project_goal = 'catalogo';\n  else if (/^(?:seguimiento|hacer seguimiento)$/.test(text)) fields.project_goal = 'seguimiento';\n  else if (!context.project_goal) {\n    const goal = pickMatch(raw, [/(?:quiero|necesito|busco)\\s+(?:mejorar|aumentar|organizar|automatizar)\\s+(.{2,100})/i]);\n    if (goal && !/responder|contestar/i.test(goal)) fields.project_goal = clean(goal).slice(0, 120);\n  }\n\n  if (/\\b(?:pierdo|perdemos)\\s+ventas?\\b/.test(text)) {\n    fields.impact = 'Pierdo ventas';\n    fields.pain_point = raw.slice(0, 180);\n  } else if (/\\b(?:problema|dificultad|se complica|no respondo|respondo tarde|demoramos|no alcanzamos)\\b/.test(text)) {\n    fields.pain_point = raw.slice(0, 180);\n  }\n\n  if (/\\b(?:manualmente|por whatsapp|en excel|a mano|una persona responde|respondemos)\\b/.test(text)) {\n    fields.current_process = raw.slice(0, 180);\n  }\n\n  if (/\\b(?:quiero|necesito)\\s+(?:responder|contestar)\\s+mas\\s+rapido\\b|\\bno perder ventas\\b|\\bautomatizar la atencion\\b/.test(text)) {\n    fields.desired_outcome = raw.slice(0, 180);\n  }\n\n  if (/\\b(?:urgente|hoy|esta semana|cuanto antes|lo antes posible)\\b/.test(text)) {\n    fields.discovery_urgency = /hoy|urgente|cuanto antes|lo antes posible/.test(text) ? 'alta' : 'media';\n  }\n\n  return fields;\n}\n\nfunction interpretMessage(input) {\n  const source = input && typeof input === 'object' ? input : {};\n  const message = clean(source.user_message || source.message || '');\n  const context = source.context && typeof source.context === 'object'\n    ? source.context\n    : (() => { try { return JSON.parse(source.context_json || '{}'); } catch { return {}; } })();\n  const intent = detectIntent(message, clean(source.message_type || 'text').toLowerCase());\n  const extracted_fields = extractFields(message, context);\n  if (intent === 'select_chatbot' || intent === 'confirm_chatbot') extracted_fields.selected_solution = 'chatbot_whatsapp_ia';\n  if (intent === 'select_web' || intent === 'confirm_web') extracted_fields.selected_solution = 'web_catalogo';\n  if (intent === 'select_pack') extracted_fields.selected_solution = 'pack_web_chatbot';\n\n  const explicit = intent !== 'general' || Object.keys(extracted_fields).length > 0;\n  const ambiguous_fields = [];\n  if (!message) ambiguous_fields.push('message');\n  if (intent === 'general' && message.length <= 2) ambiguous_fields.push('intent');\n  if (extracted_fields.business_type && extracted_fields.business_type.length < 3) ambiguous_fields.push('business_type');\n\n  return {\n    intent,\n    confidence: explicit ? 0.96 : (message.length > 8 ? 0.58 : 0.35),\n    extracted_fields,\n    ambiguous_fields,\n    reason_code: explicit ? 'DETERMINISTIC_MATCH' : 'AMBIGUOUS_REQUIRES_INTERPRETATION',\n    needs_ai: !explicit && message.length > 2,\n  };\n}\n\nmodule.exports = { SOLUTIONS, clean, normalized, detectIntent, extractFields, interpretMessage };\n\r\n\nreturn module.exports; })();\nconst decisionV3 = (function(){ const module={exports:{}}; const exports=module.exports;\n'use strict';\n\nconst ALLOWED_SOLUTIONS = new Set(['web_catalogo', 'chatbot_whatsapp_ia', 'pack_web_chatbot', 'asesor']);\nconst ALLOWED_ACTIONS = new Set(['none', 'handoff', 'proposal', 'appointment', 'media_fallback']);\nconst PROPOSAL_STATUSES = new Set(['none', 'requested', 'rendering', 'pending_approval', 'approved', 'rejected', 'sending', 'partially_sent', 'sent', 'failed', 'blocked_after_send_failure']);\n\nfunction text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction parseObject(value) {\n  if (value && typeof value === 'object' && !Array.isArray(value)) return { ...value };\n  try { const parsed = JSON.parse(text(value) || '{}'); return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}; } catch { return {}; }\n}\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\nfunction money(value) { return new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(Number(value || 0)); }\n\nfunction safeContext(input) {\n  const source = parseObject(input);\n  const result = {\n    schema_version: '3.0',\n    conversation_id: text(source.conversation_id),\n    first_name: text(source.first_name || source.name).split(/\\s+/)[0] || '',\n    business_type: text(source.business_type),\n    project_goal: text(source.project_goal),\n    pain_point: text(source.pain_point),\n    current_process: text(source.current_process),\n    impact: text(source.impact),\n    desired_outcome: text(source.desired_outcome),\n    discovery_urgency: text(source.discovery_urgency),\n    discovery_depth: 0,\n    discovery_done: false,\n    last_question_code: text(source.last_question_code),\n    last_question_hash: text(source.last_question_hash),\n    recommended_solution: ALLOWED_SOLUTIONS.has(text(source.recommended_solution)) ? text(source.recommended_solution) : '',\n    selected_solution: ALLOWED_SOLUTIONS.has(text(source.selected_solution)) ? text(source.selected_solution) : '',\n    solution_confirmed: bool(source.solution_confirmed),\n    price_requested: bool(source.price_requested),\n    proposal_requested: bool(source.proposal_requested),\n    proposal_delivery_status: PROPOSAL_STATUSES.has(text(source.proposal_delivery_status)) ? text(source.proposal_delivery_status) : 'none',\n    proposal_sent: bool(source.proposal_sent) && text(source.proposal_delivery_status) === 'sent',\n    proposal_accepted: bool(source.proposal_accepted) && bool(source.proposal_sent),\n    objection_code: text(source.objection_code),\n    human_required: bool(source.human_required),\n    bot_muted: bool(source.bot_muted),\n    opt_out: bool(source.opt_out),\n    email: text(source.email),\n    pipeline_stage: 'nuevo',\n    next_action: '',\n    conversation_summary: text(source.conversation_summary).slice(0, 420),\n  };\n  return recalculate(result);\n}\n\nfunction mergeInterpretation(context, interpretation) {\n  const next = safeContext(context);\n  const interpreted = parseObject(interpretation);\n  const fields = parseObject(interpreted.extracted_fields);\n  for (const key of ['business_type','project_goal','pain_point','current_process','impact','desired_outcome','discovery_urgency']) {\n    const value = text(fields[key]);\n    if (value) next[key] = value;\n  }\n  const extractedEmail = text(fields.email).toLowerCase();\n  if (validEmail(extractedEmail)) next.email = extractedEmail;\n  const selected = text(fields.selected_solution);\n  if (ALLOWED_SOLUTIONS.has(selected)) next.selected_solution = selected;\n  const intent = text(interpreted.intent);\n  if (intent === 'confirm_chatbot') { next.selected_solution = 'chatbot_whatsapp_ia'; next.solution_confirmed = true; }\n  if (intent === 'confirm_web') { next.selected_solution = 'web_catalogo'; next.solution_confirmed = true; }\n  if (intent === 'select_pack') { next.selected_solution = 'pack_web_chatbot'; next.solution_confirmed = true; }\n  if (intent === 'price') next.price_requested = true;\n  if (intent === 'proposal') next.proposal_requested = true;\n  return recalculate(next);\n}\n\nfunction recalculate(context) {\n  const next = { ...context };\n  const filled = [next.business_type, next.project_goal, next.pain_point, next.current_process, next.impact || next.discovery_urgency, next.desired_outcome].filter((value) => text(value));\n  next.discovery_depth = filled.length;\n  next.discovery_done = filled.length === 6;\n  if (next.opt_out) { next.pipeline_stage = 'cerrado'; next.next_action = 'No contactar'; return next; }\n  if (next.human_required || next.bot_muted) { next.pipeline_stage = 'handoff'; next.next_action = 'Esperar asesor'; return next; }\n  if (!next.business_type && !next.project_goal) next.pipeline_stage = 'nuevo';\n  else if (!next.discovery_done) next.pipeline_stage = 'descubrimiento';\n  else if (next.proposal_requested) next.pipeline_stage = 'propuesta';\n  else next.pipeline_stage = 'calificado';\n  next.next_action = nextQuestion(next).action;\n  return next;\n}\n\nfunction nextQuestion(context) {\n  if (!text(context.business_type)) return { code: 'ask_business_type', action: 'Pedir rubro del negocio', question: '¿A qué se dedica tu negocio?' };\n  if (!text(context.project_goal)) return { code: 'ask_project_goal', action: 'Pedir necesidad principal', question: '¿Qué quieres resolver primero?' };\n  if (!text(context.pain_point)) return { code: 'ask_pain_point', action: 'Pedir dolor o problema actual', question: '¿Qué está pasando hoy que te llevó a buscarlo? Cuéntamelo con tus palabras.' };\n  if (!text(context.current_process)) return { code: 'ask_current_process', action: 'Pedir situación actual', question: '¿Cómo lo están resolviendo hoy y en qué momento se complica más?' };\n  if (!text(context.impact) && !text(context.discovery_urgency)) return { code: 'ask_impact', action: 'Pedir resultado deseado o urgencia', question: '¿Qué impacto tiene hoy en tu negocio o qué tan urgente es resolverlo?' };\n  if (!text(context.desired_outcome)) return { code: 'ask_desired_outcome', action: 'Pedir resultado deseado o urgencia', question: 'Si esto funcionara bien, ¿qué tendría que cambiar primero para ti?' };\n  if (!bool(context.solution_confirmed)) return { code: 'confirm_solution', action: 'Confirmar solución: chatbot, web, pack o asesor', question: '¿Prefieres priorizar chatbot, catálogo web o ambos?' };\n  if (bool(context.proposal_requested) && !validEmail(context.email)) return { code: 'ask_email_for_proposal', action: 'Pedir correo y confirmar propuesta', question: '¿A qué correo quieres que enviemos la propuesta para revisión?' };\n  if (bool(context.proposal_requested)) return { code: 'prepare_proposal', action: 'Preparar y enviar propuesta', question: '' };\n  if (bool(context.price_requested)) return { code: 'show_catalog_prices', action: 'Mostrar precios del catálogo', question: '' };\n  return { code: 'offer_next_step', action: 'Mostrar precios del catálogo', question: '¿Quieres revisar precios, preparar una propuesta o hablar con un asesor?' };\n}\n\nfunction sentenceFragment(value) {\n  const normalized = text(value).replace(/\\bwhatsapp\\b/gi, 'WhatsApp');\n  return normalized ? normalized.charAt(0).toLocaleLowerCase('es-CO') + normalized.slice(1) : '';\n}\n\nfunction buildSummary(context) {\n  const parts = [];\n  if (context.business_type) parts.push(`tienes ${context.business_type}`);\n  if (context.project_goal) parts.push(`quieres mejorar ${context.project_goal}`);\n  if (context.pain_point) parts.push(`el problema es ${sentenceFragment(context.pain_point)}`);\n  if (context.current_process) parts.push(`hoy ${sentenceFragment(context.current_process)}`);\n  if (context.impact && !text(context.pain_point).toLowerCase().includes(text(context.impact).toLowerCase())) parts.push(text(context.impact));\n  if (context.desired_outcome) parts.push(sentenceFragment(context.desired_outcome));\n  return parts.join('; ').slice(0, 420);\n}\n\nfunction renderCatalog(catalog) {\n  const source = parseObject(catalog);\n  const packages = parseObject(source.catalog_packages);\n  const essential = packages['PKG-ESSENTIAL'] || packages.essential || {};\n  const professional = packages['PKG-PROFESSIONAL'] || packages.professional || {};\n  const ready = source.catalog_ready === true && Number(essential.price_project || 0) > 0 && Number(professional.price_project || 0) > 0;\n  if (!ready) return { ok: false, reply: 'Ahora mismo no puedo confirmar precios con seguridad. Un asesor puede validarlos según el alcance.', reason_code: 'CATALOG_UNAVAILABLE' };\n  return {\n    ok: true,\n    reply: `📦 Esencial: desde $${money(essential.price_project)}${Number(essential.price_monthly || 0) > 0 ? ` + $${money(essential.price_monthly)}/mes` : ''}\\n🚀 Profesional: desde $${money(professional.price_project)}${Number(professional.price_monthly || 0) > 0 ? ` + $${money(professional.price_monthly)}/mes` : ''}\\n🌐 Dominio: se cotiza aparte según disponibilidad.`,\n    reason_code: 'CATALOG_PRICES_RENDERED',\n  };\n}\n\nfunction bogotaGreeting(now = new Date()) {\n  let hour = 12;\n  try {\n    hour = Number(new Intl.DateTimeFormat('en-US', {\n      timeZone: 'America/Bogota',\n      hour: '2-digit',\n      hourCycle: 'h23',\n    }).format(now));\n  } catch {\n    hour = now.getUTCHours() - 5;\n    if (hour < 0) hour += 24;\n  }\n  if (hour >= 5 && hour < 12) return 'Buenos días';\n  if (hour >= 12 && hour < 19) return 'Buenas tardes';\n  return 'Buenas noches';\n}\n\nfunction renderProfessionalOpening(context) {\n  const greeting = bogotaGreeting();\n  const firstName = text(context && context.first_name);\n  const salutation = firstName ? `${greeting}, ${firstName} 👋` : `${greeting} 👋`;\n  return `${salutation} Soy *Luna de Luenio*.\n\nTe ayudo con *web, chatbot y automatizaciones* para encontrar la opción adecuada para tu negocio, directamente por este chat.\n\nPara orientarte bien, cuéntame brevemente: *¿a qué se dedica tu negocio?*`;\n}\n\nfunction clientVoice(value) {\n  let result = text(value).replace(/\\bwhatsapp\\b/gi, 'WhatsApp');\n  const replacements = [\n    [/\\bpierdo\\b/gi, 'pierdes'],\n    [/\\bperdemos\\b/gi, 'pierden'],\n    [/\\bno respondo\\b/gi, 'no respondes'],\n    [/\\brespondo\\b/gi, 'respondes'],\n    [/\\brespondemos\\b/gi, 'responden'],\n    [/\\batendemos\\b/gi, 'atienden'],\n  ];\n  for (const [pattern, replacement] of replacements) result = result.replace(pattern, replacement);\n  return result ? result.charAt(0).toLocaleLowerCase('es-CO') + result.slice(1) : '';\n}\n\nfunction outcomePhrase(value) {\n  return text(value)\n    .replace(/^(?:quiero|necesito|busco)\\s+/i, '')\n    .replace(/\\bwhatsapp\\b/gi, 'WhatsApp')\n    .trim();\n}\n\nfunction renderDiscoveryReply(context, next, intent) {\n  if (next.code === 'ask_business_type') {\n    return 'Antes de recomendarte algo, cuéntame brevemente: *¿a qué se dedica tu negocio?*';\n  }\n  if (next.code === 'ask_project_goal') {\n    return 'Perfecto, ya entiendo a qué se dedica tu negocio. *¿Qué quieres resolver primero?* Puede ser ventas, atención, catálogo, seguimiento u otra necesidad.';\n  }\n  if (next.code === 'ask_pain_point') {\n    if (context.selected_solution === 'chatbot_whatsapp_ia') {\n      return 'Perfecto, tengo en cuenta que buscas un *chatbot para WhatsApp*. Para entender bien el caso, *¿qué está pasando hoy que te llevó a buscarlo?*';\n    }\n    if (context.selected_solution === 'web_catalogo') {\n      return 'Perfecto, tengo en cuenta que buscas un *catálogo web*. Para entender bien el caso, *¿qué está pasando hoy que te llevó a buscarlo?*';\n    }\n    return `Entiendo: quieres mejorar *${text(context.project_goal)}*. *¿Qué está pasando hoy que te llevó a buscar una solución?* Cuéntamelo con tus palabras.`;\n  }\n  if (next.code === 'ask_current_process') {\n    return 'Ya veo el problema. *¿Cómo lo están resolviendo hoy y en qué momento se complica más?*';\n  }\n  if (next.code === 'ask_impact') {\n    return 'Entiendo cómo lo están manejando. *¿Qué impacto tiene hoy en el negocio o qué tan urgente es resolverlo?*';\n  }\n  if (next.code === 'ask_desired_outcome') {\n    return 'Tiene sentido. Si esto funcionara bien, *¿qué tendría que cambiar primero para ti?*';\n  }\n  return next.question;\n}\n\nfunction renderDiscoveryComplete(context) {\n  const details = [];\n  details.push(`Tu negocio está en *${text(context.business_type)}* y quieres mejorar *${text(context.project_goal)}*.`);\n  if (context.pain_point) details.push(`El problema es que ${clientVoice(context.pain_point)}.`);\n  if (context.current_process) details.push(`Hoy ${clientVoice(context.current_process)}.`);\n  if (context.impact && !text(context.pain_point).toLowerCase().includes(text(context.impact).toLowerCase())) {\n    details.push(`El impacto es ${clientVoice(context.impact)}.`);\n  }\n  if (context.desired_outcome) details.push(`Tu objetivo es *${outcomePhrase(context.desired_outcome)}*.`);\n\n  let recommendation = 'Podemos revisar *chatbot*, *catálogo web* o ambos.';\n  let question = '*¿Prefieres priorizar chatbot, catálogo web o ambos?*';\n  if (context.selected_solution === 'chatbot_whatsapp_ia') {\n    recommendation = 'Por lo que me cuentas, un *chatbot para WhatsApp* parece un buen punto de partida.';\n    question = '*¿Quieres mantenerlo solo en chatbot o también te interesa un catálogo web?*';\n  } else if (context.selected_solution === 'web_catalogo') {\n    recommendation = 'Por lo que me cuentas, un *catálogo web* parece un buen punto de partida.';\n    question = '*¿Quieres mantenerlo solo en catálogo web o también te interesa sumar un chatbot?*';\n  }\n  return `Gracias, ya entiendo mejor el caso.\\n\\n${details.join(' ')}\\n\\n${recommendation} ${question}`;\n}\n\nfunction safeReply(value) {\n  const clean = String(value == null ? '' : value)\n    .replace(/\\r\\n?/g, '\\n')\n    .replace(/[ \\t]+/g, ' ')\n    .replace(/ *\\n */g, '\\n')\n    .replace(/\\n{3,}/g, '\\n\\n')\n    .trim()\n    .slice(0, 700);\n  return clean.replace(/\\$\\s*(?:800\\.000|500\\.000|1\\.200\\.000|300\\.000)/g, 'valor por confirmar');\n}\n\nfunction decideTurn(input) {\n  const source = input && typeof input === 'object' ? input : {};\n  const interpretation = parseObject(source.interpretation || source.interpretation_json);\n  let context = mergeInterpretation(source.context || source.context_json, interpretation);\n  const intent = text(interpretation.intent || source.intent);\n  const kb = parseObject(source.approved_content || source.approved_content_json);\n  let action = { type: 'none', payload: {} };\n  let reason = 'DISCOVERY_NEXT_FIELD';\n  let reply = '';\n\n  if (intent === 'reset') {\n    const preserveOptOut = context.opt_out;\n    const preserveHuman = context.human_required;\n    const preserveMute = context.bot_muted;\n    context = safeContext({ conversation_id: context.conversation_id, first_name: context.first_name, opt_out: preserveOptOut, human_required: preserveHuman, bot_muted: preserveMute });\n    reply = 'Listo, borré el contexto comercial de esta conversación. Empezamos de cero. ¿A qué se dedica tu negocio?';\n    reason = 'RESET_APPLIED';\n  } else if (intent === 'activate') {\n    context.opt_out = false; context.human_required = false; context.bot_muted = false; context = recalculate(context);\n    reply = context.proposal_sent\n      ? 'Listo, vuelvo a atenderte. La propuesta anterior sigue registrada. ¿Quieres ajustarla o hablar con un asesor?'\n      : context.proposal_requested\n        ? 'Listo, vuelvo a atenderte. La solicitud de propuesta sigue pendiente de revisión. ¿Quieres continuar con ella o ajustar el alcance?'\n        : `Listo, vuelvo a atenderte. ${nextQuestion(context).question}`;\n    reason = 'BOT_REACTIVATED';\n  } else if (intent === 'opt_out') {\n    context.opt_out = true; context = recalculate(context);\n    reply = 'Listo, no te escribiré más de forma automática. Si quieres retomar, escribe activar luna.';\n    reason = 'OPT_OUT_APPLIED';\n  } else if (intent === 'handoff') {\n    context.human_required = true; context.bot_muted = true; context = recalculate(context);\n    action = { type: 'handoff', payload: { reason: 'explicit_request' } };\n    reply = 'Con gusto. Te paso con un asesor humano de Luenio en este chat. Para volver con el asistente, escribe activar luna.';\n    reason = 'HANDOFF_REQUESTED';\n  } else if (intent === 'media') {\n    action = { type: 'media_fallback', payload: {} };\n    reply = 'Puedo ayudarte mejor si me escribes qué necesitas resolver y a qué se dedica tu negocio.';\n    reason = 'MEDIA_REQUIRES_PROCESSOR';\n  } else if (context.opt_out) {\n    action = { type: 'none', payload: {} };\n    reply = '';\n    reason = 'OPT_OUT_NO_REPLY';\n  } else if (context.human_required || context.bot_muted) {\n    action = { type: 'none', payload: {} };\n    reply = '';\n    reason = 'BOT_MUTED_NO_REPLY';\n  } else if (\n    intent === 'greeting' &&\n    context.discovery_depth === 0 &&\n    !context.business_type &&\n    !context.project_goal\n  ) {\n    reply = renderProfessionalOpening(context);\n    reason = 'OPENING_PROFESSIONAL';\n  } else if (!context.discovery_done) {\n    const next = nextQuestion(context);\n    reply = renderDiscoveryReply(context, next, intent);\n    reason = `DISCOVERY_${next.code.toUpperCase()}`;\n  } else if (!context.solution_confirmed) {\n    context.recommended_solution = context.recommended_solution || (context.selected_solution || 'chatbot_whatsapp_ia');\n    context.conversation_summary = buildSummary(context);\n    reply = renderDiscoveryComplete(context);\n    reason = 'DISCOVERY_COMPLETE_CONFIRM_SOLUTION';\n  } else if (intent === 'confirm_chatbot' || context.selected_solution === 'chatbot_whatsapp_ia' && intent === 'price') {\n    reply = intent === 'price'\n      ? 'El chatbot no tiene un precio independiente fijo: depende del alcance, las integraciones y el volumen. ¿Quieres revisar el Pack del catálogo o prefieres hablar con un asesor?'\n      : 'Perfecto, dejamos priorizado el chatbot para WhatsApp. El valor depende del alcance, las integraciones y el volumen. ¿Quieres revisar las opciones del catálogo o prefieres hablar con un asesor?';\n    reason = 'CHATBOT_SCOPE_CONFIRMED';\n  } else if (intent === 'confirm_web' || context.selected_solution === 'web_catalogo' && intent === 'price') {\n    reply = 'Perfecto, dejamos priorizado el catálogo web. El valor depende del alcance y del volumen del catálogo. ¿Quieres revisar el Pack del catálogo o prefieres hablar con un asesor?';\n    reason = 'WEB_SCOPE_CONFIRMED';\n  } else if (intent === 'select_pack') {\n    reply = 'Perfecto, dejamos priorizado el Pack web + chatbot. ¿Quieres que te muestre los precios del catálogo, que prepare una propuesta o prefieres un asesor?';\n    reason = 'PACK_CONFIRMED';\n  } else if (intent === 'proposal' || context.proposal_requested) {\n    if (!context.solution_confirmed) {\n      reply = 'Antes de preparar una propuesta, confirmemos si quieres chatbot, catálogo web o ambos.';\n      reason = 'PROPOSAL_SOLUTION_REQUIRED';\n    } else if (!validEmail(context.email)) {\n      reply = 'Perfecto. ¿A qué correo quieres que enviemos la propuesta para revisión?';\n      reason = 'PROPOSAL_ASK_EMAIL';\n    } else {\n      context.proposal_delivery_status = 'requested';\n      action = { type: 'proposal', payload: { selected_solution: context.selected_solution } };\n      reply = 'Perfecto. Prepararé un borrador para revisión de un asesor antes de enviarlo. Te confirmaré por este chat cuando esté aprobado.';\n      reason = 'PROPOSAL_APPROVAL_REQUIRED';\n    }\n  } else if (intent === 'price') {\n    const priced = renderCatalog(source.catalog || source.catalog_json);\n    reply = `${priced.reply}${priced.ok ? '\\n\\n¿Quieres que te explique cuál encaja mejor, preparar una propuesta o hablar con un asesor?' : ''}`;\n    reason = priced.reason_code;\n  } else if (intent === 'appointment') {\n    action = { type: 'appointment', payload: { timezone: 'America/Bogota' } };\n    reply = validEmail(context.email) ? 'Puedo buscar tres horarios disponibles. Antes de reservar, necesitaré tu confirmación explícita del horario.' : 'Para coordinar una reunión necesito un correo válido. ¿Cuál quieres usar?';\n    reason = 'APPOINTMENT_APPROVAL_REQUIRED';\n  } else if (kb.found && kb.answer_template) {\n    reply = kb.answer_template;\n    if (kb.requires_human) action = { type: 'handoff', payload: { reason: 'kb_requires_human' } };\n    reason = kb.reason_code || 'KB_APPROVED_ANSWER';\n  } else {\n    reply = nextQuestion(context).question;\n    reason = 'SAFE_NEXT_STEP';\n  }\n\n  context = recalculate(context);\n  context.conversation_summary = buildSummary(context);\n  if (!ALLOWED_ACTIONS.has(action.type)) action = { type: 'none', payload: {} };\n  const terminalSilence = intent === 'handoff' || intent === 'opt_out' || context.opt_out || context.human_required || context.bot_muted;\n  const nextQuestionCode = terminalSilence ? '' : nextQuestion(context).code;\n  return { reply: safeReply(reply), next_question_code: nextQuestionCode, crm_updates: context, action_request: action, reason_code: reason };\n}\n\nmodule.exports = { safeContext, mergeInterpretation, recalculate, nextQuestion, buildSummary, renderCatalog, decideTurn };\n\r\n\nreturn module.exports; })();\nconst kbV3 = (function(){ const module={exports:{}}; const exports=module.exports;\n'use strict';\n\nfunction text(value) { return String(value == null ? '' : value).trim(); }\nfunction norm(value) { return text(value).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\n\nfunction parseSerialized(value, fallback) {\n  let current = value;\n  for (let depth = 0; depth < 3; depth += 1) {\n    if (typeof current !== 'string') break;\n    const candidate = current.trim();\n    if (!candidate || !/^[\\[{\\\"]/.test(candidate)) break;\n    try { current = JSON.parse(candidate); } catch { break; }\n  }\n  return current == null || current === '' ? fallback : current;\n}\n\nfunction normalizePatterns(value) {\n  const parsed = parseSerialized(value, []);\n  if (Array.isArray(parsed)) return parsed.map(text).filter(Boolean);\n  return text(parsed).split('|').map(text).filter(Boolean);\n}\n\nfunction normalizeKbRow(row) {\n  return {\n    entry_key: text(row.entry_key),\n    version: text(row.version || '1.0'),\n    category: text(row.category),\n    intent: norm(row.intent),\n    question_patterns: normalizePatterns(row.question_patterns_json),\n    answer_template: text(row.answer_template),\n    allowed_claims: parseSerialized(row.allowed_claims_json, []),\n    forbidden_claims: parseSerialized(row.forbidden_claims_json, []),\n    requires_catalog: bool(row.requires_catalog),\n    requires_human: bool(row.requires_human),\n    active: bool(row.active),\n  };\n}\n\nfunction normalizeObjectionRow(row) {\n  return {\n    objection_code: norm(row.objection_code),\n    trigger_patterns: normalizePatterns(row.trigger_patterns_json),\n    response_template: text(row.response_template),\n    next_action: text(row.next_action),\n    handoff_required: bool(row.handoff_required),\n    active: bool(row.active),\n    version: text(row.version || '1.0'),\n  };\n}\n\nfunction versionScore(value) {\n  return text(value).split('.').reduce((score, part, index) => score + (Number(part) || 0) * (1000 ** (2 - Math.min(index, 2))), 0);\n}\n\nfunction selectApprovedContent(input, kbRows, objectionRows) {\n  const intent = norm(input && input.intent);\n  const objectionCode = norm(input && input.objection_code);\n  const userText = norm(input && input.user_message);\n  const catalogReady = bool(input && input.catalog_ready);\n  const kb = (kbRows || []).map(normalizeKbRow).filter((row) => row.active);\n  const objections = (objectionRows || []).map(normalizeObjectionRow).filter((row) => row.active);\n  const objection = objections\n    .filter((row) => row.objection_code === objectionCode || row.trigger_patterns.some((pattern) => userText.includes(norm(pattern))))\n    .sort((a, b) => versionScore(b.version) - versionScore(a.version))[0];\n  if (objection) {\n    return {\n      found: true,\n      source: 'objection_rules',\n      key: objection.objection_code,\n      answer_template: objection.response_template,\n      next_action: objection.next_action,\n      requires_human: objection.handoff_required,\n      requires_catalog: false,\n      reason_code: 'OBJECTION_RULE_MATCH',\n    };\n  }\n  const entry = kb\n    .filter((row) => row.intent === intent || row.question_patterns.some((pattern) => userText.includes(norm(pattern))))\n    .sort((a, b) => versionScore(b.version) - versionScore(a.version))[0];\n  if (!entry) return { found: false, source: 'fallback', key: '', answer_template: '', requires_human: false, requires_catalog: false, reason_code: 'KB_NO_APPROVED_ANSWER' };\n  if (entry.requires_catalog && !catalogReady) return { found: false, source: 'catalog_gate', key: entry.entry_key, answer_template: '', requires_human: false, requires_catalog: true, reason_code: 'KB_CATALOG_UNAVAILABLE' };\n  return {\n    found: true,\n    source: 'kb_entries',\n    key: entry.entry_key,\n    answer_template: entry.answer_template,\n    allowed_claims: entry.allowed_claims,\n    forbidden_claims: entry.forbidden_claims,\n    requires_human: entry.requires_human,\n    requires_catalog: entry.requires_catalog,\n    reason_code: 'KB_APPROVED_ANSWER',\n  };\n}\n\nmodule.exports = { parseSerialized, normalizeKbRow, normalizeObjectionRow, selectApprovedContent };\n\r\n\nreturn module.exports; })();\nconst operationsV3 = (function(){ const module={exports:{}}; const exports=module.exports;\n'use strict';\n\nconst PROPOSAL_STATUSES = new Set(['none','requested','rendering','pending_approval','approved','rejected','sending','partially_sent','sent','failed','blocked_after_send_failure']);\nconst APPOINTMENT_STATUSES = new Set(['requested','availability_checked','pending_confirmation','pending_approval','confirmed','cancelled','expired','failed']);\n\nfunction text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\nfunction stableHash(value) {\n  let h1 = 0xdeadbeef ^ text(value).length;\n  let h2 = 0x41c6ce57 ^ text(value).length;\n  for (let index = 0; index < text(value).length; index += 1) {\n    const code = text(value).charCodeAt(index);\n    h1 = Math.imul(h1 ^ code, 2654435761);\n    h2 = Math.imul(h2 ^ code, 1597334677);\n  }\n  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);\n  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);\n  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');\n}\n\nfunction sanitizeProposalSnapshot(context, catalog) {\n  const allowedContext = ['business_type','project_goal','pain_point','current_process','impact','desired_outcome','discovery_urgency','recommended_solution','selected_solution','solution_confirmed','conversation_summary'];\n  const snapshot = { schema_version: '3.0', context: {}, catalog: { version: text(catalog && catalog.version), packages: {} } };\n  for (const key of allowedContext) snapshot.context[key] = typeof context?.[key] === 'boolean' ? context[key] : text(context?.[key]);\n  const packages = catalog?.catalog_packages || {};\n  for (const key of ['PKG-ESSENTIAL','PKG-PROFESSIONAL']) {\n    const row = packages[key] || {};\n    snapshot.catalog.packages[key] = { name: text(row.name), price_project: Number(row.price_project || 0), price_monthly: Number(row.price_monthly || 0) };\n  }\n  return snapshot;\n}\n\nfunction buildProposalRequest(input) {\n  const context = input?.context || {};\n  const catalog = input?.catalog || {};\n  const errors = [];\n  if (!bool(context.discovery_done)) errors.push('discovery_incomplete');\n  if (!bool(context.solution_confirmed)) errors.push('solution_unconfirmed');\n  if (!bool(context.proposal_requested)) errors.push('proposal_not_requested');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  if (catalog.catalog_ready !== true) errors.push('catalog_unavailable');\n  const snapshot = sanitizeProposalSnapshot(context, catalog);\n  const snapshot_json = JSON.stringify(snapshot);\n  const requestKey = `${text(context.conversation_id)}|${text(input.message_id)}|proposal`;\n  return {\n    ok: errors.length === 0,\n    proposal_id: `prop_${stableHash(requestKey)}`,\n    request_key: requestKey,\n    conversation_id: text(context.conversation_id),\n    message_id: text(input.message_id),\n    status: errors.length ? 'failed' : 'requested',\n    snapshot_json,\n    snapshot_hash: stableHash(snapshot_json),\n    recipient_email_hash: '',\n    catalog_version: text(catalog.version),\n    proposal_version: 1,\n    requested_at: text(input.now || new Date().toISOString()),\n    updated_at: text(input.now || new Date().toISOString()),\n    environment: text(input.environment || 'staging'),\n    source_version: text(input.source_version || '3.0'),\n    last_error_code: errors.join(','),\n  };\n}\n\nfunction parseApprovalCommand(input) {\n  const body = text(input?.content || input?.message);\n  const privateNote = bool(input?.private_note || input?.private);\n  const human = bool(input?.human_sender) && !bool(input?.sender_is_bot);\n  const hmac = bool(input?.hmac_valid);\n  const match = body.match(/^\\/luna\\s+(aprobar|rechazar)\\s+(propuesta|cita)\\s+([a-z0-9_-]+)(?:\\s+(.+))?$/i);\n  if (!hmac) return { ok: false, reason_code: 'INVALID_SIGNATURE' };\n  if (!privateNote) return { ok: false, reason_code: 'COMMAND_NOT_PRIVATE' };\n  if (!human) return { ok: false, reason_code: 'COMMAND_SENDER_NOT_HUMAN' };\n  if (!match) return { ok: false, reason_code: 'COMMAND_INVALID' };\n  const action = match[1].toLowerCase();\n  const request_type = match[2].toLowerCase() === 'propuesta' ? 'proposal' : 'appointment';\n  if (action === 'rechazar' && !text(match[4])) return { ok: false, reason_code: 'REJECTION_REASON_REQUIRED' };\n  return { ok: true, action: action === 'aprobar' ? 'approve' : 'reject', request_type, request_id: match[3], reason: text(match[4]), reason_code: 'APPROVAL_COMMAND_VALID' };\n}\n\nfunction validateMedia(input) {\n  const mime = text(input?.mime_type).toLowerCase();\n  const bytes = Number(input?.size_bytes || 0);\n  const duration = Number(input?.duration_seconds || 0);\n  const audio = ['audio/ogg','audio/mpeg','audio/mp4','audio/webm'].includes(mime);\n  const image = ['image/jpeg','image/png','image/webp'].includes(mime);\n  if (!audio && !image) return { ok: false, kind: 'unsupported', reason_code: 'MEDIA_MIME_UNSUPPORTED' };\n  if (audio && bytes > 10 * 1024 * 1024) return { ok: false, kind: 'audio', reason_code: 'MEDIA_TOO_LARGE' };\n  if (audio && duration > 300) return { ok: false, kind: 'audio', reason_code: 'MEDIA_TOO_LONG' };\n  if (image && bytes > 8 * 1024 * 1024) return { ok: false, kind: 'image', reason_code: 'MEDIA_TOO_LARGE' };\n  return { ok: true, kind: audio ? 'audio' : 'image', reason_code: 'MEDIA_ACCEPTED' };\n}\n\nfunction validateAppointment(input) {\n  const context = input?.context || {};\n  const status = text(input?.status || 'requested');\n  const errors = [];\n  if (!APPOINTMENT_STATUSES.has(status)) errors.push('appointment_status_invalid');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  if (!bool(input?.consent_explicit)) errors.push('consent_required');\n  if (text(input?.timezone || 'America/Bogota') !== 'America/Bogota') errors.push('timezone_invalid');\n  return { ok: errors.length === 0, status: errors.length ? 'failed' : status, duration_minutes: 30, buffer_minutes: 15, timezone: 'America/Bogota', reason_code: errors.join(',') || 'APPOINTMENT_VALID' };\n}\n\nfunction transitionProposal(current, event) {\n  const status = PROPOSAL_STATUSES.has(text(current)) ? text(current) : 'none';\n  const transitions = {\n    none: { request: 'requested' }, requested: { render: 'rendering', fail: 'failed' }, rendering: { rendered: 'pending_approval', fail: 'failed' },\n    pending_approval: { approve: 'approved', reject: 'rejected' }, approved: { send: 'sending' }, sending: { partial: 'partially_sent', delivered: 'sent', fail_after_send: 'blocked_after_send_failure', fail: 'failed' },\n    partially_sent: { delivered: 'sent', fail_after_send: 'blocked_after_send_failure' }, rejected: {}, sent: {}, failed: {}, blocked_after_send_failure: {},\n  };\n  const next = transitions[status]?.[text(event)];\n  return { ok: Boolean(next), previous_status: status, status: next || status, proposal_sent_this_turn: next === 'sent' && status !== 'sent', reason_code: next ? 'PROPOSAL_TRANSITION_OK' : 'PROPOSAL_TRANSITION_BLOCKED' };\n}\n\nmodule.exports = { stableHash, sanitizeProposalSnapshot, buildProposalRequest, parseApprovalCommand, validateMedia, validateAppointment, transitionProposal };\n\r\n\nreturn module.exports; })();\n\nconst rows = $input.all().map((item) => item.json || {})\n  .filter((row) => row.enabled !== false && String(row.case_id || '').startsWith('pro_v3_'));\nconst parseJson = (value, label, failures) => {\n  try { return JSON.parse(String(value || '{}')); }\n  catch (error) { failures.push(label + '_JSON_INVALID'); return {}; }\n};\nconst containsAll = (value, list) => {\n  const source = String(value || '').toLowerCase();\n  return (list || []).every((item) => source.includes(String(item).toLowerCase()));\n};\nconst containsNone = (value, list) => {\n  const source = String(value || '').toLowerCase();\n  return (list || []).every((item) => !source.includes(String(item).toLowerCase()));\n};\nconst runCase = (row) => {\n  const failures = [];\n  const started = Date.now();\n  const input = parseJson(row.input_json, 'input', failures);\n  const expected = parseJson(row.expected_json, 'expected', failures);\n  if (!row.case_id) failures.push('CASE_ID_REQUIRED');\n  if (String(row.suite_version || '') !== SUITE_VERSION) failures.push('SUITE_VERSION_MISMATCH');\n  if (String(row.source_hash || '') !== SOURCE_HASH) failures.push('SOURCE_HASH_MISMATCH');\n  let output = '';\n  let summary = '';\n  let resultState = {};\n  const kind = String(input.kind || '');\n  if (kind === 'professional_interpret') {\n    const interpreted = interpretV3.interpretMessage({\n      user_message: input.input || '',\n      message_type: input.message_type || 'text',\n      context: input.context || {},\n    });\n    resultState = {\n      intent: interpreted.intent,\n      confidence: interpreted.confidence,\n      needs_ai: interpreted.needs_ai,\n      ambiguous_count: interpreted.ambiguous_fields.length,\n      ...interpreted.extracted_fields,\n    };\n    output = JSON.stringify(resultState);\n  } else if (kind === 'professional_decision') {\n    const interpreted = interpretV3.interpretMessage({\n      user_message: input.input || '',\n      context: input.context || {},\n      message_type: input.message_type || 'text',\n    });\n    const decision = decisionV3.decideTurn({\n      context: input.context || {},\n      interpretation: interpreted,\n      catalog: input.catalog || {},\n      approved_content: input.approved_content || {},\n    });\n    resultState = {\n      reason_code: decision.reason_code,\n      action_type: decision.action_request.type,\n      next_question_code: decision.next_question_code,\n      reply_length: decision.reply.length,\n      ...decision.crm_updates,\n    };\n    output = decision.reply + '\\n' + JSON.stringify(resultState);\n  } else if (kind === 'professional_flow') {\n    let state = decisionV3.safeContext(input.context || {});\n    let decision = { reply: '', reason_code: '', action_request: { type: 'none' }, next_question_code: '' };\n    for (const message of input.sequence || []) {\n      const interpreted = interpretV3.interpretMessage({ user_message: message, context: state });\n      decision = decisionV3.decideTurn({\n        context: state,\n        interpretation: interpreted,\n        catalog: input.catalog || {},\n        approved_content: input.approved_content || {},\n      });\n      state = decision.crm_updates;\n    }\n    resultState = {\n      ...state,\n      reason_code: decision.reason_code,\n      action_type: decision.action_request.type,\n      next_question_code: decision.next_question_code,\n      reply_length: decision.reply.length,\n    };\n    summary = state.conversation_summary || '';\n    output = decision.reply + '\\n' + JSON.stringify(resultState);\n  } else if (kind === 'professional_kb') {\n    const selected = kbV3.selectApprovedContent(input.input || {}, input.kb_rows || [], input.objection_rows || []);\n    resultState = { ...selected, answer_length: String(selected.answer_template || '').length };\n    output = JSON.stringify(resultState);\n  } else if (kind === 'professional_proposal_request') {\n    const request = operationsV3.buildProposalRequest(input.input || {});\n    let snapshot = {};\n    try { snapshot = JSON.parse(request.snapshot_json || '{}'); } catch {}\n    resultState = {\n      ok: request.ok,\n      status: request.status,\n      proposal_id_prefix: String(request.proposal_id || '').slice(0, 5),\n      last_error_code: request.last_error_code,\n      snapshot_has_email: ['email','phone','history','name','first_name']\n        .some((key) => Object.prototype.hasOwnProperty.call(snapshot.context || {}, key)),\n      snapshot_hash_present: Boolean(request.snapshot_hash),\n    };\n    output = JSON.stringify(resultState);\n  } else if (kind === 'professional_approval') {\n    resultState = operationsV3.parseApprovalCommand(input.input || {});\n    output = JSON.stringify(resultState);\n  } else if (kind === 'professional_media') {\n    resultState = operationsV3.validateMedia(input.input || {});\n    output = JSON.stringify(resultState);\n  } else if (kind === 'professional_appointment') {\n    resultState = operationsV3.validateAppointment(input.input || {});\n    output = JSON.stringify(resultState);\n  } else if (kind === 'professional_transition') {\n    resultState = operationsV3.transitionProposal(input.current_status, input.event);\n    output = JSON.stringify(resultState);\n  } else {\n    failures.push('CASE_KIND_UNSUPPORTED:' + kind);\n  }\n  if (expected.contains && !containsAll(output + '\\n' + summary, expected.contains)) failures.push('EXPECTED_TEXT_MISSING');\n  if (expected.notContains && !containsNone(output + '\\n' + summary, expected.notContains)) failures.push('FORBIDDEN_TEXT_PRESENT');\n  if (expected.summaryMax && summary.length > Number(expected.summaryMax)) failures.push('SUMMARY_LIMIT_EXCEEDED');\n  if (expected.replyMax && Number(resultState.reply_length || 0) > Number(expected.replyMax)) failures.push('REPLY_LIMIT_EXCEEDED');\n  for (const [key, value] of Object.entries(expected)) {\n    if (['contains','notContains','summaryMax','replyMax'].includes(key)) continue;\n    if (resultState[key] !== undefined && resultState[key] !== value) failures.push(key.toUpperCase() + '_MISMATCH');\n  }\n  return {\n    case_id: String(row.case_id || ''),\n    category: String(row.category || ''),\n    passed: failures.length === 0,\n    output_schema_ok: Boolean(row.case_id) && typeof expected === 'object',\n    event_schema_ok: true,\n    failed_assertions: failures.join(' | '),\n    reply_hash: 'stable:' + operationsV3.stableHash(output),\n    duration_ms: Date.now() - started,\n    error_code: failures[0] || '',\n  };\n};\nconst results = rows.map(runCase);\nreturn [{json:{engine:'professional_v3',results}}];\n"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-engine-merge",
+      "name": "05 Evaluación | Unir motores",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        980,
+        85
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "eval-v3-aggregate",
+      "name": "06 Evaluación | Unir 128 resultados",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1210,
+        85
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst SOURCE_HASH='0ba97ce90f4b62d21f15492f54ada491eaa63773d0bd34ee6ca1448752aca857';\nconst results=$input.all().flatMap((item)=>Array.isArray(item.json?.results)?item.json.results:[]);\nconst ids=new Set(results.map((result)=>result.case_id));\nconst duplicateIds=results.length-ids.size;\nif (duplicateIds) throw new Error('EVAL_DUPLICATE_CASE_IDS:' + duplicateIds);\nconst failed=results.filter((result)=>!result.passed);\nconst hash=(value)=>{let h=2166136261;for(const ch of String(value||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}return ('00000000'+(h>>>0).toString(16)).slice(-8);};\nconst now=new Date().toISOString();\nconst runId='staging-v3-'+Date.now()+'-'+hash([...ids].sort().join('|'));\nreturn [{json:{run_id:runId,started_at:now,finished_at:new Date().toISOString(),suite_version:'3.0.3',source_hash:SOURCE_HASH,mode:'staging',workflow_id:String($workflow.id||''),execution_id:String($execution.id||''),total_cases:results.length,passed:results.length-failed.length,failed:failed.length,status:failed.length?'failed':'passed',error_message:failed.length?failed.slice(0,5).map((r)=>r.case_id+':'+r.error_code).join('; '):'',results}}];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-summary",
+      "name": "04 Prepare run summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        -40
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const r = $(\"06 Evaluación | Unir 128 resultados\").first().json; return [{ json: { run_id:r.run_id, started_at:r.started_at, finished_at:r.finished_at, suite_version:r.suite_version, source_hash:r.source_hash, mode:r.mode, workflow_id:r.workflow_id, execution_id:r.execution_id, total_cases:r.total_cases, passed:r.passed, failed:r.failed, status:r.status, error_message:r.error_message } }];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-cases",
+      "name": "05 Prepare case results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        210
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const r = $(\"06 Evaluación | Unir 128 resultados\").first().json; return (r.results || []).map((x) => ({ json: { run_id:r.run_id, case_id:x.case_id, category:x.category, passed:x.passed, output_schema_ok:x.output_schema_ok, event_schema_ok:x.event_schema_ok, failed_assertions:x.failed_assertions, reply_hash:x.reply_hash, duration_ms:x.duration_ms, error_code:x.error_code } }));"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-store-run",
+      "name": "06 Store evaluation run",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1710,
+        -40
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "vbw4CpfAosJu9fqi",
+          "cachedResultName": "luenio_evaluation_runs"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $(\"04 Prepare run summary\").first().json.run_id }}",
+            "started_at": "={{ $(\"04 Prepare run summary\").first().json.started_at }}",
+            "finished_at": "={{ $(\"04 Prepare run summary\").first().json.finished_at }}",
+            "suite_version": "={{ $(\"04 Prepare run summary\").first().json.suite_version }}",
+            "source_hash": "={{ $(\"04 Prepare run summary\").first().json.source_hash }}",
+            "mode": "={{ $(\"04 Prepare run summary\").first().json.mode }}",
+            "workflow_id": "={{ $(\"04 Prepare run summary\").first().json.workflow_id }}",
+            "execution_id": "={{ $(\"04 Prepare run summary\").first().json.execution_id }}",
+            "total_cases": "={{ $(\"04 Prepare run summary\").first().json.total_cases }}",
+            "passed": "={{ $(\"04 Prepare run summary\").first().json.passed }}",
+            "failed": "={{ $(\"04 Prepare run summary\").first().json.failed }}",
+            "status": "={{ $(\"04 Prepare run summary\").first().json.status }}",
+            "error_message": "={{ $(\"04 Prepare run summary\").first().json.error_message }}"
+          },
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "started_at",
+              "displayName": "started_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "finished_at",
+              "displayName": "finished_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "suite_version",
+              "displayName": "suite_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_hash",
+              "displayName": "source_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "total_cases",
+              "displayName": "total_cases",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "passed",
+              "displayName": "passed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "failed",
+              "displayName": "failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "eval-v3-store-results",
+      "name": "07 Store evaluation results",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1710,
+        210
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "4ogCCfdpDEnMJN01",
+          "cachedResultName": "luenio_evaluation_results"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "run_id": "={{ $json.run_id }}",
+            "case_id": "={{ $json.case_id }}",
+            "category": "={{ $json.category }}",
+            "passed": "={{ $json.passed }}",
+            "output_schema_ok": "={{ $json.output_schema_ok }}",
+            "event_schema_ok": "={{ $json.event_schema_ok }}",
+            "failed_assertions": "={{ $json.failed_assertions }}",
+            "reply_hash": "={{ $json.reply_hash }}",
+            "duration_ms": "={{ $json.duration_ms }}",
+            "error_code": "={{ $json.error_code }}"
+          },
+          "schema": [
+            {
+              "id": "run_id",
+              "displayName": "run_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "case_id",
+              "displayName": "case_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "passed",
+              "displayName": "passed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "output_schema_ok",
+              "displayName": "output_schema_ok",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "event_schema_ok",
+              "displayName": "event_schema_ok",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "failed_assertions",
+              "displayName": "failed_assertions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reply_hash",
+              "displayName": "reply_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duration_ms",
+              "displayName": "duration_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "error_code",
+              "displayName": "error_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "eval-v3-await",
+      "name": "08 Await run and results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1960,
+        85
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "eval-v3-status",
+      "name": "09 Check evaluation status",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2200,
+        85
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $(\"04 Prepare run summary\").first().json.status }}",
+              "rightValue": "passed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "condition-1787713264550-vvs4syo46"
+            }
+          ],
+          "combinator": "and"
+        }
+      }
+    },
+    {
+      "id": "eval-v3-passed",
+      "name": "10 Evaluation passed",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2440,
+        -40
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const r = $(\"04 Prepare run summary\").first().json; return [{ json: { ok:true, status:r.status, run_id:r.run_id, passed:r.passed, failed:r.failed } }];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-stop",
+      "name": "11 Stop and Error on failed suite",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        210
+      ],
+      "parameters": {
+        "errorType": "errorMessage",
+        "errorMessage": "=LUNA_EVALUATION_FAILED: {{ $(\"04 Prepare run summary\").first().json.error_message }}"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "eval-v3-schedule",
+      "name": "00 Trigger | Diario 05:30 Bogota",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        255
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 30 5 * * *"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "00 Trigger | Manual": {
+      "main": [
+        [
+          {
+            "node": "01 Entrada | Inicializar run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 Trigger | MCP test": {
+      "main": [
+        [
+          {
+            "node": "01 Entrada | Inicializar run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Entrada | Inicializar run": {
+      "main": [
+        [
+          {
+            "node": "02 Datos | Leer 128 casos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Datos | Leer 128 casos": {
+      "main": [
+        [
+          {
+            "node": "03 Evaluación | 65 controles base",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "04 Evaluación | 63 casos profesionales",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Evaluación | 65 controles base": {
+      "main": [
+        [
+          {
+            "node": "05 Evaluación | Unir motores",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 Evaluación | 63 casos profesionales": {
+      "main": [
+        [
+          {
+            "node": "05 Evaluación | Unir motores",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "05 Evaluación | Unir motores": {
+      "main": [
+        [
+          {
+            "node": "06 Evaluación | Unir 128 resultados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 Evaluación | Unir 128 resultados": {
+      "main": [
+        [
+          {
+            "node": "04 Prepare run summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "05 Prepare case results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 Prepare run summary": {
+      "main": [
+        [
+          {
+            "node": "06 Store evaluation run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 Store evaluation run": {
+      "main": [
+        [
+          {
+            "node": "08 Await run and results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 Prepare case results": {
+      "main": [
+        [
+          {
+            "node": "07 Store evaluation results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 Store evaluation results": {
+      "main": [
+        [
+          {
+            "node": "08 Await run and results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "08 Await run and results": {
+      "main": [
+        [
+          {
+            "node": "09 Check evaluation status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 Check evaluation status": {
+      "main": [
+        [
+          {
+            "node": "10 Evaluation passed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "11 Stop and Error on failed suite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 Trigger | Diario 05:30 Bogota": {
+      "main": [
+        [
+          {
+            "node": "01 Entrada | Inicializar run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "errorWorkflow": "csLvqYKmih4zi4Fq",
+    "saveExecutionProgress": false,
+    "saveManualExecutions": false
+  },
+  "staticData": {
+    "node:00 Trigger | Diario 05:30 Bogota": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  }
+}

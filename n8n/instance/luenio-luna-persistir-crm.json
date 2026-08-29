@@ -1,0 +1,1758 @@
+{
+  "name": "Luenio LUNA | Persistir CRM",
+  "active": true,
+  "nodes": [
+    {
+      "id": "crm-trigger",
+      "name": "01 Entrada | Contrato CRM",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "crm_json",
+              "type": "string"
+            },
+            {
+              "name": "history_json",
+              "type": "string"
+            },
+            {
+              "name": "conversation_id",
+              "type": "string"
+            },
+            {
+              "name": "phone",
+              "type": "string"
+            },
+            {
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "name": "email",
+              "type": "string"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean"
+            },
+            {
+              "name": "source_hash",
+              "type": "string"
+            },
+            {
+              "name": "environment",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "crm-normalize",
+      "name": "02 CRM | Normalizar fila canónica",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const CRM_COLUMNS_V3 = [\n  'conversation_id','phone','history','name','waiting_for_name','business_type','interested_service','lead_status','notes','last_message','last_ai_response','updated_at','next_action','appointment_date','budget','human_required','email','project_goal','selected_solution','pipeline_stage','last_intent','missing_fields','lead_score','conversation_summary','followup_at','followup_status','followup_count','last_bot_at','bot_muted','followup_2h_at','followup_2h_status','followup_2h_count','opt_out','handoff_at','urgency','decision_role','budget_signal','ficha_confirmada','site_shared','proposal_sent','proposal_accepted','pain_point','current_process','impact','desired_outcome','discovery_urgency','discovery_depth','discovery_done','recommended_solution','solution_confirmed','price_requested','proposal_requested','proposal_delivery_status','objection_code','handoff_reason','appointment_status','appointment_timezone','appointment_event_id','appointment_confirmation_sent','schema_version'\n];\nconst BOOL_FIELDS = new Set(['waiting_for_name','human_required','bot_muted','opt_out','ficha_confirmada','site_shared','proposal_sent','proposal_accepted','discovery_done','solution_confirmed','price_requested','proposal_requested','appointment_confirmation_sent']);\nconst NUMBER_FIELDS = new Set(['lead_score','followup_count','followup_2h_count','discovery_depth']);\nconst PIPELINE = new Set(['nuevo','descubrimiento','calificado','propuesta','handoff','cerrado']);\nconst PROPOSAL = new Set(['none','requested','rendering','pending_approval','approved','rejected','sending','partially_sent','sent','failed','blocked_after_send_failure']);\nconst APPOINTMENT = new Set(['','requested','availability_checked','pending_confirmation','pending_approval','confirmed','cancelled','expired','failed']);\n\nfunction text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction parseObject(value) { if (value && typeof value === 'object' && !Array.isArray(value)) return { ...value }; try { return JSON.parse(text(value) || '{}'); } catch { return {}; } }\nfunction parseHistory(value) { try { const rows = Array.isArray(value) ? value : JSON.parse(text(value) || '[]'); return Array.isArray(rows) ? rows.slice(-24) : []; } catch { return []; } }\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\n\nfunction calculateScore(row) {\n  let score = 0;\n  if (row.business_type) score += 10;\n  if (row.project_goal) score += 10;\n  if (row.pain_point) score += 10;\n  if (row.current_process) score += 10;\n  if (row.impact || row.discovery_urgency) score += 10;\n  if (row.desired_outcome) score += 10;\n  if (row.selected_solution) score += 5;\n  if (row.solution_confirmed) score += 10;\n  if (row.price_requested) score += 5;\n  if (validEmail(row.email)) score += 5;\n  if (row.proposal_requested) score += 10;\n  if (row.human_required) score += 5;\n  return Math.min(score, 100);\n}\n\nfunction normalizeCrmRow(input) {\n  const source = parseObject(input?.crm_json || input?.crm || input);\n  const identity = input && typeof input === 'object' ? input : {};\n  const row = {};\n  for (const column of CRM_COLUMNS_V3) {\n    if (BOOL_FIELDS.has(column)) row[column] = bool(source[column]);\n    else if (NUMBER_FIELDS.has(column)) row[column] = Number(source[column] || 0) || 0;\n    else row[column] = text(source[column]);\n  }\n  row.conversation_id = text(identity.conversation_id || source.conversation_id);\n  row.phone = text(identity.phone || source.phone);\n  row.name = text(identity.name || source.name);\n  row.email = validEmail(identity.email || source.email) ? text(identity.email || source.email) : '';\n  row.history = JSON.stringify(parseHistory(identity.history_json || source.history));\n  row.conversation_summary = text(source.conversation_summary).slice(0, 420);\n  row.schema_version = '3.0';\n  row.updated_at = text(source.updated_at || identity.updated_at || new Date().toISOString());\n  row.pipeline_stage = PIPELINE.has(text(source.pipeline_stage)) ? text(source.pipeline_stage) : 'nuevo';\n  row.proposal_delivery_status = PROPOSAL.has(text(source.proposal_delivery_status)) ? text(source.proposal_delivery_status) : 'none';\n  row.appointment_status = APPOINTMENT.has(text(source.appointment_status)) ? text(source.appointment_status) : '';\n  row.proposal_sent = row.proposal_sent && row.proposal_delivery_status === 'sent';\n  row.proposal_accepted = row.proposal_accepted && row.proposal_sent;\n  row.lead_score = calculateScore(row);\n  row.lead_status = row.lead_score >= 70 ? 'caliente' : row.lead_score >= 40 ? 'tibio' : 'frio';\n  if (!row.conversation_id) throw new Error('CRM_CONVERSATION_ID_REQUIRED');\n  return row;\n}\n\nfunction evaluateExistingRows(rows, canonical) {\n  const matching = (rows || []).map((item) => item && item.json ? item.json : item).filter((row) => text(row?.conversation_id) === canonical.conversation_id);\n  if (matching.length > 1) throw new Error('CRM_DUPLICATE_CONVERSATION');\n  const rowNumber = matching.length === 1 ? Number(matching[0].row_number || 0) : 0;\n  return { ...canonical, crm_operation: rowNumber > 0 ? 'update' : 'append', row_number: rowNumber, duplicate_count: matching.length };\n}\n\n\nconst input = $input.first()?.json || {};\nconst row = normalizeCrmRow(input);\nreturn [{ json: { ...row, dry_run: input.dry_run === true || String(input.dry_run).toLowerCase() === 'true', source_hash: String(input.source_hash || ''), environment: String(input.environment || 'staging') } }];"
+      }
+    },
+    {
+      "id": "crm-dry",
+      "name": "03 Filtro | ¿Solo validar?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        540,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "condition",
+              "leftValue": "={{ String($json.dry_run) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "crm-preview",
+      "name": "04 Salida | Validación sin escritura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        -160
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const row = $input.first()?.json || {}; return [{ json: { ok: true, status: 'validated', conversation_id: String(row.conversation_id || ''), schema_version: String(row.schema_version || ''), source_hash: String(row.source_hash || ''), environment: String(row.environment || 'staging') } }];"
+      }
+    },
+    {
+      "id": "crm-read",
+      "name": "05 CRM | Buscar conversación",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        820,
+        80
+      ],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "mode": "list",
+          "cachedResultName": "Luenio Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "conversation_id",
+              "lookupValue": "={{ $('02 CRM | Normalizar fila canónica').first().json.conversation_id }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "crm-evaluate",
+      "name": "06 CRM | Bloquear duplicados y decidir escritura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        80
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const CRM_COLUMNS_V3 = [\n  'conversation_id','phone','history','name','waiting_for_name','business_type','interested_service','lead_status','notes','last_message','last_ai_response','updated_at','next_action','appointment_date','budget','human_required','email','project_goal','selected_solution','pipeline_stage','last_intent','missing_fields','lead_score','conversation_summary','followup_at','followup_status','followup_count','last_bot_at','bot_muted','followup_2h_at','followup_2h_status','followup_2h_count','opt_out','handoff_at','urgency','decision_role','budget_signal','ficha_confirmada','site_shared','proposal_sent','proposal_accepted','pain_point','current_process','impact','desired_outcome','discovery_urgency','discovery_depth','discovery_done','recommended_solution','solution_confirmed','price_requested','proposal_requested','proposal_delivery_status','objection_code','handoff_reason','appointment_status','appointment_timezone','appointment_event_id','appointment_confirmation_sent','schema_version'\n];\nconst BOOL_FIELDS = new Set(['waiting_for_name','human_required','bot_muted','opt_out','ficha_confirmada','site_shared','proposal_sent','proposal_accepted','discovery_done','solution_confirmed','price_requested','proposal_requested','appointment_confirmation_sent']);\nconst NUMBER_FIELDS = new Set(['lead_score','followup_count','followup_2h_count','discovery_depth']);\nconst PIPELINE = new Set(['nuevo','descubrimiento','calificado','propuesta','handoff','cerrado']);\nconst PROPOSAL = new Set(['none','requested','rendering','pending_approval','approved','rejected','sending','partially_sent','sent','failed','blocked_after_send_failure']);\nconst APPOINTMENT = new Set(['','requested','availability_checked','pending_confirmation','pending_approval','confirmed','cancelled','expired','failed']);\n\nfunction text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction parseObject(value) { if (value && typeof value === 'object' && !Array.isArray(value)) return { ...value }; try { return JSON.parse(text(value) || '{}'); } catch { return {}; } }\nfunction parseHistory(value) { try { const rows = Array.isArray(value) ? value : JSON.parse(text(value) || '[]'); return Array.isArray(rows) ? rows.slice(-24) : []; } catch { return []; } }\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\n\nfunction calculateScore(row) {\n  let score = 0;\n  if (row.business_type) score += 10;\n  if (row.project_goal) score += 10;\n  if (row.pain_point) score += 10;\n  if (row.current_process) score += 10;\n  if (row.impact || row.discovery_urgency) score += 10;\n  if (row.desired_outcome) score += 10;\n  if (row.selected_solution) score += 5;\n  if (row.solution_confirmed) score += 10;\n  if (row.price_requested) score += 5;\n  if (validEmail(row.email)) score += 5;\n  if (row.proposal_requested) score += 10;\n  if (row.human_required) score += 5;\n  return Math.min(score, 100);\n}\n\nfunction normalizeCrmRow(input) {\n  const source = parseObject(input?.crm_json || input?.crm || input);\n  const identity = input && typeof input === 'object' ? input : {};\n  const row = {};\n  for (const column of CRM_COLUMNS_V3) {\n    if (BOOL_FIELDS.has(column)) row[column] = bool(source[column]);\n    else if (NUMBER_FIELDS.has(column)) row[column] = Number(source[column] || 0) || 0;\n    else row[column] = text(source[column]);\n  }\n  row.conversation_id = text(identity.conversation_id || source.conversation_id);\n  row.phone = text(identity.phone || source.phone);\n  row.name = text(identity.name || source.name);\n  row.email = validEmail(identity.email || source.email) ? text(identity.email || source.email) : '';\n  row.history = JSON.stringify(parseHistory(identity.history_json || source.history));\n  row.conversation_summary = text(source.conversation_summary).slice(0, 420);\n  row.schema_version = '3.0';\n  row.updated_at = text(source.updated_at || identity.updated_at || new Date().toISOString());\n  row.pipeline_stage = PIPELINE.has(text(source.pipeline_stage)) ? text(source.pipeline_stage) : 'nuevo';\n  row.proposal_delivery_status = PROPOSAL.has(text(source.proposal_delivery_status)) ? text(source.proposal_delivery_status) : 'none';\n  row.appointment_status = APPOINTMENT.has(text(source.appointment_status)) ? text(source.appointment_status) : '';\n  row.proposal_sent = row.proposal_sent && row.proposal_delivery_status === 'sent';\n  row.proposal_accepted = row.proposal_accepted && row.proposal_sent;\n  row.lead_score = calculateScore(row);\n  row.lead_status = row.lead_score >= 70 ? 'caliente' : row.lead_score >= 40 ? 'tibio' : 'frio';\n  if (!row.conversation_id) throw new Error('CRM_CONVERSATION_ID_REQUIRED');\n  return row;\n}\n\nfunction evaluateExistingRows(rows, canonical) {\n  const matching = (rows || []).map((item) => item && item.json ? item.json : item).filter((row) => text(row?.conversation_id) === canonical.conversation_id);\n  if (matching.length > 1) throw new Error('CRM_DUPLICATE_CONVERSATION');\n  const rowNumber = matching.length === 1 ? Number(matching[0].row_number || 0) : 0;\n  return { ...canonical, crm_operation: rowNumber > 0 ? 'update' : 'append', row_number: rowNumber, duplicate_count: matching.length };\n}\n\n\nconst canonical = $('02 CRM | Normalizar fila canónica').first().json || {};\nconst result = evaluateExistingRows($input.all(), canonical);\nreturn [{ json: result }];"
+      }
+    },
+    {
+      "id": "crm-update-if",
+      "name": "07 Filtro | ¿Actualizar fila?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1370,
+        80
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "condition",
+              "leftValue": "={{ String($json.crm_operation) }}",
+              "rightValue": "update",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "crm-update",
+      "name": "08 CRM | Actualizar por row_number",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1640,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "mode": "list",
+          "cachedResultName": "Luenio Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "phone": "={{ $json.phone }}",
+            "history": "={{ $json.history }}",
+            "name": "={{ $json.name }}",
+            "waiting_for_name": "={{ $json.waiting_for_name }}",
+            "business_type": "={{ $json.business_type }}",
+            "interested_service": "={{ $json.interested_service }}",
+            "lead_status": "={{ $json.lead_status }}",
+            "notes": "={{ $json.notes }}",
+            "last_message": "={{ $json.last_message }}",
+            "last_ai_response": "={{ $json.last_ai_response }}",
+            "updated_at": "={{ $json.updated_at }}",
+            "next_action": "={{ $json.next_action }}",
+            "appointment_date": "={{ $json.appointment_date }}",
+            "budget": "={{ $json.budget }}",
+            "human_required": "={{ $json.human_required }}",
+            "email": "={{ $json.email }}",
+            "project_goal": "={{ $json.project_goal }}",
+            "selected_solution": "={{ $json.selected_solution }}",
+            "pipeline_stage": "={{ $json.pipeline_stage }}",
+            "last_intent": "={{ $json.last_intent }}",
+            "missing_fields": "={{ $json.missing_fields }}",
+            "lead_score": "={{ $json.lead_score }}",
+            "conversation_summary": "={{ $json.conversation_summary }}",
+            "followup_at": "={{ $json.followup_at }}",
+            "followup_status": "={{ $json.followup_status }}",
+            "followup_count": "={{ $json.followup_count }}",
+            "last_bot_at": "={{ $json.last_bot_at }}",
+            "bot_muted": "={{ $json.bot_muted }}",
+            "followup_2h_at": "={{ $json.followup_2h_at }}",
+            "followup_2h_status": "={{ $json.followup_2h_status }}",
+            "followup_2h_count": "={{ $json.followup_2h_count }}",
+            "opt_out": "={{ $json.opt_out }}",
+            "handoff_at": "={{ $json.handoff_at }}",
+            "urgency": "={{ $json.urgency }}",
+            "decision_role": "={{ $json.decision_role }}",
+            "budget_signal": "={{ $json.budget_signal }}",
+            "ficha_confirmada": "={{ $json.ficha_confirmada }}",
+            "site_shared": "={{ $json.site_shared }}",
+            "proposal_sent": "={{ $json.proposal_sent }}",
+            "proposal_accepted": "={{ $json.proposal_accepted }}",
+            "pain_point": "={{ $json.pain_point }}",
+            "current_process": "={{ $json.current_process }}",
+            "impact": "={{ $json.impact }}",
+            "desired_outcome": "={{ $json.desired_outcome }}",
+            "discovery_urgency": "={{ $json.discovery_urgency }}",
+            "discovery_depth": "={{ $json.discovery_depth }}",
+            "discovery_done": "={{ $json.discovery_done }}",
+            "recommended_solution": "={{ $json.recommended_solution }}",
+            "solution_confirmed": "={{ $json.solution_confirmed }}",
+            "price_requested": "={{ $json.price_requested }}",
+            "proposal_requested": "={{ $json.proposal_requested }}",
+            "proposal_delivery_status": "={{ $json.proposal_delivery_status }}",
+            "objection_code": "={{ $json.objection_code }}",
+            "handoff_reason": "={{ $json.handoff_reason }}",
+            "appointment_status": "={{ $json.appointment_status }}",
+            "appointment_timezone": "={{ $json.appointment_timezone }}",
+            "appointment_event_id": "={{ $json.appointment_event_id }}",
+            "appointment_confirmation_sent": "={{ $json.appointment_confirmation_sent }}",
+            "schema_version": "={{ $json.schema_version }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "history",
+              "displayName": "history",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "waiting_for_name",
+              "displayName": "waiting_for_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "business_type",
+              "displayName": "business_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interested_service",
+              "displayName": "interested_service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_status",
+              "displayName": "lead_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_message",
+              "displayName": "last_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_ai_response",
+              "displayName": "last_ai_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_date",
+              "displayName": "appointment_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "human_required",
+              "displayName": "human_required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "project_goal",
+              "displayName": "project_goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "selected_solution",
+              "displayName": "selected_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pipeline_stage",
+              "displayName": "pipeline_stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_intent",
+              "displayName": "last_intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "missing_fields",
+              "displayName": "missing_fields",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_score",
+              "displayName": "lead_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "conversation_summary",
+              "displayName": "conversation_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_at",
+              "displayName": "followup_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_status",
+              "displayName": "followup_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_count",
+              "displayName": "followup_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_bot_at",
+              "displayName": "last_bot_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "bot_muted",
+              "displayName": "bot_muted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_2h_at",
+              "displayName": "followup_2h_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_2h_status",
+              "displayName": "followup_2h_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_2h_count",
+              "displayName": "followup_2h_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "opt_out",
+              "displayName": "opt_out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "handoff_at",
+              "displayName": "handoff_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "decision_role",
+              "displayName": "decision_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget_signal",
+              "displayName": "budget_signal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ficha_confirmada",
+              "displayName": "ficha_confirmada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "site_shared",
+              "displayName": "site_shared",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_sent",
+              "displayName": "proposal_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_accepted",
+              "displayName": "proposal_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pain_point",
+              "displayName": "pain_point",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "current_process",
+              "displayName": "current_process",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "impact",
+              "displayName": "impact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "desired_outcome",
+              "displayName": "desired_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_urgency",
+              "displayName": "discovery_urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_depth",
+              "displayName": "discovery_depth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_done",
+              "displayName": "discovery_done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommended_solution",
+              "displayName": "recommended_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "solution_confirmed",
+              "displayName": "solution_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price_requested",
+              "displayName": "price_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_requested",
+              "displayName": "proposal_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_delivery_status",
+              "displayName": "proposal_delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "objection_code",
+              "displayName": "objection_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "handoff_reason",
+              "displayName": "handoff_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_status",
+              "displayName": "appointment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_timezone",
+              "displayName": "appointment_timezone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_event_id",
+              "displayName": "appointment_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_confirmation_sent",
+              "displayName": "appointment_confirmation_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "type": "number",
+              "display": true,
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "crm-append",
+      "name": "09 CRM | Crear conversación",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1640,
+        160
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "mode": "list",
+          "cachedResultName": "Luenio Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "conversation_id": "={{ $json.conversation_id }}",
+            "phone": "={{ $json.phone }}",
+            "history": "={{ $json.history }}",
+            "name": "={{ $json.name }}",
+            "waiting_for_name": "={{ $json.waiting_for_name }}",
+            "business_type": "={{ $json.business_type }}",
+            "interested_service": "={{ $json.interested_service }}",
+            "lead_status": "={{ $json.lead_status }}",
+            "notes": "={{ $json.notes }}",
+            "last_message": "={{ $json.last_message }}",
+            "last_ai_response": "={{ $json.last_ai_response }}",
+            "updated_at": "={{ $json.updated_at }}",
+            "next_action": "={{ $json.next_action }}",
+            "appointment_date": "={{ $json.appointment_date }}",
+            "budget": "={{ $json.budget }}",
+            "human_required": "={{ $json.human_required }}",
+            "email": "={{ $json.email }}",
+            "project_goal": "={{ $json.project_goal }}",
+            "selected_solution": "={{ $json.selected_solution }}",
+            "pipeline_stage": "={{ $json.pipeline_stage }}",
+            "last_intent": "={{ $json.last_intent }}",
+            "missing_fields": "={{ $json.missing_fields }}",
+            "lead_score": "={{ $json.lead_score }}",
+            "conversation_summary": "={{ $json.conversation_summary }}",
+            "followup_at": "={{ $json.followup_at }}",
+            "followup_status": "={{ $json.followup_status }}",
+            "followup_count": "={{ $json.followup_count }}",
+            "last_bot_at": "={{ $json.last_bot_at }}",
+            "bot_muted": "={{ $json.bot_muted }}",
+            "followup_2h_at": "={{ $json.followup_2h_at }}",
+            "followup_2h_status": "={{ $json.followup_2h_status }}",
+            "followup_2h_count": "={{ $json.followup_2h_count }}",
+            "opt_out": "={{ $json.opt_out }}",
+            "handoff_at": "={{ $json.handoff_at }}",
+            "urgency": "={{ $json.urgency }}",
+            "decision_role": "={{ $json.decision_role }}",
+            "budget_signal": "={{ $json.budget_signal }}",
+            "ficha_confirmada": "={{ $json.ficha_confirmada }}",
+            "site_shared": "={{ $json.site_shared }}",
+            "proposal_sent": "={{ $json.proposal_sent }}",
+            "proposal_accepted": "={{ $json.proposal_accepted }}",
+            "pain_point": "={{ $json.pain_point }}",
+            "current_process": "={{ $json.current_process }}",
+            "impact": "={{ $json.impact }}",
+            "desired_outcome": "={{ $json.desired_outcome }}",
+            "discovery_urgency": "={{ $json.discovery_urgency }}",
+            "discovery_depth": "={{ $json.discovery_depth }}",
+            "discovery_done": "={{ $json.discovery_done }}",
+            "recommended_solution": "={{ $json.recommended_solution }}",
+            "solution_confirmed": "={{ $json.solution_confirmed }}",
+            "price_requested": "={{ $json.price_requested }}",
+            "proposal_requested": "={{ $json.proposal_requested }}",
+            "proposal_delivery_status": "={{ $json.proposal_delivery_status }}",
+            "objection_code": "={{ $json.objection_code }}",
+            "handoff_reason": "={{ $json.handoff_reason }}",
+            "appointment_status": "={{ $json.appointment_status }}",
+            "appointment_timezone": "={{ $json.appointment_timezone }}",
+            "appointment_event_id": "={{ $json.appointment_event_id }}",
+            "appointment_confirmation_sent": "={{ $json.appointment_confirmation_sent }}",
+            "schema_version": "={{ $json.schema_version }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "history",
+              "displayName": "history",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "waiting_for_name",
+              "displayName": "waiting_for_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "business_type",
+              "displayName": "business_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "interested_service",
+              "displayName": "interested_service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_status",
+              "displayName": "lead_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "notes",
+              "displayName": "notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_message",
+              "displayName": "last_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_ai_response",
+              "displayName": "last_ai_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_date",
+              "displayName": "appointment_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget",
+              "displayName": "budget",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "human_required",
+              "displayName": "human_required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "project_goal",
+              "displayName": "project_goal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "selected_solution",
+              "displayName": "selected_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pipeline_stage",
+              "displayName": "pipeline_stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_intent",
+              "displayName": "last_intent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "missing_fields",
+              "displayName": "missing_fields",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "lead_score",
+              "displayName": "lead_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "conversation_summary",
+              "displayName": "conversation_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_at",
+              "displayName": "followup_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_status",
+              "displayName": "followup_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_count",
+              "displayName": "followup_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "last_bot_at",
+              "displayName": "last_bot_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "bot_muted",
+              "displayName": "bot_muted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_2h_at",
+              "displayName": "followup_2h_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_2h_status",
+              "displayName": "followup_2h_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "followup_2h_count",
+              "displayName": "followup_2h_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "opt_out",
+              "displayName": "opt_out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "handoff_at",
+              "displayName": "handoff_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "decision_role",
+              "displayName": "decision_role",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "budget_signal",
+              "displayName": "budget_signal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ficha_confirmada",
+              "displayName": "ficha_confirmada",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "site_shared",
+              "displayName": "site_shared",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_sent",
+              "displayName": "proposal_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_accepted",
+              "displayName": "proposal_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pain_point",
+              "displayName": "pain_point",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "current_process",
+              "displayName": "current_process",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "impact",
+              "displayName": "impact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "desired_outcome",
+              "displayName": "desired_outcome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_urgency",
+              "displayName": "discovery_urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_depth",
+              "displayName": "discovery_depth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "discovery_done",
+              "displayName": "discovery_done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "recommended_solution",
+              "displayName": "recommended_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "solution_confirmed",
+              "displayName": "solution_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price_requested",
+              "displayName": "price_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_requested",
+              "displayName": "proposal_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "proposal_delivery_status",
+              "displayName": "proposal_delivery_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "objection_code",
+              "displayName": "objection_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "handoff_reason",
+              "displayName": "handoff_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_status",
+              "displayName": "appointment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_timezone",
+              "displayName": "appointment_timezone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_event_id",
+              "displayName": "appointment_event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "appointment_confirmation_sent",
+              "displayName": "appointment_confirmation_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "crm-result",
+      "name": "10 Salida | Escritura confirmada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1910,
+        80
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const item=$input.first()?.json||{}; const prior=$('06 CRM | Bloquear duplicados y decidir escritura').first().json||{}; return [{json:{ok:true,status:prior.crm_operation==='update'?'updated':'inserted',conversation_id:String(prior.conversation_id||''),row_number:Number(item.row_number||prior.row_number||0),schema_version:String(prior.schema_version||'3.0'),source_hash:String(prior.source_hash||''),environment:String(prior.environment||'staging')}}];"
+      }
+    }
+  ],
+  "connections": {
+    "01 Entrada | Contrato CRM": {
+      "main": [
+        [
+          {
+            "node": "02 CRM | Normalizar fila canónica",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 CRM | Normalizar fila canónica": {
+      "main": [
+        [
+          {
+            "node": "03 Filtro | ¿Solo validar?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Filtro | ¿Solo validar?": {
+      "main": [
+        [
+          {
+            "node": "04 Salida | Validación sin escritura",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "05 CRM | Buscar conversación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 CRM | Buscar conversación": {
+      "main": [
+        [
+          {
+            "node": "06 CRM | Bloquear duplicados y decidir escritura",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 CRM | Bloquear duplicados y decidir escritura": {
+      "main": [
+        [
+          {
+            "node": "07 Filtro | ¿Actualizar fila?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 Filtro | ¿Actualizar fila?": {
+      "main": [
+        [
+          {
+            "node": "08 CRM | Actualizar por row_number",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "09 CRM | Crear conversación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "08 CRM | Actualizar por row_number": {
+      "main": [
+        [
+          {
+            "node": "10 Salida | Escritura confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 CRM | Crear conversación": {
+      "main": [
+        [
+          {
+            "node": "10 Salida | Escritura confirmada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Luenio Schedule Probe",
+  "active": false,
+  "nodes": [
+    {
+      "id": "a5ec3828-b4ef-416c-bcc8-9574eb3d9706",
+      "name": "00 Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "7412734e-c098-4a72-b31b-1ea6d0ff2129",
+      "name": "01 Finish",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return items"
+      }
+    }
+  ],
+  "connections": {
+    "00 Schedule": {
+      "main": [
+        [
+          {
+            "node": "01 Finish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": {
+    "node:00 Schedule": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  }
+}

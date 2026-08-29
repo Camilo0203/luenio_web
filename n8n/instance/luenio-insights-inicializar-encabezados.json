@@ -1,0 +1,388 @@
+{
+  "name": "Luenio Insights | Inicializar encabezados",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "3509e27e-a608-4a01-a138-24471d4e3063",
+      "name": "00 Manual initialize headers",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { date:\"date\",schema_version:\"schema_version\",unique_conversations:\"unique_conversations\",inbound_messages:\"inbound_messages\",processed_messages:\"processed_messages\",duplicate_messages:\"duplicate_messages\",blocked_messages:\"blocked_messages\",discovery_completed:\"discovery_completed\",solutions_confirmed:\"solutions_confirmed\",price_requests:\"price_requests\",proposal_requests:\"proposal_requests\",proposals_sent:\"proposals_sent\",proposals_accepted:\"proposals_accepted\",handoffs:\"handoffs\",opt_outs:\"opt_outs\",followups_dry_run:\"followups_dry_run\",followups_sent:\"followups_sent\",followups_failed:\"followups_failed\",critical_errors:\"critical_errors\",secondary_errors:\"secondary_errors\",avg_turns_to_discovery:\"avg_turns_to_discovery\",avg_minutes_to_proposal:\"avg_minutes_to_proposal\",catalog_unavailable_count:\"catalog_unavailable_count\",generated_at:\"generated_at\",source_version:\"source_version\",status:\"status\" } }];"
+      },
+      "id": "aa704587-3b23-430d-a4ec-acdf54f4ae4a",
+      "name": "01 Build daily header row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1160182455",
+          "cachedResultName": "Insights LUNA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $json.date }}",
+            "schema_version": "={{ $json.schema_version }}",
+            "unique_conversations": "={{ $json.unique_conversations }}",
+            "inbound_messages": "={{ $json.inbound_messages }}",
+            "processed_messages": "={{ $json.processed_messages }}",
+            "duplicate_messages": "={{ $json.duplicate_messages }}",
+            "blocked_messages": "={{ $json.blocked_messages }}",
+            "discovery_completed": "={{ $json.discovery_completed }}",
+            "solutions_confirmed": "={{ $json.solutions_confirmed }}",
+            "price_requests": "={{ $json.price_requests }}",
+            "proposal_requests": "={{ $json.proposal_requests }}",
+            "proposals_sent": "={{ $json.proposals_sent }}",
+            "proposals_accepted": "={{ $json.proposals_accepted }}",
+            "handoffs": "={{ $json.handoffs }}",
+            "opt_outs": "={{ $json.opt_outs }}",
+            "followups_dry_run": "={{ $json.followups_dry_run }}",
+            "followups_sent": "={{ $json.followups_sent }}",
+            "followups_failed": "={{ $json.followups_failed }}",
+            "critical_errors": "={{ $json.critical_errors }}",
+            "secondary_errors": "={{ $json.secondary_errors }}",
+            "avg_turns_to_discovery": "={{ $json.avg_turns_to_discovery }}",
+            "avg_minutes_to_proposal": "={{ $json.avg_minutes_to_proposal }}",
+            "catalog_unavailable_count": "={{ $json.catalog_unavailable_count }}",
+            "generated_at": "={{ $json.generated_at }}",
+            "source_version": "={{ $json.source_version }}",
+            "status": "={{ $json.status }}"
+          },
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "unique_conversations",
+              "displayName": "unique_conversations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "inbound_messages",
+              "displayName": "inbound_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processed_messages",
+              "displayName": "processed_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duplicate_messages",
+              "displayName": "duplicate_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "blocked_messages",
+              "displayName": "blocked_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_completed",
+              "displayName": "discovery_completed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "solutions_confirmed",
+              "displayName": "solutions_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "price_requests",
+              "displayName": "price_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_requests",
+              "displayName": "proposal_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_sent",
+              "displayName": "proposals_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_accepted",
+              "displayName": "proposals_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoffs",
+              "displayName": "handoffs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "opt_outs",
+              "displayName": "opt_outs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_dry_run",
+              "displayName": "followups_dry_run",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_sent",
+              "displayName": "followups_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_failed",
+              "displayName": "followups_failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "critical_errors",
+              "displayName": "critical_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "secondary_errors",
+              "displayName": "secondary_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_turns_to_discovery",
+              "displayName": "avg_turns_to_discovery",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_minutes_to_proposal",
+              "displayName": "avg_minutes_to_proposal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_unavailable_count",
+              "displayName": "catalog_unavailable_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "generated_at",
+              "displayName": "generated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "locationDefine": {
+            "values": {}
+          }
+        }
+      },
+      "id": "19b9b889-a1b3-4e05-bfbb-69734f457d1d",
+      "name": "02 Append Insights header",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"requests\":[{\"appendDimension\":{\"sheetId\":0,\"dimension\":\"COLUMNS\",\"length\":8}},{\"updateCells\":{\"range\":{\"sheetId\":0,\"startRowIndex\":0,\"endRowIndex\":1,\"startColumnIndex\":52,\"endColumnIndex\":60},\"rows\":[{\"values\":[{\"userEnteredValue\":{\"stringValue\":\"proposal_delivery_status\"}},{\"userEnteredValue\":{\"stringValue\":\"objection_code\"}},{\"userEnteredValue\":{\"stringValue\":\"handoff_reason\"}},{\"userEnteredValue\":{\"stringValue\":\"appointment_status\"}},{\"userEnteredValue\":{\"stringValue\":\"appointment_timezone\"}},{\"userEnteredValue\":{\"stringValue\":\"appointment_event_id\"}},{\"userEnteredValue\":{\"stringValue\":\"appointment_confirmation_sent\"}},{\"userEnteredValue\":{\"stringValue\":\"schema_version\"}}]}],\"fields\":\"userEnteredValue\"}}]}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        672,
+        0
+      ],
+      "id": "96677272-7c01-4ce1-a8c2-6a2334539877",
+      "name": "HTTP Request"
+    }
+  ],
+  "connections": {
+    "00 Manual initialize headers": {
+      "main": [
+        [
+          {
+            "node": "01 Build daily header row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Build daily header row": {
+      "main": [
+        [
+          {
+            "node": "02 Append Insights header",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Append Insights header": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "binaryMode": "separate"
+  },
+  "staticData": null
+}

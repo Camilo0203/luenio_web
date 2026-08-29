@@ -1,0 +1,527 @@
+{
+  "name": "Luenio LUNA | Vigilar SLA handoff",
+  "active": true,
+  "nodes": [
+    {
+      "id": "sla-trigger",
+      "name": "01 Cada 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sla-get",
+      "name": "02 SLA | Leer handoffs pendientes",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "8ebPXLk2h1dWjVZR",
+          "cachedResultName": "luenio_handoff_queue"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "pending"
+            },
+            {
+              "keyName": "alert_sent",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "sla-filter",
+      "name": "03 SLA | Seleccionar vencidos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const now=Date.now(); return $input.all().filter(item=>{const j=item.json||{}; const due=Date.parse(String(j.business_due_at||'')); return String(j.status||'')==='pending'&&j.alert_sent!==true&&Number.isFinite(due)&&due<=now;}).map(item=>({json:item.json}));"
+      }
+    },
+    {
+      "id": "sla-claim",
+      "name": "04 SLA | Reclamar alerta",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        780,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "8ebPXLk2h1dWjVZR",
+          "cachedResultName": "luenio_handoff_queue"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "handoff_id",
+              "keyValue": "={{ $json.handoff_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "pending"
+            },
+            {
+              "keyName": "alert_sent",
+              "condition": "isFalse"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "alerting",
+            "last_error_code": ""
+          },
+          "schema": []
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "sla-note",
+      "name": "05 Chatwoot | Alerta privada SLA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1040,
+        -40
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ton618bot.xyz/api/v1/accounts/1/conversations/{{ $('03 SLA | Seleccionar vencidos').item.json.conversation_id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "⏱️ SLA LUNA: este handoff lleva 15 minutos hábiles pendiente. Por favor asignar o responder. Alerta única automática."
+            },
+            {
+              "name": "message_type",
+              "value": "outgoing"
+            },
+            {
+              "name": "private",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "sla-label",
+      "name": "06 Chatwoot | Etiqueta SLA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        1310,
+        -40
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ton618bot.xyz/api/v1/accounts/1/conversations/{{ $('03 SLA | Seleccionar vencidos').item.json.conversation_id }}/labels",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({labels:['luna-handoff-pendiente','sla-15m']}) }}",
+        "options": {
+          "timeout": 10000
+        }
+      }
+    },
+    {
+      "id": "sla-done",
+      "name": "07 SLA | Marcar alerta enviada",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1580,
+        -40
+      ],
+      "parameters": {
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "8ebPXLk2h1dWjVZR",
+          "cachedResultName": "luenio_handoff_queue"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "handoff_id",
+              "keyValue": "={{ $('03 SLA | Seleccionar vencidos').item.json.handoff_id }}"
+            },
+            {
+              "keyName": "status",
+              "keyValue": "alerting"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "alerted",
+            "alert_sent": true,
+            "alert_sent_at": "={{ $now.toISO() }}",
+            "label_applied": true,
+            "last_error_code": ""
+          },
+          "schema": []
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "sla-err-note",
+      "name": "99 Error | Nota SLA",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1310,
+        150
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "csLvqYKmih4zi4Fq",
+          "cachedResultName": "Luenio Error Log"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "severity": "={{ 'secondary' }}",
+            "source": "={{ 'continuation' }}",
+            "conversation_id": "={{ String($json.conversation_id || $('03 SLA | Reclamar alerta').first().json.conversation_id || '') }}",
+            "workflow_id": "={{ 'HANDOFF_SLA_WORKFLOW' }}",
+            "workflow_name": "={{ 'Luenio LUNA | Vigilar SLA handoff' }}",
+            "execution_id": "={{ String($execution.id || '') }}",
+            "execution_url": "={{ '' }}",
+            "last_node": "={{ '05 Chatwoot | Alerta privada SLA' }}",
+            "error_message": "={{ String($json.error?.message || $json.message || 'Error secundario SLA handoff').slice(0,1000) }}",
+            "mode": "={{ String($execution.mode || '') }}"
+          },
+          "schema": [
+            {
+              "id": "severity",
+              "displayName": "severity",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "last_node",
+              "displayName": "last_node",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "type": "string",
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "sla-err-label",
+      "name": "99 Error | Etiqueta SLA",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1580,
+        150
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "csLvqYKmih4zi4Fq",
+          "cachedResultName": "Luenio Error Log"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "severity": "={{ 'secondary' }}",
+            "source": "={{ 'continuation' }}",
+            "conversation_id": "={{ String($json.conversation_id || $('03 SLA | Reclamar alerta').first().json.conversation_id || '') }}",
+            "workflow_id": "={{ 'HANDOFF_SLA_WORKFLOW' }}",
+            "workflow_name": "={{ 'Luenio LUNA | Vigilar SLA handoff' }}",
+            "execution_id": "={{ String($execution.id || '') }}",
+            "execution_url": "={{ '' }}",
+            "last_node": "={{ '06 Chatwoot | Etiqueta SLA' }}",
+            "error_message": "={{ String($json.error?.message || $json.message || 'Error secundario SLA handoff').slice(0,1000) }}",
+            "mode": "={{ String($execution.mode || '') }}"
+          },
+          "schema": [
+            {
+              "id": "severity",
+              "displayName": "severity",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "last_node",
+              "displayName": "last_node",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "type": "string",
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "01 Cada 5 min": {
+      "main": [
+        [
+          {
+            "node": "02 SLA | Leer handoffs pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 SLA | Leer handoffs pendientes": {
+      "main": [
+        [
+          {
+            "node": "03 SLA | Seleccionar vencidos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 SLA | Seleccionar vencidos": {
+      "main": [
+        [
+          {
+            "node": "04 SLA | Reclamar alerta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 SLA | Reclamar alerta": {
+      "main": [
+        [
+          {
+            "node": "05 Chatwoot | Alerta privada SLA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 Chatwoot | Alerta privada SLA": {
+      "main": [
+        [
+          {
+            "node": "06 Chatwoot | Etiqueta SLA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99 Error | Nota SLA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 Chatwoot | Etiqueta SLA": {
+      "main": [
+        [
+          {
+            "node": "07 SLA | Marcar alerta enviada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "99 Error | Etiqueta SLA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": {
+    "node:01 Cada 5 min": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  }
+}

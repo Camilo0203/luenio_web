@@ -1,0 +1,62 @@
+{
+  "name": "Luenio Insights | Inicializar hoja",
+  "active": false,
+  "nodes": [
+    {
+      "id": "f739785a-58a5-47a4-bd15-eec37f2a9925",
+      "name": "00 Manual initialize sheet",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {},
+      "executeOnce": false
+    },
+    {
+      "id": "80761de6-841c-4459-b16b-8facf53a82c7",
+      "name": "01 Create Insights LUNA sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "create",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI"
+        },
+        "title": "Insights LUNA",
+        "options": {
+          "hidden": false,
+          "rightToLeft": false,
+          "index": 0
+        }
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual initialize sheet": {
+      "main": [
+        [
+          {
+            "node": "01 Create Insights LUNA sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

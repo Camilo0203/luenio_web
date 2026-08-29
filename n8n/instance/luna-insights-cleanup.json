@@ -1,0 +1,93 @@
+{
+  "name": "LUNA Insights Cleanup",
+  "active": false,
+  "nodes": [
+    {
+      "id": "7b3fa446-7cf7-429d-8260-61fa3aa7a488",
+      "name": "00 Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ba654258-70c4-4cda-a882-a53210e22fe2",
+      "name": "01 Delete synthetic insight event",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "o5XXsP9RnG9fIbKg"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "probe-conversation|message-1|turn_processed"
+            }
+          ]
+        },
+        "options": {
+          "dryRun": false
+        }
+      }
+    },
+    {
+      "id": "6ca9759c-3b9d-4a38-8097-e7a66de9df86",
+      "name": "02 Return cleanup result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{json:{ok:true,cleanup:'insights_probe_event'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual run": {
+      "main": [
+        [
+          {
+            "node": "01 Delete synthetic insight event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Delete synthetic insight event": {
+      "main": [
+        [
+          {
+            "node": "02 Return cleanup result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

@@ -1,0 +1,57 @@
+{
+  "name": "LUNA Error Handling STAGING Test",
+  "active": false,
+  "nodes": [
+    {
+      "id": "37b2d766-e796-4931-9065-2e5327681bb3",
+      "name": "01 Staging | Error Test Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luna-error-staging-20260820",
+        "responseMode": "onReceived",
+        "noResponseBody": false
+      },
+      "webhookId": "35362984-3489-4c43-9e4c-c94afc266b70"
+    },
+    {
+      "id": "8b286d62-b54e-451f-8cfd-9ca27dec79a9",
+      "name": "02 Staging | Provocar fallo controlado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "throw new Error('LUNA_STAGING_CONTROLLED_FAILURE_2026-08-20');"
+      }
+    }
+  ],
+  "connections": {
+    "01 Staging | Error Test Webhook": {
+      "main": [
+        [
+          {
+            "node": "02 Staging | Provocar fallo controlado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

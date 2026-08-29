@@ -1,0 +1,146 @@
+{
+  "name": "Luenio LUNA | Generar propuesta PDF",
+  "active": false,
+  "nodes": [
+    {
+      "id": "pdf-trigger",
+      "name": "01 Entrada | Solicitud aprobada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "request_json",
+              "type": "string"
+            },
+            {
+              "name": "environment",
+              "type": "string"
+            },
+            {
+              "name": "source_hash",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "pdf-html",
+      "name": "02 PDF | Congelar y renderizar HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        290,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const PROPOSAL_STATUSES = new Set(['none','requested','rendering','pending_approval','approved','rejected','sending','partially_sent','sent','failed','blocked_after_send_failure']);\nconst APPOINTMENT_STATUSES = new Set(['requested','availability_checked','pending_confirmation','pending_approval','confirmed','cancelled','expired','failed']);\n\nfunction text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\nfunction stableHash(value) {\n  let h1 = 0xdeadbeef ^ text(value).length;\n  let h2 = 0x41c6ce57 ^ text(value).length;\n  for (let index = 0; index < text(value).length; index += 1) {\n    const code = text(value).charCodeAt(index);\n    h1 = Math.imul(h1 ^ code, 2654435761);\n    h2 = Math.imul(h2 ^ code, 1597334677);\n  }\n  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);\n  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);\n  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');\n}\n\nfunction sanitizeProposalSnapshot(context, catalog) {\n  const allowedContext = ['business_type','project_goal','pain_point','current_process','impact','desired_outcome','discovery_urgency','recommended_solution','selected_solution','solution_confirmed','conversation_summary'];\n  const snapshot = { schema_version: '3.0', context: {}, catalog: { version: text(catalog && catalog.version), packages: {} } };\n  for (const key of allowedContext) snapshot.context[key] = typeof context?.[key] === 'boolean' ? context[key] : text(context?.[key]);\n  const packages = catalog?.catalog_packages || {};\n  for (const key of ['PKG-ESSENTIAL','PKG-PROFESSIONAL']) {\n    const row = packages[key] || {};\n    snapshot.catalog.packages[key] = { name: text(row.name), price_project: Number(row.price_project || 0), price_monthly: Number(row.price_monthly || 0) };\n  }\n  return snapshot;\n}\n\nfunction buildProposalRequest(input) {\n  const context = input?.context || {};\n  const catalog = input?.catalog || {};\n  const errors = [];\n  if (!bool(context.discovery_done)) errors.push('discovery_incomplete');\n  if (!bool(context.solution_confirmed)) errors.push('solution_unconfirmed');\n  if (!bool(context.proposal_requested)) errors.push('proposal_not_requested');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  if (catalog.catalog_ready !== true) errors.push('catalog_unavailable');\n  const snapshot = sanitizeProposalSnapshot(context, catalog);\n  const snapshot_json = JSON.stringify(snapshot);\n  const requestKey = `${text(context.conversation_id)}|${text(input.message_id)}|proposal`;\n  return {\n    ok: errors.length === 0,\n    proposal_id: `prop_${stableHash(requestKey)}`,\n    request_key: requestKey,\n    conversation_id: text(context.conversation_id),\n    message_id: text(input.message_id),\n    status: errors.length ? 'failed' : 'requested',\n    snapshot_json,\n    snapshot_hash: stableHash(snapshot_json),\n    recipient_email_hash: '',\n    catalog_version: text(catalog.version),\n    proposal_version: 1,\n    requested_at: text(input.now || new Date().toISOString()),\n    updated_at: text(input.now || new Date().toISOString()),\n    environment: text(input.environment || 'staging'),\n    source_version: text(input.source_version || '3.0'),\n    last_error_code: errors.join(','),\n  };\n}\n\nfunction parseApprovalCommand(input) {\n  const body = text(input?.content || input?.message);\n  const privateNote = bool(input?.private_note || input?.private);\n  const human = bool(input?.human_sender) && !bool(input?.sender_is_bot);\n  const hmac = bool(input?.hmac_valid);\n  const match = body.match(/^\\/luna\\s+(aprobar|rechazar)\\s+(propuesta|cita)\\s+([a-z0-9_-]+)(?:\\s+(.+))?$/i);\n  if (!hmac) return { ok: false, reason_code: 'INVALID_SIGNATURE' };\n  if (!privateNote) return { ok: false, reason_code: 'COMMAND_NOT_PRIVATE' };\n  if (!human) return { ok: false, reason_code: 'COMMAND_SENDER_NOT_HUMAN' };\n  if (!match) return { ok: false, reason_code: 'COMMAND_INVALID' };\n  const action = match[1].toLowerCase();\n  const request_type = match[2].toLowerCase() === 'propuesta' ? 'proposal' : 'appointment';\n  if (action === 'rechazar' && !text(match[4])) return { ok: false, reason_code: 'REJECTION_REASON_REQUIRED' };\n  return { ok: true, action: action === 'aprobar' ? 'approve' : 'reject', request_type, request_id: match[3], reason: text(match[4]), reason_code: 'APPROVAL_COMMAND_VALID' };\n}\n\nfunction validateMedia(input) {\n  const mime = text(input?.mime_type).toLowerCase();\n  const bytes = Number(input?.size_bytes || 0);\n  const duration = Number(input?.duration_seconds || 0);\n  const audio = ['audio/ogg','audio/mpeg','audio/mp4','audio/webm'].includes(mime);\n  const image = ['image/jpeg','image/png','image/webp'].includes(mime);\n  if (!audio && !image) return { ok: false, kind: 'unsupported', reason_code: 'MEDIA_MIME_UNSUPPORTED' };\n  if (audio && bytes > 10 * 1024 * 1024) return { ok: false, kind: 'audio', reason_code: 'MEDIA_TOO_LARGE' };\n  if (audio && duration > 300) return { ok: false, kind: 'audio', reason_code: 'MEDIA_TOO_LONG' };\n  if (image && bytes > 8 * 1024 * 1024) return { ok: false, kind: 'image', reason_code: 'MEDIA_TOO_LARGE' };\n  return { ok: true, kind: audio ? 'audio' : 'image', reason_code: 'MEDIA_ACCEPTED' };\n}\n\nfunction validateAppointment(input) {\n  const context = input?.context || {};\n  const status = text(input?.status || 'requested');\n  const errors = [];\n  if (!APPOINTMENT_STATUSES.has(status)) errors.push('appointment_status_invalid');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  if (!bool(input?.consent_explicit)) errors.push('consent_required');\n  if (text(input?.timezone || 'America/Bogota') !== 'America/Bogota') errors.push('timezone_invalid');\n  return { ok: errors.length === 0, status: errors.length ? 'failed' : status, duration_minutes: 30, buffer_minutes: 15, timezone: 'America/Bogota', reason_code: errors.join(',') || 'APPOINTMENT_VALID' };\n}\n\nfunction transitionProposal(current, event) {\n  const status = PROPOSAL_STATUSES.has(text(current)) ? text(current) : 'none';\n  const transitions = {\n    none: { request: 'requested' }, requested: { render: 'rendering', fail: 'failed' }, rendering: { rendered: 'pending_approval', fail: 'failed' },\n    pending_approval: { approve: 'approved', reject: 'rejected' }, approved: { send: 'sending' }, sending: { partial: 'partially_sent', delivered: 'sent', fail_after_send: 'blocked_after_send_failure', fail: 'failed' },\n    partially_sent: { delivered: 'sent', fail_after_send: 'blocked_after_send_failure' }, rejected: {}, sent: {}, failed: {}, blocked_after_send_failure: {},\n  };\n  const next = transitions[status]?.[text(event)];\n  return { ok: Boolean(next), previous_status: status, status: next || status, proposal_sent_this_turn: next === 'sent' && status !== 'sent', reason_code: next ? 'PROPOSAL_TRANSITION_OK' : 'PROPOSAL_TRANSITION_BLOCKED' };\n}\n\n\nconst input=$input.first()?.json||{};\nlet request={}; try{request=JSON.parse(String(input.request_json||'{}'));}catch{throw new Error('PROPOSAL_REQUEST_JSON_INVALID');}\nif(String(request.status||'')!=='approved') throw new Error('PROPOSAL_NOT_APPROVED');\nlet snapshot={}; try{snapshot=JSON.parse(String(request.snapshot_json||'{}'));}catch{throw new Error('PROPOSAL_SNAPSHOT_INVALID');}\nif(stableHash(JSON.stringify(snapshot))!==String(request.snapshot_hash||'')) throw new Error('PROPOSAL_SNAPSHOT_HASH_MISMATCH');\nconst esc=(v)=>String(v==null?'':v).replace(/[&<>\"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]));\nconst ctx=snapshot.context||{}; const pkgs=snapshot.catalog?.packages||{};\nconst cop=(v)=>new Intl.NumberFormat('es-CO',{maximumFractionDigits:0}).format(Number(v||0));\nconst price=(p)=>'$'+cop(p.price_project)+(Number(p.price_monthly||0)>0?' + $'+cop(p.price_monthly)+'/mes':'');\nconst issued=new Date(); const expires=new Date(issued.getTime()+15*86400000);\nconst fmt=(d)=>new Intl.DateTimeFormat('es-CO',{timeZone:'America/Bogota',year:'numeric',month:'long',day:'numeric'}).format(d);\nconst html='<!doctype html><html lang=\"es\"><head><meta charset=\"utf-8\"><style>'+\n'@page{size:A4;margin:18mm}body{font-family:Arial,sans-serif;color:#132033;font-size:12px;line-height:1.5}.brand{font-size:30px;font-weight:800;color:#1769e0}.muted{color:#607089}.hero{padding:24px;background:#eef5ff;border-radius:16px;margin:18px 0}h1{font-size:24px;margin:8px 0}h2{font-size:16px;margin-top:22px}.card{border:1px solid #dce6f2;border-radius:12px;padding:16px;margin:10px 0}.price{font-size:18px;font-weight:700}.footer{margin-top:28px;border-top:1px solid #dce6f2;padding-top:12px;color:#607089;font-size:10px}</style></head><body>'+\n'<div class=\"brand\">Luenio</div><div class=\"muted\">Propuesta comercial preliminar · '+esc(request.proposal_id)+'</div>'+\n'<div class=\"hero\"><h1>Una solución digital enfocada en tu operación</h1><p><b>Negocio:</b> '+esc(ctx.business_type)+'</p><p><b>Objetivo:</b> '+esc(ctx.project_goal)+'</p><p><b>Situación:</b> '+esc(ctx.conversation_summary||ctx.pain_point)+'</p></div>'+\n'<h2>Solución confirmada</h2><p>'+esc(ctx.selected_solution==='pack_web_chatbot'?'Pack catálogo web + chatbot para WhatsApp':ctx.selected_solution)+'</p>'+\n'<h2>Opciones del catálogo</h2>'+\nObject.values(pkgs).map((p)=>'<div class=\"card\"><b>'+esc(p.name)+'</b><div class=\"price\">Desde '+esc(price(p))+'</div></div>').join('')+\n'<h2>Alcance y próximos pasos</h2><ul><li>Validación final del alcance con un asesor.</li><li>Integraciones y automatizaciones se confirman por escrito.</li><li>Dominio y servicios de terceros se cotizan según disponibilidad.</li></ul>'+\n'<p><b>Vigencia:</b> 15 días, hasta '+esc(fmt(expires))+'.</p><p><b>Versión de catálogo:</b> '+esc(snapshot.catalog?.version||'vigente al emitir')+'.</p>'+\n'<div class=\"footer\">Documento informativo, no contractual. El alcance final, contrato y pago requieren aprobación humana.</div></body></html>';\nreturn [{json:{proposal_id:String(request.proposal_id||''),snapshot_hash:String(request.snapshot_hash||''),status:'rendering',environment:String(input.environment||'staging'),source_hash:String(input.source_hash||'')},binary:{html:{data:Buffer.from(html,'utf8').toString('base64'),mimeType:'text/html',fileName:'index.html',fileExtension:'html'}}}];"
+      }
+    },
+    {
+      "id": "pdf-gotenberg",
+      "name": "03 PDF | Convertir con Gotenberg privado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.5,
+      "position": [
+        590,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "parameters": {
+        "method": "POST",
+        "url": "http://gotenberg:3000/forms/chromium/convert/html",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "files",
+              "inputDataFieldName": "html"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000,
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "proposal_pdf"
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "pdf-output",
+      "name": "04 Salida | PDF temporal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        890,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const source=$('02 PDF | Congelar y renderizar HTML').first().json||{}; const item=$input.first()||{}; if(!item.binary?.proposal_pdf) throw new Error('GOTENBERG_PDF_MISSING'); return [{json:{proposal_id:String(source.proposal_id||''),snapshot_hash:String(source.snapshot_hash||''),status:'pending_approval',binary_property:'proposal_pdf',persist_binary:false,environment:String(source.environment||'staging'),source_hash:String(source.source_hash||'')},binary:{proposal_pdf:item.binary.proposal_pdf}}];"
+      }
+    }
+  ],
+  "connections": {
+    "01 Entrada | Solicitud aprobada": {
+      "main": [
+        [
+          {
+            "node": "02 PDF | Congelar y renderizar HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 PDF | Congelar y renderizar HTML": {
+      "main": [
+        [
+          {
+            "node": "03 PDF | Convertir con Gotenberg privado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 PDF | Convertir con Gotenberg privado": {
+      "main": [
+        [
+          {
+            "node": "04 Salida | PDF temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

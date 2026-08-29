@@ -1,0 +1,51 @@
+{
+  "name": "Luenio Advanced Waves [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "395af66e-9531-4eee-9d7c-1b6aed7e040e",
+      "name": "00 Manual staging",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "e760e79e-7bbc-42ff-8faf-bd55d0ee2dfb",
+      "name": "01 Advanced waves contract",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// Contrato determinista para las olas avanzadas de LUNA.\n// Se ejecuta en un workflow staging sin credenciales ni servicios externos.\n// No procesa ni persiste texto completo, binarios, PII o transcripciones.\n\nconst input = $json || {};\nconst feature = String(input.feature || 'media|calendar|pdf|multichannel|followup').trim().toLowerCase();\nconst allowed = new Set(['media', 'calendar', 'pdf', 'multichannel', 'followup']);\nconst validFeature = allowed.has(feature);\nconst bool = (v) => v === true || v === 1 || String(v || '').toLowerCase() === 'true';\nconst hasExplicitConsent = bool(input.consent) || /\\b(acepto|confirmo|sí|si|autoriza|autorizo)\\b/i.test(String(input.text || ''));\nconst result = {\n  schema_version: '1.0',\n  feature: validFeature ? feature : 'unknown',\n  active: false,\n  staging_only: true,\n  external_call: false,\n  pii_persisted: false,\n  status: 'blocked_until_staging_approval',\n  reason_code: validFeature ? 'STAGING_CONTRACT_READY' : 'FEATURE_NOT_ALLOWED',\n  fallback: 'Puedo ayudarte mejor si me escribes qué necesitas resolver y a qué se dedica tu negocio.',\n};\n\nif (feature === 'media') {\n  const mime = String(input.mime_type || '').toLowerCase();\n  const supported = /^(audio|image)\\//.test(mime);\n  result.status = supported ? 'staging_media_contract_ready' : 'fallback_required';\n  result.reason_code = supported ? 'MEDIA_MIME_ACCEPTED_NO_PROVIDER_CALL' : 'MEDIA_MIME_UNSUPPORTED';\n}\nif (feature === 'calendar') {\n  result.status = hasExplicitConsent ? 'pending_confirmation' : 'consent_required';\n  result.appointment_status = hasExplicitConsent ? 'requested' : 'none';\n  result.appointment_timezone = 'America/Bogota';\n  result.reason_code = hasExplicitConsent ? 'CALENDAR_REQUEST_STAGED' : 'CALENDAR_CONSENT_REQUIRED';\n}\nif (feature === 'pdf') {\n  const ready = bool(input.discovery_done) && bool(input.solution_confirmed) && bool(input.catalog_ready) && bool(input.proposal_requested);\n  result.status = ready ? 'staging_pdf_contract_ready' : 'preconditions_required';\n  result.reason_code = ready ? 'PDF_PRECONDITIONS_MET_NO_FILE_CREATED' : 'PDF_PRECONDITIONS_MISSING';\n}\nif (feature === 'multichannel') {\n  const channel = String(input.channel || '').toLowerCase();\n  result.channel = channel || 'whatsapp';\n  result.status = channel === 'whatsapp' ? 'whatsapp_adapter_ready' : 'adapter_not_active';\n  result.reason_code = channel === 'whatsapp' ? 'WHATSAPP_ONLY_ACTIVE_CHANNEL' : 'CHANNEL_DISABLED';\n}\nif (feature === 'followup') {\n  result.active = false;\n  result.dry_run = true;\n  result.max_per_run = 3;\n  result.status = 'dry_run_only';\n  result.reason_code = 'FOLLOWUP_REAL_SEND_BLOCKED';\n}\n\nreturn [{ json: result }];\n\r\n"
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual staging": {
+      "main": [
+        [
+          {
+            "node": "01 Advanced waves contract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

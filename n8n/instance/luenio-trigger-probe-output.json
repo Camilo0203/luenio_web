@@ -1,0 +1,50 @@
+{
+  "name": "Luenio Trigger Probe Output",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b1fd56d3-098a-4b89-91fa-904f465cf04c",
+      "name": "00 Manual trigger with output",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "303b5f6d-800c-4e65-8b89-ef27908646e7",
+      "name": "01 Finish",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return [{json:{ok:true}}]"
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual trigger with output": {
+      "main": [
+        [
+          {
+            "node": "01 Finish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

@@ -1,0 +1,761 @@
+{
+  "name": "Luenio LUNA | Orquestar turno v3 [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "orch-webhook",
+      "name": "00 Trigger | Turno staging",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luna-v3-staging-8f3c1d7b",
+        "responseMode": "responseNode",
+        "options": {},
+        "authentication": "headerAuth"
+      },
+      "webhookId": "ce74668c-ff1b-41b1-8e05-d0f1c3f946ea"
+    },
+    {
+      "id": "orch-normalize",
+      "name": "01 Sistema | Normalizar fixture",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const src=$input.first()?.json||{};const body=src.body&&typeof src.body==='object'?src.body:src;const env=String(body.environment||'staging');if(!['staging','test'].includes(env))throw new Error('STAGING_ENVIRONMENT_REQUIRED');const parse=(v,fallback={})=>{if(v&&typeof v==='object')return v;try{return JSON.parse(String(v||''))}catch{return fallback}};const context=parse(body.context_json||body.context,{});const conversationId=String(body.conversation_id||context.conversation_id||'staging-conversation');if(!context.conversation_id)context.conversation_id=conversationId;const catalog=parse(body.catalog_json||body.catalog,{catalog_ready:false,catalog_packages:{},price_map:{}});return [{json:{user_message:String(body.user_message||body.message||''),message_type:String(body.message_type||'text'),conversation_id:conversationId,message_id:String(body.message_id||''),context_json:JSON.stringify(context),catalog_json:JSON.stringify(catalog),source_hash:'f83952787b6022f867e615dba318efa3a137d5773e2e1da1cdbc4f310b48a913',environment:env}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "orch-interpret",
+      "name": "02 LUNA | Interpretar mensaje",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        500,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 500,
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "JAtiEwJwK0gVfGhe",
+          "cachedResultName": "Luenio LUNA | Interpretar mensaje"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_message": "={{ $('01 Sistema | Normalizar fixture').first().json.user_message }}",
+            "message_type": "={{ $('01 Sistema | Normalizar fixture').first().json.message_type }}",
+            "context_json": "={{ $('01 Sistema | Normalizar fixture').first().json.context_json }}",
+            "source_hash": "={{ $('01 Sistema | Normalizar fixture').first().json.source_hash }}",
+            "environment": "={{ $('01 Sistema | Normalizar fixture').first().json.environment }}"
+          },
+          "schema": [
+            {
+              "id": "user_message",
+              "displayName": "user_message",
+              "type": "string"
+            },
+            {
+              "id": "message_type",
+              "displayName": "message_type",
+              "type": "string"
+            },
+            {
+              "id": "context_json",
+              "displayName": "context_json",
+              "type": "string"
+            },
+            {
+              "id": "source_hash",
+              "displayName": "source_hash",
+              "type": "string"
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "orch-kb-input",
+      "name": "03 Sistema | Preparar consulta aprobada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const base=$('01 Sistema | Normalizar fixture').first().json||{};const interpretation=$input.first()?.json||{};return [{json:{intent:String(interpretation.intent||''),objection_code:String(interpretation.intent||'').startsWith('objection_')?String(interpretation.intent).replace(/^objection_/,''):'',user_message:String(base.user_message||''),catalog_ready:Boolean((()=>{try{return JSON.parse(base.catalog_json||'{}').catalog_ready===true}catch{return false}})()),source_version:'3.0',environment:String(base.environment||'staging')}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "orch-kb",
+      "name": "04 LUNA | Consultar KB y objeciones",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1020,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 500,
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "iO7jw31alKTZH9ee",
+          "cachedResultName": "Luenio LUNA | Consultar KB y objeciones"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "intent": "={{ $json.intent }}",
+            "objection_code": "={{ $json.objection_code }}",
+            "user_message": "={{ $json.user_message }}",
+            "catalog_ready": "={{ $json.catalog_ready }}",
+            "source_version": "={{ $json.source_version }}",
+            "environment": "={{ $json.environment }}"
+          },
+          "schema": [
+            {
+              "id": "intent",
+              "displayName": "intent",
+              "type": "string"
+            },
+            {
+              "id": "objection_code",
+              "displayName": "objection_code",
+              "type": "string"
+            },
+            {
+              "id": "user_message",
+              "displayName": "user_message",
+              "type": "string"
+            },
+            {
+              "id": "catalog_ready",
+              "displayName": "catalog_ready",
+              "type": "boolean"
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "type": "string"
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "orch-decision-input",
+      "name": "05 Sistema | Preparar decisión",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const base=$('01 Sistema | Normalizar fixture').first().json||{};const interpretation=$('02 LUNA | Interpretar mensaje').first().json||{};const approved=$input.first()?.json||{};return [{json:{context_json:String(base.context_json||'{}'),interpretation_json:JSON.stringify(interpretation),catalog_json:String(base.catalog_json||'{}'),approved_content_json:JSON.stringify(approved),source_hash:String(base.source_hash||''),environment:String(base.environment||'staging')}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "orch-decide",
+      "name": "06 LUNA | Decidir turno",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1540,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ASS5sfyqGKQTPyy9",
+          "cachedResultName": "Luenio LUNA | Decidir turno"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "context_json": "={{ $json.context_json }}",
+            "interpretation_json": "={{ $json.interpretation_json }}",
+            "catalog_json": "={{ $json.catalog_json }}",
+            "approved_content_json": "={{ $json.approved_content_json }}",
+            "source_hash": "={{ $json.source_hash }}",
+            "environment": "={{ $json.environment }}"
+          },
+          "schema": [
+            {
+              "id": "context_json",
+              "displayName": "context_json",
+              "type": "string"
+            },
+            {
+              "id": "interpretation_json",
+              "displayName": "interpretation_json",
+              "type": "string"
+            },
+            {
+              "id": "catalog_json",
+              "displayName": "catalog_json",
+              "type": "string"
+            },
+            {
+              "id": "approved_content_json",
+              "displayName": "approved_content_json",
+              "type": "string"
+            },
+            {
+              "id": "source_hash",
+              "displayName": "source_hash",
+              "type": "string"
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "orch-crm-input",
+      "name": "07 Sistema | Preparar CRM dry-run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const base=$('01 Sistema | Normalizar fixture').first().json||{};const decision=$('06 LUNA | Decidir turno').first().json||{};return [{json:{crm_json:JSON.stringify(decision.crm_updates||{}),history_json:'[]',conversation_id:String(base.conversation_id||''),phone:'',name:'',email:'',dry_run:true,source_hash:String(base.source_hash||''),environment:String(base.environment||'staging')}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "orch-crm",
+      "name": "08 LUNA | Validar persistencia CRM",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2060,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 500,
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "cH15aZjmkstGEM79",
+          "cachedResultName": "Luenio LUNA | Persistir CRM"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "crm_json": "={{ $json.crm_json }}",
+            "history_json": "={{ $json.history_json }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "phone": "={{ $json.phone }}",
+            "name": "={{ $json.name }}",
+            "email": "={{ $json.email }}",
+            "dry_run": "={{ $json.dry_run }}",
+            "source_hash": "={{ $json.source_hash }}",
+            "environment": "={{ $json.environment }}"
+          },
+          "schema": [
+            {
+              "id": "crm_json",
+              "displayName": "crm_json",
+              "type": "string"
+            },
+            {
+              "id": "history_json",
+              "displayName": "history_json",
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string"
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "type": "string"
+            },
+            {
+              "id": "name",
+              "displayName": "name",
+              "type": "string"
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "type": "string"
+            },
+            {
+              "id": "dry_run",
+              "displayName": "dry_run",
+              "type": "boolean"
+            },
+            {
+              "id": "source_hash",
+              "displayName": "source_hash",
+              "type": "string"
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    },
+    {
+      "id": "orch-output",
+      "name": "09 Salida | Contrato turno v3",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2320,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const base=$('01 Sistema | Normalizar fixture').first().json||{};const interpretation=$('02 LUNA | Interpretar mensaje').first().json||{};const approved=$('04 LUNA | Consultar KB y objeciones').first().json||{};const decision=$('06 LUNA | Decidir turno').first().json||{};const crm=$input.first()?.json||{};return [{json:{ok:true,environment:base.environment,source_hash:base.source_hash,interpretation:{intent:interpretation.intent,confidence:interpretation.confidence,extracted_fields:interpretation.extracted_fields,ambiguous_fields:interpretation.ambiguous_fields,reason_code:interpretation.reason_code},approved_content:{found:Boolean(approved.found),source:String(approved.source||''),key:String(approved.key||''),reason_code:String(approved.reason_code||'')},decision:{reply:String(decision.reply||''),next_question_code:String(decision.next_question_code||''),crm_updates:decision.crm_updates||{},action_request:decision.action_request||{type:'none',payload:{}},reason_code:String(decision.reason_code||'')},crm_validation:{ok:Boolean(crm.ok),status:String(crm.status||''),schema_version:String(crm.schema_version||'')}}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "b633f8f0-91de-40be-9385-e9caf84c81e9",
+      "name": "10 Respuesta | Éxito staging",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2580,
+        0
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 200
+        }
+      }
+    },
+    {
+      "id": "2fc8fce4-68a6-4c92-b465-d5456bbd35ef",
+      "name": "90 Error | Respuesta segura staging",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        2060,
+        320
+      ],
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ ({ ok: false, environment: 'staging', error: 'internal_error', message: 'La evaluación staging no pudo completar el turno.', reason_code: 'staging_workflow_error', execution_id: String($execution.id || '') }) }}",
+        "includeOtherFields": false,
+        "options": {}
+      }
+    },
+    {
+      "id": "f3146a61-84c3-49ac-a679-6a088bffdfec",
+      "name": "91 Respuesta | Error staging",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2320,
+        320
+      ],
+      "parameters": {
+        "respondWith": "firstIncomingItem",
+        "options": {
+          "responseCode": 500
+        }
+      }
+    },
+    {
+      "id": "8b7293a4-b5c6-4def-9172-8d9e0f1a2b3c",
+      "name": "06a Sistema | Preparar acción staging",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1800,
+        -180
+      ],
+      "parameters": {
+        "jsCode": "const base = $('01 Sistema | Normalizar fixture').first()?.json || {};\nconst decision = $('06 LUNA | Decidir turno').first()?.json || {};\nreturn [{json:{\n  action_request_json: JSON.stringify(decision.action_request || {type:'none',payload:{}}),\n  context_json: JSON.stringify(decision.crm_updates || {}),\n  catalog_json: String(base.catalog_json || '{}'),\n  conversation_id: String(base.conversation_id || ''),\n  message_id: String(base.message_id || ''),\n  occurred_at: new Date().toISOString(),\n  environment: String(base.environment || 'staging'),\n  source_hash: String(base.source_hash || '')\n}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "9c83a4b5-c6d7-4ef0-a283-9e0f1a2b3c4d",
+      "name": "06b LUNA | Registrar acción operativa",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        2060,
+        -180
+      ],
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "veHhGXM1jFaHVkTz",
+          "cachedResultName": "Luenio LUNA | Registrar acción operativa"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "action_request_json": "={{ $json.action_request_json }}",
+            "context_json": "={{ $json.context_json }}",
+            "catalog_json": "={{ $json.catalog_json }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "message_id": "={{ $json.message_id }}",
+            "occurred_at": "={{ $json.occurred_at }}",
+            "environment": "={{ $json.environment }}",
+            "source_hash": "={{ $json.source_hash }}"
+          },
+          "schema": [
+            {
+              "id": "action_request_json",
+              "displayName": "action_request_json",
+              "type": "string"
+            },
+            {
+              "id": "context_json",
+              "displayName": "context_json",
+              "type": "string"
+            },
+            {
+              "id": "catalog_json",
+              "displayName": "catalog_json",
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string"
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "type": "string"
+            },
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "type": "string"
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "type": "string"
+            },
+            {
+              "id": "source_hash",
+              "displayName": "source_hash",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "00 Trigger | Turno staging": {
+      "main": [
+        [
+          {
+            "node": "01 Sistema | Normalizar fixture",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Sistema | Normalizar fixture": {
+      "main": [
+        [
+          {
+            "node": "02 LUNA | Interpretar mensaje",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 LUNA | Interpretar mensaje": {
+      "main": [
+        [
+          {
+            "node": "03 Sistema | Preparar consulta aprobada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Sistema | Preparar consulta aprobada": {
+      "main": [
+        [
+          {
+            "node": "04 LUNA | Consultar KB y objeciones",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 LUNA | Consultar KB y objeciones": {
+      "main": [
+        [
+          {
+            "node": "05 Sistema | Preparar decisión",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 Sistema | Preparar decisión": {
+      "main": [
+        [
+          {
+            "node": "06 LUNA | Decidir turno",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 LUNA | Decidir turno": {
+      "main": [
+        [
+          {
+            "node": "06a Sistema | Preparar acción staging",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 Sistema | Preparar CRM dry-run": {
+      "main": [
+        [
+          {
+            "node": "08 LUNA | Validar persistencia CRM",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "08 LUNA | Validar persistencia CRM": {
+      "main": [
+        [
+          {
+            "node": "09 Salida | Contrato turno v3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "09 Salida | Contrato turno v3": {
+      "main": [
+        [
+          {
+            "node": "10 Respuesta | Éxito staging",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "90 Error | Respuesta segura staging": {
+      "main": [
+        [
+          {
+            "node": "91 Respuesta | Error staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06a Sistema | Preparar acción staging": {
+      "main": [
+        [
+          {
+            "node": "06b LUNA | Registrar acción operativa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06b LUNA | Registrar acción operativa": {
+      "main": [
+        [
+          {
+            "node": "07 Sistema | Preparar CRM dry-run",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "90 Error | Respuesta segura staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

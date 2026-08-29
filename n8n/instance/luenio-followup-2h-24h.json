@@ -1,0 +1,1216 @@
+{
+  "name": "Luenio Followup 2h+24h",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "7e2ed162-2430-4c64-8be6-f6fc6d02d0b1",
+      "name": "01 Cada 20 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1568,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "mode": "list",
+          "cachedResultName": "Luenio Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit#gid=0"
+        },
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        },
+        "resource": "sheet",
+        "operation": "read"
+      },
+      "id": "23a1d48a-ea21-40e0-9224-794194859972",
+      "name": "02 CRM | Leer todos los leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1344,
+        0
+      ],
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "onError": "stopWorkflow",
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "jsCode": "// LUNA Follow-up filter — Fase 3 (cap, dry-run, opt-out, proposal_sent)\n// Fuente: scripts/codes/followup_filter.js → se sincroniza al workflow FU\n\n// ========== CONFIG OPS (paquete C — activación segura) ==========\n// 1) Auditoría: DRY_RUN = true → no envía WhatsApp, solo lista en n8n\n// 2) Solo tu lead: primero revisar la salida sin enviar mensajes\n// 3) Producción controlada: DRY_RUN = false solo después de la aprobación operativa\nconst DRY_RUN = true;\nconst MAX_PER_RUN = 3;\nconst MAX_STALE_HOURS = 72; // nunca enviar seguimientos con más de 72h de atraso\nconst LUNA_SITE = 'https://luenio.com';\n// ================================================================\n\nfunction formatBogota(ms) {\n  const d = new Date(ms);\n  if (!Number.isFinite(d.getTime())) return '';\n  const parts = new Intl.DateTimeFormat('en-GB', {\n    timeZone: 'America/Bogota',\n    day: '2-digit',\n    month: '2-digit',\n    year: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    hour12: false,\n  }).formatToParts(d);\n  const g = (t) => parts.find((p) => p.type === t)?.value || '';\n  return g('day') + '/' + g('month') + '/' + g('year') + ' ' + g('hour') + ':' + g('minute');\n}\n\nfunction isFollowupSendWindow(d) {\n  try {\n    const fmt = new Intl.DateTimeFormat('en-US', {\n      timeZone: 'America/Bogota',\n      weekday: 'short',\n      hour: 'numeric',\n      minute: 'numeric',\n      hour12: false,\n    });\n    const parts = fmt.formatToParts(d || new Date());\n    const map = {};\n    for (const p of parts) map[p.type] = p.value;\n    const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };\n    const day = dayMap[String(map.weekday || '').toLowerCase()];\n    const hour = Number(map.hour === '24' ? 0 : map.hour);\n    const minute = Number(map.minute || 0);\n    if (![1, 2, 3, 4, 5].includes(day)) return false;\n    const mins = hour * 60 + minute;\n    return mins >= 8 * 60 && mins < 20 * 60;\n  } catch (e) {\n    return true;\n  }\n}\n\nfunction nextFollowupWindowIso(baseMs = Date.now()) {\n  const base = Number(baseMs) || Date.now();\n  for (let addH = 1; addH < 24 * 6; addH++) {\n    const t = new Date(base + addH * 3600 * 1000);\n    if (isFollowupSendWindow(t)) return t.toISOString();\n  }\n  return new Date(base + 12 * 3600 * 1000).toISOString();\n}\n\nfunction focusFrom(j) {\n  const selectedSolution = String(j.selected_solution || '').trim().toLowerCase();\n  const interestedService = String(j.interested_service || '').trim().toLowerCase();\n  const serviceContext = selectedSolution + ' ' + interestedService;\n  const explicitPack =\n    selectedSolution === 'pack_web_chatbot' ||\n    interestedService === 'pack' ||\n    /\\bpack\\b|web_catalogo.*chatbot|chatbot.*web_catalogo/i.test(serviceContext);\n  const explicitChatbot =\n    !explicitPack &&\n    (selectedSolution === 'chatbot_whatsapp_ia' ||\n      interestedService === 'chatbot' ||\n      /\\bchatbot\\b/i.test(serviceContext));\n  const explicitWeb =\n    !explicitPack &&\n    !explicitChatbot &&\n    (selectedSolution === 'web_catalogo' ||\n      interestedService === 'web' ||\n      /\\bweb_catalogo\\b/i.test(serviceContext));\n  if (explicitPack) return 'tu *pack web + chatbot*';\n  if (explicitChatbot) return 'tu *chatbot de WhatsApp*';\n  if (explicitWeb) return 'tu *web / catálogo*';\n\n  const blob = [j.business_type, j.interested_service, j.selected_solution, j.project_goal, j.conversation_summary, j.notes]\n    .map((x) => String(x || ''))\n    .join(' ');\n  if (/\\bpc\\b|pcs|computador|hardware|perif/i.test(blob)) return 'tu proyecto digital para venta de *PCs*';\n  if (/retail|tienda|ropa|cat[aá]logo/i.test(blob)) return 'tu proyecto para *tienda / retail*';\n  if (/inmobil|arriendo|apartament/i.test(blob)) return 'tu proyecto para *inmobiliaria*';\n  if (/restaurant|comida|men[uú]/i.test(blob)) return 'tu proyecto de *restaurante / local*';\n  if (/servicio|consultor|cl[ií]nica/i.test(blob)) return 'tu proyecto para *servicios*';\n  if (/web|catalogo|catálogo|p[aá]gina/i.test(blob)) return 'tu *web / catálogo*';\n  return 'tu proyecto digital con *Luenio*';\n}\n\nfunction isTruthy(v) {\n  return String(v || '').toLowerCase() === 'true' || v === true || v === 1 || v === '1';\n}\n\nfunction parseWhen(v) {\n  if (v === undefined || v === null || v === '') return NaN;\n  if (typeof v === 'number' && Number.isFinite(v)) {\n    if (v > 1e12) return v;\n    if (v > 1e9) return v * 1000;\n    if (v > 20000 && v < 100000) return Math.round((v - 25569) * 86400 * 1000);\n  }\n  const s = String(v).trim();\n  const m = s.match(/^(\\d{1,2})\\/(\\d{1,2})\\/(\\d{4})[ T]+(\\d{1,2}):(\\d{2})/);\n  if (m) {\n    const dd = Number(m[1]);\n    const mm = Number(m[2]);\n    const yyyy = Number(m[3]);\n    const hh = Number(m[4]);\n    const mi = Number(m[5]);\n    return Date.parse(\n      yyyy +\n        '-' +\n        String(mm).padStart(2, '0') +\n        '-' +\n        String(dd).padStart(2, '0') +\n        'T' +\n        String(hh).padStart(2, '0') +\n        ':' +\n        String(mi).padStart(2, '0') +\n        ':00-05:00'\n    );\n  }\n  const t = Date.parse(s);\n  return Number.isFinite(t) ? t : NaN;\n}\n\nfunction scoreOf(j) {\n  const n = Number(j.lead_score || 0);\n  if (Number.isFinite(n)) return n;\n  const st = String(j.lead_status || '').toLowerCase();\n  if (st === 'caliente') return 80;\n  if (st === 'tibio') return 50;\n  return 10;\n}\n\nfunction auditKey(conv, kind, scheduledMs) {\n  const scheduled_at = new Date(scheduledMs).toISOString();\n  return { scheduled_at, dedupe_key: [conv, kind, scheduled_at].join('|') };\n}\n\nconst now = Date.now();\nconst items = $input.all();\nconst due = [];\nconst sendWindowOpen = isFollowupSendWindow(new Date());\nconst inWindow = DRY_RUN || sendWindowOpen;\nlet staleSkipped = 0;\nconst isTooStale = (timestamp) => now - timestamp > MAX_STALE_HOURS * 3600 * 1000;\n\nfor (const item of items) {\n  const j = item.json || {};\n  const human = isTruthy(j.human_required);\n  const muted = isTruthy(j.bot_muted);\n  const optOut = isTruthy(j.opt_out);\n  // Compatibilidad de lectura: los valores antiguos se normalizan antes de\n  // aplicar las reglas; nunca se escriben de nuevo en CRM/auditoría.\n  const stageRaw = String(j.pipeline_stage || '').toLowerCase();\n  const stage =\n    stageRaw === 'handoff_humano'\n      ? 'handoff'\n      : stageRaw === 'consulta_lista_para_confirmar' || stageRaw === 'recomendacion_solucion'\n        ? 'propuesta'\n        : stageRaw;\n  const conv = String(j.conversation_id || '').trim();\n  if (!conv) continue;\n  if (human || muted || optOut || stage === 'handoff' || stage === 'handoff_humano') continue;\n  if (/handoff|asesor humano|opt_out|no molestar/i.test(String(j.notes || ''))) continue;\n\n  const name = String(j.name || '').trim();\n  const greet = name ? 'Hola ' + name : 'Hola';\n  const focus = focusFrom(j);\n  const row = j.row_number || j.rowNumber || '';\n  const email = String(j.email || '').trim();\n  const siteShared = isTruthy(j.site_shared);\n  let selectedForLead = false;\n  const hasProposal =\n    isTruthy(j.proposal_sent) ||\n    /propuesta|proposal_sent|borrador/i.test(\n      String(j.notes || '') +\n        ' ' +\n        String(j.conversation_summary || '') +\n        ' ' +\n        String(j.last_ai_response || '') +\n        ' ' +\n        stage\n    ) ||\n    stage === 'propuesta';\n\n  // --- 2h ---\n  const st2 = String(j.followup_2h_status || '').toLowerCase().trim();\n  const at2 = j.followup_2h_at || '';\n  const c2 = Number(j.followup_2h_count || 0) || 0;\n  if (st2 === 'pending' && at2 && c2 < 1) {\n    const t2 = parseWhen(at2);\n    if (Number.isFinite(t2) && t2 <= now && isTooStale(t2)) staleSkipped++;\n    if (Number.isFinite(t2) && t2 <= now && !isTooStale(t2) && inWindow) {\n      let msg2;\n      if (hasProposal) {\n        msg2 =\n          greet +\n          '.\\n\\n' +\n          'Te escribí con la *propuesta* de ' +\n          focus +\n          '.\\n\\n' +\n          'Cuando puedas: ¿la revisamos, la *ajustamos*, o prefieres un *asesor* (persona)?';\n      } else if (email.includes('@')) {\n        msg2 =\n          greet +\n          '.\\n\\n' +\n          'Soy *Luna* de *Luenio*.\\n\\n' +\n          'Seguimos con ' +\n          focus +\n          '.\\n\\n' +\n          '¿Te dejo o reenvío la *propuesta* por este chat?';\n      } else {\n        msg2 =\n          greet +\n          '.\\n\\n' +\n          'Soy *Luna* de *Luenio*.\\n\\n' +\n          '¿Seguimos con ' +\n          focus +\n          '?\\n\\n' +\n          '¿Me dejas tu *correo* o prefieres ver *precios*?';\n      }\n      due.push({\n        json: {\n          ...j,\n          conversation_id: conv,\n          row_number: row,\n          followup_kind: '2h',\n          ...auditKey(conv, '2h', t2),\n          followup_message: msg2,\n          skip_send: DRY_RUN,\n          dry_run: DRY_RUN,\n          _score: scoreOf(j),\n          _due_at: t2,\n          followup_2h_status_next: 'sent',\n          followup_2h_count_next: String(c2 + 1),\n          followup_2h_at_next: '',\n          followup_status_next: String(j.followup_status || 'pending'),\n          followup_count_next: String(j.followup_count || 0),\n          followup_at_next:\n            String(j.followup_status || 'pending').toLowerCase() === 'pending'\n              ? nextFollowupWindowIso(Date.now() + 24 * 3600 * 1000)\n              : j.followup_at || '',\n          followup_sent_at: formatBogota(Date.now()),\n        },\n      });\n      selectedForLead = true;\n    }\n  }\n\n  // --- 24h ---\n  const st24 = String(j.followup_status || '').toLowerCase().trim();\n  const at24 = j.followup_at || '';\n  const c24 = Number(j.followup_count || 0) || 0;\n  if (!selectedForLead && st24 === 'pending' && at24 && c24 < 2) {\n    const t24 = parseWhen(at24);\n    if (Number.isFinite(t24) && t24 <= now && isTooStale(t24)) staleSkipped++;\n    if (Number.isFinite(t24) && t24 <= now && !isTooStale(t24) && inWindow) {\n      let msg24;\n      if (c24 === 0) {\n        msg24 =\n          hasProposal || email.includes('@')\n            ? greet +\n              '.\\n\\n' +\n              'Soy *Luna* de *Luenio*.\\n\\n' +\n              'Retomo ' +\n              focus +\n              '.\\n\\n' +\n              '¿Quieres que preparemos la propuesta, revisar precios o hablar con un asesor?' +\n              (siteShared ? '' : '\\nTrabajos: ' + LUNA_SITE)\n            : greet +\n              '.\\n\\n' +\n              'Soy *Luna* de *Luenio*.\\n\\n' +\n              'Retomo ' +\n              focus +\n              '.\\n\\n' +\n              '¿Te oriento con *precios* o armamos *propuesta* por este chat?';\n      } else {\n        // 24h #2 — cierre + opt-out explícito\n        msg24 =\n          greet +\n          '.\\n\\n' +\n          'Soy *Luna* de *Luenio*.\\n\\n' +\n          'Último aviso amable sobre ' +\n          focus +\n          '.\\n\\n' +\n          'Si te interesa, responde propuesta, precios o asesor.\\n' +\n          'Si no quieres más mensajes, escribe *no molestar* y no te escribo más.';\n      }\n      due.push({\n        json: {\n          ...j,\n          conversation_id: conv,\n          row_number: row,\n          followup_kind: '24h',\n          ...auditKey(conv, '24h', t24),\n          followup_message: msg24,\n          skip_send: DRY_RUN,\n          dry_run: DRY_RUN,\n          _score: scoreOf(j),\n          _due_at: t24,\n          followup_2h_status_next: String(j.followup_2h_status || ''),\n          followup_2h_count_next: String(j.followup_2h_count || 0),\n          followup_2h_at_next: j.followup_2h_at || '',\n          followup_status_next: c24 + 1 >= 2 ? 'sent' : 'pending',\n          followup_count_next: String(c24 + 1),\n          followup_at_next: c24 + 1 >= 2 ? '' : nextFollowupWindowIso(),\n          followup_sent_at: formatBogota(Date.now()),\n        },\n      });\n    }\n  }\n}\n\n// Priorizar calientes y más vencidos; cap por run\ndue.sort((a, b) => {\n  const s = (b.json._score || 0) - (a.json._score || 0);\n  if (s !== 0) return s;\n  return (a.json._due_at || 0) - (b.json._due_at || 0);\n});\n\nconst capped = due.slice(0, MAX_PER_RUN);\n\n// Dry-run: no envía; deja traza en mensaje para ver en ejecución n8n\nif (DRY_RUN) {\n  for (const d of capped) {\n    d.json.followup_message =\n      '[DRY-RUN ' + d.json.followup_kind + '] ' + String(d.json.followup_message || '').slice(0, 400);\n    d.json.skip_send = true;\n  }\n}\n\n// Metadatos de corrida (un item sintético al final si no hay due — útil en logs)\nif (capped.length === 0) {\n  return [\n    {\n      json: {\n        conversation_id: '',\n        skip_send: true,\n        dry_run: DRY_RUN,\n        followup_kind: 'none',\n        followup_message: '',\n        _meta: true,\n        _due_total: 0,\n        _capped: MAX_PER_RUN,\n        _in_window: sendWindowOpen,\n        _window_bypassed_for_dry_run: DRY_RUN && !sendWindowOpen,\n        _scanned: items.length,\n        _stale_skipped: staleSkipped,\n        _max_stale_hours: MAX_STALE_HOURS,\n      },\n    },\n  ];\n}\n\nfor (const d of capped) {\n  d.json._due_total = due.length;\n  d.json._capped = MAX_PER_RUN;\n  d.json._in_window = sendWindowOpen;\n  d.json._window_bypassed_for_dry_run = DRY_RUN && !sendWindowOpen;\n  d.json._scanned = items.length;\n  d.json._stale_skipped = staleSkipped;\n  d.json._max_stale_hours = MAX_STALE_HOURS;\n}\n\nreturn capped;\n\r\n"
+      },
+      "id": "9fe3cc61-f458-4ae8-9af3-000749e529a7",
+      "name": "03 Filtro | Leads con follow-up vencido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1120,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "has-conv",
+              "leftValue": "={{ $json.conversation_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "d60c6f35-5d2d-475c-8cc7-83e332b80b07",
+      "name": "04 ¿Hay conversation_id?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://chat.ton618bot.xyz/api/v1/accounts/1/conversations/{{ $json.conversation_id }}/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.followup_message }}"
+            },
+            {
+              "name": "message_type",
+              "value": "outgoing"
+            },
+            {
+              "name": "private",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cf94505e-bc3c-4ae3-9358-0be901c3e87c",
+      "name": "05 Chatwoot | Enviar follow-up",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -448,
+        0
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "has-row",
+              "leftValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.row_number }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "76f76e15-4fe5-429b-a1c0-ee4a68835d6e",
+      "name": "06 ¿Tiene row_number?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "skip-send",
+              "leftValue": "={{ String($json.skip_send || 'false') !== 'true' && String($json.dry_run || 'false') !== 'true' && String($json.conversation_id || '') !== '' && String($json._meta || '') !== 'true' }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "62be942a-c40a-4710-bc33-f2868b22e95f",
+      "name": "03b Filtro | ¿Enviar follow-up?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -896,
+        0
+      ]
+    },
+    {
+      "id": "a6e4c9d2-ff64-4a3f-93a1-3af553d26a10",
+      "name": "02a Audit | Buscar clave",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -1000,
+        -240
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "SwAH9JfoOpB6UzCa",
+          "cachedResultName": "luenio_followup_audit"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "dedupe_key",
+              "condition": "eq",
+              "keyValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}"
+            }
+          ]
+        },
+        "returnAll": false,
+        "limit": 1
+      },
+      "alwaysOutputData": true,
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000
+    },
+    {
+      "id": "b7f5d0e3-0a75-4b40-a4b2-4bf664e37b21",
+      "name": "02b Audit | Permitir envío",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        -240
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const audits = $input.all();\nconst originals = $('03 Filtro | Leads con follow-up vencido').all();\nconst out = [];\nfor (let i = 0; i < audits.length; i++) {\n  const audit = audits[i]?.json || {};\n  const original = originals[i]?.json || {};\n  const status = String(audit.status || '').toLowerCase().trim();\n  const isDryRun = String(original.dry_run || 'false').toLowerCase() === 'true';\n  if (original._meta === true || !String(original.conversation_id || '').trim()) continue;\n  if (status === 'attempting' || status === 'sent' || (status === 'dry_run' && isDryRun)) continue;\n  out.push({ json: { ...original, audit_status: status || 'new' } });\n}\nreturn out;",
+        "language": "javaScript"
+      }
+    },
+    {
+      "id": "c8a6e1f4-1b86-4c51-b5c3-5c7775f48c32",
+      "name": "02c Audit | Marcar sent",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        220
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "SwAH9JfoOpB6UzCa",
+          "cachedResultName": "luenio_followup_audit"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "dedupe_key",
+              "condition": "eq",
+              "keyValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "sent",
+            "sent_at": "={{ $now.toISO() }}",
+            "execution_id": "={{ $execution.id }}",
+            "error_message": ""
+          },
+          "schema": []
+        },
+        "options": {}
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "d9b7f2a5-2c97-4d62-c6d4-6d8886g59d43",
+      "name": "02d Audit | Marcar failed",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        360
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "update",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "SwAH9JfoOpB6UzCa",
+          "cachedResultName": "luenio_followup_audit"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "dedupe_key",
+              "condition": "eq",
+              "keyValue": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "status": "failed",
+            "execution_id": "={{ $execution.id }}",
+            "error_message": "={{ String($json.error?.message || $json.message || 'Chatwoot follow-up failed').slice(0, 1000) }}"
+          },
+          "schema": []
+        },
+        "options": {}
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "e0c8a3b6-3da8-4e73-d7e5-7e9997h60e54",
+      "name": "02e Follow-up | Bloquear tras fallo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        360
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const errorText = String($json.error_message || $json.message || 'Chatwoot follow-up failed');\nthrow new Error('Follow-up blocked after send failure; audit marked failed: ' + errorText.slice(0, 500));\nif (false) return [{ json: { blocked_after_send_failure: true } }];\n"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "a0d85a70-5db5-4ca8-9f72-86c5e4d6bc20",
+      "name": "02c Audit | Registrar intento",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        -672,
+        -240
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "SwAH9JfoOpB6UzCa",
+          "cachedResultName": "luenio_followup_audit"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "audited_at": "={{ $now.toISO() }}",
+            "classification": "followup",
+            "reason": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind }}",
+            "due_types": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind }}",
+            "oldest_scheduled_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.scheduled_at }}",
+            "pipeline_stage": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.pipeline_stage || '' }}",
+            "lead_status": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.lead_status || '' }}",
+            "score": "={{ Number($('03 Filtro | Leads con follow-up vencido').item.json._score || 0) }}",
+            "approved": false,
+            "contains_pii": false,
+            "dry_run": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.dry_run || 'false') === 'true' }}",
+            "source_row": "={{ Number($('03 Filtro | Leads con follow-up vencido').item.json.row_number || 0) }}",
+            "notes": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.followup_message || '').slice(0, 1000) }}",
+            "conversation_id": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.conversation_id }}",
+            "dedupe_key": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.dedupe_key }}",
+            "followup_kind": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind }}",
+            "scheduled_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.scheduled_at }}",
+            "status": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.dry_run || 'false') === 'true' ? 'dry_run' : 'attempting' }}",
+            "attempted_at": "={{ $now.toISO() }}",
+            "sent_at": "={{ null }}",
+            "execution_id": "={{ $execution.id }}",
+            "error_message": ""
+          },
+          "schema": []
+        },
+        "options": {
+          "optimizeBulk": false
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "2f9f4451-840a-46ec-bacc-c5f2939d38f1",
+      "name": "07 CRM | Marcar follow-up enviado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "mode": "list",
+          "cachedResultName": "Luenio Chatbot",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Hoja 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.row_number }}",
+            "conversation_id": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.conversation_id }}",
+            "followup_status": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_status_next }}",
+            "followup_count": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_count_next }}",
+            "followup_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind === '24h' ? ($('03 Filtro | Leads con follow-up vencido').item.json.followup_at_next || '') : ($('03 Filtro | Leads con follow-up vencido').item.json.followup_at || '') }}",
+            "followup_2h_status": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_2h_status_next }}",
+            "followup_2h_count": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_2h_count_next }}",
+            "followup_2h_at": "={{ ($('03 Filtro | Leads con follow-up vencido').item.json.clear_2h_at === true || $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind === '2h') ? '' : ($('03 Filtro | Leads con follow-up vencido').item.json.followup_2h_at || '') }}",
+            "last_ai_response": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_message }}",
+            "last_message": "={{ '[followup_' + $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind + ']' }}",
+            "updated_at": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_sent_at }}",
+            "next_action": "={{ $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind === '2h' ? 'Esperar respuesta post follow-up 2h' : 'Esperar respuesta post follow-up 24h' }}",
+            "notes": "={{ (($('03 Filtro | Leads con follow-up vencido').item.json.notes || '') + ' | Follow-up ' + $('03 Filtro | Leads con follow-up vencido').item.json.followup_kind + ' enviado ' + $('03 Filtro | Leads con follow-up vencido').item.json.followup_sent_at).slice(-1900) }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500
+    },
+    {
+      "id": "a6d2b4e1-7f03-4b94-9b2a-51b6f61a0001",
+      "name": "99 Insights | Registrar followup_dry_run",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        128
+      ],
+      "parameters": {
+        "mode": "once",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "BDSexxBUSXWgGTCT",
+          "cachedResultName": "Luenio Insights | Registrar evento"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_dry_run'; } catch (e) { return ''; } })() }}",
+            "event_type": "followup_dry_run",
+            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "message_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
+            "occurred_at": "={{ $now.toISO() }}",
+            "workflow_id": "WXd1LnLLBRXIqvj5",
+            "execution_id": "={{ String($execution.id || '') }}",
+            "snapshot": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
+            "reply_status": "dry_run",
+            "reply_hash": "followup_dry_run",
+            "duration_ms": 0,
+            "reason_code": "followup_dry_run",
+            "source_version": "followup-v1",
+            "body_hash": "",
+            "minute_bucket": "={{ $now.toISO().slice(0, 16) }}"
+          },
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "type": "string"
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string"
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "type": "string"
+            },
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "type": "string"
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string"
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string"
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "object"
+            },
+            {
+              "id": "reply_status",
+              "displayName": "reply_status",
+              "type": "string"
+            },
+            {
+              "id": "reply_hash",
+              "displayName": "reply_hash",
+              "type": "string"
+            },
+            {
+              "id": "duration_ms",
+              "displayName": "duration_ms",
+              "type": "number"
+            },
+            {
+              "id": "reason_code",
+              "displayName": "reason_code",
+              "type": "string"
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "type": "string"
+            },
+            {
+              "id": "body_hash",
+              "displayName": "body_hash",
+              "type": "string"
+            },
+            {
+              "id": "minute_bucket",
+              "displayName": "minute_bucket",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "a6d2b4e1-7f03-4b94-9b2a-51b6f61a0002",
+      "name": "99 Insights | Registrar followup_sent",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        0
+      ],
+      "parameters": {
+        "mode": "once",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "BDSexxBUSXWgGTCT",
+          "cachedResultName": "Luenio Insights | Registrar evento"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_sent'; } catch (e) { return ''; } })() }}",
+            "event_type": "followup_sent",
+            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "message_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
+            "occurred_at": "={{ $now.toISO() }}",
+            "workflow_id": "WXd1LnLLBRXIqvj5",
+            "execution_id": "={{ String($execution.id || '') }}",
+            "snapshot": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
+            "reply_status": "sent",
+            "reply_hash": "followup_sent",
+            "duration_ms": 0,
+            "reason_code": "followup_sent",
+            "source_version": "followup-v1",
+            "body_hash": "",
+            "minute_bucket": "={{ $now.toISO().slice(0, 16) }}"
+          },
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "type": "string"
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string"
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "type": "string"
+            },
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "type": "string"
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string"
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string"
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "object"
+            },
+            {
+              "id": "reply_status",
+              "displayName": "reply_status",
+              "type": "string"
+            },
+            {
+              "id": "reply_hash",
+              "displayName": "reply_hash",
+              "type": "string"
+            },
+            {
+              "id": "duration_ms",
+              "displayName": "duration_ms",
+              "type": "number"
+            },
+            {
+              "id": "reason_code",
+              "displayName": "reason_code",
+              "type": "string"
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "type": "string"
+            },
+            {
+              "id": "body_hash",
+              "displayName": "body_hash",
+              "type": "string"
+            },
+            {
+              "id": "minute_bucket",
+              "displayName": "minute_bucket",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "a6d2b4e1-7f03-4b94-9b2a-51b6f61a0003",
+      "name": "99 Insights | Registrar followup event",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1360,
+        256
+      ],
+      "parameters": {
+        "mode": "once",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "BDSexxBUSXWgGTCT",
+          "cachedResultName": "Luenio Insights | Registrar evento"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || '') + '|' + String(r.dedupe_key || r.scheduled_at || '') + '|followup_failed'; } catch (e) { return ''; } })() }}",
+            "event_type": "followup_failed",
+            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "message_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.dedupe_key || r.scheduled_at || ''); } catch (e) { return ''; } })() }}",
+            "occurred_at": "={{ $now.toISO() }}",
+            "workflow_id": "WXd1LnLLBRXIqvj5",
+            "execution_id": "={{ String($execution.id || '') }}",
+            "snapshot": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; const truthy = (v) => v === true || v === 1 || String(v == null ? '' : v).toLowerCase() === 'true' || String(v) === '1'; return { pipeline_stage:String(r.pipeline_stage || ''), next_action:String(r.next_action || ''), interested_service:String(r.interested_service || ''), selected_solution:String(r.selected_solution || ''), discovery_depth:Number(r.discovery_depth || 0), discovery_done:truthy(r.discovery_done), solution_confirmed:truthy(r.solution_confirmed), price_requested:false, proposal_requested:false, proposal_sent:truthy(r.proposal_sent), proposal_accepted:truthy(r.proposal_accepted), human_required:truthy(r.human_required), bot_muted:truthy(r.bot_muted), opt_out:truthy(r.opt_out), duplicate_blocked:false, catalog_ready:true, lead_score:Number(r._score || r.lead_score || 0) }; } catch (e) { return {}; } })() }}",
+            "reply_status": "failed",
+            "reply_hash": "followup_failed",
+            "duration_ms": 0,
+            "reason_code": "followup_failed",
+            "source_version": "followup-v1",
+            "body_hash": "",
+            "minute_bucket": "={{ $now.toISO().slice(0, 16) }}"
+          },
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "type": "string"
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string"
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "type": "string"
+            },
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "type": "string"
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string"
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string"
+            },
+            {
+              "id": "snapshot",
+              "displayName": "snapshot",
+              "type": "object"
+            },
+            {
+              "id": "reply_status",
+              "displayName": "reply_status",
+              "type": "string"
+            },
+            {
+              "id": "reply_hash",
+              "displayName": "reply_hash",
+              "type": "string"
+            },
+            {
+              "id": "duration_ms",
+              "displayName": "duration_ms",
+              "type": "number"
+            },
+            {
+              "id": "reason_code",
+              "displayName": "reason_code",
+              "type": "string"
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "type": "string"
+            },
+            {
+              "id": "body_hash",
+              "displayName": "body_hash",
+              "type": "string"
+            },
+            {
+              "id": "minute_bucket",
+              "displayName": "minute_bucket",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "a6d2b4e1-7f03-4b94-9b2a-51b6f61a0004",
+      "name": "02c Insights | ¿Dry run?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1136,
+        128
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "followup-dry",
+              "leftValue": "={{ String($('03 Filtro | Leads con follow-up vencido').item.json.dry_run || '').toLowerCase() === 'true' }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "a6d2b4e1-7f03-4b94-9b2a-51b6f61a0005",
+      "name": "99 Insights | Error secundario",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1584,
+        128
+      ],
+      "parameters": {
+        "mode": "once",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "csLvqYKmih4zi4Fq",
+          "cachedResultName": "Luenio Error Log"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "severity": "secondary",
+            "source": "continuation",
+            "conversation_id": "={{ (() => { try { const r = $('03 Filtro | Leads con follow-up vencido').item.json || {}; return String(r.conversation_id || ''); } catch (e) { return ''; } })() }}",
+            "workflow_id": "WXd1LnLLBRXIqvj5",
+            "workflow_name": "Luenio Followup 2h+24h",
+            "execution_id": "={{ String($execution.id || '') }}",
+            "execution_url": "",
+            "last_node": "={{ String($json.error?.node?.name || $json.nodeName || $json.name || 'Insights logger').slice(0, 200) }}",
+            "error_message": "={{ String($json.error?.message || $json.message || $json.errorMessage || 'Insights logger failed').slice(0, 1000) }}",
+            "mode": "={{ String($execution.mode || '') }}"
+          },
+          "schema": [
+            {
+              "id": "severity",
+              "displayName": "severity",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "type": "string"
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string"
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string"
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "type": "string"
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string"
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "type": "string"
+            },
+            {
+              "id": "last_node",
+              "displayName": "last_node",
+              "type": "string"
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "type": "string"
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 1000
+    }
+  ],
+  "connections": {
+    "01 Cada 20 min": {
+      "main": [
+        [
+          {
+            "node": "02 CRM | Leer todos los leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 CRM | Leer todos los leads": {
+      "main": [
+        [
+          {
+            "node": "03 Filtro | Leads con follow-up vencido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 ¿Hay conversation_id?": {
+      "main": [
+        [
+          {
+            "node": "05 Chatwoot | Enviar follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03b Filtro | ¿Enviar follow-up?": {
+      "main": [
+        [
+          {
+            "node": "04 ¿Hay conversation_id?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "03 Filtro | Leads con follow-up vencido": {
+      "main": [
+        [
+          {
+            "node": "02a Audit | Buscar clave",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02a Audit | Buscar clave": {
+      "main": [
+        [
+          {
+            "node": "02b Audit | Permitir envío",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 Chatwoot | Enviar follow-up": {
+      "main": [
+        [
+          {
+            "node": "02c Audit | Marcar sent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "02d Audit | Marcar failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02c Audit | Marcar sent": {
+      "main": [
+        [
+          {
+            "node": "06 ¿Tiene row_number?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "99 Insights | Registrar followup_sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02d Audit | Marcar failed": {
+      "main": [
+        [
+          {
+            "node": "02e Follow-up | Bloquear tras fallo",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "99 Insights | Registrar followup event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02b Audit | Permitir envío": {
+      "main": [
+        [
+          {
+            "node": "02c Audit | Registrar intento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02c Audit | Registrar intento": {
+      "main": [
+        [
+          {
+            "node": "03b Filtro | ¿Enviar follow-up?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "02c Insights | ¿Dry run?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 ¿Tiene row_number?": {
+      "main": [
+        [
+          {
+            "node": "07 CRM | Marcar follow-up enviado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02c Insights | ¿Dry run?": {
+      "main": [
+        [
+          {
+            "node": "99 Insights | Registrar followup_dry_run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "99 Insights | Registrar followup_dry_run": {
+      "main": [
+        [],
+        [
+          {
+            "node": "99 Insights | Error secundario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "99 Insights | Registrar followup_sent": {
+      "main": [
+        [],
+        [
+          {
+            "node": "99 Insights | Error secundario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "99 Insights | Registrar followup event": {
+      "main": [
+        [],
+        [
+          {
+            "node": "99 Insights | Error secundario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "csLvqYKmih4zi4Fq",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": {
+    "node:01 Cada 20 min": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  }
+}

@@ -1,0 +1,744 @@
+{
+  "name": "Luenio LUNA | Registrar acción operativa",
+  "active": true,
+  "nodes": [
+    {
+      "id": "1a0b2c3d-4e5f-4678-9a0b-1c2d3e4f5a6b",
+      "name": "01 Entrada | Acción validada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "action_request_json",
+              "type": "string"
+            },
+            {
+              "name": "context_json",
+              "type": "string"
+            },
+            {
+              "name": "catalog_json",
+              "type": "string"
+            },
+            {
+              "name": "conversation_id",
+              "type": "string"
+            },
+            {
+              "name": "message_id",
+              "type": "string"
+            },
+            {
+              "name": "occurred_at",
+              "type": "string"
+            },
+            {
+              "name": "environment",
+              "type": "string"
+            },
+            {
+              "name": "source_hash",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "2b1c3d4e-5f60-4789-ab1c-2d3e4f5a6b7c",
+      "name": "02 Sistema | Validar y preparar acción",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        0
+      ],
+      "parameters": {
+        "jsCode": "function text(value) { return String(value == null ? '' : value).replace(/\\s+/g, ' ').trim(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\nfunction parseObject(value) {\n  if (value && typeof value === 'object' && !Array.isArray(value)) return { ...value };\n  try {\n    const parsed = JSON.parse(text(value) || '{}');\n    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};\n  } catch { return {}; }\n}\nfunction stableHash(value) {\n  const input = text(value);\n  let h1 = 0xdeadbeef ^ input.length;\n  let h2 = 0x41c6ce57 ^ input.length;\n  for (let i = 0; i < input.length; i += 1) {\n    const code = input.charCodeAt(i);\n    h1 = Math.imul(h1 ^ code, 2654435761);\n    h2 = Math.imul(h2 ^ code, 1597334677);\n  }\n  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);\n  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);\n  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16).padStart(14, '0');\n}\nfunction validEmail(value) { return /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(text(value)); }\nfunction safePackages(catalog) {\n  const source = parseObject(catalog.catalog_packages);\n  const result = {};\n  for (const sku of ['PKG-ESSENTIAL','PKG-PROFESSIONAL']) {\n    const row = parseObject(source[sku]);\n    result[sku] = {\n      name: text(row.name),\n      price_project: Number(row.price_project || 0),\n      price_monthly: Number(row.price_monthly || 0)\n    };\n  }\n  return result;\n}\nfunction businessDueAt(nowIso) {\n  const now = new Date(nowIso);\n  const shifted = new Date(now.getTime() - 5 * 60 * 60 * 1000);\n  let y = shifted.getUTCFullYear();\n  let m = shifted.getUTCMonth();\n  let d = shifted.getUTCDate();\n  let hour = shifted.getUTCHours();\n  let minute = shifted.getUTCMinutes();\n  const day = shifted.getUTCDay();\n  const nextBusinessStart = () => {\n    do {\n      const candidate = new Date(Date.UTC(y, m, d + 1, 8, 15, 0));\n      y = candidate.getUTCFullYear(); m = candidate.getUTCMonth(); d = candidate.getUTCDate();\n    } while ([0,6].includes(new Date(Date.UTC(y,m,d)).getUTCDay()));\n    hour = 8; minute = 15;\n  };\n  if ([0,6].includes(day) || hour < 8 || hour >= 18) {\n    if (![0,6].includes(day) && hour < 8) { hour = 8; minute = 15; }\n    else nextBusinessStart();\n  } else {\n    minute += 15;\n    if (minute >= 60) { hour += Math.floor(minute / 60); minute %= 60; }\n    if (hour >= 18) nextBusinessStart();\n  }\n  return new Date(Date.UTC(y,m,d,hour + 5,minute,0)).toISOString();\n}\n\nconst input = $input.first()?.json || {};\nconst action = parseObject(input.action_request_json);\nconst context = parseObject(input.context_json);\nconst catalog = parseObject(input.catalog_json);\nconst environment = ['production','staging','test'].includes(text(input.environment)) ? text(input.environment) : 'staging';\nconst actionType = text(action.type || 'none');\nconst now = text(input.occurred_at) || new Date().toISOString();\nconst conversationId = text(input.conversation_id || context.conversation_id);\nconst minuteBucket = now.slice(0,16);\nconst messageId = text(input.message_id) || `fallback:${stableHash(JSON.stringify(context))}:${minuteBucket}`;\nconst baseKey = `${conversationId}|${messageId}`;\nconst sourceVersion = '3.0.3';\n\nif (!conversationId) throw new Error('ACTION_CONVERSATION_ID_REQUIRED');\n\nif (actionType === 'proposal') {\n  const errors = [];\n  if (!bool(context.discovery_done)) errors.push('discovery_incomplete');\n  if (!bool(context.solution_confirmed)) errors.push('solution_unconfirmed');\n  if (!bool(context.proposal_requested)) errors.push('proposal_not_requested');\n  if (!validEmail(context.email)) errors.push('email_invalid');\n  const packages = safePackages(catalog);\n  const catalogReady = catalog.catalog_ready === true &&\n    Number(packages['PKG-ESSENTIAL'].price_project || 0) > 0 &&\n    Number(packages['PKG-PROFESSIONAL'].price_project || 0) > 0;\n  if (!catalogReady) errors.push('catalog_unavailable');\n  if (errors.length) throw new Error(`PROPOSAL_ACTION_BLOCKED:${errors.join(',')}`);\n  const snapshot = {\n    schema_version:'3.0',\n    context:{\n      business_type:text(context.business_type),\n      project_goal:text(context.project_goal),\n      pain_point:text(context.pain_point),\n      current_process:text(context.current_process),\n      impact:text(context.impact),\n      desired_outcome:text(context.desired_outcome),\n      discovery_urgency:text(context.discovery_urgency),\n      recommended_solution:text(context.recommended_solution),\n      selected_solution:text(context.selected_solution),\n      solution_confirmed:bool(context.solution_confirmed),\n      conversation_summary:text(context.conversation_summary).slice(0,420)\n    },\n    catalog:{\n      version:text(catalog.catalog_version || catalog.version),\n      packages\n    }\n  };\n  const snapshotJson = JSON.stringify(snapshot);\n  const requestKey = `${baseKey}|proposal`;\n  const expires = new Date(Date.parse(now) + 15 * 24 * 60 * 60 * 1000).toISOString();\n  return [{json:{\n    ok:true,route:'proposal',request_type:'proposal',\n    request_id:`prop_${stableHash(requestKey)}`,\n    proposal_id:`prop_${stableHash(requestKey)}`,\n    request_key:requestKey,conversation_id:conversationId,message_id:messageId,\n    status:'requested',snapshot_json:snapshotJson,snapshot_hash:stableHash(snapshotJson),\n    recipient_email_hash:stableHash(text(context.email).toLowerCase()),\n    catalog_version:text(catalog.catalog_version || catalog.version),\n    proposal_version:1,requested_at:now,updated_at:now,expires_at:expires,\n    approved_at:null,approved_by:'',rejected_at:null,rejection_reason_code:'',\n    whatsapp_status:'pending',gmail_status:'pending',\n    whatsapp_delivery_id:'',gmail_delivery_id:'',last_error_code:'',\n    environment,source_version:sourceVersion,source_hash:text(input.source_hash)\n  }}];\n}\n\nif (actionType === 'handoff') {\n  const requestKey = `${baseKey}|handoff`;\n  return [{json:{\n    ok:true,route:'handoff',request_type:'handoff',\n    request_id:`hand_${stableHash(requestKey)}`,\n    handoff_id:`hand_${stableHash(requestKey)}`,\n    request_key:requestKey,conversation_id:conversationId,message_id:messageId,\n    status:'pending',handoff_reason:text(action.payload?.reason || context.handoff_reason || 'explicit_request'),\n    objection_code:text(context.objection_code),urgency:text(context.discovery_urgency || context.urgency),\n    requested_at:now,business_due_at:businessDueAt(now),\n    assigned_at:null,human_replied_at:null,acknowledged_at:null,\n    alert_sent:false,alert_sent_at:null,label_applied:false,last_error_code:'',\n    environment,source_version:sourceVersion,source_hash:text(input.source_hash)\n  }}];\n}\n\nif (actionType === 'appointment') {\n  return [{json:{\n    ok:true,route:'noop',request_type:'appointment',request_id:'',\n    status:'awaiting_customer_input',reason_code:'APPOINTMENT_REQUIRES_CONFIRMED_SLOT_AND_CONSENT',\n    environment,source_version:sourceVersion,source_hash:text(input.source_hash)\n  }}];\n}\n\nreturn [{json:{\n  ok:true,route:'noop',request_type:actionType || 'none',request_id:'',\n  status:'noop',reason_code:actionType === 'media_fallback' ? 'MEDIA_FALLBACK_NO_EXTERNAL_ACTION' : 'NO_ACTION_REQUIRED',\n  environment,source_version:sourceVersion,source_hash:text(input.source_hash)\n}}];"
+      }
+    },
+    {
+      "id": "3c2d4e5f-6071-489a-bc2d-3e4f5a6b7c8d",
+      "name": "03 Filtro | ¿Registrar propuesta?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        560,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "action-proposal",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "proposal",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4d3e5f60-7182-49ab-8d3e-4f5a6b7c8d9e",
+      "name": "04 Propuesta | Upsert solicitud",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        840,
+        -120
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "MAaI6cmQOlZ5S54c",
+          "cachedResultName": "luenio_proposal_requests"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "request_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.request_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "proposal_id": "={{ $json.proposal_id }}",
+            "request_key": "={{ $json.request_key }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "message_id": "={{ $json.message_id }}",
+            "status": "={{ $json.status }}",
+            "snapshot_json": "={{ $json.snapshot_json }}",
+            "snapshot_hash": "={{ $json.snapshot_hash }}",
+            "recipient_email_hash": "={{ $json.recipient_email_hash }}",
+            "catalog_version": "={{ $json.catalog_version }}",
+            "proposal_version": "={{ $json.proposal_version }}",
+            "requested_at": "={{ $json.requested_at }}",
+            "updated_at": "={{ $json.updated_at }}",
+            "expires_at": "={{ $json.expires_at }}",
+            "approved_by": "={{ $json.approved_by }}",
+            "rejection_reason_code": "={{ $json.rejection_reason_code }}",
+            "whatsapp_status": "={{ $json.whatsapp_status }}",
+            "gmail_status": "={{ $json.gmail_status }}",
+            "whatsapp_delivery_id": "={{ $json.whatsapp_delivery_id }}",
+            "gmail_delivery_id": "={{ $json.gmail_delivery_id }}",
+            "last_error_code": "={{ $json.last_error_code }}",
+            "environment": "={{ $json.environment }}",
+            "source_version": "={{ $json.source_version }}"
+          },
+          "schema": [
+            {
+              "id": "proposal_id",
+              "displayName": "proposal_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "request_key",
+              "displayName": "request_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "snapshot_json",
+              "displayName": "snapshot_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "snapshot_hash",
+              "displayName": "snapshot_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "recipient_email_hash",
+              "displayName": "recipient_email_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_version",
+              "displayName": "catalog_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_version",
+              "displayName": "proposal_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "requested_at",
+              "displayName": "requested_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "updated_at",
+              "displayName": "updated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "expires_at",
+              "displayName": "expires_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "approved_at",
+              "displayName": "approved_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "approved_by",
+              "displayName": "approved_by",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "rejected_at",
+              "displayName": "rejected_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "rejection_reason_code",
+              "displayName": "rejection_reason_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "whatsapp_status",
+              "displayName": "whatsapp_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "gmail_status",
+              "displayName": "gmail_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "whatsapp_delivery_id",
+              "displayName": "whatsapp_delivery_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "gmail_delivery_id",
+              "displayName": "gmail_delivery_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "last_error_code",
+              "displayName": "last_error_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "5e4f6071-8293-4abc-9e4f-5a6b7c8d9e0f",
+      "name": "05 Filtro | ¿Registrar handoff?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        840,
+        120
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "action-handoff",
+              "leftValue": "={{ $json.route }}",
+              "rightValue": "handoff",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "6f507182-93a4-4bcd-af50-6b7c8d9e0f1a",
+      "name": "06 Handoff | Upsert cola",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        40
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "8ebPXLk2h1dWjVZR",
+          "cachedResultName": "luenio_handoff_queue"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "request_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.request_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "handoff_id": "={{ $json.handoff_id }}",
+            "request_key": "={{ $json.request_key }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "message_id": "={{ $json.message_id }}",
+            "status": "={{ $json.status }}",
+            "handoff_reason": "={{ $json.handoff_reason }}",
+            "objection_code": "={{ $json.objection_code }}",
+            "urgency": "={{ $json.urgency }}",
+            "requested_at": "={{ $json.requested_at }}",
+            "business_due_at": "={{ $json.business_due_at }}",
+            "alert_sent": "={{ $json.alert_sent }}",
+            "label_applied": "={{ $json.label_applied }}",
+            "last_error_code": "={{ $json.last_error_code }}",
+            "environment": "={{ $json.environment }}",
+            "source_version": "={{ $json.source_version }}"
+          },
+          "schema": [
+            {
+              "id": "handoff_id",
+              "displayName": "handoff_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "request_key",
+              "displayName": "request_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoff_reason",
+              "displayName": "handoff_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objection_code",
+              "displayName": "objection_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "requested_at",
+              "displayName": "requested_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "business_due_at",
+              "displayName": "business_due_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "assigned_at",
+              "displayName": "assigned_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "human_replied_at",
+              "displayName": "human_replied_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "acknowledged_at",
+              "displayName": "acknowledged_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "alert_sent",
+              "displayName": "alert_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "alert_sent_at",
+              "displayName": "alert_sent_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "label_applied",
+              "displayName": "label_applied",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "last_error_code",
+              "displayName": "last_error_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "7a618293-a4b5-4cde-8061-7c8d9e0f1a2b",
+      "name": "07 Salida | Acción registrada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1400,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const prepared = $('02 Sistema | Validar y preparar acción').first()?.json || {};\nreturn [{json:{\n  ok:prepared.ok === true,\n  status:String(prepared.status || (prepared.route === 'noop' ? 'noop' : 'registered')),\n  request_type:String(prepared.request_type || 'none'),\n  request_id:String(prepared.request_id || ''),\n  route:String(prepared.route || 'noop'),\n  reason_code:String(prepared.reason_code || (prepared.route === 'noop' ? 'NO_ACTION_REQUIRED' : 'ACTION_REGISTERED')),\n  environment:String(prepared.environment || 'staging'),\n  source_hash:String(prepared.source_hash || '')\n}}];"
+      }
+    }
+  ],
+  "connections": {
+    "01 Entrada | Acción validada": {
+      "main": [
+        [
+          {
+            "node": "02 Sistema | Validar y preparar acción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Sistema | Validar y preparar acción": {
+      "main": [
+        [
+          {
+            "node": "03 Filtro | ¿Registrar propuesta?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Filtro | ¿Registrar propuesta?": {
+      "main": [
+        [
+          {
+            "node": "04 Propuesta | Upsert solicitud",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "05 Filtro | ¿Registrar handoff?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 Propuesta | Upsert solicitud": {
+      "main": [
+        [
+          {
+            "node": "07 Salida | Acción registrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 Filtro | ¿Registrar handoff?": {
+      "main": [
+        [
+          {
+            "node": "06 Handoff | Upsert cola",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "07 Salida | Acción registrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 Handoff | Upsert cola": {
+      "main": [
+        [
+          {
+            "node": "07 Salida | Acción registrada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

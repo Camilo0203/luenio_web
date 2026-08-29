@@ -1,0 +1,66 @@
+{
+  "name": "Luenio Evaluations | Limpiar casos seed",
+  "active": false,
+  "nodes": [
+    {
+      "id": "463255e5-b140-4eba-8df2-14a90b780c48",
+      "name": "00 Manual cleanup",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "ca6fb48c-4d99-419d-a253-a18127d45fa7",
+      "name": "01 Delete seeded eval cases",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "dR1e7BHzsk9DNQyg"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "case_id",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {
+          "dryRun": false
+        }
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual cleanup": {
+      "main": [
+        [
+          {
+            "node": "01 Delete seeded eval cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

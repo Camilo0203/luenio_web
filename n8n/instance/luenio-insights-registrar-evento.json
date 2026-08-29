@@ -1,0 +1,1113 @@
+{
+  "name": "Luenio Insights | Registrar evento",
+  "active": true,
+  "nodes": [
+    {
+      "id": "73c44e1f-05a0-4c23-8038-ba39404f182b",
+      "name": "00 Insights event input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "event_id",
+              "type": "string"
+            },
+            {
+              "name": "event_type",
+              "type": "string"
+            },
+            {
+              "name": "conversation_id",
+              "type": "string"
+            },
+            {
+              "name": "message_id",
+              "type": "string"
+            },
+            {
+              "name": "occurred_at",
+              "type": "string"
+            },
+            {
+              "name": "workflow_id",
+              "type": "string"
+            },
+            {
+              "name": "execution_id",
+              "type": "string"
+            },
+            {
+              "name": "snapshot",
+              "type": "object"
+            },
+            {
+              "name": "reply_status",
+              "type": "string"
+            },
+            {
+              "name": "reply_hash",
+              "type": "string"
+            },
+            {
+              "name": "duration_ms",
+              "type": "number"
+            },
+            {
+              "name": "reason_code",
+              "type": "string"
+            },
+            {
+              "name": "source_version",
+              "type": "string"
+            },
+            {
+              "name": "body_hash",
+              "type": "string"
+            },
+            {
+              "name": "minute_bucket",
+              "type": "string"
+            },
+            {
+              "name": "environment",
+              "type": "string"
+            },
+            {
+              "name": "action_type",
+              "type": "string"
+            },
+            {
+              "name": "approval_required",
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "0a5fcca8-93f3-4b3d-9566-25de43332a68",
+      "name": "01 Normalize event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst input = $json || {};\nconst environment = String(input.environment || 'production').trim().toLowerCase();\nif (!['production','staging','test'].includes(environment)) throw new Error('INSIGHTS_ENVIRONMENT_INVALID');\nconst forbidden = [\n  'body','message_text','history','email','phone','name',\n  'conversation_summary','raw_error','full_prompt','full_reply'\n];\nconst hasForbidden = (obj) => forbidden.some((key) => Object.prototype.hasOwnProperty.call(obj || {}, key));\nif (hasForbidden(input) || hasForbidden(input.snapshot)) throw new Error('INSIGHTS_PII_FIELD_REJECTED');\nconst allowedEvents = new Set([\n  'turn_processed','turn_blocked','duplicate_blocked','handoff','opt_out',\n  'reset','followup_dry_run','followup_sent','followup_failed',\n  'proposal_sent','proposal_accepted'\n]);\nconst eventType = String(input.event_type || '').trim();\nif (!allowedEvents.has(eventType)) throw new Error('INSIGHTS_EVENT_TYPE_INVALID');\nconst conversationId = String(input.conversation_id || '').trim();\nif (!conversationId) throw new Error('INSIGHTS_CONVERSATION_ID_REQUIRED');\nconst occurredAt = String(input.occurred_at || new Date().toISOString());\nconst minuteBucket = String(input.minute_bucket || occurredAt.slice(0, 16));\nconst bodyHash = String(input.body_hash || 'missing');\nconst messageId = String(input.message_id || '').trim();\nconst eventId = String(input.event_id || (\n  conversationId + '|' + (messageId || ('fallback:' + bodyHash + ':' + minuteBucket)) + '|' + eventType\n)).trim();\nif (!eventId) throw new Error('INSIGHTS_EVENT_ID_REQUIRED');\nconst snap = input.snapshot && typeof input.snapshot === 'object' ? input.snapshot : {};\nconst bool = (value) => value === true || value === 'true' || value === 1 || value === '1';\nconst num = (value) => {\n  const n = Number(value);\n  return Number.isFinite(n) ? n : 0;\n};\nreturn [{ json: {\n  event_id: eventId,\n  schema_version: '3.0',\n  occurred_at: occurredAt,\n  event_type: eventType,\n  conversation_id: conversationId,\n  message_id: messageId,\n  workflow_id: String(input.workflow_id || ''),\n  execution_id: String(input.execution_id || ''),\n  pipeline_stage: String(snap.pipeline_stage || ''),\n  next_action: String(snap.next_action || ''),\n  interested_service: String(snap.interested_service || ''),\n  selected_solution: String(snap.selected_solution || ''),\n  discovery_depth: num(snap.discovery_depth),\n  discovery_done: bool(snap.discovery_done),\n  solution_confirmed: bool(snap.solution_confirmed),\n  price_requested: bool(snap.price_requested),\n  proposal_requested: bool(snap.proposal_requested),\n  proposal_sent: bool(snap.proposal_sent),\n  proposal_accepted: bool(snap.proposal_accepted),\n  human_required: bool(snap.human_required),\n  bot_muted: bool(snap.bot_muted),\n  opt_out: bool(snap.opt_out),\n  duplicate_blocked: bool(snap.duplicate_blocked),\n  reply_status: String(input.reply_status || ''),\n  catalog_ready: bool(snap.catalog_ready),\n  lead_score: num(snap.lead_score),\n  reply_hash: String(input.reply_hash || ''),\n  duration_ms: num(input.duration_ms),\n  reason_code: String(input.reason_code || ''),\n  source_version: String(input.source_version || ''),\n  recommended_solution: String(snap.recommended_solution || ''),\n  objection_code: String(snap.objection_code || ''),\n  fallback_used: bool(snap.fallback_used),\n  handoff_reason: String(snap.handoff_reason || ''),\n  time_to_solution_ms: num(snap.time_to_solution_ms),\n  time_to_proposal_ms: num(snap.time_to_proposal_ms),\n  time_to_handoff_ms: num(snap.time_to_handoff_ms),\n  environment,\n  kb_used: bool(snap.kb_used),\n  kb_entry_key: String(snap.kb_entry_key || ''),\n  objection_rule_used: bool(snap.objection_rule_used),\n  handoff_sla_ms: num(snap.handoff_sla_ms),\n  proposal_status: String(snap.proposal_status || snap.proposal_delivery_status || 'none'),\n  appointment_status: String(snap.appointment_status || ''),\n  media_type: String(snap.media_type || ''),\n  media_processing_status: String(snap.media_processing_status || ''),\n  action_type: String(input.action_type || snap.action_type || 'none'),\n  approval_required: bool(input.approval_required ?? snap.approval_required),\n} }];\n"
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": false
+    },
+    {
+      "id": "a416d8cb-ff5b-44aa-9968-a8d812b4050a",
+      "name": "02 Upsert insight event",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "o5XXsP9RnG9fIbKg",
+          "cachedResultName": "luenio_insight_events"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $(\"01 Normalize event\").first().json.event_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $(\"01 Normalize event\").first().json.event_id }}",
+            "schema_version": "={{ $(\"01 Normalize event\").first().json.schema_version }}",
+            "occurred_at": "={{ $(\"01 Normalize event\").first().json.occurred_at }}",
+            "event_type": "={{ $(\"01 Normalize event\").first().json.event_type }}",
+            "conversation_id": "={{ $(\"01 Normalize event\").first().json.conversation_id }}",
+            "message_id": "={{ $(\"01 Normalize event\").first().json.message_id }}",
+            "workflow_id": "={{ $(\"01 Normalize event\").first().json.workflow_id }}",
+            "execution_id": "={{ $(\"01 Normalize event\").first().json.execution_id }}",
+            "pipeline_stage": "={{ $(\"01 Normalize event\").first().json.pipeline_stage }}",
+            "next_action": "={{ $(\"01 Normalize event\").first().json.next_action }}",
+            "interested_service": "={{ $(\"01 Normalize event\").first().json.interested_service }}",
+            "selected_solution": "={{ $(\"01 Normalize event\").first().json.selected_solution }}",
+            "discovery_depth": "={{ $(\"01 Normalize event\").first().json.discovery_depth }}",
+            "discovery_done": "={{ $(\"01 Normalize event\").first().json.discovery_done }}",
+            "solution_confirmed": "={{ $(\"01 Normalize event\").first().json.solution_confirmed }}",
+            "price_requested": "={{ $(\"01 Normalize event\").first().json.price_requested }}",
+            "proposal_requested": "={{ $(\"01 Normalize event\").first().json.proposal_requested }}",
+            "proposal_sent": "={{ $(\"01 Normalize event\").first().json.proposal_sent }}",
+            "proposal_accepted": "={{ $(\"01 Normalize event\").first().json.proposal_accepted }}",
+            "human_required": "={{ $(\"01 Normalize event\").first().json.human_required }}",
+            "bot_muted": "={{ $(\"01 Normalize event\").first().json.bot_muted }}",
+            "opt_out": "={{ $(\"01 Normalize event\").first().json.opt_out }}",
+            "duplicate_blocked": "={{ $(\"01 Normalize event\").first().json.duplicate_blocked }}",
+            "reply_status": "={{ $(\"01 Normalize event\").first().json.reply_status }}",
+            "catalog_ready": "={{ $(\"01 Normalize event\").first().json.catalog_ready }}",
+            "lead_score": "={{ $(\"01 Normalize event\").first().json.lead_score }}",
+            "reply_hash": "={{ $(\"01 Normalize event\").first().json.reply_hash }}",
+            "duration_ms": "={{ $(\"01 Normalize event\").first().json.duration_ms }}",
+            "reason_code": "={{ $(\"01 Normalize event\").first().json.reason_code }}",
+            "source_version": "={{ $(\"01 Normalize event\").first().json.source_version }}",
+            "recommended_solution": "={{ $(\"01 Normalize event\").first().json.recommended_solution }}",
+            "objection_code": "={{ $(\"01 Normalize event\").first().json.objection_code }}",
+            "fallback_used": "={{ $(\"01 Normalize event\").first().json.fallback_used }}",
+            "handoff_reason": "={{ $(\"01 Normalize event\").first().json.handoff_reason }}",
+            "time_to_solution_ms": "={{ $(\"01 Normalize event\").first().json.time_to_solution_ms }}",
+            "time_to_proposal_ms": "={{ $(\"01 Normalize event\").first().json.time_to_proposal_ms }}",
+            "time_to_handoff_ms": "={{ $(\"01 Normalize event\").first().json.time_to_handoff_ms }}"
+          },
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "pipeline_stage",
+              "displayName": "pipeline_stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "interested_service",
+              "displayName": "interested_service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "selected_solution",
+              "displayName": "selected_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_depth",
+              "displayName": "discovery_depth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_done",
+              "displayName": "discovery_done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "solution_confirmed",
+              "displayName": "solution_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "price_requested",
+              "displayName": "price_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_requested",
+              "displayName": "proposal_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_sent",
+              "displayName": "proposal_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_accepted",
+              "displayName": "proposal_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "human_required",
+              "displayName": "human_required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "bot_muted",
+              "displayName": "bot_muted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "opt_out",
+              "displayName": "opt_out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duplicate_blocked",
+              "displayName": "duplicate_blocked",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reply_status",
+              "displayName": "reply_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_ready",
+              "displayName": "catalog_ready",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "lead_score",
+              "displayName": "lead_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reply_hash",
+              "displayName": "reply_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duration_ms",
+              "displayName": "duration_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reason_code",
+              "displayName": "reason_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "recommended_solution",
+              "displayName": "recommended_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objection_code",
+              "displayName": "objection_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "fallback_used",
+              "displayName": "fallback_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoff_reason",
+              "displayName": "handoff_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "time_to_solution_ms",
+              "displayName": "time_to_solution_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "time_to_proposal_ms",
+              "displayName": "time_to_proposal_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "time_to_handoff_ms",
+              "displayName": "time_to_handoff_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            }
+          ]
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "cbb7d22e-fffe-4e60-9bff-17ebaf330dd7",
+      "name": "03 Return result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const e = $(\"01 Normalize event\").first().json; return [{ json: { ok: true, event_id: e.event_id, status: 'upserted' } }];"
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": false
+    },
+    {
+      "id": "2e9f4c04-8284-4fde-b20e-906d6ffc0723",
+      "name": "02b Persistencia | Espejo evento v3",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "hv6ue39jtQAXbCqn",
+          "cachedResultName": "luenio_insight_events_v3"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "event_id",
+              "condition": "eq",
+              "keyValue": "={{ $(\"01 Normalize event\").first().json.event_id }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "event_id": "={{ $(\"01 Normalize event\").first().json.event_id }}",
+            "schema_version": "={{ $(\"01 Normalize event\").first().json.schema_version }}",
+            "occurred_at": "={{ $(\"01 Normalize event\").first().json.occurred_at }}",
+            "event_type": "={{ $(\"01 Normalize event\").first().json.event_type }}",
+            "conversation_id": "={{ $(\"01 Normalize event\").first().json.conversation_id }}",
+            "message_id": "={{ $(\"01 Normalize event\").first().json.message_id }}",
+            "workflow_id": "={{ $(\"01 Normalize event\").first().json.workflow_id }}",
+            "execution_id": "={{ $(\"01 Normalize event\").first().json.execution_id }}",
+            "pipeline_stage": "={{ $(\"01 Normalize event\").first().json.pipeline_stage }}",
+            "next_action": "={{ $(\"01 Normalize event\").first().json.next_action }}",
+            "interested_service": "={{ $(\"01 Normalize event\").first().json.interested_service }}",
+            "selected_solution": "={{ $(\"01 Normalize event\").first().json.selected_solution }}",
+            "discovery_depth": "={{ $(\"01 Normalize event\").first().json.discovery_depth }}",
+            "discovery_done": "={{ $(\"01 Normalize event\").first().json.discovery_done }}",
+            "solution_confirmed": "={{ $(\"01 Normalize event\").first().json.solution_confirmed }}",
+            "price_requested": "={{ $(\"01 Normalize event\").first().json.price_requested }}",
+            "proposal_requested": "={{ $(\"01 Normalize event\").first().json.proposal_requested }}",
+            "proposal_sent": "={{ $(\"01 Normalize event\").first().json.proposal_sent }}",
+            "proposal_accepted": "={{ $(\"01 Normalize event\").first().json.proposal_accepted }}",
+            "human_required": "={{ $(\"01 Normalize event\").first().json.human_required }}",
+            "bot_muted": "={{ $(\"01 Normalize event\").first().json.bot_muted }}",
+            "opt_out": "={{ $(\"01 Normalize event\").first().json.opt_out }}",
+            "duplicate_blocked": "={{ $(\"01 Normalize event\").first().json.duplicate_blocked }}",
+            "reply_status": "={{ $(\"01 Normalize event\").first().json.reply_status }}",
+            "catalog_ready": "={{ $(\"01 Normalize event\").first().json.catalog_ready }}",
+            "lead_score": "={{ $(\"01 Normalize event\").first().json.lead_score }}",
+            "reply_hash": "={{ $(\"01 Normalize event\").first().json.reply_hash }}",
+            "duration_ms": "={{ $(\"01 Normalize event\").first().json.duration_ms }}",
+            "reason_code": "={{ $(\"01 Normalize event\").first().json.reason_code }}",
+            "source_version": "={{ $(\"01 Normalize event\").first().json.source_version }}",
+            "recommended_solution": "={{ $(\"01 Normalize event\").first().json.recommended_solution }}",
+            "objection_code": "={{ $(\"01 Normalize event\").first().json.objection_code }}",
+            "fallback_used": "={{ $(\"01 Normalize event\").first().json.fallback_used }}",
+            "handoff_reason": "={{ $(\"01 Normalize event\").first().json.handoff_reason }}",
+            "time_to_solution_ms": "={{ $(\"01 Normalize event\").first().json.time_to_solution_ms }}",
+            "time_to_proposal_ms": "={{ $(\"01 Normalize event\").first().json.time_to_proposal_ms }}",
+            "time_to_handoff_ms": "={{ $(\"01 Normalize event\").first().json.time_to_handoff_ms }}",
+            "environment": "={{ $(\"01 Normalize event\").first().json.environment }}",
+            "kb_used": "={{ $(\"01 Normalize event\").first().json.kb_used }}",
+            "kb_entry_key": "={{ $(\"01 Normalize event\").first().json.kb_entry_key }}",
+            "objection_rule_used": "={{ $(\"01 Normalize event\").first().json.objection_rule_used }}",
+            "handoff_sla_ms": "={{ $(\"01 Normalize event\").first().json.handoff_sla_ms }}",
+            "proposal_status": "={{ $(\"01 Normalize event\").first().json.proposal_status }}",
+            "appointment_status": "={{ $(\"01 Normalize event\").first().json.appointment_status }}",
+            "media_type": "={{ $(\"01 Normalize event\").first().json.media_type }}",
+            "media_processing_status": "={{ $(\"01 Normalize event\").first().json.media_processing_status }}",
+            "action_type": "={{ $(\"01 Normalize event\").first().json.action_type }}",
+            "approval_required": "={{ $(\"01 Normalize event\").first().json.approval_required }}"
+          },
+          "schema": [
+            {
+              "id": "event_id",
+              "displayName": "event_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "event_type",
+              "displayName": "event_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "pipeline_stage",
+              "displayName": "pipeline_stage",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "next_action",
+              "displayName": "next_action",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "interested_service",
+              "displayName": "interested_service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "selected_solution",
+              "displayName": "selected_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_depth",
+              "displayName": "discovery_depth",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_done",
+              "displayName": "discovery_done",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "solution_confirmed",
+              "displayName": "solution_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "price_requested",
+              "displayName": "price_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_requested",
+              "displayName": "proposal_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_sent",
+              "displayName": "proposal_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_accepted",
+              "displayName": "proposal_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "human_required",
+              "displayName": "human_required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "bot_muted",
+              "displayName": "bot_muted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "opt_out",
+              "displayName": "opt_out",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duplicate_blocked",
+              "displayName": "duplicate_blocked",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reply_status",
+              "displayName": "reply_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_ready",
+              "displayName": "catalog_ready",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "lead_score",
+              "displayName": "lead_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reply_hash",
+              "displayName": "reply_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duration_ms",
+              "displayName": "duration_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "reason_code",
+              "displayName": "reason_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "recommended_solution",
+              "displayName": "recommended_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objection_code",
+              "displayName": "objection_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "fallback_used",
+              "displayName": "fallback_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoff_reason",
+              "displayName": "handoff_reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "time_to_solution_ms",
+              "displayName": "time_to_solution_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "time_to_proposal_ms",
+              "displayName": "time_to_proposal_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "time_to_handoff_ms",
+              "displayName": "time_to_handoff_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "kb_used",
+              "displayName": "kb_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "kb_entry_key",
+              "displayName": "kb_entry_key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objection_rule_used",
+              "displayName": "objection_rule_used",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoff_sla_ms",
+              "displayName": "handoff_sla_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_status",
+              "displayName": "proposal_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "appointment_status",
+              "displayName": "appointment_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "media_type",
+              "displayName": "media_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "media_processing_status",
+              "displayName": "media_processing_status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "action_type",
+              "displayName": "action_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "approval_required",
+              "displayName": "approval_required",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "boolean",
+              "canBeUsedToMatch": false
+            }
+          ]
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "connections": {
+    "00 Insights event input": {
+      "main": [
+        [
+          {
+            "node": "01 Normalize event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Normalize event": {
+      "main": [
+        [
+          {
+            "node": "02 Upsert insight event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Upsert insight event": {
+      "main": [
+        [
+          {
+            "node": "02b Persistencia | Espejo evento v3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02b Persistencia | Espejo evento v3": {
+      "main": [
+        [
+          {
+            "node": "03 Return result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

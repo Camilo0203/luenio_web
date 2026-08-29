@@ -1,0 +1,164 @@
+{
+  "name": "Luenio LUNA | Consultar KB y objeciones",
+  "active": true,
+  "nodes": [
+    {
+      "id": "kb-trigger",
+      "name": "01 Entrada | Consulta aprobada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "intent",
+              "type": "string"
+            },
+            {
+              "name": "objection_code",
+              "type": "string"
+            },
+            {
+              "name": "user_message",
+              "type": "string"
+            },
+            {
+              "name": "catalog_ready",
+              "type": "boolean"
+            },
+            {
+              "name": "source_version",
+              "type": "string"
+            },
+            {
+              "name": "environment",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "kb-table",
+      "name": "02 KB | Leer entradas activas",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        280,
+        -80
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "xJfcOcEFzEVVHdGl",
+          "cachedResultName": "luenio_kb_entries"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "active",
+              "condition": "isTrue"
+            }
+          ]
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "obj-table",
+      "name": "03 Objeciones | Leer reglas activas",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        540,
+        -80
+      ],
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "0MLsFg1nzqIefGkZ",
+          "cachedResultName": "luenio_objection_rules"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "active",
+              "condition": "isTrue"
+            }
+          ]
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "kb-select",
+      "name": "04 Sistema | Seleccionar contenido aprobado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        820,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "function text(value) { return String(value == null ? '' : value).trim(); }\nfunction norm(value) { return text(value).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase(); }\nfunction bool(value) { return value === true || value === 1 || /^(true|1|yes|si)$/i.test(text(value)); }\n\nfunction parseSerialized(value, fallback) {\n  let current = value;\n  for (let depth = 0; depth < 3; depth += 1) {\n    if (typeof current !== 'string') break;\n    const candidate = current.trim();\n    if (!candidate || !/^[\\[{\\\"]/.test(candidate)) break;\n    try { current = JSON.parse(candidate); } catch { break; }\n  }\n  return current == null || current === '' ? fallback : current;\n}\n\nfunction normalizePatterns(value) {\n  const parsed = parseSerialized(value, []);\n  if (Array.isArray(parsed)) return parsed.map(text).filter(Boolean);\n  return text(parsed).split('|').map(text).filter(Boolean);\n}\n\nfunction normalizeKbRow(row) {\n  return {\n    entry_key: text(row.entry_key),\n    version: text(row.version || '1.0'),\n    category: text(row.category),\n    intent: norm(row.intent),\n    question_patterns: normalizePatterns(row.question_patterns_json),\n    answer_template: text(row.answer_template),\n    allowed_claims: parseSerialized(row.allowed_claims_json, []),\n    forbidden_claims: parseSerialized(row.forbidden_claims_json, []),\n    requires_catalog: bool(row.requires_catalog),\n    requires_human: bool(row.requires_human),\n    active: bool(row.active),\n  };\n}\n\nfunction normalizeObjectionRow(row) {\n  return {\n    objection_code: norm(row.objection_code),\n    trigger_patterns: normalizePatterns(row.trigger_patterns_json),\n    response_template: text(row.response_template),\n    next_action: text(row.next_action),\n    handoff_required: bool(row.handoff_required),\n    active: bool(row.active),\n    version: text(row.version || '1.0'),\n  };\n}\n\nfunction versionScore(value) {\n  return text(value).split('.').reduce((score, part, index) => score + (Number(part) || 0) * (1000 ** (2 - Math.min(index, 2))), 0);\n}\n\nfunction selectApprovedContent(input, kbRows, objectionRows) {\n  const intent = norm(input && input.intent);\n  const objectionCode = norm(input && input.objection_code);\n  const userText = norm(input && input.user_message);\n  const catalogReady = bool(input && input.catalog_ready);\n  const kb = (kbRows || []).map(normalizeKbRow).filter((row) => row.active);\n  const objections = (objectionRows || []).map(normalizeObjectionRow).filter((row) => row.active);\n  const objection = objections\n    .filter((row) => row.objection_code === objectionCode || row.trigger_patterns.some((pattern) => userText.includes(norm(pattern))))\n    .sort((a, b) => versionScore(b.version) - versionScore(a.version))[0];\n  if (objection) {\n    return {\n      found: true,\n      source: 'objection_rules',\n      key: objection.objection_code,\n      answer_template: objection.response_template,\n      next_action: objection.next_action,\n      requires_human: objection.handoff_required,\n      requires_catalog: false,\n      reason_code: 'OBJECTION_RULE_MATCH',\n    };\n  }\n  const entry = kb\n    .filter((row) => row.intent === intent || row.question_patterns.some((pattern) => userText.includes(norm(pattern))))\n    .sort((a, b) => versionScore(b.version) - versionScore(a.version))[0];\n  if (!entry) return { found: false, source: 'fallback', key: '', answer_template: '', requires_human: false, requires_catalog: false, reason_code: 'KB_NO_APPROVED_ANSWER' };\n  if (entry.requires_catalog && !catalogReady) return { found: false, source: 'catalog_gate', key: entry.entry_key, answer_template: '', requires_human: false, requires_catalog: true, reason_code: 'KB_CATALOG_UNAVAILABLE' };\n  return {\n    found: true,\n    source: 'kb_entries',\n    key: entry.entry_key,\n    answer_template: entry.answer_template,\n    allowed_claims: entry.allowed_claims,\n    forbidden_claims: entry.forbidden_claims,\n    requires_human: entry.requires_human,\n    requires_catalog: entry.requires_catalog,\n    reason_code: 'KB_APPROVED_ANSWER',\n  };\n}\n\n\nconst input = $('01 Entrada | Consulta aprobada').first().json || {};\nconst kbRows = $('02 KB | Leer entradas activas').all().map((item) => item.json || {});\nconst objectionRows = $input.all().map((item) => item.json || {});\nconst result = selectApprovedContent(input, kbRows, objectionRows);\nreturn [{ json: { ...result, source_version: String(input.source_version || '3.0'), environment: String(input.environment || 'staging') } }];"
+      }
+    }
+  ],
+  "connections": {
+    "01 Entrada | Consulta aprobada": {
+      "main": [
+        [
+          {
+            "node": "02 KB | Leer entradas activas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 KB | Leer entradas activas": {
+      "main": [
+        [
+          {
+            "node": "03 Objeciones | Leer reglas activas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Objeciones | Leer reglas activas": {
+      "main": [
+        [
+          {
+            "node": "04 Sistema | Seleccionar contenido aprobado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

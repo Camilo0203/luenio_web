@@ -1,0 +1,968 @@
+{
+  "name": "Luenio Insights | Consolidar diario",
+  "active": true,
+  "nodes": [
+    {
+      "id": "06c72978-62f7-4677-a9d2-c9e3c0a7f143",
+      "name": "00 Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "c46a9258-5c57-4e43-9f59-3c66b46d30c4",
+      "name": "01 Normalize trigger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst input = ($json && $json.body && typeof $json.body === 'object') ? $json.body : ($json || {});\nconst partsInBogota = (value) => {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit'\n  }).formatToParts(new Date(value));\n  const map = {};\n  for (const part of parts) map[part.type] = part.value;\n  return map.year + '-' + map.month + '-' + map.day;\n};\nconst requested = String(input.target_date || '').trim();\nconst targetDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(requested)\n  ? requested\n  : partsInBogota(new Date(Date.now() - 24 * 60 * 60 * 1000));\nreturn [{json:{\n  target_date: targetDate,\n  target_environment: 'production',\n  dry_run: input.dry_run !== false,\n  started_at: new Date().toISOString()\n}}];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "b1a2caef-17c1-4c10-85ac-a13370643e0c",
+      "name": "00 Schedule 00:15 Bogota",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        192
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 15 0 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "b58b18ff-5bdb-4891-8354-5d146d9bd4bb",
+      "name": "02 Read insight events",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "hv6ue39jtQAXbCqn",
+          "cachedResultName": "luenio_insight_events_v3"
+        },
+        "returnAll": true
+      },
+      "executeOnce": false,
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "5db8ff7e-3d38-4782-93ed-aaa4fb441b0b",
+      "name": "04 Merge source rows",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        672,
+        96
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "5a1a4cb8-724b-4108-b956-e94031cd0011",
+      "name": "03 Read operational rows",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        192
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "OHFUPwzhe3aCqMY6",
+          "cachedResultName": "luenio_error_events"
+        },
+        "returnAll": true
+      },
+      "executeOnce": false,
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "7617bccd-3014-4f29-8542-1e937b110817",
+      "name": "05 Aggregate daily",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst rows = $input.all().map((item) => item.json || {});\nconst cfg = $(\"01 Normalize trigger\").first().json;\nconst targetDate = String(cfg.target_date);\nconst TZ = 'America/Bogota';\nconst eventTypes = new Set([\n  'turn_processed','turn_blocked','duplicate_blocked','handoff','opt_out',\n  'reset','followup_dry_run','followup_sent','followup_failed',\n  'proposal_sent','proposal_accepted'\n]);\nconst partsInBogota = (value) => {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit'\n  }).formatToParts(new Date(value));\n  const map = {};\n  for (const part of parts) map[part.type] = part.value;\n  return map.year + '-' + map.month + '-' + map.day;\n};\nconst parseTime = (value) => {\n  const time = Date.parse(String(value || ''));\n  return Number.isFinite(time) ? time : NaN;\n};\nconst productionWorkflowIds = new Set([\n  'TTF82QAR4HEPtUMx','WXd1LnLLBRXIqvj5','BDSexxBUSXWgGTCT','SoPRTYavFC58ezIG',\n  'veHhGXM1jFaHVkTz','roa83xYOinxUEhRN','JAtiEwJwK0gVfGhe','iO7jw31alKTZH9ee',\n  'ASS5sfyqGKQTPyy9','cH15aZjmkstGEM79','csLvqYKmih4zi4Fq'\n]);\nconst isProductionError = (row) => {\n  const environment = String(row.environment || '').trim().toLowerCase();\n  if (environment) return environment === 'production';\n  const workflowId = String(row.workflow_id || '').trim();\n  const workflowName = String(row.workflow_name || '').toUpperCase();\n  return productionWorkflowIds.has(workflowId) && !workflowName.includes('STAGING') && !workflowName.includes('TEST');\n};\nconst events = [];\nconst errors = [];\nfor (const row of rows) {\n  const time = parseTime(row.occurred_at);\n  if (!Number.isFinite(time) || partsInBogota(time) !== targetDate) continue;\n  if (eventTypes.has(String(row.event_type || '')) && row.event_id) {\n    if (String(row.environment || '').toLowerCase() === 'production') events.push(row);\n    continue;\n  }\n  if (row.severity && isProductionError(row)) errors.push(row);\n}\nconst bool = (value) => value === true || value === 'true' || value === 1 || value === '1';\nconst count = (predicate) => events.reduce((total, row) => total + (predicate(row) ? 1 : 0), 0);\nconst average = (values) => values.length\n  ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100\n  : 0;\nconst conversations = new Set(events.map((row) => String(row.conversation_id || '')).filter(Boolean));\nconst discovered = new Set(events.filter((row) => bool(row.discovery_done)).map((row) => String(row.conversation_id || '')).filter(Boolean));\nconst solutions = new Set(events.filter((row) => bool(row.solution_confirmed)).map((row) => String(row.conversation_id || '')).filter(Boolean));\nconst firstTurn = new Map();\nconst discoveryDepths = new Map();\nconst proposalTimes = new Map();\nfor (const row of events) {\n  const conversationId = String(row.conversation_id || '');\n  const time = parseTime(row.occurred_at);\n  if (!conversationId || !Number.isFinite(time)) continue;\n  if (row.event_type === 'turn_processed' && (!firstTurn.has(conversationId) || time < firstTurn.get(conversationId))) {\n    firstTurn.set(conversationId, time);\n  }\n  if (bool(row.discovery_done) && !discoveryDepths.has(conversationId)) {\n    const depth = Number(row.discovery_depth);\n    if (Number.isFinite(depth)) discoveryDepths.set(conversationId, depth);\n  }\n  if (row.event_type === 'proposal_sent' && (!proposalTimes.has(conversationId) || time < proposalTimes.get(conversationId))) {\n    proposalTimes.set(conversationId, time);\n  }\n}\nconst proposalMinutes = [];\nfor (const [conversationId, proposalTime] of proposalTimes.entries()) {\n  if (firstTurn.has(conversationId)) proposalMinutes.push((proposalTime - firstTurn.get(conversationId)) / 60000);\n}\nconst handoffSla = events.map((row) => Number(row.handoff_sla_ms)).filter((value) => Number.isFinite(value) && value > 0);\nreturn [{json:{\n  date: targetDate,\n  schema_version: '3.0',\n  environment: 'production',\n  unique_conversations: conversations.size,\n  inbound_messages: count((row) => ['turn_processed','turn_blocked','duplicate_blocked'].includes(row.event_type)),\n  processed_messages: count((row) => row.event_type === 'turn_processed'),\n  duplicate_messages: count((row) => row.event_type === 'duplicate_blocked'),\n  blocked_messages: count((row) => row.event_type === 'turn_blocked'),\n  discovery_completed: discovered.size,\n  solutions_confirmed: solutions.size,\n  price_requests: count((row) => bool(row.price_requested)),\n  proposal_requests: count((row) => bool(row.proposal_requested)),\n  proposals_sent: count((row) => row.event_type === 'proposal_sent'),\n  proposals_accepted: count((row) => row.event_type === 'proposal_accepted'),\n  handoffs: count((row) => row.event_type === 'handoff'),\n  opt_outs: count((row) => row.event_type === 'opt_out'),\n  followups_dry_run: count((row) => row.event_type === 'followup_dry_run'),\n  followups_sent: count((row) => row.event_type === 'followup_sent'),\n  followups_failed: count((row) => row.event_type === 'followup_failed'),\n  critical_errors: errors.filter((row) => String(row.severity).toLowerCase() === 'critical').length,\n  secondary_errors: errors.filter((row) => String(row.severity).toLowerCase() === 'secondary').length,\n  avg_turns_to_discovery: average([...discoveryDepths.values()]),\n  avg_minutes_to_proposal: average(proposalMinutes),\n  catalog_unavailable_count: count((row) => bool(row.price_requested) && !bool(row.catalog_ready)),\n  kb_resolved_count: count((row) => bool(row.kb_used)),\n  objection_count: count((row) => bool(row.objection_rule_used) || Boolean(row.objection_code)),\n  fallback_count: count((row) => bool(row.fallback_used)),\n  avg_handoff_sla_ms: average(handoffSla),\n  proposal_pending_approval: count((row) => row.proposal_status === 'pending_approval'),\n  proposal_partially_sent: count((row) => row.proposal_status === 'partially_sent'),\n  appointments_requested: count((row) => ['requested','availability_checked','pending_confirmation','pending_approval'].includes(row.appointment_status)),\n  appointments_confirmed: count((row) => row.appointment_status === 'confirmed'),\n  media_processed: count((row) => ['processed','succeeded'].includes(row.media_processing_status)),\n  media_failed: count((row) => row.media_processing_status === 'failed'),\n  generated_at: new Date().toISOString(),\n  source_version: 'luna-v3-professional',\n  status: events.length || errors.length ? 'complete' : 'empty',\n  dry_run: Boolean(cfg.dry_run),\n  should_persist: cfg.dry_run === false ? 'true' : 'false'\n}}];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "ad245e8b-5dad-4c02-b226-87c58fab58b5",
+      "name": "06 Upsert daily aggregate",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1120,
+        96
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "QPDJElbifp4RAGkv",
+          "cachedResultName": "luenio_insight_daily_v3"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "={{ DateTime.fromISO($(\"05 Aggregate daily\").first().json.date, { zone: \"America/Bogota\" }).toUTC().toISO() }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $(\"05 Aggregate daily\").first().json.date }}",
+            "schema_version": "={{ $(\"05 Aggregate daily\").first().json.schema_version }}",
+            "environment": "={{ $(\"05 Aggregate daily\").first().json.environment }}",
+            "unique_conversations": "={{ $(\"05 Aggregate daily\").first().json.unique_conversations }}",
+            "inbound_messages": "={{ $(\"05 Aggregate daily\").first().json.inbound_messages }}",
+            "processed_messages": "={{ $(\"05 Aggregate daily\").first().json.processed_messages }}",
+            "duplicate_messages": "={{ $(\"05 Aggregate daily\").first().json.duplicate_messages }}",
+            "blocked_messages": "={{ $(\"05 Aggregate daily\").first().json.blocked_messages }}",
+            "discovery_completed": "={{ $(\"05 Aggregate daily\").first().json.discovery_completed }}",
+            "solutions_confirmed": "={{ $(\"05 Aggregate daily\").first().json.solutions_confirmed }}",
+            "price_requests": "={{ $(\"05 Aggregate daily\").first().json.price_requests }}",
+            "proposal_requests": "={{ $(\"05 Aggregate daily\").first().json.proposal_requests }}",
+            "proposals_sent": "={{ $(\"05 Aggregate daily\").first().json.proposals_sent }}",
+            "proposals_accepted": "={{ $(\"05 Aggregate daily\").first().json.proposals_accepted }}",
+            "handoffs": "={{ $(\"05 Aggregate daily\").first().json.handoffs }}",
+            "opt_outs": "={{ $(\"05 Aggregate daily\").first().json.opt_outs }}",
+            "followups_dry_run": "={{ $(\"05 Aggregate daily\").first().json.followups_dry_run }}",
+            "followups_sent": "={{ $(\"05 Aggregate daily\").first().json.followups_sent }}",
+            "followups_failed": "={{ $(\"05 Aggregate daily\").first().json.followups_failed }}",
+            "critical_errors": "={{ $(\"05 Aggregate daily\").first().json.critical_errors }}",
+            "secondary_errors": "={{ $(\"05 Aggregate daily\").first().json.secondary_errors }}",
+            "avg_turns_to_discovery": "={{ $(\"05 Aggregate daily\").first().json.avg_turns_to_discovery }}",
+            "avg_minutes_to_proposal": "={{ $(\"05 Aggregate daily\").first().json.avg_minutes_to_proposal }}",
+            "catalog_unavailable_count": "={{ $(\"05 Aggregate daily\").first().json.catalog_unavailable_count }}",
+            "kb_resolved_count": "={{ $(\"05 Aggregate daily\").first().json.kb_resolved_count }}",
+            "objection_count": "={{ $(\"05 Aggregate daily\").first().json.objection_count }}",
+            "fallback_count": "={{ $(\"05 Aggregate daily\").first().json.fallback_count }}",
+            "avg_handoff_sla_ms": "={{ $(\"05 Aggregate daily\").first().json.avg_handoff_sla_ms }}",
+            "proposal_pending_approval": "={{ $(\"05 Aggregate daily\").first().json.proposal_pending_approval }}",
+            "proposal_partially_sent": "={{ $(\"05 Aggregate daily\").first().json.proposal_partially_sent }}",
+            "appointments_requested": "={{ $(\"05 Aggregate daily\").first().json.appointments_requested }}",
+            "appointments_confirmed": "={{ $(\"05 Aggregate daily\").first().json.appointments_confirmed }}",
+            "media_processed": "={{ $(\"05 Aggregate daily\").first().json.media_processed }}",
+            "media_failed": "={{ $(\"05 Aggregate daily\").first().json.media_failed }}",
+            "generated_at": "={{ $(\"05 Aggregate daily\").first().json.generated_at }}",
+            "source_version": "={{ $(\"05 Aggregate daily\").first().json.source_version }}",
+            "status": "={{ $(\"05 Aggregate daily\").first().json.status }}"
+          },
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "unique_conversations",
+              "displayName": "unique_conversations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "inbound_messages",
+              "displayName": "inbound_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processed_messages",
+              "displayName": "processed_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duplicate_messages",
+              "displayName": "duplicate_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "blocked_messages",
+              "displayName": "blocked_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_completed",
+              "displayName": "discovery_completed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "solutions_confirmed",
+              "displayName": "solutions_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "price_requests",
+              "displayName": "price_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_requests",
+              "displayName": "proposal_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_sent",
+              "displayName": "proposals_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_accepted",
+              "displayName": "proposals_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoffs",
+              "displayName": "handoffs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "opt_outs",
+              "displayName": "opt_outs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_dry_run",
+              "displayName": "followups_dry_run",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_sent",
+              "displayName": "followups_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_failed",
+              "displayName": "followups_failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "critical_errors",
+              "displayName": "critical_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "secondary_errors",
+              "displayName": "secondary_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_turns_to_discovery",
+              "displayName": "avg_turns_to_discovery",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_minutes_to_proposal",
+              "displayName": "avg_minutes_to_proposal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_unavailable_count",
+              "displayName": "catalog_unavailable_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "kb_resolved_count",
+              "displayName": "kb_resolved_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objection_count",
+              "displayName": "objection_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "fallback_count",
+              "displayName": "fallback_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_handoff_sla_ms",
+              "displayName": "avg_handoff_sla_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_pending_approval",
+              "displayName": "proposal_pending_approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_partially_sent",
+              "displayName": "proposal_partially_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "appointments_requested",
+              "displayName": "appointments_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "appointments_confirmed",
+              "displayName": "appointments_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "media_processed",
+              "displayName": "media_processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "media_failed",
+              "displayName": "media_failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "generated_at",
+              "displayName": "generated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "604c17dc-1c80-4597-af47-e343125a598a",
+      "name": "07 Upsert Insights LUNA sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1344,
+        96
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "appendOrUpdate",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "cachedResultName": "Luenio Chatbot"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1160182455",
+          "cachedResultName": "Insights LUNA"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $(\"05 Aggregate daily\").first().json.date }}",
+            "schema_version": "={{ $(\"05 Aggregate daily\").first().json.schema_version }}",
+            "unique_conversations": "={{ $(\"05 Aggregate daily\").first().json.unique_conversations }}",
+            "inbound_messages": "={{ $(\"05 Aggregate daily\").first().json.inbound_messages }}",
+            "processed_messages": "={{ $(\"05 Aggregate daily\").first().json.processed_messages }}",
+            "duplicate_messages": "={{ $(\"05 Aggregate daily\").first().json.duplicate_messages }}",
+            "blocked_messages": "={{ $(\"05 Aggregate daily\").first().json.blocked_messages }}",
+            "discovery_completed": "={{ $(\"05 Aggregate daily\").first().json.discovery_completed }}",
+            "solutions_confirmed": "={{ $(\"05 Aggregate daily\").first().json.solutions_confirmed }}",
+            "price_requests": "={{ $(\"05 Aggregate daily\").first().json.price_requests }}",
+            "proposal_requests": "={{ $(\"05 Aggregate daily\").first().json.proposal_requests }}",
+            "proposals_sent": "={{ $(\"05 Aggregate daily\").first().json.proposals_sent }}",
+            "proposals_accepted": "={{ $(\"05 Aggregate daily\").first().json.proposals_accepted }}",
+            "handoffs": "={{ $(\"05 Aggregate daily\").first().json.handoffs }}",
+            "opt_outs": "={{ $(\"05 Aggregate daily\").first().json.opt_outs }}",
+            "followups_dry_run": "={{ $(\"05 Aggregate daily\").first().json.followups_dry_run }}",
+            "followups_sent": "={{ $(\"05 Aggregate daily\").first().json.followups_sent }}",
+            "followups_failed": "={{ $(\"05 Aggregate daily\").first().json.followups_failed }}",
+            "critical_errors": "={{ $(\"05 Aggregate daily\").first().json.critical_errors }}",
+            "secondary_errors": "={{ $(\"05 Aggregate daily\").first().json.secondary_errors }}",
+            "avg_turns_to_discovery": "={{ $(\"05 Aggregate daily\").first().json.avg_turns_to_discovery }}",
+            "avg_minutes_to_proposal": "={{ $(\"05 Aggregate daily\").first().json.avg_minutes_to_proposal }}",
+            "catalog_unavailable_count": "={{ $(\"05 Aggregate daily\").first().json.catalog_unavailable_count }}",
+            "generated_at": "={{ $(\"05 Aggregate daily\").first().json.generated_at }}",
+            "source_version": "={{ $(\"05 Aggregate daily\").first().json.source_version }}",
+            "status": "={{ $(\"05 Aggregate daily\").first().json.status }}"
+          },
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "unique_conversations",
+              "displayName": "unique_conversations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "inbound_messages",
+              "displayName": "inbound_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processed_messages",
+              "displayName": "processed_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duplicate_messages",
+              "displayName": "duplicate_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "blocked_messages",
+              "displayName": "blocked_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_completed",
+              "displayName": "discovery_completed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "solutions_confirmed",
+              "displayName": "solutions_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "price_requests",
+              "displayName": "price_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_requests",
+              "displayName": "proposal_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_sent",
+              "displayName": "proposals_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_accepted",
+              "displayName": "proposals_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoffs",
+              "displayName": "handoffs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "opt_outs",
+              "displayName": "opt_outs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_dry_run",
+              "displayName": "followups_dry_run",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_sent",
+              "displayName": "followups_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_failed",
+              "displayName": "followups_failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "critical_errors",
+              "displayName": "critical_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "secondary_errors",
+              "displayName": "secondary_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_turns_to_discovery",
+              "displayName": "avg_turns_to_discovery",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_minutes_to_proposal",
+              "displayName": "avg_minutes_to_proposal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_unavailable_count",
+              "displayName": "catalog_unavailable_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "generated_at",
+              "displayName": "generated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ],
+          "matchingColumns": [
+            "date"
+          ]
+        },
+        "options": {
+          "cellFormat": "RAW",
+          "locationDefine": {
+            "values": {
+              "headerRow": 1,
+              "firstDataRow": 2
+            }
+          }
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "connections": {
+    "00 Manual run": {
+      "main": [
+        [
+          {
+            "node": "01 Normalize trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Normalize trigger": {
+      "main": [
+        [
+          {
+            "node": "02 Read insight events",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "03 Read operational rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 Schedule 00:15 Bogota": {
+      "main": [
+        [
+          {
+            "node": "01 Normalize trigger",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Read insight events": {
+      "main": [
+        [
+          {
+            "node": "04 Merge source rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "04 Merge source rows": {
+      "main": [
+        [
+          {
+            "node": "05 Aggregate daily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Read operational rows": {
+      "main": [
+        [
+          {
+            "node": "04 Merge source rows",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "05 Aggregate daily": {
+      "main": [
+        [
+          {
+            "node": "06 Upsert daily aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 Upsert daily aggregate": {
+      "main": [
+        [
+          {
+            "node": "07 Upsert Insights LUNA sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all"
+  },
+  "staticData": {
+    "node:00 Schedule 00:15 Bogota": {
+      "recurrenceRules": [
+        null
+      ],
+      "recurrenceRuleSignatures": [
+        null
+      ]
+    }
+  }
+}

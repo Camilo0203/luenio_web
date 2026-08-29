@@ -1,0 +1,167 @@
+{
+  "name": "Luenio Catalogo Sync [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "28666003-143d-4907-b5eb-3f1f80e52cb0",
+      "name": "01 Inicio manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d1fc96e2-19fd-484c-99ec-cbdd7133ef02",
+      "name": "02 Sheets | Leer catalogo_luna",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "sheet",
+        "operation": "read",
+        "authentication": "oAuth2",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "1ccQtbE02P-CmbWwKSZGlHKMdYEp0z-BY5fHZDuoIYsI",
+          "cachedResultName": "Luenio Chatbot"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "catalogo_luna",
+          "cachedResultName": "catalogo_luna"
+        },
+        "options": {
+          "dataLocationOnSheet": {
+            "values": {
+              "rangeDefinition": "specifyRangeA1",
+              "range": "A1:Q1000"
+            }
+          },
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          },
+          "returnAllMatches": "returnAllMatches"
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "6c832aa2-d952-472e-b146-5abd10f8f245",
+      "name": "03 Normalizar tipos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "language": "javaScript",
+        "jsCode": "const n = (v) => Number(v || 0);\nconst b = (v) => v === true || String(v).toLowerCase() === 'true';\nconst { row_number, ...data } = $json;\nconst canonical = {\n  'package:essential': {\n    ideal_for: 'Negocios pequeños que necesitan presencia web y automatización inicial en WhatsApp',\n    version: 'v2'\n  },\n  'package:professional': {\n    ideal_for: 'Negocios en crecimiento que requieren más secciones, integraciones y automatización',\n    version: 'v2'\n  },\n  'rule:02': {\n    rule_text: 'Identifica el rubro únicamente a partir de información explícita del cliente; si no está claro, pregunta sin inferir.',\n    version: 'v2'\n  }\n};\nconst normalized = { ...data, ...(canonical[String(data.record_key || '')] || {}) };\nreturn {\n  json: {\n    ...normalized,\n    price_project: n(normalized.price_project),\n    price_monthly: n(normalized.price_monthly),\n    price_min: n(normalized.price_min),\n    price_max: n(normalized.price_max),\n    active: b(normalized.active),\n    source_row: n(normalized.source_row)\n  }\n};"
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "0abcdba0-8d69-4d48-9483-19847a1104ce",
+      "name": "04 Data Table | Upsert staging",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        672,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "dHq0lZMoxBUYfBnZ",
+          "cachedResultName": "luenio_catalog_staging"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "record_key",
+              "condition": "eq",
+              "keyValue": "={{ $json.record_key }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": [
+            "record_key"
+          ]
+        },
+        "options": {
+          "dryRun": false
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "01 Inicio manual": {
+      "main": [
+        [
+          {
+            "node": "02 Sheets | Leer catalogo_luna",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Sheets | Leer catalogo_luna": {
+      "main": [
+        [
+          {
+            "node": "03 Normalizar tipos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Normalizar tipos": {
+      "main": [
+        [
+          {
+            "node": "04 Data Table | Upsert staging",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

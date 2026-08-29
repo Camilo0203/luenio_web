@@ -8,3 +8,7 @@ tmp
 test-results
 
 apps/web/partials
+
+# Generado por scripts/n8n-sync.mjs desde la instancia real
+n8n/instance
+n8n/ARCHITECTURE.md

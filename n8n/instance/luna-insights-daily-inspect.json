@@ -1,0 +1,93 @@
+{
+  "name": "LUNA Insights Daily Inspect",
+  "active": false,
+  "nodes": [
+    {
+      "id": "70cf374f-734d-422f-b652-1a93c122675a",
+      "name": "00 Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "610c77ea-4f89-4a0a-b00a-bf87ffc8721e",
+      "name": "01 Inspect daily duplicate rows",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "UGPwJ09rPWZsyMlG"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "2026-08-19T05:00:00.000Z"
+            }
+          ]
+        },
+        "options": {
+          "dryRun": false
+        }
+      }
+    },
+    {
+      "id": "e0d2da96-cb96-4ee2-b001-98be469b4515",
+      "name": "02 Return inspection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return $input.all();"
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual run": {
+      "main": [
+        [
+          {
+            "node": "01 Inspect daily duplicate rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Inspect daily duplicate rows": {
+      "main": [
+        [
+          {
+            "node": "02 Return inspection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

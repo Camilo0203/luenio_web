@@ -1,0 +1,103 @@
+{
+  "name": "Luenio Catalog Context [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "6e91da11-7aa1-44ff-938c-2d853176f3ae",
+      "name": "01 Inicio manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "beeb2248-38e0-4ef1-8837-66661be862d7",
+      "name": "02 Data Table | Leer catalogo activo",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "dHq0lZMoxBUYfBnZ",
+          "cachedResultName": "luenio_catalog_staging"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "active",
+              "condition": "isTrue"
+            }
+          ]
+        },
+        "returnAll": true,
+        "orderBy": true,
+        "orderByColumn": "source_row",
+        "orderByDirection": "ASC"
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "id": "e5d60cbf-3194-4754-8417-85cb0722200e",
+      "name": "03 Construir contexto dinamico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const input = $input.all().map(i => i.json || {});\nconst rows = input\n  .filter(r => r.active === true || String(r.active).toLowerCase() === 'true')\n  .map(r => ({\n    record_key: String(r.record_key || '').trim(),\n    category: String(r.category || '').trim().toLowerCase(),\n    sku: String(r.sku || '').trim(),\n    name: String(r.name || '').trim(),\n    price_project: Number(r.price_project || 0),\n    price_monthly: Number(r.price_monthly || 0),\n    price_min: Number(r.price_min || 0),\n    price_max: Number(r.price_max || 0),\n    includes_text: String(r.includes_text || '').trim(),\n    ideal_for: String(r.ideal_for || '').trim(),\n    notes: String(r.notes || '').trim(),\n    rule_text: String(r.rule_text || '').trim(),\n    active: true,\n    source_sheet: String(r.source_sheet || 'catalogo_luna'),\n    source_row: r.source_row || '',\n    version: String(r.version || 'unknown'),\n    updated_at: String(r.updated_at || ''),\n  }));\nconst money = (v) => '$' + Number(v || 0).toLocaleString('es-CO');\nconst by = (category) => rows.filter(r => r.category === category);\nconst packages = by('package');\nconst domains = by('domain');\nconst addons = by('addon');\nconst ruleRows = by('rule');\nconst rules = ruleRows.map(r => r.rule_text).filter(Boolean);\nconst keys = rows.map(r => r.record_key).filter(Boolean);\nif (keys.length !== new Set(keys).size) throw new Error('Catálogo inválido: record_key duplicado');\nif (rows.some(r => !r.record_key || !r.sku || !r.name)) throw new Error('Catálogo inválido: record_key, sku y name son obligatorios');\nif (rows.some(r => r.price_project < 0 || r.price_monthly < 0 || r.price_min < 0 || r.price_max < 0)) throw new Error('Catálogo inválido: precios negativos');\nconst essential = packages.find(p => p.sku === 'PKG-ESSENTIAL');\nconst professional = packages.find(p => p.sku === 'PKG-PROFESSIONAL');\nconst catalog_ready = Boolean(\n  essential && professional &&\n  essential.price_project > 0 &&\n  professional.price_project > 0 &&\n  essential.price_monthly >= 0 &&\n  professional.price_monthly >= 0\n);\nif (!catalog_ready) throw new Error('Catálogo inválido: faltan Esencial o Profesional con precios válidos');\nconst package_map = Object.fromEntries(packages.map(p => [p.sku, p]));\nconst price_map = Object.fromEntries(packages.map(p => [p.sku, {\n  project: p.price_project,\n  monthly: p.price_monthly,\n  project_display: money(p.price_project),\n  monthly_display: money(p.price_monthly),\n}]));\nconst package_lines = packages.map(p => [\n  p.name + ': proyecto ' + money(p.price_project),\n  p.price_monthly > 0 ? ('mensualidad ' + money(p.price_monthly)) : '',\n  p.includes_text ? ('incluye ' + p.includes_text) : '',\n  p.notes || '',\n].filter(Boolean).join(' | '));\nconst domain_lines = domains.map(d => d.name + ': ' + money(d.price_min) + '–' + money(d.price_max));\nconst addon_lines = addons.map(a => a.name + ': proyecto ' + money(a.price_project) + ' (rango ' + money(a.price_min) + '–' + money(a.price_max) + ')');\nconst knowledge_base = [\n  'CATÁLOGO COMERCIAL VIGENTE',\n  'PAQUETES',\n  ...package_lines,\n  '',\n  'DOMINIOS (siempre se cobran aparte)',\n  ...domain_lines,\n  '',\n  'ADICIONALES',\n  ...addon_lines,\n  '',\n  'REGLAS',\n  ...rules,\n].join('\\n');\nreturn [{ json: {\n  source: 'luenio_catalog_staging',\n  generated_at: new Date().toISOString(),\n  catalog_version: rows[0]?.version || 'unknown',\n  catalog_ready,\n  counts: { total: rows.length, packages: packages.length, domains: domains.length, addons: addons.length, rules: rules.length },\n  catalog_counts: { total: rows.length, packages: packages.length, domains: domains.length, addons: addons.length, rules: rules.length },\n  packages,\n  catalog_packages: package_map,\n  price_map,\n  catalog_price_map: price_map,\n  domains,\n  catalog_domains: domains,\n  addons,\n  catalog_addons: addons,\n  rules,\n  catalog_rules: rules,\n  package_lines,\n  domain_lines,\n  addon_lines,\n  knowledge_base,\n  catalog_knowledge_base: knowledge_base,\n} }];"
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "01 Inicio manual": {
+      "main": [
+        [
+          {
+            "node": "02 Data Table | Leer catalogo activo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Data Table | Leer catalogo activo": {
+      "main": [
+        [
+          {
+            "node": "03 Construir contexto dinamico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true,
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

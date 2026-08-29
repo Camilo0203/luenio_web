@@ -1,0 +1,723 @@
+{
+  "name": "Luenio Insights | Consolidar diario v3 [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "daily-v3-manual",
+      "name": "00 Trigger | Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "daily-v3-execute",
+      "name": "00 Trigger | Subworkflow",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        180
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "target_date",
+              "type": "string"
+            },
+            {
+              "name": "dry_run",
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "daily-v3-normalize",
+      "name": "01 Entrada | Fecha y modo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst input = $json || {};\nconst partsInBogota = (value) => {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit'\n  }).formatToParts(new Date(value));\n  const map = {};\n  for (const part of parts) map[part.type] = part.value;\n  return map.year + '-' + map.month + '-' + map.day;\n};\nconst requested = String(input.target_date || '').trim();\nconst targetDate = /^\\d{4}-\\d{2}-\\d{2}$/.test(requested)\n  ? requested\n  : partsInBogota(new Date(Date.now() - 24 * 60 * 60 * 1000));\nreturn [{json:{\n  target_date: targetDate,\n  target_environment: 'production',\n  dry_run: input.dry_run !== false,\n  started_at: new Date().toISOString()\n}}];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "daily-v3-events",
+      "name": "02 Datos | Leer eventos v3",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "hv6ue39jtQAXbCqn",
+          "cachedResultName": "luenio_insight_events_v3"
+        },
+        "returnAll": true
+      },
+      "executeOnce": false,
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "daily-v3-errors",
+      "name": "03 Datos | Leer eventos operativos",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        192
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "OHFUPwzhe3aCqMY6",
+          "cachedResultName": "luenio_error_events"
+        },
+        "returnAll": true
+      },
+      "executeOnce": false,
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "daily-v3-merge",
+      "name": "04 Datos | Unir fuentes",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        672,
+        96
+      ],
+      "parameters": {
+        "mode": "append",
+        "numberInputs": 2
+      }
+    },
+    {
+      "id": "daily-v3-aggregate",
+      "name": "05 Métricas | Agregar solo production",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "\nconst rows = $input.all().map((item) => item.json || {});\nconst cfg = $(\"01 Entrada | Fecha y modo\").first().json;\nconst targetDate = String(cfg.target_date);\nconst TZ = 'America/Bogota';\nconst eventTypes = new Set([\n  'turn_processed','turn_blocked','duplicate_blocked','handoff','opt_out',\n  'reset','followup_dry_run','followup_sent','followup_failed',\n  'proposal_sent','proposal_accepted'\n]);\nconst partsInBogota = (value) => {\n  const parts = new Intl.DateTimeFormat('en-CA', {\n    timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit'\n  }).formatToParts(new Date(value));\n  const map = {};\n  for (const part of parts) map[part.type] = part.value;\n  return map.year + '-' + map.month + '-' + map.day;\n};\nconst parseTime = (value) => {\n  const time = Date.parse(String(value || ''));\n  return Number.isFinite(time) ? time : NaN;\n};\nconst productionWorkflowIds = new Set([\n  'TTF82QAR4HEPtUMx','WXd1LnLLBRXIqvj5','BDSexxBUSXWgGTCT','SoPRTYavFC58ezIG',\n  'veHhGXM1jFaHVkTz','roa83xYOinxUEhRN','JAtiEwJwK0gVfGhe','iO7jw31alKTZH9ee',\n  'ASS5sfyqGKQTPyy9','cH15aZjmkstGEM79','csLvqYKmih4zi4Fq'\n]);\nconst isProductionError = (row) => {\n  const environment = String(row.environment || '').trim().toLowerCase();\n  if (environment) return environment === 'production';\n  const workflowId = String(row.workflow_id || '').trim();\n  const workflowName = String(row.workflow_name || '').toUpperCase();\n  return productionWorkflowIds.has(workflowId) && !workflowName.includes('STAGING') && !workflowName.includes('TEST');\n};\nconst events = [];\nconst errors = [];\nfor (const row of rows) {\n  const time = parseTime(row.occurred_at);\n  if (!Number.isFinite(time) || partsInBogota(time) !== targetDate) continue;\n  if (eventTypes.has(String(row.event_type || '')) && row.event_id) {\n    if (String(row.environment || '').toLowerCase() === 'production') events.push(row);\n    continue;\n  }\n  if (row.severity && isProductionError(row)) errors.push(row);\n}\nconst bool = (value) => value === true || value === 'true' || value === 1 || value === '1';\nconst count = (predicate) => events.reduce((total, row) => total + (predicate(row) ? 1 : 0), 0);\nconst average = (values) => values.length\n  ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 100) / 100\n  : 0;\nconst conversations = new Set(events.map((row) => String(row.conversation_id || '')).filter(Boolean));\nconst discovered = new Set(events.filter((row) => bool(row.discovery_done)).map((row) => String(row.conversation_id || '')).filter(Boolean));\nconst solutions = new Set(events.filter((row) => bool(row.solution_confirmed)).map((row) => String(row.conversation_id || '')).filter(Boolean));\nconst firstTurn = new Map();\nconst discoveryDepths = new Map();\nconst proposalTimes = new Map();\nfor (const row of events) {\n  const conversationId = String(row.conversation_id || '');\n  const time = parseTime(row.occurred_at);\n  if (!conversationId || !Number.isFinite(time)) continue;\n  if (row.event_type === 'turn_processed' && (!firstTurn.has(conversationId) || time < firstTurn.get(conversationId))) {\n    firstTurn.set(conversationId, time);\n  }\n  if (bool(row.discovery_done) && !discoveryDepths.has(conversationId)) {\n    const depth = Number(row.discovery_depth);\n    if (Number.isFinite(depth)) discoveryDepths.set(conversationId, depth);\n  }\n  if (row.event_type === 'proposal_sent' && (!proposalTimes.has(conversationId) || time < proposalTimes.get(conversationId))) {\n    proposalTimes.set(conversationId, time);\n  }\n}\nconst proposalMinutes = [];\nfor (const [conversationId, proposalTime] of proposalTimes.entries()) {\n  if (firstTurn.has(conversationId)) proposalMinutes.push((proposalTime - firstTurn.get(conversationId)) / 60000);\n}\nconst handoffSla = events.map((row) => Number(row.handoff_sla_ms)).filter((value) => Number.isFinite(value) && value > 0);\nreturn [{json:{\n  date: targetDate,\n  schema_version: '3.0',\n  environment: 'production',\n  unique_conversations: conversations.size,\n  inbound_messages: count((row) => ['turn_processed','turn_blocked','duplicate_blocked'].includes(row.event_type)),\n  processed_messages: count((row) => row.event_type === 'turn_processed'),\n  duplicate_messages: count((row) => row.event_type === 'duplicate_blocked'),\n  blocked_messages: count((row) => row.event_type === 'turn_blocked'),\n  discovery_completed: discovered.size,\n  solutions_confirmed: solutions.size,\n  price_requests: count((row) => bool(row.price_requested)),\n  proposal_requests: count((row) => bool(row.proposal_requested)),\n  proposals_sent: count((row) => row.event_type === 'proposal_sent'),\n  proposals_accepted: count((row) => row.event_type === 'proposal_accepted'),\n  handoffs: count((row) => row.event_type === 'handoff'),\n  opt_outs: count((row) => row.event_type === 'opt_out'),\n  followups_dry_run: count((row) => row.event_type === 'followup_dry_run'),\n  followups_sent: count((row) => row.event_type === 'followup_sent'),\n  followups_failed: count((row) => row.event_type === 'followup_failed'),\n  critical_errors: errors.filter((row) => String(row.severity).toLowerCase() === 'critical').length,\n  secondary_errors: errors.filter((row) => String(row.severity).toLowerCase() === 'secondary').length,\n  avg_turns_to_discovery: average([...discoveryDepths.values()]),\n  avg_minutes_to_proposal: average(proposalMinutes),\n  catalog_unavailable_count: count((row) => bool(row.price_requested) && !bool(row.catalog_ready)),\n  kb_resolved_count: count((row) => bool(row.kb_used)),\n  objection_count: count((row) => bool(row.objection_rule_used) || Boolean(row.objection_code)),\n  fallback_count: count((row) => bool(row.fallback_used)),\n  avg_handoff_sla_ms: average(handoffSla),\n  proposal_pending_approval: count((row) => row.proposal_status === 'pending_approval'),\n  proposal_partially_sent: count((row) => row.proposal_status === 'partially_sent'),\n  appointments_requested: count((row) => ['requested','availability_checked','pending_confirmation','pending_approval'].includes(row.appointment_status)),\n  appointments_confirmed: count((row) => row.appointment_status === 'confirmed'),\n  media_processed: count((row) => ['processed','succeeded'].includes(row.media_processing_status)),\n  media_failed: count((row) => row.media_processing_status === 'failed'),\n  generated_at: new Date().toISOString(),\n  source_version: 'luna-v3-professional',\n  status: events.length || errors.length ? 'complete' : 'empty',\n  dry_run: Boolean(cfg.dry_run),\n  should_persist: cfg.dry_run === false ? 'true' : 'false'\n}}];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "daily-v3-if",
+      "name": "06 Gate | ¿Persistir?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1120,
+        96
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "persist",
+              "leftValue": "={{ $json.should_persist }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      }
+    },
+    {
+      "id": "daily-v3-upsert",
+      "name": "07 Persistencia | Upsert diario v3",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1370,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "QPDJElbifp4RAGkv",
+          "cachedResultName": "luenio_insight_daily_v3"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "date",
+              "condition": "eq",
+              "keyValue": "={{ DateTime.fromISO($(\"05 Métricas | Agregar solo production\").first().json.date, { zone: \"America/Bogota\" }).toUTC().toISO() }}"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $(\"05 Métricas | Agregar solo production\").first().json.date }}",
+            "schema_version": "={{ $(\"05 Métricas | Agregar solo production\").first().json.schema_version }}",
+            "environment": "={{ $(\"05 Métricas | Agregar solo production\").first().json.environment }}",
+            "unique_conversations": "={{ $(\"05 Métricas | Agregar solo production\").first().json.unique_conversations }}",
+            "inbound_messages": "={{ $(\"05 Métricas | Agregar solo production\").first().json.inbound_messages }}",
+            "processed_messages": "={{ $(\"05 Métricas | Agregar solo production\").first().json.processed_messages }}",
+            "duplicate_messages": "={{ $(\"05 Métricas | Agregar solo production\").first().json.duplicate_messages }}",
+            "blocked_messages": "={{ $(\"05 Métricas | Agregar solo production\").first().json.blocked_messages }}",
+            "discovery_completed": "={{ $(\"05 Métricas | Agregar solo production\").first().json.discovery_completed }}",
+            "solutions_confirmed": "={{ $(\"05 Métricas | Agregar solo production\").first().json.solutions_confirmed }}",
+            "price_requests": "={{ $(\"05 Métricas | Agregar solo production\").first().json.price_requests }}",
+            "proposal_requests": "={{ $(\"05 Métricas | Agregar solo production\").first().json.proposal_requests }}",
+            "proposals_sent": "={{ $(\"05 Métricas | Agregar solo production\").first().json.proposals_sent }}",
+            "proposals_accepted": "={{ $(\"05 Métricas | Agregar solo production\").first().json.proposals_accepted }}",
+            "handoffs": "={{ $(\"05 Métricas | Agregar solo production\").first().json.handoffs }}",
+            "opt_outs": "={{ $(\"05 Métricas | Agregar solo production\").first().json.opt_outs }}",
+            "followups_dry_run": "={{ $(\"05 Métricas | Agregar solo production\").first().json.followups_dry_run }}",
+            "followups_sent": "={{ $(\"05 Métricas | Agregar solo production\").first().json.followups_sent }}",
+            "followups_failed": "={{ $(\"05 Métricas | Agregar solo production\").first().json.followups_failed }}",
+            "critical_errors": "={{ $(\"05 Métricas | Agregar solo production\").first().json.critical_errors }}",
+            "secondary_errors": "={{ $(\"05 Métricas | Agregar solo production\").first().json.secondary_errors }}",
+            "avg_turns_to_discovery": "={{ $(\"05 Métricas | Agregar solo production\").first().json.avg_turns_to_discovery }}",
+            "avg_minutes_to_proposal": "={{ $(\"05 Métricas | Agregar solo production\").first().json.avg_minutes_to_proposal }}",
+            "catalog_unavailable_count": "={{ $(\"05 Métricas | Agregar solo production\").first().json.catalog_unavailable_count }}",
+            "kb_resolved_count": "={{ $(\"05 Métricas | Agregar solo production\").first().json.kb_resolved_count }}",
+            "objection_count": "={{ $(\"05 Métricas | Agregar solo production\").first().json.objection_count }}",
+            "fallback_count": "={{ $(\"05 Métricas | Agregar solo production\").first().json.fallback_count }}",
+            "avg_handoff_sla_ms": "={{ $(\"05 Métricas | Agregar solo production\").first().json.avg_handoff_sla_ms }}",
+            "proposal_pending_approval": "={{ $(\"05 Métricas | Agregar solo production\").first().json.proposal_pending_approval }}",
+            "proposal_partially_sent": "={{ $(\"05 Métricas | Agregar solo production\").first().json.proposal_partially_sent }}",
+            "appointments_requested": "={{ $(\"05 Métricas | Agregar solo production\").first().json.appointments_requested }}",
+            "appointments_confirmed": "={{ $(\"05 Métricas | Agregar solo production\").first().json.appointments_confirmed }}",
+            "media_processed": "={{ $(\"05 Métricas | Agregar solo production\").first().json.media_processed }}",
+            "media_failed": "={{ $(\"05 Métricas | Agregar solo production\").first().json.media_failed }}",
+            "generated_at": "={{ $(\"05 Métricas | Agregar solo production\").first().json.generated_at }}",
+            "source_version": "={{ $(\"05 Métricas | Agregar solo production\").first().json.source_version }}",
+            "status": "={{ $(\"05 Métricas | Agregar solo production\").first().json.status }}"
+          },
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "schema_version",
+              "displayName": "schema_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "environment",
+              "displayName": "environment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "unique_conversations",
+              "displayName": "unique_conversations",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "inbound_messages",
+              "displayName": "inbound_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "processed_messages",
+              "displayName": "processed_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "duplicate_messages",
+              "displayName": "duplicate_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "blocked_messages",
+              "displayName": "blocked_messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "discovery_completed",
+              "displayName": "discovery_completed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "solutions_confirmed",
+              "displayName": "solutions_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "price_requests",
+              "displayName": "price_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_requests",
+              "displayName": "proposal_requests",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_sent",
+              "displayName": "proposals_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposals_accepted",
+              "displayName": "proposals_accepted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "handoffs",
+              "displayName": "handoffs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "opt_outs",
+              "displayName": "opt_outs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_dry_run",
+              "displayName": "followups_dry_run",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_sent",
+              "displayName": "followups_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "followups_failed",
+              "displayName": "followups_failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "critical_errors",
+              "displayName": "critical_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "secondary_errors",
+              "displayName": "secondary_errors",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_turns_to_discovery",
+              "displayName": "avg_turns_to_discovery",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_minutes_to_proposal",
+              "displayName": "avg_minutes_to_proposal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "catalog_unavailable_count",
+              "displayName": "catalog_unavailable_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "kb_resolved_count",
+              "displayName": "kb_resolved_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "objection_count",
+              "displayName": "objection_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "fallback_count",
+              "displayName": "fallback_count",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "avg_handoff_sla_ms",
+              "displayName": "avg_handoff_sla_ms",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_pending_approval",
+              "displayName": "proposal_pending_approval",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "proposal_partially_sent",
+              "displayName": "proposal_partially_sent",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "appointments_requested",
+              "displayName": "appointments_requested",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "appointments_confirmed",
+              "displayName": "appointments_confirmed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "media_processed",
+              "displayName": "media_processed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "media_failed",
+              "displayName": "media_failed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "generated_at",
+              "displayName": "generated_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "date",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "source_version",
+              "displayName": "source_version",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "id": "daily-v3-output",
+      "name": "08 Salida | Consolidado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1620,
+        96
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const a = $(\"05 Métricas | Agregar solo production\").first().json;\nconst { should_persist, ...metrics } = a;\nreturn [{json:{ok:true,...metrics}}];"
+      },
+      "onError": "stopWorkflow"
+    }
+  ],
+  "connections": {
+    "00 Trigger | Manual": {
+      "main": [
+        [
+          {
+            "node": "01 Entrada | Fecha y modo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 Trigger | Subworkflow": {
+      "main": [
+        [
+          {
+            "node": "01 Entrada | Fecha y modo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Entrada | Fecha y modo": {
+      "main": [
+        [
+          {
+            "node": "02 Datos | Leer eventos v3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "03 Datos | Leer eventos operativos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Datos | Leer eventos v3": {
+      "main": [
+        [
+          {
+            "node": "04 Datos | Unir fuentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "03 Datos | Leer eventos operativos": {
+      "main": [
+        [
+          {
+            "node": "04 Datos | Unir fuentes",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "04 Datos | Unir fuentes": {
+      "main": [
+        [
+          {
+            "node": "05 Métricas | Agregar solo production",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "05 Métricas | Agregar solo production": {
+      "main": [
+        [
+          {
+            "node": "06 Gate | ¿Persistir?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "06 Gate | ¿Persistir?": {
+      "main": [
+        [
+          {
+            "node": "07 Persistencia | Upsert diario v3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "08 Salida | Consolidado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "07 Persistencia | Upsert diario v3": {
+      "main": [
+        [
+          {
+            "node": "08 Salida | Consolidado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none",
+    "errorWorkflow": "csLvqYKmih4zi4Fq"
+  },
+  "staticData": null
+}

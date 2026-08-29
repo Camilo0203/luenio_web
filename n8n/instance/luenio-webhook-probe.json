@@ -1,0 +1,55 @@
+{
+  "name": "Luenio Webhook Probe",
+  "active": false,
+  "nodes": [
+    {
+      "id": "c2fb2209-4b71-4b26-b2c9-2ed40a768c09",
+      "name": "00 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luna-trigger-probe",
+        "options": {}
+      },
+      "webhookId": "a910ddde-71d6-4911-be39-a8fdced6dd31"
+    },
+    {
+      "id": "ff3422d8-7f23-463a-9b2a-d45bb0c56bb0",
+      "name": "01 Finish",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "return items"
+      }
+    }
+  ],
+  "connections": {
+    "00 Webhook": {
+      "main": [
+        [
+          {
+            "node": "01 Finish",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

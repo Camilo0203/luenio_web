@@ -1,0 +1,256 @@
+{
+  "name": "Luenio Error Log",
+  "active": true,
+  "nodes": [
+    {
+      "id": "57bca578-fdda-40c7-8004-d99dfe08fb83",
+      "name": "01 Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "cd1891c6-eb46-496b-be9a-5ff9e63c5508",
+      "name": "02 Normalizar error",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const direct = $input.first()?.json || {};\nconst execution = direct.execution || {};\nconst workflow = direct.workflow || {};\nconst err = execution.error || direct.error || {};\nconst isDirect = Boolean(direct.source || direct.severity || direct.conversation_id || direct.workflow_id);\nconst value = (v) => String(v == null ? '' : v);\nreturn [{\n  json: {\n    occurred_at: new Date().toISOString(),\n    workflow_id: value(isDirect ? direct.workflow_id : (workflow.id || execution.workflowId || '')),\n    workflow_name: value(isDirect ? direct.workflow_name : (workflow.name || '')),\n    execution_id: value(isDirect ? direct.execution_id : (execution.id || '')),\n    execution_url: value(isDirect ? direct.execution_url : (execution.url || '')),\n    status: 'error',\n    last_node: value(isDirect ? direct.last_node : (execution.lastNodeExecuted || '')),\n    error_message: value(isDirect ? direct.error_message : (err.message || err.description || 'Error sin mensaje')).slice(0, 5000),\n    mode: value(isDirect ? direct.mode : (execution.mode || '')),\n    severity: isDirect ? (value(direct.severity) || 'secondary') : 'critical',\n    source: isDirect ? (value(direct.source) || 'continuation') : 'error_trigger',\n    conversation_id: value(isDirect ? direct.conversation_id : ''),\n    handled: isDirect ? true : false,\n  }\n}];"
+      },
+      "onError": "stopWorkflow"
+    },
+    {
+      "id": "afaab84a-fee1-49de-8c0b-1a20383ea7d7",
+      "name": "03 Guardar en luenio_error_events",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "insert",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "OHFUPwzhe3aCqMY6",
+          "cachedResultName": "luenio_error_events"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "occurred_at": "={{ $json.occurred_at }}",
+            "workflow_id": "={{ $json.workflow_id }}",
+            "workflow_name": "={{ $json.workflow_name }}",
+            "execution_id": "={{ $json.execution_id }}",
+            "execution_url": "={{ $json.execution_url }}",
+            "status": "={{ $json.status }}",
+            "last_node": "={{ $json.last_node }}",
+            "error_message": "={{ $json.error_message }}",
+            "mode": "={{ $json.mode }}",
+            "severity": "={{ $json.severity }}",
+            "source": "={{ $json.source }}",
+            "conversation_id": "={{ $json.conversation_id }}",
+            "handled": "={{ Boolean($json.handled) }}"
+          },
+          "schema": [
+            {
+              "id": "occurred_at",
+              "displayName": "occurred_at",
+              "type": "date",
+              "display": true
+            },
+            {
+              "id": "workflow_id",
+              "displayName": "workflow_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "workflow_name",
+              "displayName": "workflow_name",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "execution_id",
+              "displayName": "execution_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "execution_url",
+              "displayName": "execution_url",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "last_node",
+              "displayName": "last_node",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "error_message",
+              "displayName": "error_message",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "mode",
+              "displayName": "mode",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "severity",
+              "displayName": "severity",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "type": "string",
+              "display": true
+            },
+            {
+              "id": "handled",
+              "displayName": "handled",
+              "type": "boolean",
+              "display": true
+            }
+          ]
+        },
+        "options": {
+          "optimizeBulk": false
+        }
+      },
+      "onError": "stopWorkflow",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
+      "alwaysOutputData": true
+    },
+    {
+      "id": "2f62bb0a-2c46-4ed2-b697-a9d85ab91d1f1",
+      "name": "00 Operativo | Evento secundario",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        224
+      ],
+      "parameters": {
+        "inputSource": "workflowInputs",
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "severity",
+              "type": "string"
+            },
+            {
+              "name": "source",
+              "type": "string"
+            },
+            {
+              "name": "conversation_id",
+              "type": "string"
+            },
+            {
+              "name": "workflow_id",
+              "type": "string"
+            },
+            {
+              "name": "workflow_name",
+              "type": "string"
+            },
+            {
+              "name": "execution_id",
+              "type": "string"
+            },
+            {
+              "name": "execution_url",
+              "type": "string"
+            },
+            {
+              "name": "last_node",
+              "type": "string"
+            },
+            {
+              "name": "error_message",
+              "type": "string"
+            },
+            {
+              "name": "mode",
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "01 Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "02 Normalizar error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "02 Normalizar error": {
+      "main": [
+        [
+          {
+            "node": "03 Guardar en luenio_error_events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "00 Operativo | Evento secundario": {
+      "main": [
+        [
+          {
+            "node": "02 Normalizar error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

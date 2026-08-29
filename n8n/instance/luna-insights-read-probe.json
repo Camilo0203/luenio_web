@@ -1,0 +1,81 @@
+{
+  "name": "LUNA Insights Read Probe",
+  "active": false,
+  "nodes": [
+    {
+      "id": "13410bfa-5f95-4bc5-8f1f-3f76b46a4049",
+      "name": "00 Manual run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "d4741ed2-0245-4f23-9966-4fe1567e96cb",
+      "name": "01 Read insight events",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "o5XXsP9RnG9fIbKg"
+        },
+        "returnAll": true
+      }
+    },
+    {
+      "id": "f24bcf49-2f29-4051-8840-a33146fb6b38",
+      "name": "02 Count probe rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const rows=$input.all().map(i=>i.json||{}).filter(r=>r.event_id==='probe-conversation|message-1|turn_processed'); const forbidden=['body','message_text','history','email','phone','name','conversation_summary','raw_error','full_prompt','full_reply']; return [{json:{count:rows.length,event_ids:rows.map(r=>r.event_id),pii_fields:rows.some(r=>Object.keys(r).some(k=>forbidden.includes(k)))}}];"
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual run": {
+      "main": [
+        [
+          {
+            "node": "01 Read insight events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "01 Read insight events": {
+      "main": [
+        [
+          {
+            "node": "02 Count probe rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}

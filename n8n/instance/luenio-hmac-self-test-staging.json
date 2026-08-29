@@ -1,0 +1,118 @@
+{
+  "name": "Luenio HMAC Self-Test [STAGING]",
+  "active": false,
+  "nodes": [
+    {
+      "id": "b7d4e3c2-3333-4a5b-8c6d-000000000001",
+      "name": "HMAC Self-Test Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        300,
+        300
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "luna-hmac-selftest-20260824",
+        "responseMode": "lastNode",
+        "responseData": "firstEntryJson",
+        "options": {}
+      },
+      "webhookId": "fbb19b3c-4894-4ba1-b3a7-c3e6cac96005"
+    },
+    {
+      "id": "b7d4e3c2-3333-4a5b-8c6d-000000000002",
+      "name": "HMAC Self-Test Prepare",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const trigger = $input.first()?.json || {};\nconst syntheticTimestamp = Math.floor(Date.now() / 1000);\nconst syntheticBody = JSON.stringify({source:'luna-hmac-selftest',probe:'synthetic',nonce:String(Date.now())});\nconst syntheticDelivery = 'selftest-' + String(Date.now());\nreturn [{json:{\n  ...trigger,\n  _selftest_timestamp: syntheticTimestamp,\n  _selftest_raw_body: syntheticBody,\n  _selftest_delivery: syntheticDelivery,\n}}];"
+      }
+    },
+    {
+      "id": "b7d4e3c2-3333-4a5b-8c6d-000000000003",
+      "name": "HMAC Self-Test Crypto",
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 2,
+      "position": [
+        740,
+        300
+      ],
+      "parameters": {
+        "action": "hmac",
+        "binaryData": false,
+        "type": "SHA256",
+        "value": "={{ String($json._selftest_timestamp ?? '') + '.' + String($json._selftest_raw_body ?? '') }}",
+        "dataPropertyName": "_expected",
+        "encoding": "hex"
+      }
+    },
+    {
+      "id": "b7d4e3c2-3333-4a5b-8c6d-000000000004",
+      "name": "HMAC Self-Test Assert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const result = $input.first()?.json || {};\nconst expected = String(result._expected || '').trim().toLowerCase();\nconst suppliedValid = 'sha256=' + expected;\nconst suppliedInvalid = expected ? expected.slice(0, -1) + (expected.endsWith('0') ? '1' : '0') : '';\nconst compareHmac = (leftValue, rightValue) => {\n  const leftText = String(leftValue || '').replace(/^sha256=/i, '').toLowerCase();\n  const rightText = String(rightValue || '').replace(/^sha256=/i, '').toLowerCase();\n  let differenceMask = leftText.length ^ rightText.length;\n  const comparisonLength = Math.max(leftText.length, rightText.length);\n  for (let comparisonIndex = 0; comparisonIndex < comparisonLength; comparisonIndex += 1) {\n    const leftCodePoint = comparisonIndex < leftText.length ? leftText.charCodeAt(comparisonIndex) : 0;\n    const rightCodePoint = comparisonIndex < rightText.length ? rightText.charCodeAt(comparisonIndex) : 0;\n    differenceMask |= leftCodePoint ^ rightCodePoint;\n  }\n  return differenceMask === 0;\n};\nconst validSignature = Boolean(expected) && compareHmac(suppliedValid, expected);\nconst invalidSignature = Boolean(expected) && !compareHmac(suppliedInvalid, expected);\nconst currentTimestamp = Number(result._selftest_timestamp || 0);\nconst expiredSignature = Math.abs(Math.floor(Date.now() / 1000) - currentTimestamp - 3600) > 300;\nconst staticData = $getWorkflowStaticData('global');\nstaticData.selftestDeliveries = staticData.selftestDeliveries || {};\nconst deliveryKey = String(result._selftest_delivery || '');\nconst firstAttempt = !staticData.selftestDeliveries[deliveryKey];\nstaticData.selftestDeliveries[deliveryKey] = Date.now();\nconst replayBlocked = firstAttempt && Boolean(staticData.selftestDeliveries[deliveryKey]);\nreturn [{json:{\n  ok:validSignature && invalidSignature && expiredSignature && replayBlocked,\n  cases:{valid_signature:validSignature,invalid_signature:invalidSignature,expired_signature:expiredSignature,replay_blocked:replayBlocked},\n  credential_loaded:Boolean(expected),\n}}];"
+      }
+    }
+  ],
+  "connections": {
+    "HMAC Self-Test Webhook": {
+      "main": [
+        [
+          {
+            "node": "HMAC Self-Test Prepare",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HMAC Self-Test Prepare": {
+      "main": [
+        [
+          {
+            "node": "HMAC Self-Test Crypto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HMAC Self-Test Crypto": {
+      "main": [
+        [
+          {
+            "node": "HMAC Self-Test Assert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none"
+  },
+  "staticData": {
+    "global": {
+      "selftestDeliveries": {
+        "selftest-1787623124675": 1787623124718
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "LUNA Eval Maintenance | Limpiar casos",
+  "active": false,
+  "nodes": [
+    {
+      "id": "2d66940a-2166-4112-b7b8-f8a599f6c36a",
+      "name": "00 Manual reset eval cases",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "34feb1c1-95c4-44a1-ae4e-49804ece841a",
+      "name": "01 Delete all eval cases",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "parameters": {
+        "resource": "row",
+        "operation": "deleteRows",
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "dR1e7BHzsk9DNQyg"
+        },
+        "matchType": "allConditions",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "case_id",
+              "condition": "isNotEmpty"
+            }
+          ]
+        },
+        "options": {
+          "dryRun": false
+        }
+      }
+    }
+  ],
+  "connections": {
+    "00 Manual reset eval cases": {
+      "main": [
+        [
+          {
+            "node": "01 Delete all eval cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": true
+  },
+  "staticData": null
+}
