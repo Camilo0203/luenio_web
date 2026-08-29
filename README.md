@@ -53,6 +53,9 @@ Las páginas públicas declaran su chrome en vez de repetirlo:
 <!-- include: site-header nav="site" ctaHref="/cotizacion" quoteCta="header" ctaLocation="legal_header" -->
 ```
 
+Reiniciar `npm run dev` tras tocar `server.js`: un proceso ya arrancado sirve la
+directiva sin expandir, es decir la página sin cabecera ni pie.
+
 Los bloques viven en `apps/web/partials/`. La expansión ocurre en el build (plugin
 de Vite) y al servir el árbol de fuentes (`server.js`), con el mismo módulo
 `lib/html-includes.js`, así que fuente y `dist/` no pueden divergir. Un parámetro

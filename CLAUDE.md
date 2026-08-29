@@ -115,6 +115,12 @@ desarrollo y el arranque de producción falla sin Supabase.
 
 ## Detalles que muerden
 
+- **Un servidor de desarrollo ya arrancado no recoge los cambios de `server.js`.**
+  Desde que la cabecera y el pie se expanden en el servidor, un proceso viejo
+  sirve las páginas con la directiva `<!-- include: … -->` sin expandir: sin
+  cabecera y sin pie, en silencio. Antes bastaba con editar el HTML. Si el sitio
+  aparece sin barra de navegación, reinicia `npm run dev` antes de buscar el fallo
+  en otro sitio.
 - **Prettier manda en el formato.** El gate no lo corre, pero CI sí
   (`npm run format:check`). Pasa `npm run format` antes de terminar.
 - **Los tests leen las páginas expandidas**, vía `scripts/page-source.mjs`. Si
