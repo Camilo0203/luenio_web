@@ -56,3 +56,8 @@ desktop.ini
 design-proposals/
 source-assets/
 .impeccable/
+
+# Local tooling / workspace files
+.mcp.json
+.obsidian/
+graphify-out/

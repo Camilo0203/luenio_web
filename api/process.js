@@ -4,7 +4,7 @@ import {
   LeadValidationError,
   PipelineStageValidationError,
   processCrmRequestBody,
-} from "./services/lead-processing-service.js";
+} from "./services/lead-request-router.js";
 import { logError, logInfo } from "./services/logger.js";
 
 export default async function handler(request, response) {

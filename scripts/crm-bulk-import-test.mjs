@@ -3,11 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { parseCrmCsv } from "../apps/admin/src/csv-import.js";
 import { getEmailTemplate, buildMailtoUrl } from "../apps/admin/src/reply-templates.js";
-import {
-  bulkUpdateLeads,
-  importCrmLeadsFromRows,
-  listCrmWorkspace,
-} from "../api/services/lead-processing-service.js";
+import { bulkUpdateLeads } from "../api/services/lead-update-service.js";
+import { importCrmLeadsFromRows } from "../api/services/lead-import-service.js";
+import { listCrmWorkspace } from "../api/services/lead-workspace-service.js";
 
 const localDbPath = path.join(process.cwd(), "db", "leads-db.json");
 const localDbSnapshot = fs.existsSync(localDbPath) ? fs.readFileSync(localDbPath, "utf8") : null;

@@ -5,9 +5,11 @@
 
 import { getDigestEnv, isDigestDeliveryConfigured } from "../../config/env.js";
 import { listCrmData, listCrmWorkspaceIds } from "../../db/storage.js";
-import { fetchWithTimeout, getSecureOutboundUrl } from "./outbound-request.js";
+import { getSecureOutboundUrl } from "./outbound-request.js";
+import { deliverWebhook } from "./webhook-delivery.js";
 
 const STALE_HOT_MS = 48 * 60 * 60 * 1000;
+const DIGEST_WEBHOOK_TIMEOUT_MS = 10_000;
 
 function getClassification(lead) {
   return (
@@ -155,7 +157,23 @@ export async function deliverWorkspaceDigests({
     return { sent: 0, skipped: 0, workspaceCount: 0, results: [] };
   }
 
-  const url = getSecureOutboundUrl(config.webhookUrl, "DIGEST_WEBHOOK_URL");
+  // Fail fast on a broken DIGEST_WEBHOOK_URL (embedded credentials, or a
+  // private/localhost host in production) before touching the DB. The actual
+  // per-workspace send below re-validates via deliverWebhook(), so this is a
+  // pure optimization, not the safety net: a failure here can never abort
+  // the loop below, it only returns a structured result instead of throwing.
+  try {
+    getSecureOutboundUrl(config.webhookUrl, "DIGEST_WEBHOOK_URL");
+  } catch (error) {
+    return {
+      sent: 0,
+      skipped: 0,
+      workspaceCount: 0,
+      results: [],
+      configError: error?.message || "Invalid DIGEST_WEBHOOK_URL.",
+    };
+  }
+
   const workspaceIds = await listCrmWorkspaceIds();
   const nowMs = now.getTime();
   const results = [];
@@ -179,33 +197,35 @@ export async function deliverWorkspaceDigests({
       recipient: config.recipient || null,
     });
 
-    try {
-      const response = await fetchWithTimeout(
-        url,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${config.webhookToken}`,
-          },
-          body: JSON.stringify(body),
-        },
-        10_000,
-      );
+    const delivery = await deliverWebhook({
+      url: config.webhookUrl,
+      token: config.webhookToken,
+      payload: body,
+      urlLabel: "DIGEST_WEBHOOK_URL",
+      timeoutMs: DIGEST_WEBHOOK_TIMEOUT_MS,
+    });
 
-      if (!response.ok) {
-        skipped += 1;
-        results.push({ workspaceId, status: "http_error", httpStatus: response.status });
-        continue;
-      }
-
+    if (delivery.status === "sent") {
       lastSentAtByWorkspace.set(workspaceId, nowMs);
       sent += 1;
       results.push({ workspaceId, status: "sent" });
-    } catch {
+      continue;
+    }
+
+    if (delivery.reason === "network_error") {
+      // Covers both a network/timeout failure and a URL that fails
+      // validation on this specific attempt (same bucket the prior
+      // implementation used for any thrown/caught delivery error).
       skipped += 1;
       results.push({ workspaceId, status: "network_error" });
+      continue;
     }
+
+    // Non-2xx HTTP response. (not_configured/missing_token cannot occur
+    // here in practice: isDigestDeliveryConfigured() above already
+    // guarantees a non-empty URL and a token of sufficient length.)
+    skipped += 1;
+    results.push({ workspaceId, status: "http_error", httpStatus: delivery.httpStatus ?? null });
   }
 
   return { sent, skipped, workspaceCount: workspaceIds.length, results };

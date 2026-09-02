@@ -1,6 +1,6 @@
 import { buildLeadLifecycleEvents, buildLeadNotification } from "../../core/events.js";
 
-export function buildCrmRecordBundle({ lead, actionLog, userId }) {
+export function buildCrmRecordBundle({ lead, actionLog, userId, deliveries = [] }) {
   if (!userId) throw new Error("userId is required to build CRM record bundle.");
 
   const tenantLead = { ...lead, userId };
@@ -17,5 +17,6 @@ export function buildCrmRecordBundle({ lead, actionLog, userId }) {
     action: tenantActionLog,
     notification,
     events,
+    deliveries,
   };
 }

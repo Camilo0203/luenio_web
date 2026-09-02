@@ -105,6 +105,9 @@ export function getAutomationEnv() {
     whatsappWebhookUrl: getEnv("LUENIO_WHATSAPP_WEBHOOK_URL"),
     emailWebhookUrl: getEnv("LUENIO_EMAIL_WEBHOOK_URL"),
     webhookToken: getEnv("AUTOMATION_WEBHOOK_TOKEN"),
+    deliveryWorkerEnabled: getBooleanEnv("AUTOMATION_DELIVERY_WORKER_ENABLED", isProduction()),
+    deliveryWorkerIntervalMs: getNumberEnv("AUTOMATION_DELIVERY_WORKER_INTERVAL_MS", 30_000),
+    deliveryWorkerBatchSize: getNumberEnv("AUTOMATION_DELIVERY_WORKER_BATCH_SIZE", 10),
   };
 }
 

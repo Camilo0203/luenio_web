@@ -3,10 +3,10 @@ import {
   completeContactDelivery,
   storePublicInquiry,
 } from "../../db/storage.js";
-import { getContactEnv, isProduction } from "../../config/env.js";
+import { getContactEnv } from "../../config/env.js";
 import { generateRecordId, leadFieldLimits, normalizeTextField } from "../../core/engine.js";
 import { validatePublicInquirySecurity } from "./turnstile-service.js";
-import { fetchWithTimeout, getSecureOutboundUrl } from "./outbound-request.js";
+import { deliverWebhook } from "./webhook-delivery.js";
 
 export class PublicInquiryValidationError extends Error {
   constructor(missingFields) {
@@ -58,41 +58,33 @@ function buildPublicInquiryResponse(stored) {
 
 async function sendContactWebhook(inquiry) {
   const { webhookUrl, webhookToken } = getContactEnv();
-  if (!webhookUrl) {
-    return {
-      status: "not_configured",
-      destination: null,
-    };
+  const result = await deliverWebhook({
+    url: webhookUrl,
+    token: webhookToken,
+    payload: inquiry,
+    urlLabel: "Contact webhook URL",
+    timeoutMs: CONTACT_WEBHOOK_TIMEOUT_MS,
+  });
+
+  if (result.status === "not_configured") {
+    return { status: "not_configured", destination: null };
   }
-  if (isProduction() && !webhookToken) {
+  if (result.reason === "missing_token") {
     return { status: "failed", destination: null };
   }
-
-  try {
-    const webhookResponse = await fetchWithTimeout(
-      getSecureOutboundUrl(webhookUrl, "Contact webhook URL"),
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(webhookToken ? { Authorization: `Bearer ${webhookToken}` } : {}),
-        },
-        body: JSON.stringify(inquiry),
-      },
-      CONTACT_WEBHOOK_TIMEOUT_MS,
-    );
-    return {
-      status: webhookResponse.ok ? "sent" : "failed",
-      destination: webhookUrl,
-      httpStatus: webhookResponse.status,
-    };
-  } catch (error) {
+  if (result.reason === "network_error") {
     return {
       status: "failed",
       destination: webhookUrl,
-      error: error.message,
+      error: result.errorMessage,
     };
   }
+
+  return {
+    status: result.status,
+    destination: webhookUrl,
+    httpStatus: result.httpStatus,
+  };
 }
 
 export async function deliverQueuedContactInquiries({ limit = 10, inquiryId = null } = {}) {

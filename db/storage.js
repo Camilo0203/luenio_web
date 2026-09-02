@@ -59,6 +59,8 @@ export async function supabaseRequest(pathname, options = {}) {
         "CONTACT_DUPLICATE",
         "CONTACT_DELIVERY_INVALID",
         "INVALID_THROTTLE_KEY",
+        "CRM_RECORD_INVALID",
+        "AUTOMATION_DELIVERY_INVALID",
       ].find((code) => responseBody.includes(code));
       if (!isProduction()) {
         console.error("[Luenio DB] Supabase error", {
@@ -471,37 +473,66 @@ export async function storeCrmRecord(recordBundle) {
   const tenantActionLog = recordBundle?.action;
   const notification = recordBundle?.notification;
   const lifecycleEvents = recordBundle?.events || [];
+  const pendingDeliveries = recordBundle?.deliveries || [];
   const userId = tenantLead?.userId || tenantActionLog?.userId || notification?.userId;
   if (!userId) throw new Error("userId is required to store CRM data.");
   if (!tenantLead?.id) throw new Error("lead id is required to store CRM data.");
   if (!tenantActionLog?.id) throw new Error("action id is required to store CRM data.");
   if (!notification?.id) throw new Error("notification id is required to store CRM data.");
 
+  const createdAt = tenantLead.timestamp || new Date().toISOString();
+  // Delivery rows are constructed here (not passed in fully-formed), same as
+  // storePublicInquiry constructs its own `delivery` record below -- this is
+  // persistence-layer bookkeeping (ids, timestamps, initial status), not a
+  // domain event, so it doesn't fall under "db/ persists domain events, it
+  // doesn't build them".
+  const deliveries = pendingDeliveries.map((pending) => ({
+    id: `automation_delivery_${tenantLead.id}_${pending.action}`,
+    leadId: tenantLead.id,
+    userId,
+    action: pending.action,
+    payload: pending.payload,
+    status: "pending",
+    attempts: 0,
+    nextAttemptAt: createdAt,
+    lockedUntil: null,
+    deliveredAt: null,
+    lastHttpStatus: null,
+    createdAt,
+    updatedAt: createdAt,
+  }));
+
   if (getSupabaseConfig()) {
-    await supabaseRequest("leads", {
+    const [storedLead] = await supabaseRequest("rpc/luenio_store_crm_record", {
       method: "POST",
-      body: JSON.stringify(
-        mapLeadForSupabase({
+      body: JSON.stringify({
+        p_lead: mapLeadForSupabase({
           ...tenantLead,
           phoneNormalized: normalizePhone(tenantLead.phone),
           workflow: tenantActionLog.workflow,
         }),
-      ),
+        p_action: mapActionForSupabase(tenantActionLog),
+        p_notification: mapNotificationForSupabase(notification),
+        p_events: lifecycleEvents.map(mapEventForSupabase),
+        p_deliveries: deliveries.map((delivery) => ({
+          id: delivery.id,
+          lead_id: delivery.leadId,
+          business_id: delivery.userId,
+          action: delivery.action,
+          payload: delivery.payload,
+          status: delivery.status,
+          attempts: delivery.attempts,
+          next_attempt_at: delivery.nextAttemptAt,
+          created_at: delivery.createdAt,
+          updated_at: delivery.updatedAt,
+        })),
+      }),
     });
-    await supabaseRequest("lead_actions", {
-      method: "POST",
-      body: JSON.stringify(mapActionForSupabase(tenantActionLog)),
-    });
-    await supabaseRequest("lead_notifications", {
-      method: "POST",
-      body: JSON.stringify(mapNotificationForSupabase(notification)),
-    });
-    for (const lifecycleEvent of lifecycleEvents) {
-      await recordEvent(lifecycleEvent);
-    }
 
     return {
-      lead: { ...tenantLead, phoneNormalized: normalizePhone(tenantLead.phone) },
+      lead: storedLead
+        ? { ...tenantLead, phoneNormalized: normalizePhone(tenantLead.phone) }
+        : null,
       action: tenantActionLog,
       notification,
       storedLeads: null,
@@ -517,6 +548,7 @@ export async function storeCrmRecord(recordBundle) {
     actions: [tenantActionLog, ...(database.actions || [])].slice(0, 500),
     notifications: [notification, ...(database.notifications || [])].slice(0, 500),
     events: [...lifecycleEvents.slice().reverse(), ...(database.events || [])].slice(0, 1000),
+    automationDeliveries: [...deliveries, ...(database.automationDeliveries || [])].slice(0, 1_000),
   });
 
   return {
@@ -526,6 +558,120 @@ export async function storeCrmRecord(recordBundle) {
     storedLeads: nextDatabase.leads.filter((item) => item.userId === userId).length,
     storage: "json_fallback",
   };
+}
+
+function mapAutomationDeliveryClaim(record) {
+  return {
+    deliveryId: record.delivery_id,
+    leadId: record.lead_id,
+    action: record.action,
+    payload: record.payload,
+    attempts: record.delivery_attempts,
+  };
+}
+
+export async function claimAutomationDeliveries({ limit = 10, leadId = null } = {}) {
+  assertStorageAvailable();
+  if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+    throw new Error("Automation delivery limit is invalid.");
+  }
+  const now = new Date();
+  const nowIso = now.toISOString();
+
+  if (getSupabaseConfig()) {
+    const records = await supabaseRequest("rpc/luenio_claim_automation_deliveries", {
+      method: "POST",
+      body: JSON.stringify({
+        p_now: nowIso,
+        p_limit: limit,
+        p_lock_seconds: 300,
+        p_lead_id: leadId || null,
+      }),
+    });
+    return records.map(mapAutomationDeliveryClaim);
+  }
+
+  const database = readLocalDatabase();
+  const deliveries = database.automationDeliveries || [];
+  const claimedIds = deliveries
+    .filter((delivery) => {
+      if (delivery.attempts >= 10) return false;
+      if (leadId && delivery.leadId !== leadId) return false;
+      const due = new Date(delivery.nextAttemptAt).getTime() <= now.getTime();
+      const staleLock =
+        delivery.status === "processing" &&
+        delivery.lockedUntil &&
+        new Date(delivery.lockedUntil).getTime() <= now.getTime();
+      return (["pending", "retry"].includes(delivery.status) && due) || staleLock;
+    })
+    .sort((left, right) => new Date(left.nextAttemptAt) - new Date(right.nextAttemptAt))
+    .slice(0, limit)
+    .map((delivery) => delivery.id);
+  const claimedIdSet = new Set(claimedIds);
+  const nextDeliveries = deliveries.map((delivery) =>
+    claimedIdSet.has(delivery.id)
+      ? {
+          ...delivery,
+          status: "processing",
+          attempts: delivery.attempts + 1,
+          lockedUntil: new Date(now.getTime() + 5 * 60 * 1_000).toISOString(),
+          updatedAt: nowIso,
+        }
+      : delivery,
+  );
+  writeLocalDatabase({ ...database, automationDeliveries: nextDeliveries });
+  return nextDeliveries
+    .filter((delivery) => claimedIdSet.has(delivery.id))
+    .map((delivery) => ({
+      deliveryId: delivery.id,
+      leadId: delivery.leadId,
+      action: delivery.action,
+      payload: delivery.payload,
+      attempts: delivery.attempts,
+    }));
+}
+
+export async function completeAutomationDelivery({ deliveryId, succeeded, httpStatus = null }) {
+  assertStorageAvailable();
+  const normalizedHttpStatus =
+    Number.isInteger(httpStatus) && httpStatus >= 100 && httpStatus <= 599 ? httpStatus : null;
+  const now = new Date();
+  const nowIso = now.toISOString();
+
+  if (getSupabaseConfig()) {
+    const [result] = await supabaseRequest("rpc/luenio_complete_automation_delivery", {
+      method: "POST",
+      body: JSON.stringify({
+        p_delivery_id: deliveryId,
+        p_succeeded: Boolean(succeeded),
+        p_http_status: normalizedHttpStatus,
+        p_now: nowIso,
+      }),
+    });
+    return result || null;
+  }
+
+  const database = readLocalDatabase();
+  let completed = null;
+  const automationDeliveries = (database.automationDeliveries || []).map((delivery) => {
+    if (delivery.id !== deliveryId || delivery.status !== "processing") return delivery;
+    const status = succeeded ? "sent" : delivery.attempts >= 10 ? "dead" : "retry";
+    const backoffSeconds = Math.min(3_600, 30 * 2 ** Math.max(delivery.attempts - 1, 0));
+    completed = {
+      ...delivery,
+      status,
+      nextAttemptAt: succeeded
+        ? delivery.nextAttemptAt
+        : new Date(now.getTime() + backoffSeconds * 1_000).toISOString(),
+      lockedUntil: null,
+      deliveredAt: succeeded ? nowIso : delivery.deliveredAt,
+      lastHttpStatus: normalizedHttpStatus,
+      updatedAt: nowIso,
+    };
+    return completed;
+  });
+  writeLocalDatabase({ ...database, automationDeliveries });
+  return completed;
 }
 
 export async function storePublicInquiry(inquiry) {

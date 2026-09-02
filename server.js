@@ -233,6 +233,8 @@ const { startContactDeliveryWorker, stopContactDeliveryWorker } =
   await import("./api/services/contact-delivery-worker.js");
 const { startDigestDeliveryWorker, stopDigestDeliveryWorker } =
   await import("./api/services/digest-delivery-worker.js");
+const { startAutomationDeliveryWorker, stopAutomationDeliveryWorker } =
+  await import("./api/services/automation-delivery-worker.js");
 
 const host = serverConfig.host;
 const port = serverConfig.port;
@@ -1104,6 +1106,7 @@ function shutdown(signal) {
   shuttingDown = true;
   stopContactDeliveryWorker();
   stopDigestDeliveryWorker();
+  stopAutomationDeliveryWorker();
   console.info(`[Luenio] ${signal} received; draining active requests.`);
   server.close(() => process.exit(0));
   const forceTimer = setTimeout(() => {
@@ -1143,7 +1146,10 @@ function listen(portToUse, allowDevelopmentFallback = !isProduction()) {
     const activePort = typeof address === "object" && address ? address.port : portToUse;
     announceServer(activePort);
     startContactDeliveryWorker();
-    if (!serverConfig.publicDemoMode) startDigestDeliveryWorker();
+    if (!serverConfig.publicDemoMode) {
+      startDigestDeliveryWorker();
+      startAutomationDeliveryWorker();
+    }
   });
 }
 

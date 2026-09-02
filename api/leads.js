@@ -1,12 +1,12 @@
 import { requireUser } from "./services/auth-service.js";
 import { sendApiError } from "./services/http-response.js";
+import { captureCrmLeadFromBody } from "./services/lead-capture-service.js";
+import { importCrmLeadsFromRows } from "./services/lead-import-service.js";
+import { listCrmWorkspace } from "./services/lead-workspace-service.js";
 import {
-  captureCrmLeadFromBody,
-  importCrmLeadsFromRows,
   LeadValidationError,
-  listCrmWorkspace,
   PipelineStageValidationError,
-} from "./services/lead-processing-service.js";
+} from "./services/lead-validation-service.js";
 
 export default async function handler(request, response) {
   let user;

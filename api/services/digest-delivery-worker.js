@@ -27,7 +27,9 @@ async function runOnce() {
       lastSentAtByWorkspace,
       now: new Date(),
     });
-    if (result.sent > 0) {
+    if (result.configError) {
+      logError("digest.worker.config_invalid", { message: result.configError });
+    } else if (result.sent > 0) {
       logInfo("digest.worker.sent", {
         sent: result.sent,
         skipped: result.skipped,
