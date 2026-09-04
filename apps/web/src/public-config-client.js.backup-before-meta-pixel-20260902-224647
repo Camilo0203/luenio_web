@@ -6,7 +6,6 @@ export function getPublicConfig() {
   if (!configPromise) {
     configPromise = fetchPublicConfig().catch(() => ({
       gaMeasurementId: null,
-      metaPixelId: null,
       analyticsEnabled: false,
       turnstileSiteKey: null,
       turnstileRequired: false,

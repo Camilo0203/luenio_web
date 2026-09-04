@@ -20,8 +20,7 @@ export default async function handler(request, response) {
   const sentryDsn = getEnv("SENTRY_DSN_PUBLIC") || getEnv("SENTRY_DSN") || null;
   return response.status(200).json({
     gaMeasurementId: analytics.gaMeasurementId || null,
-    metaPixelId: analytics.metaPixelId || null,
-    analyticsEnabled: Boolean(analytics.gaMeasurementId || analytics.metaPixelId),
+    analyticsEnabled: Boolean(analytics.gaMeasurementId),
     agencyCrmEnabled: crm.enabled,
     publicBillingEnabled: stripe.publicBillingEnabled,
     turnstileSiteKey: turnstile.siteKey || null,

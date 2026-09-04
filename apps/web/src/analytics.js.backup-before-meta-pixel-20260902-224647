@@ -3,7 +3,6 @@ import { getPublicConfig } from "./public-config-client.js";
 const consentKey = "luenio.analytics.consent";
 const eventKey = "luenio.analytics.events";
 let measurementId = null;
-let pixelId = null;
 let analyticsLoaded = false;
 
 const sensitivePropertyKeys = new Set([
@@ -58,7 +57,7 @@ consentCommand("default", {
 });
 
 function loadAnalytics() {
-  if ((!measurementId && !pixelId) || analyticsLoaded) return;
+  if (!measurementId || analyticsLoaded) return;
   analyticsLoaded = true;
   consentCommand("update", {
     analytics_storage: "granted",
@@ -66,42 +65,12 @@ function loadAnalytics() {
     ad_user_data: "denied",
     ad_personalization: "denied",
   });
-  if (measurementId) {
-    const script = document.createElement("script");
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
-    document.head.append(script);
-    window.gtag("js", new Date());
-    window.gtag("config", measurementId, { anonymize_ip: true });
-  }
-  loadMetaPixel();
-}
-
-// Coincidencias avanzadas automáticas quedan desactivadas a propósito: no se
-// manda correo/telefono del cliente a Meta sin una decision explicita aparte
-// de la de analítica general.
-function loadMetaPixel() {
-  if (!pixelId || window.fbq) return;
-  /* eslint-disable */
-  !(function (f, b, e, v, n, t, s) {
-    if (f.fbq) return;
-    n = f.fbq = function () {
-      n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
-    };
-    if (!f._fbq) f._fbq = n;
-    n.push = n;
-    n.loaded = !0;
-    n.version = "2.0";
-    n.queue = [];
-    t = b.createElement(e);
-    t.async = !0;
-    t.src = v;
-    s = b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t, s);
-  })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
-  /* eslint-enable */
-  window.fbq("init", pixelId);
-  window.fbq("track", "PageView");
+  const script = document.createElement("script");
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`;
+  document.head.append(script);
+  window.gtag("js", new Date());
+  window.gtag("config", measurementId, { anonymize_ip: true });
 }
 
 // Storage can be unavailable (Safari private mode, blocked third-party storage).
@@ -137,7 +106,7 @@ function showBanner() {
   banner.className = "consent-banner";
   banner.dataset.consentBanner = "";
   banner.setAttribute("aria-label", "Preferencias de privacidad");
-  banner.innerHTML = `<p><strong>Privacidad bajo tu control.</strong> Usamos analítica para mejorar Luenio. No cargamos herramientas de analítica ni de publicidad de terceros sin tu permiso.</p><div><button type="button" data-consent="necessary">Solo necesarias</button><button type="button" data-consent="accepted">Aceptar analítica</button></div>`;
+  banner.innerHTML = `<p><strong>Privacidad bajo tu control.</strong> Usamos analítica para mejorar Luenio. No cargamos Google Analytics sin tu permiso.</p><div><button type="button" data-consent="necessary">Solo necesarias</button><button type="button" data-consent="accepted">Aceptar analítica</button></div>`;
   banner.addEventListener("click", (event) => {
     const button = event.target.closest("[data-consent]");
     if (button) saveConsent(button.dataset.consent);
@@ -148,7 +117,6 @@ function showBanner() {
 export async function initAnalytics() {
   const config = await getPublicConfig();
   measurementId = config.gaMeasurementId;
-  pixelId = config.metaPixelId;
   if (!config.analyticsEnabled) return;
   if (!document.querySelector("[data-cookie-settings]")) {
     const footer = document.querySelector("footer");
@@ -185,5 +153,4 @@ export function trackEvent(name, properties = {}) {
     // Analytics must never interrupt conversion paths.
   }
   if (analyticsLoaded && window.gtag) window.gtag("event", event.name, safeProperties);
-  if (analyticsLoaded && window.fbq) window.fbq("trackCustom", event.name, safeProperties);
 }

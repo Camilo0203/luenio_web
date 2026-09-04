@@ -23,18 +23,6 @@ if (root) {
   const browserFrame = stage?.querySelector(".hc-browser");
   const demoButtons = [...document.querySelectorAll("[data-demo-target]")];
   const demoShots = [...document.querySelectorAll("[data-demo-shot]")];
-
-  // Solo la primera imagen trae src; las otras se piden al hacer clic en su
-  // pestana, y esa espera (red + decode del AVIF) se sentia como que el
-  // selector no respondia, sobre todo en celular. Se precargan en cuanto el
-  // navegador tiene un respiro: loadDemoShot ya evita relanzar la carga si
-  // el clic real llega antes de que esto corra.
-  const prefetchDemoShots = () => demoShots.forEach((shot) => loadDemoShot(shot));
-  if ("requestIdleCallback" in globalThis) {
-    globalThis.requestIdleCallback(prefetchDemoShots, { timeout: 4000 });
-  } else {
-    setTimeout(prefetchDemoShots, 1500);
-  }
   const activeDemoLink = document.querySelector("[data-active-demo-link]");
   const mobileDemoLink = document.querySelector("[data-mobile-demo-link]");
   const demoStatus = document.querySelector("[data-demo-status]");

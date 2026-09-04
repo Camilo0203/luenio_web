@@ -173,12 +173,17 @@
           <section id="contacto-legal">
             <h2>8. Contacto</h2>
             <p>Analizamos cada solicitud con el contexto del proyecto y la propuesta aceptada.</p>
+            <!-- LUENIO_LEGAL_IDENTITY_PENDING
+                 Antes de publicar (y antes de poner LEGAL_IDENTITY_READY=true) este bloque debe
+                 nombrar al responsable con: nombre completo o razon social, numero de identificacion
+                 fiscal (NIT o cedula) y domicilio fisico completo, no solo la ciudad.
+                 El correo y el telefono de abajo son canales de contacto, no identifican al responsable.
+                 Requisitos y verificacion: docs/CHECKLIST-PRODUCCION.md
+            -->
             <div class="legal-contact">
-              <strong>Responsable:</strong> Juan Camilo Cordoba Lopez &middot; NIT 10167146493<br />
-              Carrera 93B #34-15 Sur, Bogotá D.C., Colombia<br /><br />
               <strong>Pagos y reembolsos</strong><br /><a href="mailto:contacto@luenio.com"
                 >contacto@luenio.com</a
-              ><br />+57 319 320 3702
+              ><br />+57 319 320 3702<br />Bogotá D.C., Colombia
             </div>
           </section>
         </article>
