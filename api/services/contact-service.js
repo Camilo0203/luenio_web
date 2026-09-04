@@ -18,7 +18,12 @@ export class PublicInquiryValidationError extends Error {
   }
 }
 
-const CONTACT_WEBHOOK_TIMEOUT_MS = 3_000;
+// The n8n workflow chains several sequential Chatwoot/WhatsApp API calls
+// (search contact, create conversation, send template, persist CRM) before
+// it responds; real runs take 3.5-4.2s. A shorter timeout here marks a
+// successful delivery as failed, which queues a retry that also succeeds --
+// duplicating the WhatsApp send on every retry until the attempt cap is hit.
+const CONTACT_WEBHOOK_TIMEOUT_MS = 12_000;
 
 function normalizeInquiry(body = {}) {
   return {
