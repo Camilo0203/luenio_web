@@ -667,6 +667,28 @@ select {
   font-size: 13px;
 }
 
+.footer-credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #8fa0b7;
+}
+
+.footer-credit__heart {
+  flex-shrink: 0;
+  color: #ff6b81;
+}
+
+.footer-credit__mark {
+  width: 14px;
+  height: auto;
+  display: block;
+}
+
+html[data-theme="dark"] .footer-credit__mark {
+  content: url("/brand/isotipo-blanco.svg?v=202608");
+}
+
 /* Quote page */
 .quote-hero .eyebrow,
 .legal-hero .eyebrow {
@@ -1376,6 +1398,13 @@ body.modal-open .wa-widget__trigger {
   .site-footer__inner,
   .site-footer__bottom {
     width: min(calc(100% - 40px), var(--container));
+  }
+
+  .site-footer__bottom {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    row-gap: 10px;
   }
 
   .section-shell {
