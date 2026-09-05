@@ -234,7 +234,10 @@ try {
   const storedEvent = await database.query(
     "select count(*)::int as n from public.events where lead_id = 'lead_test'",
   );
-  assert(storedEvent.rows[0]?.n === 1, "luenio_store_crm_record must persist events atomically with the lead.");
+  assert(
+    storedEvent.rows[0]?.n === 1,
+    "luenio_store_crm_record must persist events atomically with the lead.",
+  );
   const storedDeliveries = await database.query(
     "select count(*)::int as n from public.automation_deliveries where lead_id = 'lead_test' and status = 'pending'",
   );
@@ -260,7 +263,10 @@ try {
   const claimedAutomation = await database.query(`
     select * from public.luenio_claim_automation_deliveries(now(), 10, 300, 'lead_test')
   `);
-  assert(claimedAutomation.rows.length === 2, "Both queued deliveries for the lead must be claimable.");
+  assert(
+    claimedAutomation.rows.length === 2,
+    "Both queued deliveries for the lead must be claimable.",
+  );
   assert(
     claimedAutomation.rows.every((row) => row.delivery_attempts === 1),
     "Claiming must increment attempts atomically.",
@@ -276,7 +282,10 @@ try {
   const completedSent = await database.query(
     `select * from public.luenio_complete_automation_delivery('${sentDelivery}', true, 200, now())`,
   );
-  assert(completedSent.rows[0]?.delivery_status === "sent", "A successful delivery must reach terminal state 'sent'.");
+  assert(
+    completedSent.rows[0]?.delivery_status === "sent",
+    "A successful delivery must reach terminal state 'sent'.",
+  );
 
   const completedRetry = await database.query(
     `select * from public.luenio_complete_automation_delivery('${failedDelivery}', false, 503, now())`,
@@ -288,11 +297,16 @@ try {
   const retriedRow = await database.query(
     `select next_attempt_at > now() as backoff_applied from public.automation_deliveries where id = '${failedDelivery}'`,
   );
-  assert(retriedRow.rows[0]?.backoff_applied, "A retry must push next_attempt_at into the future (backoff).");
+  assert(
+    retriedRow.rows[0]?.backoff_applied,
+    "A retry must push next_attempt_at into the future (backoff).",
+  );
 
   let invalidClaimRejected = false;
   try {
-    await database.query("select * from public.luenio_claim_automation_deliveries(now(), 999, 300, null)");
+    await database.query(
+      "select * from public.luenio_claim_automation_deliveries(now(), 999, 300, null)",
+    );
   } catch {
     invalidClaimRejected = true;
   }

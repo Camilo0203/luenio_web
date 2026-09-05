@@ -7,7 +7,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-const fixtureDir = path.join(process.cwd(), "test-results", `.automation-delivery-fixture-${process.pid}`);
+const fixtureDir = path.join(
+  process.cwd(),
+  "test-results",
+  `.automation-delivery-fixture-${process.pid}`,
+);
 const fixturePath = path.join(fixtureDir, "leads-db.json");
 
 fs.mkdirSync(fixtureDir, { recursive: true });
@@ -40,7 +44,9 @@ function crmRecordBundle({ leadId, actions }) {
     },
     action: { id: `action_${leadId}`, userId: "auto_ws", leadId, workflow: "hot_lead_workflow" },
     notification: { id: `notif_${leadId}`, userId: "auto_ws", leadId, summary: "New hot lead" },
-    events: [{ id: `event_${leadId}`, userId: "auto_ws", leadId, type: "lead.created", timestamp: now }],
+    events: [
+      { id: `event_${leadId}`, userId: "auto_ws", leadId, type: "lead.created", timestamp: now },
+    ],
     deliveries: actions.map((action) => ({ action, payload: { leadId, action } })),
   };
 }
@@ -48,7 +54,9 @@ function crmRecordBundle({ leadId, actions }) {
 try {
   // --- storeCrmRecord: atomic creation of queued delivery rows ---
 
-  await storeCrmRecord(crmRecordBundle({ leadId: "lead_a", actions: ["send_webhook", "send_crm_webhook"] }));
+  await storeCrmRecord(
+    crmRecordBundle({ leadId: "lead_a", actions: ["send_webhook", "send_crm_webhook"] }),
+  );
 
   const dataAfterStore = await listCrmData("auto_ws");
   assert.equal(dataAfterStore.leads.length, 1, "storeCrmRecord must persist the lead.");
@@ -57,7 +65,11 @@ try {
   {
     const idA = "automation_delivery_lead_a_send_webhook";
     const idB = "automation_delivery_lead_a_send_crm_webhook";
-    assert.notEqual(idA, idB, "Two different actions for the same lead must get distinct delivery ids.");
+    assert.notEqual(
+      idA,
+      idB,
+      "Two different actions for the same lead must get distinct delivery ids.",
+    );
   }
 
   // --- claim: exclusion between concurrent claims ---
@@ -106,7 +118,11 @@ try {
   // --- Not-yet-due retries are not claimable; simulate the wait, then reclaim ---
   {
     const tooSoon = await claimAutomationDeliveries({ limit: 10, leadId: "lead_a" });
-    assert.equal(tooSoon.length, 0, "A retry with a future nextAttemptAt must not be claimable yet.");
+    assert.equal(
+      tooSoon.length,
+      0,
+      "A retry with a future nextAttemptAt must not be claimable yet.",
+    );
   }
 
   // --- Lock expiry: a claim that's never completed must self-heal after the lock window ---
@@ -141,17 +157,27 @@ try {
       const claimed = await claimAutomationDeliveries({ limit: 10, leadId: "lead_c" });
       assert.equal(claimed.length, 1, `Attempt ${attempt} must still be claimable before the cap.`);
       deliveryId = claimed[0].deliveryId;
-      const result = await completeAutomationDelivery({ deliveryId, succeeded: false, httpStatus: 500 });
+      const result = await completeAutomationDelivery({
+        deliveryId,
+        succeeded: false,
+        httpStatus: 500,
+      });
       if (attempt < 10) {
         assert.equal(result.status, "retry", `Attempt ${attempt} of 10 must still retry.`);
         // Force the next attempt due immediately instead of waiting out backoff.
         const fixture = JSON.parse(fs.readFileSync(fixturePath, "utf8"));
         fixture.automationDeliveries = fixture.automationDeliveries.map((delivery) =>
-          delivery.id === deliveryId ? { ...delivery, nextAttemptAt: new Date().toISOString() } : delivery,
+          delivery.id === deliveryId
+            ? { ...delivery, nextAttemptAt: new Date().toISOString() }
+            : delivery,
         );
         fs.writeFileSync(fixturePath, JSON.stringify(fixture));
       } else {
-        assert.equal(result.status, "dead", "The 10th consecutive failure must reach the terminal 'dead' state.");
+        assert.equal(
+          result.status,
+          "dead",
+          "The 10th consecutive failure must reach the terminal 'dead' state.",
+        );
       }
     }
     const afterDead = await claimAutomationDeliveries({ limit: 10, leadId: "lead_c" });
@@ -165,7 +191,10 @@ try {
     // exercises a fresh module instance against the same on-disk fixture,
     // the same way a real process restart would re-read the same file.
     const fresh = await import(`../db/storage.js?restart=${Date.now()}`);
-    const claimedAfterRestart = await fresh.claimAutomationDeliveries({ limit: 10, leadId: "lead_d" });
+    const claimedAfterRestart = await fresh.claimAutomationDeliveries({
+      limit: 10,
+      leadId: "lead_d",
+    });
     assert.equal(
       claimedAfterRestart.length,
       1,

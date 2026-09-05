@@ -8,7 +8,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const fixtureDir = path.join(process.cwd(), "test-results", `.digest-delivery-fixture-${process.pid}`);
+const fixtureDir = path.join(
+  process.cwd(),
+  "test-results",
+  `.digest-delivery-fixture-${process.pid}`,
+);
 const fixturePath = path.join(fixtureDir, "leads-db.json");
 const now = new Date("2026-07-22T15:00:00.000Z");
 const dueAt = "2026-07-22T09:00:00.000Z"; // before `now` on the same local day -> due today
@@ -85,10 +89,22 @@ try {
     const result = await deliverWorkspaceDigests({ now });
 
     assert(!fetchCalled, "Missing DIGEST_WEBHOOK_TOKEN in production must not attempt any send.");
-    assert(result.sent === 0 && result.skipped === 0, "Unconfigured digest delivery must be a no-op.");
-    assert(result.workspaceCount === 0, "Unconfigured digest delivery must not enumerate workspaces.");
-    assert(Array.isArray(result.results) && result.results.length === 0, "results must stay empty.");
-    assert(result.configError === undefined, "Missing token is 'not configured', not a config error.");
+    assert(
+      result.sent === 0 && result.skipped === 0,
+      "Unconfigured digest delivery must be a no-op.",
+    );
+    assert(
+      result.workspaceCount === 0,
+      "Unconfigured digest delivery must not enumerate workspaces.",
+    );
+    assert(
+      Array.isArray(result.results) && result.results.length === 0,
+      "results must stay empty.",
+    );
+    assert(
+      result.configError === undefined,
+      "Missing token is 'not configured', not a config error.",
+    );
 
     process.env.DIGEST_WEBHOOK_TOKEN = "digest-test-token-32-characters-min";
   }
@@ -109,12 +125,18 @@ try {
     const result = await deliverWorkspaceDigests({ now });
 
     assert(!fetchCalled, "An invalid webhook URL must not reach fetch.");
-    assert(typeof result.configError === "string" && result.configError.length > 0, "configError must be reported.");
+    assert(
+      typeof result.configError === "string" && result.configError.length > 0,
+      "configError must be reported.",
+    );
     assert(
       result.sent === 0 && result.skipped === 0 && result.workspaceCount === 0,
       "A config error must short-circuit before touching any workspace.",
     );
-    assert(Array.isArray(result.results) && result.results.length === 0, "results must stay empty.");
+    assert(
+      Array.isArray(result.results) && result.results.length === 0,
+      "results must stay empty.",
+    );
 
     process.env.NODE_ENV = "test";
     process.env.DIGEST_WEBHOOK_URL = "https://digest.example.com/webhook";
@@ -164,7 +186,8 @@ try {
       "A thrown delivery error must be marked network_error, matching the pre-refactor contract.",
     );
     assert(
-      byWorkspace.digest_ws_http?.status === "http_error" && byWorkspace.digest_ws_http?.httpStatus === 503,
+      byWorkspace.digest_ws_http?.status === "http_error" &&
+        byWorkspace.digest_ws_http?.httpStatus === 503,
       "A non-2xx response must be marked http_error with the original httpStatus.",
     );
   }

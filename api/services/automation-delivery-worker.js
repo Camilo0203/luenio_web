@@ -34,7 +34,10 @@ async function runOnce() {
 
 function hasAnyConfiguredTarget(config) {
   return Boolean(
-    config.webhookUrl || config.crmWebhookUrl || config.whatsappWebhookUrl || config.emailWebhookUrl,
+    config.webhookUrl ||
+    config.crmWebhookUrl ||
+    config.whatsappWebhookUrl ||
+    config.emailWebhookUrl,
   );
 }
 

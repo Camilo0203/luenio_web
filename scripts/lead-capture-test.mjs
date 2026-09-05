@@ -21,16 +21,13 @@ const previousDbPath = process.env.LUENIO_LOCAL_DB_PATH;
 process.env.NODE_ENV = "test";
 process.env.LUENIO_LOCAL_DB_PATH = fixturePath;
 
-const { normalizeLeadInput, processCrmLead, captureCrmLeadFromBody } = await import(
-  "../api/services/lead-capture-service.js"
-);
-const { LeadValidationError: ValidationErrorFromValidationService } = await import(
-  "../api/services/lead-validation-service.js"
-);
+const { normalizeLeadInput, processCrmLead, captureCrmLeadFromBody } =
+  await import("../api/services/lead-capture-service.js");
+const { LeadValidationError: ValidationErrorFromValidationService } =
+  await import("../api/services/lead-validation-service.js");
 // The exact same import api/process.js uses for its `instanceof` check.
-const { LeadValidationError: ValidationErrorAsImportedByProcessHandler } = await import(
-  "../api/services/lead-request-router.js"
-);
+const { LeadValidationError: ValidationErrorAsImportedByProcessHandler } =
+  await import("../api/services/lead-request-router.js");
 
 try {
   // --- normalizeLeadInput: normalize (trim/limit) then validate, composed ---
@@ -47,10 +44,15 @@ try {
   }
 
   assert.throws(
-    () => normalizeLeadInput({ name: "   ", business: "Nova", phone: "+573001112233", service: "CRM" }),
+    () =>
+      normalizeLeadInput({ name: "   ", business: "Nova", phone: "+573001112233", service: "CRM" }),
     (error) => {
       assert.ok(error instanceof ValidationErrorFromValidationService);
-      assert.deepEqual(error.missingFields, ["name"], "A whitespace-only field must count as missing.");
+      assert.deepEqual(
+        error.missingFields,
+        ["name"],
+        "A whitespace-only field must count as missing.",
+      );
       return true;
     },
     "Normalization must run before validation, so a whitespace-only name is caught.",
@@ -95,7 +97,11 @@ try {
   assert.ok(captured.response.leadId, "Response must carry the generated lead id.");
   assert.equal(captured.response.userId, "u1");
   assert.ok(Array.isArray(captured.response.integrations), "Automation results must be surfaced.");
-  assert.equal(captured.log.leadId, captured.response.leadId, "Stored log must match the response.");
+  assert.equal(
+    captured.log.leadId,
+    captured.response.leadId,
+    "Stored log must match the response.",
+  );
 
   // processCrmLead directly (used by both capture and the /api/process fallback)
   const secondLead = normalizeLeadInput({

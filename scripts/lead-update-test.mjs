@@ -35,9 +35,8 @@ const previousDbPath = process.env.LUENIO_LOCAL_DB_PATH;
 process.env.NODE_ENV = "test";
 process.env.LUENIO_LOCAL_DB_PATH = fixturePath;
 
-const { normalizeLeadUpdates, applyLeadUpdate, bulkUpdateLeads } = await import(
-  "../api/services/lead-update-service.js"
-);
+const { normalizeLeadUpdates, applyLeadUpdate, bulkUpdateLeads } =
+  await import("../api/services/lead-update-service.js");
 const { PipelineStageValidationError } = await import("../api/services/lead-validation-service.js");
 
 try {

@@ -58,7 +58,11 @@ try {
 
     assert.equal(result.response.mode, "import");
     assert.equal(result.response.imported, 2, "Two valid rows must import.");
-    assert.equal(result.response.failed, 1, "One incomplete row must fail without blocking the others.");
+    assert.equal(
+      result.response.failed,
+      1,
+      "One incomplete row must fail without blocking the others.",
+    );
     assert.equal(result.response.results.length, 3, "One result per input row, in order.");
     assert.equal(result.response.results[0].ok, true);
     assert.ok(result.response.results[0].leadId);

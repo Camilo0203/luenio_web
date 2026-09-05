@@ -7,7 +7,11 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-const fixtureDir = path.join(process.cwd(), "test-results", `.lead-workspace-fixture-${process.pid}`);
+const fixtureDir = path.join(
+  process.cwd(),
+  "test-results",
+  `.lead-workspace-fixture-${process.pid}`,
+);
 const fixturePath = path.join(fixtureDir, "leads-db.json");
 
 fs.mkdirSync(fixtureDir, { recursive: true });
@@ -66,7 +70,11 @@ try {
   {
     const result = await listCrmWorkspace(owner, { q: "nova" });
     assert.equal(result.leads.length, 1);
-    assert.equal(result.leads[0].id, "lead_old", "Search must match on business name, case-insensitively.");
+    assert.equal(
+      result.leads[0].id,
+      "lead_old",
+      "Search must match on business name, case-insensitively.",
+    );
   }
 
   {
@@ -100,7 +108,10 @@ try {
     const strangerCaller = { id: "ws_1_ghost", businessId: "ws_1", email: "ghost@nova.test" };
     const result = await listCrmWorkspace(strangerCaller, {});
     const member = result.members.find((row) => row.id === "ws_1_ghost");
-    assert.ok(member, "The current caller must be synthesized into members even if absent from the local DB.");
+    assert.ok(
+      member,
+      "The current caller must be synthesized into members even if absent from the local DB.",
+    );
     assert.equal(member.email, "ghost@nova.test");
   }
 

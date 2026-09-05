@@ -9,7 +9,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const fixtureDir = path.join(process.cwd(), "test-results", `.automation-privacy-fixture-${process.pid}`);
+const fixtureDir = path.join(
+  process.cwd(),
+  "test-results",
+  `.automation-privacy-fixture-${process.pid}`,
+);
 const fixturePath = path.join(fixtureDir, "leads-db.json");
 fs.mkdirSync(fixtureDir, { recursive: true });
 fs.writeFileSync(fixturePath, JSON.stringify({ businesses: [{ id: "priv_ws" }], leads: [] }));

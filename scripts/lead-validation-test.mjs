@@ -55,7 +55,11 @@ assert.equal(
   "An explicit empty-string field still counts (checked with !== undefined, not truthiness).",
 );
 assert.equal(isLeadUpdateRequest({ leadId: "l1", contactLogEntry: { summary: "Llamó" } }), true);
-assert.equal(isLeadUpdateRequest({ status: "qualified" }), false, "No leadId disqualifies even with other fields.");
+assert.equal(
+  isLeadUpdateRequest({ status: "qualified" }),
+  false,
+  "No leadId disqualifies even with other fields.",
+);
 
 // isPipelineOnlyUpdate
 assert.equal(isPipelineOnlyUpdate({ status: "qualified" }), true);
@@ -65,7 +69,11 @@ assert.equal(
   false,
   "Any non-pipeline key disqualifies the fast path.",
 );
-assert.equal(isPipelineOnlyUpdate({ notes: "x" }), false, "No status key can never be pipeline-only.");
+assert.equal(
+  isPipelineOnlyUpdate({ notes: "x" }),
+  false,
+  "No status key can never be pipeline-only.",
+);
 assert.equal(isPipelineOnlyUpdate({}), false);
 
 // leadMatchesQuery

@@ -37,9 +37,8 @@ const previousDbPath = process.env.LUENIO_LOCAL_DB_PATH;
 process.env.NODE_ENV = "test";
 process.env.LUENIO_LOCAL_DB_PATH = fixturePath;
 
-const { processCrmRequestBody, LeadValidationError, PipelineStageValidationError } = await import(
-  "../api/services/lead-request-router.js"
-);
+const { processCrmRequestBody, LeadValidationError, PipelineStageValidationError } =
+  await import("../api/services/lead-request-router.js");
 
 try {
   const user = { id: "u1", businessId: "router_ws", plan: "starter" };
@@ -50,7 +49,11 @@ try {
     assert.equal(result.response.ok, true);
     assert.equal(result.response.mode, "digest");
     assert.ok(result.response.digest, "digest mode must return a digest payload.");
-    assert.equal(result.response.digest.totals.leads, 1, "digest must be scoped to the caller's workspace.");
+    assert.equal(
+      result.response.digest.totals.leads,
+      1,
+      "digest must be scoped to the caller's workspace.",
+    );
   }
 
   // --- import mode ---
@@ -116,7 +119,11 @@ try {
       user,
     });
     assert.equal(result.response.ok, true);
-    assert.equal(result.response.mode, "processed", "The default path must use the 'processed' response shape, distinct from capture's shape.");
+    assert.equal(
+      result.response.mode,
+      "processed",
+      "The default path must use the 'processed' response shape, distinct from capture's shape.",
+    );
     assert.ok(result.response.lead, "processed mode must echo the normalized lead.");
     assert.ok(result.response.action, "processed mode must include the automation action log.");
   }

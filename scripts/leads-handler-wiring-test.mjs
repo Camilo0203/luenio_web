@@ -7,10 +7,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 
-const leadsHandlerSource = fs.readFileSync(
-  path.join(process.cwd(), "api", "leads.js"),
-  "utf8",
-);
+const leadsHandlerSource = fs.readFileSync(path.join(process.cwd(), "api", "leads.js"), "utf8");
 assert(
   !leadsHandlerSource.includes("lead-processing-service"),
   "api/leads.js must not reference lead-processing-service.js at all after this extraction.",
@@ -31,9 +28,8 @@ process.env.NODE_ENV = "test";
 process.env.LUENIO_LOCAL_DB_PATH = fixturePath;
 
 // The exact same import api/leads.js uses post-decoupling.
-const { LeadValidationError, PipelineStageValidationError } = await import(
-  "../api/services/lead-validation-service.js"
-);
+const { LeadValidationError, PipelineStageValidationError } =
+  await import("../api/services/lead-validation-service.js");
 const { captureCrmLeadFromBody } = await import("../api/services/lead-capture-service.js");
 const { importCrmLeadsFromRows } = await import("../api/services/lead-import-service.js");
 const { listCrmWorkspace } = await import("../api/services/lead-workspace-service.js");
@@ -54,7 +50,11 @@ try {
   );
 
   const workspace = await listCrmWorkspace(user, {});
-  assert.equal(workspace.ok, true, "listCrmWorkspace must remain callable from its new canonical path.");
+  assert.equal(
+    workspace.ok,
+    true,
+    "listCrmWorkspace must remain callable from its new canonical path.",
+  );
 
   console.info("api/leads.js wiring guard passed");
 } finally {
