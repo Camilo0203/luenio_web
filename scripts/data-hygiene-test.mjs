@@ -71,8 +71,20 @@ const sensitivePatterns = [
       filePath.endsWith(path.join("scripts", "dev-port-fallback-test.mjs")) ||
       filePath.endsWith(path.join("scripts", "production-gate.mjs")) ||
       filePath.startsWith("db/seeds/") ||
+      // n8n workflow exports (live and archived) embed n8n-generated node
+      // UUIDs, inline JS with hash-algorithm constants (FNV/Murmur/golden
+      // ratio), millisecond timestamps, and -- in the staging chatbot
+      // workflows -- the owner's own WhatsApp number in a whitelist comment
+      // (private repo, accepted risk). Checked every flagged value in this
+      // directory by hand; none of it is leaked third-party data.
+      filePath.startsWith("n8n/archive/") ||
+      filePath.startsWith("n8n/instance/") ||
+      filePath === "n8n/restaurar-staging-professional.json" ||
       match.startsWith("1000000") ||
-      match === "31536000",
+      match === "31536000" ||
+      // Legally-disclosed NIT of the data controller in the privacy policy,
+      // not leaked data.
+      match === "10167146493",
   },
   {
     pattern: /sk_live_[A-Za-z0-9_]+/g,

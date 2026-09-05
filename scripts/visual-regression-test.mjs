@@ -319,6 +319,11 @@ async function preparePage(page, scenario, baseUrl) {
     waitUntil: "domcontentloaded",
     timeout: 15_000,
   });
+  // domcontentloaded fires before web fonts finish loading/swapping; capturing
+  // before that race settles produces baseline-vs-run diffs from fallback-font
+  // metrics rather than any real visual change (see browser-e2e-test.mjs's
+  // same wait before its own layout measurements).
+  await page.evaluate(() => globalThis.document.fonts.ready);
   await page.addStyleTag({
     content: `
       *, *::before, *::after {

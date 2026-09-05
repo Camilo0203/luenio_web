@@ -455,7 +455,7 @@ async function runSmoke() {
     assert(publicConfig.ok, "Public config route must return 200.");
     assert(
       Object.keys(publicConfigBody).sort().join(",") ===
-        "agencyCrmEnabled,analyticsEnabled,environment,gaMeasurementId,publicBillingEnabled,sentryDsn,turnstileRequired,turnstileSiteKey",
+        "agencyCrmEnabled,analyticsEnabled,environment,gaMeasurementId,metaPixelId,publicBillingEnabled,sentryDsn,turnstileRequired,turnstileSiteKey",
       "Public config must expose only allowlisted browser configuration.",
     );
     assert(

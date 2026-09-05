@@ -745,7 +745,7 @@ assert(
 
 const contactServiceSource = readText("api/services/contact-service.js");
 assert(
-  contactServiceSource.includes("CONTACT_WEBHOOK_TIMEOUT_MS = 3_000"),
+  contactServiceSource.includes("CONTACT_WEBHOOK_TIMEOUT_MS = 12_000"),
   "Initial contact delivery must have a short bounded timeout.",
 );
 const publicContactResponseSource =

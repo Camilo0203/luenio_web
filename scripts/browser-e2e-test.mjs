@@ -695,6 +695,10 @@ async function runBrowserChecks(baseUrl) {
         `${slug} disclosure must be visible in the first desktop viewport: ${JSON.stringify(landingDisclosure)}`,
       );
       if (slug === "agencies") {
+        // Match the fonts.ready wait used before the gym measurement above --
+        // without it this page's WhatsApp trigger can still be laid out with
+        // fallback-font metrics, producing a false width mismatch.
+        await page.evaluate(() => globalThis.document.fonts.ready);
         const sharedWhatsappPresentation = await getWhatsappPresentation(page);
         assert(
           gymWhatsappPresentation.background === sharedWhatsappPresentation.background &&
