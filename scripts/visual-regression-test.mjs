@@ -2,11 +2,17 @@ import crypto from "node:crypto";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import sharp from "sharp";
-import { chromium } from "playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
 import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
+import {
+  assert,
+  compareImages,
+  createLocalRequestFilter,
+  defaultContextOptions,
+  launchBrowser,
+  maxDiffRatio,
+} from "./visual-regression-shared.mjs";
 
 const UPDATE_BASELINES = process.argv.includes("--update");
 const scenarioArg = process.argv.find((argument) => argument.startsWith("--scenario="));
@@ -16,27 +22,15 @@ const finalResultsDir = path.join(process.cwd(), "test-results", "visual");
 const resultsDir = path.join(process.cwd(), "test-results", `.visual-${process.pid}`);
 const fixtureDir = path.join(process.cwd(), "test-results", `.visual-fixture-${process.pid}`);
 const localDbPath = path.join(fixtureDir, "leads-db.json");
-const maxDiffRatio = 0.005;
-// Chromium and system Chrome rasterize scaled AVIF text edges slightly differently.
-// Keep geometry strict (0.5% of pixels) while ignoring imperceptible edge antialiasing.
-const channelTolerance = 48;
-// Twice in CI, headless Chromium has stalled context.newPage() indefinitely
-// after ~12 sequential pages on the same context (always at the same
-// scenario) -- not a slow render, a DevTools command that never resolves or
-// rejects. Bound each scenario so a stall costs seconds, not the whole
-// step's budget.
-const scenarioTimeoutMs = 30_000;
-
-function withTimeout(promise, timeoutMs, label) {
-  let timer;
-  const timeout = new Promise((_resolve, reject) => {
-    timer = setTimeout(
-      () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
-      timeoutMs,
-    );
-  });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-}
+const workerScriptPath = path.join(process.cwd(), "scripts", "visual-capture-worker.mjs");
+// Twice in CI, headless Chromium wedged its DevTools pipe indefinitely after
+// ~12 sequential pages on the same browser context -- not a slow render, a
+// stall that blocks the whole Node event loop, so a same-process timeout
+// (e.g. Promise.race with setTimeout) never fires either: the timer itself
+// can't run. Each scenario now captures in its own child process, supervised
+// from here with a real OS-level timeout+kill, so a stall costs seconds
+// instead of the whole step's budget regardless of what's blocked inside it.
+const captureTimeoutMs = 45_000;
 
 // Scenario names key the baseline PNGs in tests/visual-baselines, so they stay
 // the sector id; only the list itself is derived.
@@ -146,10 +140,6 @@ if (requestedScenario && selectedScenarios.length === 0) {
   );
 }
 
-function assert(condition, message) {
-  if (!condition) throw new Error(message);
-}
-
 async function startServer() {
   const port = await getFreePort();
   fs.mkdirSync(fixtureDir, { recursive: true });
@@ -201,23 +191,6 @@ async function startServer() {
     baseUrl,
     stop: () => stopTestProcess(server, { label: "visual test server" }),
   };
-}
-
-async function launchBrowser() {
-  try {
-    return await chromium.launch({ headless: true });
-  } catch (bundledError) {
-    for (const channel of ["chrome", "msedge"]) {
-      try {
-        const browser = await chromium.launch({ headless: true, channel });
-        console.info(`[visual] Using system browser channel: ${channel}`);
-        return browser;
-      } catch {
-        // Try the next installed browser.
-      }
-    }
-    throw new Error(`No Playwright browser available: ${bundledError.message}`);
-  }
 }
 
 function seedInvitation(email) {
@@ -325,160 +298,75 @@ async function authenticateContext(context, baseUrl) {
   seedVisualLeads(body.user.businessId);
 }
 
-async function preparePage(page, scenario, baseUrl) {
-  page.setDefaultNavigationTimeout(15_000);
-  page.setDefaultTimeout(15_000);
-  await page.setViewportSize({ width: scenario.width, height: scenario.height });
-  await page.addInitScript((theme) => {
-    globalThis.localStorage.setItem("luenio-theme", theme);
-  }, scenario.theme);
-  await page.goto(`${baseUrl}${scenario.path}`, {
-    waitUntil: "domcontentloaded",
-    timeout: 15_000,
-  });
-  await page.addStyleTag({
-    content: `
-      *, *::before, *::after {
-        animation-delay: 0s !important;
-        animation-duration: 0s !important;
-        caret-color: transparent !important;
-        scroll-behavior: auto !important;
-        transition-delay: 0s !important;
-        transition-duration: 0s !important;
-      }
-    `,
-  });
-  if (scenario.path === "/login") {
-    await page.locator(".luenio-guard__tile").first().waitFor({ state: "visible", timeout: 8_000 });
-    await page.evaluate(() => {
-      const labels = ["Meta", "Proceso", "Cliente", "Acuerdo"];
-      const prompt = globalThis.document.querySelector(".luenio-guard__prompt");
-      if (prompt) prompt.textContent = "Haz clic en: Meta";
-      globalThis.document.querySelectorAll(".luenio-guard__tile").forEach((tile, index) => {
-        const [symbol, label] = tile.querySelectorAll("span");
-        if (symbol) symbol.textContent = ["◆", "●", "■", "▲"][index] || "●";
-        if (label) label.textContent = labels[index] || `Opción ${index + 1}`;
-      });
-    });
+async function createAuthStorageState(baseUrl) {
+  const browser = await launchBrowser();
+  try {
+    const context = await browser.newContext(defaultContextOptions);
+    await context.route("**/*", createLocalRequestFilter(baseUrl));
+    await authenticateContext(context, baseUrl);
+    const storageStatePath = path.join(fixtureDir, "auth-storage-state.json");
+    await context.storageState({ path: storageStatePath });
+    return storageStatePath;
+  } finally {
+    await browser.close();
   }
-  if (scenario.path === "/dashboard") {
-    await page.waitForFunction(
-      () => {
-        const account = globalThis.document.querySelector("#adminUser strong");
-        const leads = globalThis.document.querySelectorAll(".lead-row");
-        return (
-          !globalThis.document.body.classList.contains("admin-loading") &&
-          account &&
-          !account.textContent?.includes("Verificando") &&
-          leads.length >= 2
-        );
-      },
-      undefined,
-      { timeout: 15_000 },
-    );
-  }
-  if (scenario.path === "/app") {
-    await page.locator(".hub-card--accent").waitFor({ state: "visible", timeout: 15_000 });
-  }
-  if (scenario.path === "/crm") {
-    await page.locator(".crm-shell .ui-empty").waitFor({ state: "visible", timeout: 15_000 });
-  }
-  if (scenario.path === "/") {
-    // home-clarity.js sets the hero demo shot's src lazily and toggles this
-    // attribute off only once that image has loaded and decoded; screenshotting
-    // before then captures whatever the shot's untouched default markup looks
-    // like, not the picked demo, producing a large false diff (11.85% on
-    // home-light-desktop in CI, where nothing is cached ahead of time).
-    await page.waitForFunction(
-      () =>
-        !globalThis.document
-          .querySelector("[data-hero-stage] .hc-browser")
-          ?.hasAttribute("aria-busy"),
-      undefined,
-      { timeout: 15_000 },
-    );
-  }
-  await page.evaluate(async () => {
-    const settle = (promise, timeoutMs = 5_000) =>
-      Promise.race([
-        Promise.resolve(promise).catch(() => {}),
-        new Promise((resolve) => globalThis.setTimeout(resolve, timeoutMs)),
-      ]);
-    await settle(globalThis.document.fonts?.ready);
-    await settle(
-      Promise.all(
-        [...globalThis.document.images].map((image) =>
-          typeof image.decode === "function"
-            ? image.decode().catch(() => {})
-            : image.complete
-              ? Promise.resolve()
-              : new Promise((resolve) => {
-                  image.addEventListener("load", resolve, { once: true });
-                  image.addEventListener("error", resolve, { once: true });
-                }),
-        ),
-      ),
-    );
-  });
-  // Nested requestAnimationFrame calls are how this used to wait a couple of
-  // paint frames for layout/paint to settle after the awaits above, but
-  // headless Chromium in CI can throttle rAF to a crawl (seconds per frame,
-  // not ~16ms) -- across 44 scenarios that alone was enough to blow the
-  // gate's timeout for this step. A fixed short wait is slower than an ideal
-  // rAF would be, but nowhere near as slow as a throttled one, and is what
-  // actually determines this step's real-world runtime.
-  await page.waitForTimeout(50);
 }
 
-async function compareImages(actualPath, baselinePath, diffPath) {
-  const baseline = sharp(baselinePath);
-  const actual = sharp(actualPath);
-  const [baselineMetadata, actualMetadata] = await Promise.all([
-    baseline.metadata(),
-    actual.metadata(),
-  ]);
-  assert(
-    baselineMetadata.width === actualMetadata.width &&
-      baselineMetadata.height === actualMetadata.height,
-    `Visual dimensions changed for ${path.basename(actualPath)}: ` +
-      `${baselineMetadata.width}x${baselineMetadata.height} -> ` +
-      `${actualMetadata.width}x${actualMetadata.height}.`,
+/** Runs one scenario capture in its own child process, killing and reporting
+ * a timeout instead of ever blocking this process's own event loop. */
+async function captureScenario(scenario, baseUrl, actualPath, storageStatePath) {
+  const configPath = path.join(
+    fixtureDir,
+    `capture-${scenario.name}-${process.hrtime.bigint()}.json`,
   );
-
-  const [baselineRaw, actualRaw] = await Promise.all([
-    baseline.ensureAlpha().raw().toBuffer(),
-    actual.ensureAlpha().raw().toBuffer(),
-  ]);
-  const diffRaw = Buffer.alloc(actualRaw.length);
-  let differentPixels = 0;
-
-  for (let offset = 0; offset < actualRaw.length; offset += 4) {
-    const redDiff = Math.abs(actualRaw[offset] - baselineRaw[offset]);
-    const greenDiff = Math.abs(actualRaw[offset + 1] - baselineRaw[offset + 1]);
-    const blueDiff = Math.abs(actualRaw[offset + 2] - baselineRaw[offset + 2]);
-    const different =
-      redDiff > channelTolerance || greenDiff > channelTolerance || blueDiff > channelTolerance;
-    if (different) differentPixels += 1;
-    diffRaw[offset] = different ? 255 : Math.round(actualRaw[offset] * 0.18);
-    diffRaw[offset + 1] = different ? 32 : Math.round(actualRaw[offset + 1] * 0.18);
-    diffRaw[offset + 2] = different ? 64 : Math.round(actualRaw[offset + 2] * 0.18);
-    diffRaw[offset + 3] = 255;
+  fs.writeFileSync(
+    configPath,
+    JSON.stringify({
+      scenario,
+      baseUrl,
+      actualPath,
+      storageStatePath: scenario.authenticated ? storageStatePath : null,
+    }),
+  );
+  const child = spawn(
+    process.execPath,
+    [workerScriptPath, configPath],
+    testProcessOptions({
+      cwd: process.cwd(),
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    }),
+  );
+  let stderr = "";
+  child.stdout.on("data", (chunk) => process.stdout.write(chunk));
+  child.stderr.on("data", (chunk) => {
+    stderr += chunk.toString();
+  });
+  let timer;
+  try {
+    const outcome = await Promise.race([
+      new Promise((resolve) => {
+        child.once("error", (error) => resolve({ error }));
+        child.once("close", (code) => resolve({ code }));
+      }),
+      new Promise((resolve) => {
+        timer = setTimeout(() => resolve({ timedOut: true }), captureTimeoutMs);
+      }),
+    ]);
+    if (outcome.timedOut) {
+      await stopTestProcess(child, { label: `${scenario.name} capture`, timeoutMs: 3_000 }).catch(
+        () => {},
+      );
+      throw new Error(`stalled and was killed after ${Math.round(captureTimeoutMs / 1000)}s`);
+    }
+    if (outcome.error) throw outcome.error;
+    if (outcome.code !== 0) {
+      throw new Error(stderr.trim() || `capture worker exited with code ${outcome.code}`);
+    }
+  } finally {
+    clearTimeout(timer);
+    fs.rmSync(configPath, { force: true });
   }
-
-  const totalPixels = baselineMetadata.width * baselineMetadata.height;
-  const ratio = differentPixels / totalPixels;
-  if (ratio > maxDiffRatio) {
-    await sharp(diffRaw, {
-      raw: {
-        width: baselineMetadata.width,
-        height: baselineMetadata.height,
-        channels: 4,
-      },
-    })
-      .png()
-      .toFile(diffPath);
-  }
-  return ratio;
 }
 
 async function run() {
@@ -487,48 +375,11 @@ async function run() {
   fs.mkdirSync(resultsDir, { recursive: true });
 
   let server;
-  let browser;
-  let publicContext;
-  let authenticatedContext;
   try {
     server = await startServer();
-    const contextOptions = {
-      locale: "es-CO",
-      reducedMotion: "reduce",
-      serviceWorkers: "block",
-    };
-    const keepLocalRequests = async (route) => {
-      if (route.request().url().startsWith(server.baseUrl)) {
-        await route.continue();
-        return;
-      }
-      await route.abort();
-    };
-
-    async function launchBrowserState() {
-      const newBrowser = await launchBrowser();
-      const newPublicContext = await newBrowser.newContext(contextOptions);
-      const newAuthenticatedContext = await newBrowser.newContext(contextOptions);
-      await newPublicContext.route("**/*", keepLocalRequests);
-      await newAuthenticatedContext.route("**/*", keepLocalRequests);
-      await authenticateContext(newAuthenticatedContext, server.baseUrl);
-      return { newBrowser, newPublicContext, newAuthenticatedContext };
-    }
-
-    // A stuck context.newPage() leaves the browser's DevTools connection
-    // occupied by a command that never resolves, so even a graceful
-    // browser.close() on it would hang next -- the only reliable recovery is
-    // to skip graceful shutdown entirely and SIGKILL the process.
-    function killBrowser(target) {
-      const child = target?.process?.();
-      if (child && !child.killed) child.kill("SIGKILL");
-    }
-
-    ({
-      newBrowser: browser,
-      newPublicContext: publicContext,
-      newAuthenticatedContext: authenticatedContext,
-    } = await launchBrowserState());
+    const storageStatePath = selectedScenarios.some((scenario) => scenario.authenticated)
+      ? await createAuthStorageState(server.baseUrl)
+      : null;
 
     // Collect every scenario's outcome instead of throwing on the first
     // failure: a single stale-baseline drift (e.g. a Chromium version bump)
@@ -541,85 +392,43 @@ async function run() {
       const baselinePath = path.join(baselineDir, `${scenario.name}.png`);
       const diffPath = path.join(resultsDir, `${scenario.name}.diff.png`);
 
-      let page;
       try {
-        page = await withTimeout(
-          (async () => {
-            const context = scenario.authenticated ? authenticatedContext : publicContext;
-            const preparedPage = await context.newPage();
-            await preparePage(preparedPage, scenario, server.baseUrl);
-            await preparedPage.screenshot({
-              path: actualPath,
-              animations: "disabled",
-              caret: "hide",
-              fullPage: false,
-              scale: "css",
-            });
-            return preparedPage;
-          })(),
-          scenarioTimeoutMs,
-          scenario.name,
-        );
+        await captureScenario(scenario, server.baseUrl, actualPath, storageStatePath);
       } catch (error) {
         failures.push(`${scenario.name}: ${error.message}`);
         console.error(`[visual] FAILED: ${scenario.name}: ${error.message}`);
-        console.error(`[visual] Restarting the browser after a stall on ${scenario.name}.`);
-        killBrowser(browser);
-        ({
-          newBrowser: browser,
-          newPublicContext: publicContext,
-          newAuthenticatedContext: authenticatedContext,
-        } = await launchBrowserState());
+        continue;
+      }
+
+      if (UPDATE_BASELINES) {
+        fs.copyFileSync(actualPath, baselinePath);
+        console.info(`[visual] baseline updated: ${scenario.name}`);
         continue;
       }
 
       try {
-        if (UPDATE_BASELINES) {
-          fs.copyFileSync(actualPath, baselinePath);
-          console.info(`[visual] baseline updated: ${scenario.name}`);
-          continue;
+        assert(
+          fs.existsSync(baselinePath),
+          `Missing visual baseline ${scenario.name}. Run: npm run test:visual:update`,
+        );
+        let diffRatio = await compareImages(actualPath, baselinePath, diffPath);
+        // Only worth retrying for a plausible decode/paint race close to the
+        // threshold -- a large diff is a genuine mismatch no amount of
+        // re-capturing will fix.
+        if (diffRatio > maxDiffRatio && diffRatio <= maxDiffRatio * 5) {
+          await captureScenario(scenario, server.baseUrl, actualPath, storageStatePath);
+          diffRatio = await compareImages(actualPath, baselinePath, diffPath);
         }
-
-        try {
-          assert(
-            fs.existsSync(baselinePath),
-            `Missing visual baseline ${scenario.name}. Run: npm run test:visual:update`,
-          );
-          let diffRatio = await compareImages(actualPath, baselinePath, diffPath);
-          // Only worth retrying for a plausible decode/paint race close to the
-          // threshold -- a large diff is a genuine mismatch no amount of
-          // re-settling will fix, and headless Chromium's requestAnimationFrame
-          // can be throttled to a crawl in CI, so nested rAFs here previously
-          // turned every real failure into a ~60s stall instead of a fast one.
-          if (diffRatio > maxDiffRatio && diffRatio <= maxDiffRatio * 5) {
-            await page.evaluate(async () => {
-              await Promise.all(
-                [...globalThis.document.images].map((image) => image.decode?.().catch(() => {})),
-              );
-            });
-            await page.waitForTimeout(150);
-            await page.screenshot({
-              path: actualPath,
-              animations: "disabled",
-              caret: "hide",
-              fullPage: false,
-              scale: "css",
-            });
-            diffRatio = await compareImages(actualPath, baselinePath, diffPath);
-          }
-          if (diffRatio <= maxDiffRatio && fs.existsSync(diffPath)) fs.unlinkSync(diffPath);
-          assert(
-            diffRatio <= maxDiffRatio,
-            `${scenario.name} changed ${(diffRatio * 100).toFixed(2)}% ` +
-              `(allowed ${(maxDiffRatio * 100).toFixed(2)}%). See ${diffPath}.`,
-          );
-          console.info(`[visual] ok: ${scenario.name} (${(diffRatio * 100).toFixed(3)}%)`);
-        } catch (error) {
-          failures.push(`${scenario.name}: ${error.message}`);
-          console.error(`[visual] FAILED: ${scenario.name}: ${error.message}`);
-        }
-      } finally {
-        await page.close();
+        if (diffRatio <= maxDiffRatio && fs.existsSync(diffPath)) fs.unlinkSync(diffPath);
+        assert(
+          diffRatio <= maxDiffRatio,
+          `${scenario.name} changed ${(diffRatio * 100).toFixed(2)}% ` +
+            `(allowed ${(maxDiffRatio * 100).toFixed(2)}%). See ${diffPath}.`,
+        );
+        console.info(`[visual] ok: ${scenario.name} (${(diffRatio * 100).toFixed(3)}%)`);
+      } catch (error) {
+        failures.push(`${scenario.name}: ${error.message}`);
+        console.error(`[visual] FAILED: ${scenario.name}: ${error.message}`);
       }
     }
     assert(
@@ -627,9 +436,6 @@ async function run() {
       `${failures.length} visual regression scenario(s) failed:\n${failures.join("\n")}`,
     );
   } finally {
-    await publicContext?.close();
-    await authenticatedContext?.close();
-    await browser?.close();
     await server?.stop();
     fs.rmSync(fixtureDir, { recursive: true, force: true });
     // Keep whatever screenshots/diffs were captured even when a scenario threw --
