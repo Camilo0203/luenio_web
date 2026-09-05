@@ -966,9 +966,27 @@ async function runBrowserChecks(baseUrl) {
       nichePath(sector),
       simulationSelectors[sector.id],
     ]);
-    for (const [slug, brand, landingHref, dynamicSelector] of industrySimulations) {
+    for (const [
+      index,
+      [slug, brand, landingHref, dynamicSelector],
+    ] of industrySimulations.entries()) {
       await page.goto(`${baseUrl}/demo/${slug}`, { waitUntil: "domcontentloaded" });
       await expectVisibleText(page, brand, `${slug} simulation brand`);
+      if (index === 0) {
+        // The demo auto-starts ~650ms after load and its run button re-enables
+        // ~5.1s after that (industry-demo-runtime.js's default autoStartDelay
+        // and completedDelay) -- give the first page's run a chance to finish
+        // so simulation_start/simulation_complete actually land in analytics
+        // before the loop moves on to the next sector.
+        await page.waitForFunction(
+          () =>
+            JSON.parse(globalThis.localStorage.getItem("luenio.analytics.events") || "[]")
+              .map((event) => event.name)
+              .includes("simulation_complete"),
+          undefined,
+          { timeout: 8_000 },
+        );
+      }
       const simulationDisclosure = await page
         .locator(".simulation-disclosure")
         .first()
