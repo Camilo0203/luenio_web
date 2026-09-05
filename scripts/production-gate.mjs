@@ -189,7 +189,7 @@ const steps = [
   ["UI hardening", () => runNpmScript("test:ui-hardening")],
   ["Browser E2E + a11y", () => runNpmScript("test:browser", { timeoutMs: 8 * 60_000 })],
   ["Responsive matrix", () => runNpmScript("test:responsive")],
-  ["Visual regression", () => runNpmScript("test:visual")],
+  ["Visual regression", () => runNpmScript("test:visual", { timeoutMs: 8 * 60_000 })],
   ["Light/dark theme audit", () => runNpmScript("test:theme")],
 ];
 
