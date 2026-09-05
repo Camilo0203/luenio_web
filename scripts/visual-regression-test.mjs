@@ -402,10 +402,15 @@ async function preparePage(page, scenario, baseUrl) {
         ),
       ),
     );
-    await new Promise((resolve) =>
-      globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
-    );
   });
+  // Nested requestAnimationFrame calls are how this used to wait a couple of
+  // paint frames for layout/paint to settle after the awaits above, but
+  // headless Chromium in CI can throttle rAF to a crawl (seconds per frame,
+  // not ~16ms) -- across 44 scenarios that alone was enough to blow the
+  // gate's timeout for this step. A fixed short wait is slower than an ideal
+  // rAF would be, but nowhere near as slow as a throttled one, and is what
+  // actually determines this step's real-world runtime.
+  await page.waitForTimeout(50);
 }
 
 async function compareImages(actualPath, baselinePath, diffPath) {
