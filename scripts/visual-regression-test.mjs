@@ -20,6 +20,23 @@ const maxDiffRatio = 0.005;
 // Chromium and system Chrome rasterize scaled AVIF text edges slightly differently.
 // Keep geometry strict (0.5% of pixels) while ignoring imperceptible edge antialiasing.
 const channelTolerance = 48;
+// Twice in CI, headless Chromium has stalled context.newPage() indefinitely
+// after ~12 sequential pages on the same context (always at the same
+// scenario) -- not a slow render, a DevTools command that never resolves or
+// rejects. Bound each scenario so a stall costs seconds, not the whole
+// step's budget.
+const scenarioTimeoutMs = 30_000;
+
+function withTimeout(promise, timeoutMs, label) {
+  let timer;
+  const timeout = new Promise((_resolve, reject) => {
+    timer = setTimeout(
+      () => reject(new Error(`${label} timed out after ${timeoutMs}ms`)),
+      timeoutMs,
+    );
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
 
 // Scenario names key the baseline PNGs in tests/visual-baselines, so they stay
 // the sector id; only the list itself is derived.
@@ -475,14 +492,11 @@ async function run() {
   let authenticatedContext;
   try {
     server = await startServer();
-    browser = await launchBrowser();
     const contextOptions = {
       locale: "es-CO",
       reducedMotion: "reduce",
       serviceWorkers: "block",
     };
-    publicContext = await browser.newContext(contextOptions);
-    authenticatedContext = await browser.newContext(contextOptions);
     const keepLocalRequests = async (route) => {
       if (route.request().url().startsWith(server.baseUrl)) {
         await route.continue();
@@ -490,9 +504,32 @@ async function run() {
       }
       await route.abort();
     };
-    await publicContext.route("**/*", keepLocalRequests);
-    await authenticatedContext.route("**/*", keepLocalRequests);
-    await authenticateContext(authenticatedContext, server.baseUrl);
+
+    async function launchBrowserState() {
+      const newBrowser = await launchBrowser();
+      const newPublicContext = await newBrowser.newContext(contextOptions);
+      const newAuthenticatedContext = await newBrowser.newContext(contextOptions);
+      await newPublicContext.route("**/*", keepLocalRequests);
+      await newAuthenticatedContext.route("**/*", keepLocalRequests);
+      await authenticateContext(newAuthenticatedContext, server.baseUrl);
+      return { newBrowser, newPublicContext, newAuthenticatedContext };
+    }
+
+    // A stuck context.newPage() leaves the browser's DevTools connection
+    // occupied by a command that never resolves, so even a graceful
+    // browser.close() on it would hang next -- the only reliable recovery is
+    // to skip graceful shutdown entirely and SIGKILL the process.
+    function killBrowser(target) {
+      const child = target?.process?.();
+      if (child && !child.killed) child.kill("SIGKILL");
+    }
+
+    ({
+      newBrowser: browser,
+      newPublicContext: publicContext,
+      newAuthenticatedContext: authenticatedContext,
+    } = await launchBrowserState());
+
     // Collect every scenario's outcome instead of throwing on the first
     // failure: a single stale-baseline drift (e.g. a Chromium version bump)
     // can affect several scenarios, and finding them one CI run at a time
@@ -500,21 +537,43 @@ async function run() {
     const failures = [];
     for (const scenario of selectedScenarios) {
       console.info(`[visual] capture: ${scenario.name}`);
-      const context = scenario.authenticated ? authenticatedContext : publicContext;
-      const page = await context.newPage();
       const actualPath = path.join(resultsDir, `${scenario.name}.png`);
       const baselinePath = path.join(baselineDir, `${scenario.name}.png`);
       const diffPath = path.join(resultsDir, `${scenario.name}.diff.png`);
-      try {
-        await preparePage(page, scenario, server.baseUrl);
-        await page.screenshot({
-          path: actualPath,
-          animations: "disabled",
-          caret: "hide",
-          fullPage: false,
-          scale: "css",
-        });
 
+      let page;
+      try {
+        page = await withTimeout(
+          (async () => {
+            const context = scenario.authenticated ? authenticatedContext : publicContext;
+            const preparedPage = await context.newPage();
+            await preparePage(preparedPage, scenario, server.baseUrl);
+            await preparedPage.screenshot({
+              path: actualPath,
+              animations: "disabled",
+              caret: "hide",
+              fullPage: false,
+              scale: "css",
+            });
+            return preparedPage;
+          })(),
+          scenarioTimeoutMs,
+          scenario.name,
+        );
+      } catch (error) {
+        failures.push(`${scenario.name}: ${error.message}`);
+        console.error(`[visual] FAILED: ${scenario.name}: ${error.message}`);
+        console.error(`[visual] Restarting the browser after a stall on ${scenario.name}.`);
+        killBrowser(browser);
+        ({
+          newBrowser: browser,
+          newPublicContext: publicContext,
+          newAuthenticatedContext: authenticatedContext,
+        } = await launchBrowserState());
+        continue;
+      }
+
+      try {
         if (UPDATE_BASELINES) {
           fs.copyFileSync(actualPath, baselinePath);
           console.info(`[visual] baseline updated: ${scenario.name}`);
