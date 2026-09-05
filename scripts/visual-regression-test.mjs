@@ -488,6 +488,11 @@ async function run() {
     await publicContext.route("**/*", keepLocalRequests);
     await authenticatedContext.route("**/*", keepLocalRequests);
     await authenticateContext(authenticatedContext, server.baseUrl);
+    // Collect every scenario's outcome instead of throwing on the first
+    // failure: a single stale-baseline drift (e.g. a Chromium version bump)
+    // can affect several scenarios, and finding them one CI run at a time
+    // is far more expensive than reporting them all together up front.
+    const failures = [];
     for (const scenario of selectedScenarios) {
       console.info(`[visual] capture: ${scenario.name}`);
       const context = scenario.authenticated ? authenticatedContext : publicContext;
@@ -511,42 +516,51 @@ async function run() {
           continue;
         }
 
-        assert(
-          fs.existsSync(baselinePath),
-          `Missing visual baseline ${scenario.name}. Run: npm run test:visual:update`,
-        );
-        let diffRatio = await compareImages(actualPath, baselinePath, diffPath);
-        if (diffRatio > maxDiffRatio) {
-          await page.evaluate(async () => {
-            await Promise.all(
-              [...globalThis.document.images].map((image) => image.decode?.().catch(() => {})),
-            );
-            await new Promise((resolve) =>
-              globalThis.requestAnimationFrame(() =>
-                globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
-              ),
-            );
-          });
-          await page.screenshot({
-            path: actualPath,
-            animations: "disabled",
-            caret: "hide",
-            fullPage: false,
-            scale: "css",
-          });
-          diffRatio = await compareImages(actualPath, baselinePath, diffPath);
+        try {
+          assert(
+            fs.existsSync(baselinePath),
+            `Missing visual baseline ${scenario.name}. Run: npm run test:visual:update`,
+          );
+          let diffRatio = await compareImages(actualPath, baselinePath, diffPath);
+          if (diffRatio > maxDiffRatio) {
+            await page.evaluate(async () => {
+              await Promise.all(
+                [...globalThis.document.images].map((image) => image.decode?.().catch(() => {})),
+              );
+              await new Promise((resolve) =>
+                globalThis.requestAnimationFrame(() =>
+                  globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
+                ),
+              );
+            });
+            await page.screenshot({
+              path: actualPath,
+              animations: "disabled",
+              caret: "hide",
+              fullPage: false,
+              scale: "css",
+            });
+            diffRatio = await compareImages(actualPath, baselinePath, diffPath);
+          }
+          if (diffRatio <= maxDiffRatio && fs.existsSync(diffPath)) fs.unlinkSync(diffPath);
+          assert(
+            diffRatio <= maxDiffRatio,
+            `${scenario.name} changed ${(diffRatio * 100).toFixed(2)}% ` +
+              `(allowed ${(maxDiffRatio * 100).toFixed(2)}%). See ${diffPath}.`,
+          );
+          console.info(`[visual] ok: ${scenario.name} (${(diffRatio * 100).toFixed(3)}%)`);
+        } catch (error) {
+          failures.push(`${scenario.name}: ${error.message}`);
+          console.error(`[visual] FAILED: ${scenario.name}: ${error.message}`);
         }
-        if (diffRatio <= maxDiffRatio && fs.existsSync(diffPath)) fs.unlinkSync(diffPath);
-        assert(
-          diffRatio <= maxDiffRatio,
-          `${scenario.name} changed ${(diffRatio * 100).toFixed(2)}% ` +
-            `(allowed ${(maxDiffRatio * 100).toFixed(2)}%). See ${diffPath}.`,
-        );
-        console.info(`[visual] ok: ${scenario.name} (${(diffRatio * 100).toFixed(3)}%)`);
       } finally {
         await page.close();
       }
     }
+    assert(
+      failures.length === 0,
+      `${failures.length} visual regression scenario(s) failed:\n${failures.join("\n")}`,
+    );
   } finally {
     await publicContext?.close();
     await authenticatedContext?.close();
