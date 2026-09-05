@@ -319,11 +319,6 @@ async function preparePage(page, scenario, baseUrl) {
     waitUntil: "domcontentloaded",
     timeout: 15_000,
   });
-  // domcontentloaded fires before web fonts finish loading/swapping; capturing
-  // before that race settles produces baseline-vs-run diffs from fallback-font
-  // metrics rather than any real visual change (see browser-e2e-test.mjs's
-  // same wait before its own layout measurements).
-  await page.evaluate(() => globalThis.document.fonts.ready);
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -370,6 +365,18 @@ async function preparePage(page, scenario, baseUrl) {
   }
   if (scenario.path === "/crm") {
     await page.locator(".crm-shell .ui-empty").waitFor({ state: "visible", timeout: 15_000 });
+  }
+  if (scenario.path === "/") {
+    // home-clarity.js sets the hero demo shot's src lazily and toggles this
+    // attribute off only once that image has loaded and decoded; screenshotting
+    // before then captures whatever the shot's untouched default markup looks
+    // like, not the picked demo, producing a large false diff (11.85% on
+    // home-light-desktop in CI, where nothing is cached ahead of time).
+    await page.waitForFunction(
+      () => !globalThis.document.querySelector("[data-hero-stage] .hc-browser")?.hasAttribute("aria-busy"),
+      undefined,
+      { timeout: 15_000 },
+    );
   }
   await page.evaluate(async () => {
     const settle = (promise, timeoutMs = 5_000) =>

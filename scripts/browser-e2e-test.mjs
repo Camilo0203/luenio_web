@@ -111,7 +111,20 @@ async function assertWhatsappStableWhileScrolling(page, label) {
 }
 
 async function getWhatsappPresentation(page) {
-  return page.locator(".luenio-wa__trigger").evaluate((trigger) => {
+  return page.locator(".luenio-wa__trigger").evaluate(async (trigger) => {
+    const nextFrame = () => new Promise((resolve) => globalThis.requestAnimationFrame(resolve));
+    const read = () => Number.parseFloat(globalThis.getComputedStyle(trigger).width);
+    // The trigger's width is text-shaped from its icon + label, which can still
+    // be settling (webfont swap, first-shape-of-this-string cache warm-up) right
+    // after navigation; read it across frames until it holds steady instead of
+    // trusting whatever the very first layout pass reports.
+    let previous = read();
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      await nextFrame();
+      const current = read();
+      if (current === previous) break;
+      previous = current;
+    }
     const styles = globalThis.getComputedStyle(trigger);
     const label = trigger.querySelector("span");
     return {
@@ -121,7 +134,7 @@ async function getWhatsappPresentation(page) {
       height: Number.parseFloat(styles.height),
       labelDisplay: label ? globalThis.getComputedStyle(label).display : "missing",
       paddingInline: `${styles.paddingInlineStart}|${styles.paddingInlineEnd}`,
-      width: Number.parseFloat(styles.width),
+      width: previous,
     };
   });
 }
