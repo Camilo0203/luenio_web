@@ -522,17 +522,18 @@ async function run() {
             `Missing visual baseline ${scenario.name}. Run: npm run test:visual:update`,
           );
           let diffRatio = await compareImages(actualPath, baselinePath, diffPath);
-          if (diffRatio > maxDiffRatio) {
+          // Only worth retrying for a plausible decode/paint race close to the
+          // threshold -- a large diff is a genuine mismatch no amount of
+          // re-settling will fix, and headless Chromium's requestAnimationFrame
+          // can be throttled to a crawl in CI, so nested rAFs here previously
+          // turned every real failure into a ~60s stall instead of a fast one.
+          if (diffRatio > maxDiffRatio && diffRatio <= maxDiffRatio * 5) {
             await page.evaluate(async () => {
               await Promise.all(
                 [...globalThis.document.images].map((image) => image.decode?.().catch(() => {})),
               );
-              await new Promise((resolve) =>
-                globalThis.requestAnimationFrame(() =>
-                  globalThis.requestAnimationFrame(() => globalThis.requestAnimationFrame(resolve)),
-                ),
-              );
             });
+            await page.waitForTimeout(150);
             await page.screenshot({
               path: actualPath,
               animations: "disabled",
