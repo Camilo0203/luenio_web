@@ -468,7 +468,6 @@ async function run() {
   let browser;
   let publicContext;
   let authenticatedContext;
-  let completed = false;
   try {
     server = await startServer();
     browser = await launchBrowser();
@@ -548,19 +547,17 @@ async function run() {
         await page.close();
       }
     }
-    completed = true;
   } finally {
     await publicContext?.close();
     await authenticatedContext?.close();
     await browser?.close();
     await server?.stop();
     fs.rmSync(fixtureDir, { recursive: true, force: true });
-    if (completed) {
-      fs.rmSync(finalResultsDir, { recursive: true, force: true });
-      fs.renameSync(resultsDir, finalResultsDir);
-    } else {
-      fs.rmSync(resultsDir, { recursive: true, force: true });
-    }
+    // Keep whatever screenshots/diffs were captured even when a scenario threw --
+    // that diff.png is what the failure message points at, and CI's diagnostics
+    // upload only ever sees finalResultsDir, never the pid-scoped temp dir.
+    fs.rmSync(finalResultsDir, { recursive: true, force: true });
+    fs.renameSync(resultsDir, finalResultsDir);
   }
 
   console.info(
