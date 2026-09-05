@@ -373,7 +373,10 @@ async function preparePage(page, scenario, baseUrl) {
     // like, not the picked demo, producing a large false diff (11.85% on
     // home-light-desktop in CI, where nothing is cached ahead of time).
     await page.waitForFunction(
-      () => !globalThis.document.querySelector("[data-hero-stage] .hc-browser")?.hasAttribute("aria-busy"),
+      () =>
+        !globalThis.document
+          .querySelector("[data-hero-stage] .hc-browser")
+          ?.hasAttribute("aria-busy"),
       undefined,
       { timeout: 15_000 },
     );
