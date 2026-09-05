@@ -580,6 +580,25 @@ select {
   border-radius: var(--radius-sm);
   font-size: 13px;
   line-height: 1.5;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--duration-normal) var(--luenio-ease-out),
+    transform var(--duration-normal) var(--luenio-ease-out),
+    display var(--duration-normal) allow-discrete;
+}
+
+.form-status[hidden] {
+  display: none;
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+@starting-style {
+  .form-status:not([hidden]) {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
 }
 
 .lead-form[data-state="success"] .form-status {

@@ -434,5 +434,46 @@ if (root) {
     setChatChannel(chatDemo.dataset.chatChannel || "whatsapp");
   }
 
+  const accordionDetails = [...document.querySelectorAll(".hc-accordion details")];
+  if (accordionDetails.length && !reduceMotion && typeof Element.prototype.animate === "function") {
+    const ACCORDION_DURATION = 320;
+    const ACCORDION_EASING = "cubic-bezier(0.16, 1, 0.3, 1)";
+
+    accordionDetails.forEach((details) => {
+      const summary = details.querySelector("summary");
+      if (!summary) return;
+      let animation = null;
+
+      const runAnimation = (keyframes, onDone) => {
+        details.style.overflow = "hidden";
+        animation?.cancel();
+        animation = details.animate(keyframes, {
+          duration: ACCORDION_DURATION,
+          easing: ACCORDION_EASING,
+        });
+        animation.onfinish = () => {
+          animation = null;
+          details.style.overflow = "";
+          details.style.height = "";
+          onDone?.();
+        };
+      };
+
+      summary.addEventListener("click", (event) => {
+        event.preventDefault();
+        const startHeight = `${details.offsetHeight}px`;
+        if (details.open) {
+          runAnimation([{ height: startHeight }, { height: `${summary.offsetHeight}px` }], () => {
+            details.open = false;
+          });
+        } else {
+          details.open = true;
+          const endHeight = `${details.offsetHeight}px`;
+          runAnimation([{ height: startHeight }, { height: endHeight }]);
+        }
+      });
+    });
+  }
+
   root.classList.add("motion-ready");
 }

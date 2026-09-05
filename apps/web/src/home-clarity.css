@@ -495,10 +495,12 @@ body.home-clarity {
   clip-path: inset(0 0 0 7%);
   opacity: 0;
   transform: scale(1.018);
+  /* opacity toggles instantly (not listed here) so the outgoing shot never
+     sits semi-transparent on top of the incoming one — that overlap was
+     rendering both images' text at once mid-transition. */
   transition:
     clip-path 520ms var(--hc-ease),
-    opacity 360ms ease,
-    transform 720ms var(--hc-ease);
+    transform 520ms var(--hc-ease);
 }
 
 .hc-demo-shot.is-active {
