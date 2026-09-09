@@ -1,0 +1,64 @@
+# The visual baselines are captured with external requests blocked, so the page
+# renders in whatever fonts the host provides. They can only be regenerated on
+# the same Linux image the gate runs on -- a Windows or macOS checkout produces
+# a different set for every scenario. This workflow does that on the runner and
+# opens the result on a branch for review instead of writing to main.
+name: Refresh visual baselines
+
+on:
+  # Run it from the Actions tab, or by pushing the throwaway `refresh-baselines`
+  # branch. ci.yml only watches main, so that push costs nothing else.
+  workflow_dispatch:
+  push:
+    branches: ["refresh-baselines"]
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    name: Recapture on the gate runner
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        run: npx playwright install chromium --with-deps
+
+      - name: Recapture every baseline
+        run: npm run test:visual:update
+
+      - name: Push the refreshed baselines to a review branch
+        run: |
+          if git diff --quiet -- tests/visual-baselines; then
+            echo "Every baseline already matches the runner. Nothing to push."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          branch="visual-baselines/${GITHUB_SHA::7}"
+          git checkout -b "$branch"
+          git add tests/visual-baselines
+          git commit -m "test: refresh visual baselines from ${GITHUB_SHA::7} on the Linux runner"
+          git push origin "$branch"
+          echo "Pushed $branch. Review the diff before merging it into main."
+
+      - name: Upload the captures
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: visual-baselines-${{ github.run_id }}
+          path: tests/visual-baselines/
+          if-no-files-found: ignore
+          retention-days: 14

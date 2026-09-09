@@ -126,10 +126,16 @@ desarrollo y el arranque de producción falla sin Supabase.
 - **Los tests leen las páginas expandidas**, vía `scripts/page-source.mjs`. Si
   añades una aserción sobre markup compartido, usa ese helper y no
   `readFileSync`.
-- **Un cambio visual intencionado necesita baselines nuevos**:
-  `npm run test:visual:update`. Revisa el diff antes de aceptarlo.
-- **El test de regresión visual borra su carpeta de resultados cuando falla**
-  (`visual-regression-test.mjs`), así que el `.diff.png` que menciona el error
-  desaparece. Si necesitas verlo, corre el escenario suelto.
+- **Un cambio visual intencionado necesita baselines nuevos, y solo Linux los
+  genera bien.** La captura bloquea toda petición externa, así que cada página
+  se dibuja con las fuentes del sistema anfitrión: `npm run test:visual:update`
+  en Windows o macOS reescribe los 44 escenarios con un set que el gate rechaza
+  entero. Lanza el workflow **Refresh visual baselines** (pestaña Actions, o
+  empuja la rama `refresh-baselines`); recaptura en la misma imagen de Ubuntu y
+  deja el resultado en una rama `visual-baselines/<sha>` para que revises el
+  diff antes de llevarlo a `main`.
+- **El test de regresión visual conserva sus capturas cuando falla**, en
+  `test-results/visual/`, con el `.diff.png` que menciona cada error. El gate de
+  CI sube esa carpeta como artefacto `gate-diagnostics`.
 - **Idioma:** la copy del producto y la documentación van en español; el código,
   los comentarios y los mensajes de commit, en inglés.
