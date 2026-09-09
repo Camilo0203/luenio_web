@@ -43,7 +43,7 @@ function normalizeBrandMarks() {
     image.classList.add("brand-mark__logo", "brand-mark__logo--primary");
     image.src = "/brand/isotipo.svg?v=202608";
     lightImage.classList.add("brand-mark__logo", "brand-mark__logo--light");
-    lightImage.src = "/brand/isotipo-blanco.svg?v=202608";
+    lightImage.src = "/brand/isotipo-blanco.svg?v=202609";
     lightImage.alt = "";
     lightImage.setAttribute("aria-hidden", "true");
     image.before(viewport);

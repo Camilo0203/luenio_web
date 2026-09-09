@@ -705,7 +705,7 @@ select {
 }
 
 html[data-theme="dark"] .footer-credit__mark {
-  content: url("/brand/isotipo-blanco.svg?v=202608");
+  content: url("/brand/isotipo-blanco.svg?v=202609");
 }
 
 /* Quote page */
@@ -1757,7 +1757,7 @@ html[data-theme="dark"] .site-footer {
 }
 
 html[data-theme="dark"] .site-footer .brand-lockup img {
-  content: url("/brand/isotipo-blanco.svg?v=202608");
+  content: url("/brand/isotipo-blanco.svg?v=202609");
 }
 
 html[data-theme="dark"] .site-footer .brand-mark__logo--primary {
@@ -1765,7 +1765,7 @@ html[data-theme="dark"] .site-footer .brand-mark__logo--primary {
 }
 
 html[data-theme="dark"] .site-footer .brand-mark__logo--light {
-  content: url("/brand/isotipo-blanco.svg?v=202608");
+  content: url("/brand/isotipo-blanco.svg?v=202609");
 }
 
 html[data-theme="dark"] .site-footer__intro p,
