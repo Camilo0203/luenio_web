@@ -1,4 +1,8 @@
-<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1536 1024" width="1536" height="1024">
+<!-- The viewBox crops the export's 1536x1024 artboard to the mark itself, framed
+     the way isotipo.svg is: an even ~27-unit margin and the same 0.96 box ratio.
+     The two files are swapped for each other by theme, so a wider canvas here
+     shrank the mark and collapsed the height of anything sized `height: auto`. -->
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="577 218 473 493" width="473" height="493">
 	<style>
 		.s0 { opacity: .98;fill: #fcfdfd } 
 	</style>

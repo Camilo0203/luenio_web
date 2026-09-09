@@ -974,15 +974,38 @@ html[data-theme="dark"] .footer-credit__mark {
   text-underline-offset: 2px;
 }
 
+/* A <button> with no surface of its own falls back to the browser's chrome: a
+   ButtonFace box with an outset border, which paints light grey in the light
+   theme and mid grey in the dark one. State the whole surface here. */
 .whatsapp-alternative {
   display: flex;
   min-height: var(--luenio-touch-target);
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 10px 18px;
   color: var(--whatsapp);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--whatsapp) 38%, transparent);
+  border-radius: var(--luenio-radius-public-control);
+  cursor: pointer;
+  font-family: inherit;
   font-size: 13px;
   font-weight: 800;
+  transition:
+    background var(--luenio-duration-fast) var(--luenio-ease-out),
+    border-color var(--luenio-duration-fast) var(--luenio-ease-out);
+}
+
+.whatsapp-alternative:hover {
+  background: color-mix(in srgb, var(--whatsapp) 10%, transparent);
+  border-color: color-mix(in srgb, var(--whatsapp) 62%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .whatsapp-alternative {
+    transition: none;
+  }
 }
 
 /* Legal */
@@ -1719,7 +1742,13 @@ html[data-theme="dark"] .form-reassurance a {
 }
 
 html[data-theme="dark"] .whatsapp-alternative {
-  color: #edfff5;
+  color: #7fe0aa;
+  border-color: rgba(127, 224, 170, 0.4);
+}
+
+html[data-theme="dark"] .whatsapp-alternative:hover {
+  background: rgba(127, 224, 170, 0.12);
+  border-color: rgba(127, 224, 170, 0.66);
 }
 
 html[data-theme="dark"] .site-footer {

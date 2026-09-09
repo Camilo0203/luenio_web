@@ -36,12 +36,11 @@
   display: block;
 }
 
+/* The white mark used to ship on the export's 1536x1024 artboard, so this rule
+   blew it up to 105px and slid it under the viewport's overflow to crop the
+   padding away. isotipo-blanco.svg now carries the same tight viewBox as
+   isotipo.svg, so both variants share the box above and only the swap remains. */
 .brand-lockup .brand-mark__logo--light {
-  top: -17px !important;
-  left: -42px !important;
-  width: 105px !important;
-  height: auto !important;
-  max-width: none !important;
   display: none;
 }
 

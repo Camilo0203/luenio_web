@@ -1403,3 +1403,147 @@ html[data-theme="light"] body.gym-board.sector-v2 {
     display: none;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Real estate: the v2 world in both themes.
+
+   sector-worlds.css still describes the previous version of this landing:
+   ivory paper for every section and ink blue for the cover, both hardcoded
+   without a theme selector. The v2 layout replaced that with a full-bleed
+   dark photograph over a warm near-black canvas, so those rules produced two
+   visible failures. In light the cover copy turned ink blue over the dark
+   photo and became unreadable; in dark the page alternated ivory bands with a
+   dark cover and footer. Everything below restates those surfaces in terms of
+   the tokens the v2 world already declares.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* The cover always sits on the dark photo scrim, so its type stays ivory even
+   when the rest of the page is light. */
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero {
+  background: #0b0b0a;
+}
+
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero__media::after {
+  background:
+    linear-gradient(90deg, rgb(5 5 4 / 0.86), transparent 54%),
+    linear-gradient(0deg, rgb(4 4 3 / 0.74), transparent 64%);
+}
+
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero h1,
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero__content > p:not(.demo-eyebrow),
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero .demo-button--ghost {
+  color: #fffaf2;
+}
+
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero .demo-eyebrow {
+  color: #e7ad87;
+}
+
+html[data-theme="light"] .demo-real-estate.sector-v2 .demo-hero .demo-button--ghost {
+  border-color: rgb(255 250 242 / 0.5);
+}
+
+/* Dark: every band that the v1 rules pinned to ivory follows the tokens. */
+html[data-theme="dark"] body.demo-real-estate.sector-v2,
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-hero {
+  background: var(--page);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-section {
+  color: var(--ink);
+  background: var(--page);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-section--surface {
+  background: var(--surface);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-section-head h2 {
+  color: var(--ink);
+}
+
+html[data-theme="dark"]
+  .demo-real-estate.sector-v2
+  .demo-section
+  :is(.demo-eyebrow, .property-card__price, .demo-number) {
+  color: var(--accent);
+}
+
+html[data-theme="dark"]
+  .demo-real-estate.sector-v2
+  .demo-section
+  :is(
+    .demo-section-head > p,
+    .demo-section-copy,
+    .property-card__location,
+    .property-card__meta,
+    .demo-card p,
+    .demo-faq p
+  ) {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-card {
+  color: var(--ink);
+  border-top-color: var(--line);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-faq details {
+  border-top-color: var(--line);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-faq details:last-child {
+  border-bottom-color: var(--line);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-form label {
+  color: var(--muted);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-form :is(input, select, textarea) {
+  color: var(--ink);
+  background: var(--surface-2);
+  border-color: var(--line);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-footer {
+  color: var(--ink);
+  background: var(--surface);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-footer :is(h2, h3) {
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .demo-real-estate.sector-v2 .demo-footer :is(p, a) {
+  color: var(--muted);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Restaurant: one ivory column behind the cover copy, not five.
+
+   Each direct child of the cover carries its own opaque ivory background so
+   the copy stays readable over the dish photograph. The two paragraphs also
+   inherit a narrower max-width from niche-showcase.css, so the blocks ended
+   at different x positions and the panel read as a staircase. It is invisible
+   in light, where the page behind is ivory too, and obvious in dark.
+   ───────────────────────────────────────────────────────────────────────── */
+.demo-restaurant.sector-v2 .demo-hero__content > :not(.restaurant-pass) {
+  max-width: none;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Agency and real estate pin their navigation to a rail on the left edge, and
+   the theme toggle rides at the foot of that rail. The Luenio signature badge
+   is fixed at left: 18px, so it sat on top of both. Clear the rail while it is
+   on screen; below 1100px the rail becomes a normal sticky header.
+   ───────────────────────────────────────────────────────────────────────── */
+@media (min-width: 1101px) {
+  body.demo-agency.sector-v2 .luenio-signature {
+    left: 150px;
+  }
+
+  body.demo-real-estate.sector-v2 .luenio-signature {
+    left: 142px;
+  }
+}
