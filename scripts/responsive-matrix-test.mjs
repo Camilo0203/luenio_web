@@ -4,9 +4,14 @@ import { spawn } from "node:child_process";
 import { chromium } from "playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
-import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
+import { SECTORS, demoPath } from "../config/sectors.js";
+import { canonicalPublicPaths } from "../lib/public-routes.js";
 
-const ROUTES = ["/", "/demos", "/cotizacion", ...SECTORS.map(nichePath), ...SECTORS.map(demoPath)];
+// Every indexable page plus the simulations. Derived rather than listed: the
+// guides, the service pages and the city pages were all invisible to this test
+// while it kept its own hand-written list, which is exactly the surface most
+// likely to overflow on a phone because it is the one made of long prose.
+const ROUTES = [...canonicalPublicPaths(), ...SECTORS.map(demoPath)];
 const VIEWPORTS = [
   { name: "phone-320", width: 320, height: 844 },
   { name: "phone-375", width: 375, height: 844 },

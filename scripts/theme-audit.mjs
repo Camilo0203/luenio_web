@@ -4,19 +4,15 @@ import { chromium } from "playwright";
 import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
-import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
+import { SECTORS, demoPath } from "../config/sectors.js";
+import { canonicalPublicPaths } from "../lib/public-routes.js";
 
 let baseUrl = process.env.THEME_AUDIT_BASE_URL || "";
-const defaultRoutes = [
-  "/",
-  "/cotizacion",
-  ...SECTORS.map(nichePath),
-  "/demo",
-  ...SECTORS.map(demoPath),
-  "/privacidad",
-  "/terminos",
-  "/reembolsos",
-];
+// Every indexable page plus the simulations, derived from the same table the
+// sitemap uses. It used to be a hand-written list, so each new section — the
+// guides, then the service and city pages — silently escaped the light/dark
+// audit until someone remembered to add it here.
+const defaultRoutes = [...canonicalPublicPaths(), ...SECTORS.map(demoPath)];
 const routes = process.env.THEME_AUDIT_ROUTES
   ? process.env.THEME_AUDIT_ROUTES.split(",").map((route) => route.trim())
   : defaultRoutes;
