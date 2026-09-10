@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { GUIDES } from "../config/guides.js";
 import { SECTORS, demoPath, nichePath } from "../config/sectors.js";
 import { canonicalPublicPaths, getDemoPagePath, getNichePagePath } from "../lib/public-routes.js";
 import { expandIncludes, hasIncludeDirectives } from "../lib/html-includes.js";
@@ -120,7 +121,14 @@ for (const filePath of pageFiles) {
   }
   expandedPages += 1;
 }
-assert(expandedPages === 21, `Expected 21 pages to use the shared chrome, found ${expandedPages}.`);
+// A landing and a simulation per sector, a page per guide, and the eight pages
+// no table derives: home, the 404, the demo catalogue, the guide index, the
+// quote page and the three legal documents.
+const expectedChromePages = SECTORS.length * 2 + GUIDES.length + 8;
+assert(
+  expandedPages === expectedChromePages,
+  `Expected ${expectedChromePages} pages to use the shared chrome, found ${expandedPages}.`,
+);
 const productCss = readText("apps/web/src/style.css");
 assert(
   /\.brand\s*\{[\s\S]*?border:\s*0;/.test(productCss),
