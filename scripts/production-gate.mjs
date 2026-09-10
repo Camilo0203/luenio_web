@@ -177,6 +177,7 @@ const steps = [
   ["Development port fallback", () => runNpmScript("test:dev-port")],
   ["Industry demo system", () => runNpmScript("test:demo-system")],
   ["Niche landing conversion pages", () => runNpmScript("test:niche-landings")],
+  ["Structured data graph", () => runNpmScript("test:structured-data")],
   ["Endpoint rate limits", () => runNpmScript("test:rate-limit")],
   ["Sellable SaaS product experience", () => runNpmScript("test:sellable")],
   ["Supabase schema", () => runNpmScript("test:schema")],

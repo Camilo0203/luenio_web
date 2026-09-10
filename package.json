@@ -59,6 +59,7 @@
     "test:performance": "node scripts/ui-performance-test.mjs",
     "test:runner-cleanup": "node scripts/test-process-regression.mjs",
     "test:storage-fixture": "node scripts/storage-fixture-path-test.mjs",
+    "test:structured-data": "node scripts/structured-data-test.mjs",
     "test:public-only": "node scripts/public-only-mode-test.mjs",
     "test:visual": "node scripts/visual-regression-test.mjs",
     "test:visual:update": "node scripts/visual-regression-test.mjs --update",
