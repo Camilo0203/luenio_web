@@ -1,5 +1,33 @@
 # Changelog
 
+## Sin publicar
+
+### Contenido y descubrimiento
+
+- Nueva sección `/guias` con tres artículos de fondo: WhatsApp Business frente a WhatsApp
+  Business API, qué resuelve y qué no un chatbot de WhatsApp, y cómo conectar la web con
+  WhatsApp sin perder el origen de cada conversación. Las guías se declaran una sola vez en
+  `config/guides.js`, igual que los sectores, así que rutas, entradas de build y filas del
+  sitemap se derivan de ahí.
+- Las guías reutilizan el chasis de documento de las páginas legales: ese CSS ya trae tema claro
+  y oscuro y disposición móvil, de modo que no hacen falta baselines visuales nuevos.
+- Enlace a Guías en las tres variantes del pie, y las guías añadidas a `llms.txt`.
+
+### SEO
+
+- La home describe a Luenio como `ProfessionalService` con dirección, zona de cobertura, punto
+  de contacto, temas que domina y un catálogo con los siete servicios por sector, cada uno
+  enlazado al nodo `Service` que su propia landing ya declara.
+- Las siete landings apuntan su `provider` al mismo `@id`, de forma que el grafo resuelve a una
+  entidad en vez de a ocho copias sueltas.
+- Las guías publican `Article`, `FAQPage` y `BreadcrumbList`; el índice publica
+  `CollectionPage` e `ItemList`.
+
+### Calidad
+
+- `architecture-test.mjs` deriva de las tablas cuántas páginas deben usar la cabecera y el pie
+  compartidos, en vez de comprobarlo contra un número escrito a mano.
+
 ## 2026.8.1 - Release candidate
 
 ### Lanzamiento
