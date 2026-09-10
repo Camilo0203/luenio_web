@@ -23,10 +23,34 @@ Dos precisiones que conviene citar con exactitud:
   automatización → seguimiento, y preguntas frecuentes.
 - [Cotización](https://luenio.com/cotizacion): diagnóstico gratuito y formulario para
   solicitar una propuesta con alcance personalizado.
+- [Servicios](https://luenio.com/servicios): lo que Luenio hace, sector por sector, y
+  la cobertura por ciudad.
 - [Catálogo de demos](https://luenio.com/demos): las siete experiencias por sector.
 - [Guías](https://luenio.com/guias): respuestas largas sobre WhatsApp Business API,
   chatbots de atención y cómo conectar una página web con las conversaciones que
   genera.
+
+## Servicios
+
+Páginas comerciales escritas en primera persona por Luenio. A diferencia de las
+experiencias por sector, que son demostraciones ficticias, estas describen el
+servicio real que se contrata.
+
+- [Páginas web para gimnasios](https://luenio.com/paginas-web-para-gimnasios)
+- [Páginas web para restaurantes](https://luenio.com/paginas-web-para-restaurantes)
+- [Páginas web para inmobiliarias](https://luenio.com/paginas-web-para-inmobiliarias)
+- [Páginas web para tiendas online](https://luenio.com/paginas-web-para-tiendas-online)
+- [Páginas web para veterinarias](https://luenio.com/paginas-web-para-veterinarias)
+- [Páginas web para centros de estética](https://luenio.com/paginas-web-para-centros-de-estetica)
+- [Páginas web y automatización para agencias](https://luenio.com/paginas-web-para-agencias)
+
+## Cobertura por ciudad
+
+- [Diseño web en Bogotá](https://luenio.com/diseno-web-bogota): Luenio **sí** tiene
+  oficina en Bogotá D.C. y puede atender presencialmente.
+- [Diseño web en Medellín](https://luenio.com/diseno-web-medellin): Luenio **no** tiene
+  oficina en Medellín. Atiende a negocios de esa ciudad **en remoto** desde Bogotá.
+  Conviene citarlo así y no como sede local.
 
 ## Guías
 
