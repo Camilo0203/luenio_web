@@ -77,6 +77,34 @@ final), las entradas de build de Vite, las URLs del sitemap y las listas de los
 tests. Un sector nuevo son **dos páginas** (`apps/web/pages/<id>/` y
 `apps/web/pages/demo/<id>/`) y **una fila** en la tabla.
 
+## Añadir una guía, un servicio o una ciudad
+
+Mismo patrón que los sectores: una fila en una tabla y las páginas.
+
+| Qué | Tabla | Páginas | Ruta pública |
+| --- | --- | --- | --- |
+| Guía | `config/guides.js` | `apps/web/pages/guides/<dir>/` | `/guias/<slug>` |
+| Servicio | `config/services.js` | `apps/web/pages/servicios/<dir>/` | `/<slug>` |
+| Ciudad | `config/locations.js` | `apps/web/pages/ciudades/<dir>/` | `/<slug>` |
+
+De ahí salen las rutas, las entradas de Vite, el sitemap, el conteo de páginas
+del test de arquitectura y las listas de rutas del audit de tema y de la matriz
+responsive. **Ninguna de esas listas se escribe a mano.**
+
+Las tres familias reutilizan las clases `legal-*`, que ya traen tema claro/oscuro
+y móvil, así que **no necesitan baselines visuales nuevas**.
+
+Los slugs de servicio y ciudad son planos y calcados de la búsqueda
+(`/paginas-web-para-gimnasios`), no `/servicios/gimnasios`: la ruta es la
+consulta, no una carpeta.
+
+**`presence` en `config/locations.js` no es decorativo.** Una ciudad marcada como
+algo distinto de `"office"` no puede publicar `PostalAddress` en su JSON-LD ni
+omitir en la copia visible que se trabaja en remoto, y `test:structured-data`
+falla si lo intenta. Alquilar una dirección para parecer local es lo que persigue
+la política de ubicaciones falsas de Google, y engaña a quien podría ir hasta
+allí. Hoy Bogotá es `"office"` y Medellín no.
+
 ## Cabecera, pie y barra legal
 
 Las páginas públicas declaran su chrome en vez de repetirlo:
