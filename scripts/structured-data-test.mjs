@@ -11,10 +11,12 @@
  *    split across pages on purpose — the guides point their publisher at the
  *    organization the home page declares — so the check is global, not per file.
  * 3. Every page in the sitemap carries a canonical that matches its own URL.
+ * 4. A city page only publishes a postal address for a city Luenio works from.
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { LOCATIONS, hasOffice } from "../config/locations.js";
 import { canonicalPublicPaths } from "../lib/public-routes.js";
 
 const root = process.cwd();
@@ -40,9 +42,11 @@ function publicPageFiles() {
 
 /** Types the site is allowed to publish. A new one is a deliberate decision. */
 const KNOWN_TYPES = new Set([
+  "AdministrativeArea",
   "Answer",
   "Article",
   "BreadcrumbList",
+  "City",
   "CollectionPage",
   "ContactPoint",
   "Country",
@@ -125,6 +129,29 @@ for (const [id, file] of referenced) {
   assert(
     defined.has(id),
     `${file}: references "${id}" but no page defines that node. A reference-only @id must resolve.`,
+  );
+}
+
+// A city page may only claim a street address in a city Luenio works from.
+// `config/locations.js` carries that as `presence`, and this is the assertion
+// that keeps it honest: a `"remote"` city gets `areaServed` and nothing else.
+// Publishing a PostalAddress there would claim premises that do not exist —
+// the pattern Google's misrepresented-location policy is written against, and a
+// straight lie to a prospect who might drive to it.
+for (const location of LOCATIONS) {
+  const file = path.join(root, "apps", "web", "pages", "ciudades", location.dir, "index.html");
+  if (!fs.existsSync(file)) continue;
+  const html = fs.readFileSync(file, "utf8");
+  const blocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
+  const graph = blocks.map(([, body]) => body).join(" ");
+  if (hasOffice(location)) continue;
+  assert(
+    !graph.includes("PostalAddress") && !graph.includes("streetAddress"),
+    `ciudades/${location.dir}: presence is "${location.presence}", so its JSON-LD must not publish a PostalAddress.`,
+  );
+  assert(
+    /no tenemos oficina|en remoto/i.test(html),
+    `ciudades/${location.dir}: a remote city page must say so in the copy, not only in the schema.`,
   );
 }
 
