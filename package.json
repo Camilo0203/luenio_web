@@ -87,7 +87,7 @@
     "@sentry/node": "^10.68.0"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.1",
+    "@axe-core/playwright": "^4.13.0",
     "@electric-sql/pglite": "0.5.4",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.8.0",
