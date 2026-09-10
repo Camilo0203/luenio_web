@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio | Luenio</title>
+    <meta name="description" content="Las tres formas de usar WhatsApp en un negocio, qué gana y qué pierde cada una, y cuándo la API deja de ser opcional." />
+    <meta name="author" content="Luenio" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://luenio.com/guias/whatsapp-business-api" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Article",
+            "@id": "https://luenio.com/guias/whatsapp-business-api#article",
+            "headline": "WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio",
+            "description": "Las tres formas de usar WhatsApp en un negocio, qué gana y qué pierde cada una, y cuándo la API deja de ser opcional.",
+            "url": "https://luenio.com/guias/whatsapp-business-api",
+            "inLanguage": "es-CO",
+            "datePublished": "2026-09-10",
+            "dateModified": "2026-09-10",
+            "image": "https://luenio.com/og-luenio.png",
+            "author": {
+              "@type": "Organization",
+              "@id": "https://luenio.com/#organization",
+              "name": "Luenio",
+              "url": "https://luenio.com/"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "@id": "https://luenio.com/#organization",
+              "name": "Luenio",
+              "url": "https://luenio.com/"
+            },
+            "isPartOf": {
+              "@id": "https://luenio.com/#website"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://luenio.com/guias/whatsapp-business-api#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "¿Puedo usar mi mismo número de WhatsApp para la API?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí, pero al migrarlo deja de funcionar en la aplicación de WhatsApp y el historial guardado en el teléfono no viaja con él. Conviene decidirlo antes de migrar."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿WhatsApp Business API es gratis?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Meta cobra por los mensajes según su categoría y la plataforma de atención cobra su propio servicio. La aplicación de WhatsApp Business sí es gratuita."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Tengo que aprobar cada mensaje que envío?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Dentro de las 24 horas siguientes al último mensaje del cliente puedes escribir texto libre. Fuera de esa ventana solo puedes usar plantillas aprobadas por Meta."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Pueden limitar mi línea de WhatsApp?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí. Escribir a personas que no autorizaron el contacto o acumular reportes y bloqueos baja la calificación de calidad del número y puede reducir su límite de envío."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://luenio.com/guias/whatsapp-business-api#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Inicio",
+                "item": "https://luenio.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Guías",
+                "item": "https://luenio.com/guias"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio",
+                "item": "https://luenio.com/guias/whatsapp-business-api"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio | Luenio" />
+    <meta property="og:description" content="Las tres formas de usar WhatsApp en un negocio, qué gana y qué pierde cada una, y cuándo la API deja de ser opcional." />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/guias/whatsapp-business-api" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio | Luenio" />
+    <meta name="twitter:description" content="Las tres formas de usar WhatsApp en un negocio, qué gana y qué pierde cada una, y cuándo la API deja de ser opcional." />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+  </head>
+  <body data-page-context="Guía: WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio" data-whatsapp-widget="true">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <!-- include: site-header nav="site" ctaHref="/cotizacion" quoteCta="header" ctaLocation="guide_header" -->
+    <main id="contenido">
+      <section class="legal-hero">
+        <div class="legal-hero__inner">
+          <a class="legal-back" href="/guias">← Volver a las guías</a>
+          <p class="eyebrow">Guía</p>
+          <h1>WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio</h1>
+          <p class="legal-date">Publicada el 10 de septiembre de 2026</p>
+          <p>Hay tres formas de usar WhatsApp en un negocio y solo una permite automatizar de verdad. Esta guía explica en qué se diferencian y cuándo vale la pena dar el salto.</p>
+        </div>
+      </section>
+      <div class="section-shell legal-layout">
+        <nav class="legal-toc" aria-label="Contenido">
+          <strong>Contenido</strong>
+          <a href="#respuesta-corta">1. Respuesta corta</a>
+          <a href="#tres-formas">2. Las tres formas</a>
+          <a href="#que-cambia">3. Qué cambia</a>
+          <a href="#ventana-24-horas">4. La ventana de 24 horas</a>
+          <a href="#plantillas">5. Plantillas</a>
+          <a href="#costos">6. Cómo se cobra</a>
+          <a href="#cuando-no">7. Cuándo no la necesitas</a>
+          <a href="#como-empezar">8. Qué hace falta</a>
+          <a href="#preguntas">Preguntas frecuentes</a>
+        </nav>
+        <article class="legal-article">
+          <section id="respuesta-corta">
+            <h2>1. La respuesta corta</h2>
+            <p>
+              La aplicación normal de WhatsApp sirve para vender de a poco.
+              <strong>WhatsApp Business</strong>, la aplicación gratuita, añade catálogo, etiquetas
+              y respuestas rápidas, pero sigue viviendo dentro de un teléfono.
+              <strong>WhatsApp Business API</strong> no tiene aplicación: es un canal que se conecta
+              a un sistema. Es la única de las tres que permite que varias personas atiendan la
+              misma línea, que un CRM registre lo que pasó y que un asistente responda solo.
+            </p>
+            <p>
+              Si atiendes desde un teléfono y te alcanza, no necesitas la API. Si se te pierden
+              conversaciones, si responde más de una persona, o si quieres que el seguimiento ocurra
+              sin que alguien tenga que acordarse, entonces sí.
+            </p>
+          </section>
+          <section id="tres-formas">
+            <h2>2. Las tres formas de usar WhatsApp</h2>
+            <ul>
+              <li>
+                <strong>WhatsApp personal.</strong> Un número, un teléfono, una persona. Sin
+                herramientas de negocio y sin forma de saber qué pasó con cada conversación.
+              </li>
+              <li>
+                <strong>WhatsApp Business, la aplicación.</strong> Gratuita. Añade perfil de
+                empresa, catálogo, etiquetas, mensaje de ausencia y respuestas rápidas. Sigue atada
+                al teléfono y admite pocos dispositivos.
+              </li>
+              <li>
+                <strong>WhatsApp Business API.</strong> No se descarga: se conecta. La línea deja de
+                vivir en un teléfono y pasa a vivir en una plataforma de atención, que a su vez se
+                conecta con la web, el CRM y las automatizaciones.
+              </li>
+            </ul>
+          </section>
+          <section id="que-cambia">
+            <h2>3. Qué cambia cuando pasas a la API</h2>
+            <ul>
+              <li>
+                <strong>Varias personas en la misma línea.</strong> Con conversaciones asignadas,
+                sin pasarse el teléfono.
+              </li>
+              <li>
+                <strong>El historial deja de ser del teléfono.</strong> Queda en un sistema que
+                puedes consultar, exportar y conectar.
+              </li>
+              <li>
+                <strong>La automatización se vuelve posible.</strong> Responder al instante, recoger
+                datos, agendar, avisar al equipo, escribir en el CRM.
+              </li>
+              <li>
+                <strong>Pierdes la aplicación.</strong> Ese número ya no abre en el teléfono.
+                Necesitas una plataforma de atención desde el primer día.
+              </li>
+            </ul>
+          </section>
+          <section id="ventana-24-horas">
+            <h2>4. La ventana de 24 horas manda</h2>
+            <p>
+              Meta permite responder con texto libre durante las 24 horas siguientes al último
+              mensaje del cliente. Pasado ese plazo, la línea solo puede escribir usando una
+              plantilla aprobada de antemano.
+            </p>
+            <p>
+              La consecuencia práctica es que <strong>el seguimiento no es libre</strong>. Si un
+              cliente escribe un martes y nadie le responde hasta el jueves, ese mensaje ya no puede
+              ser un texto cualquiera. Los negocios que ignoran esta regla descubren tarde que su
+              recordatorio nunca llegó.
+            </p>
+          </section>
+          <section id="plantillas">
+            <h2>5. Las plantillas se aprueban antes, no después</h2>
+            <p>
+              Una plantilla es un mensaje con huecos para datos variables que Meta revisa antes de
+              permitir su uso. La revisión puede rechazarla por sonar demasiado promocional, por
+              usar mal las variables o por prometer cosas que no corresponden.
+            </p>
+            <p>
+              Conviene tener aprobadas las plantillas de seguimiento <em>antes</em> de necesitarlas.
+              Pedir la aprobación el día que quieres reactivar una conversación suele llegar tarde.
+            </p>
+          </section>
+          <section id="costos">
+            <h2>6. Cómo se cobra</h2>
+            <p>
+              Hay dos cuentas separadas. Meta cobra por los mensajes según su categoría, y la
+              plataforma de atención cobra su propio servicio. El modelo de precios de Meta ha
+              cambiado varias veces en los últimos años, así que cualquier cifra que leas fuera de
+              su documentación oficial envejece rápido.
+            </p>
+            <p>
+              Lo que sí se mantiene: <strong>los mensajes que inicia el negocio cuestan</strong>, y
+              responder dentro de la ventana abierta por el cliente es siempre la vía más barata. Un
+              flujo bien diseñado gasta menos porque provoca que el cliente escriba primero.
+            </p>
+          </section>
+          <section id="cuando-no">
+            <h2>7. Cuándo no la necesitas</h2>
+            <p>
+              Si recibes pocas conversaciones al día, responde una sola persona y no hay nada que
+              automatizar, la aplicación de WhatsApp Business es suficiente y no cuesta nada. Migrar
+              a la API sin ese volumen añade complejidad y una factura sin resolver ningún problema
+              real.
+            </p>
+          </section>
+          <section id="como-empezar">
+            <h2>8. Qué hace falta para empezar</h2>
+            <ul>
+              <li>
+                Un número que no esté activo en la aplicación de WhatsApp, o uno que estés dispuesto
+                a migrar sabiendo que el historial del teléfono no viaja con él.
+              </li>
+              <li>Una cuenta de Meta Business verificada.</li>
+              <li>Una plataforma de atención donde vivan las conversaciones.</li>
+              <li>
+                Alguien que conecte esa línea con tu página web, tu CRM y las automatizaciones que
+                de verdad usas.
+              </li>
+            </ul>
+          </section>
+          <section id="preguntas">
+            <h2>Preguntas frecuentes</h2>
+            <h3>¿Puedo usar mi mismo número de WhatsApp para la API?</h3>
+            <p>Sí, pero al migrarlo deja de funcionar en la aplicación de WhatsApp y el historial guardado en el teléfono no viaja con él. Conviene decidirlo antes de migrar.</p>
+            <h3>¿WhatsApp Business API es gratis?</h3>
+            <p>No. Meta cobra por los mensajes según su categoría y la plataforma de atención cobra su propio servicio. La aplicación de WhatsApp Business sí es gratuita.</p>
+            <h3>¿Tengo que aprobar cada mensaje que envío?</h3>
+            <p>No. Dentro de las 24 horas siguientes al último mensaje del cliente puedes escribir texto libre. Fuera de esa ventana solo puedes usar plantillas aprobadas por Meta.</p>
+            <h3>¿Pueden limitar mi línea de WhatsApp?</h3>
+            <p>Sí. Escribir a personas que no autorizaron el contacto o acumular reportes y bloqueos baja la calificación de calidad del número y puede reducir su límite de envío.</p>
+            <div class="legal-contact">
+              <strong>¿Quieres esto funcionando en tu negocio?</strong><br />
+              Cuéntanos qué necesitas y preparamos una propuesta con alcance definido. El
+              diagnóstico no tiene costo.<br /><br />
+              <a href="/cotizacion" data-quote-cta="guide_footer" data-cta-location="guide_footer"
+                >Pedir una cotización</a
+              ><br />
+              <a href="mailto:contacto@luenio.com">contacto@luenio.com</a><br />+57 319 320 3702
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+    <!-- include: site-footer variant="explore" -->
+    <script type="module" src="/apps/web/src/public-site.js"></script>
+  </body>
+</html>

@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#071a33" />
+    <script src="/theme-boot.js"></script>
+    <title>Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente | Luenio</title>
+    <meta name="description" content="Por qué el botón de WhatsApp borra el origen de cada conversación y cómo montar el puente para que no ocurra." />
+    <meta name="author" content="Luenio" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://luenio.com/guias/conectar-web-con-whatsapp" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Article",
+            "@id": "https://luenio.com/guias/conectar-web-con-whatsapp#article",
+            "headline": "Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente",
+            "description": "Por qué el botón de WhatsApp borra el origen de cada conversación y cómo montar el puente para que no ocurra.",
+            "url": "https://luenio.com/guias/conectar-web-con-whatsapp",
+            "inLanguage": "es-CO",
+            "datePublished": "2026-09-10",
+            "dateModified": "2026-09-10",
+            "image": "https://luenio.com/og-luenio.png",
+            "author": {
+              "@type": "Organization",
+              "@id": "https://luenio.com/#organization",
+              "name": "Luenio",
+              "url": "https://luenio.com/"
+            },
+            "publisher": {
+              "@type": "Organization",
+              "@id": "https://luenio.com/#organization",
+              "name": "Luenio",
+              "url": "https://luenio.com/"
+            },
+            "isPartOf": {
+              "@id": "https://luenio.com/#website"
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://luenio.com/guias/conectar-web-con-whatsapp#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "¿Sirve el botón flotante de WhatsApp en una página web?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí, siempre que lleve un dato de origen y no tape el contenido en pantallas pequeñas. Un botón que cubre el texto en el celular estorba más de lo que ayuda."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Puedo saber de qué página vino un cliente que escribe por WhatsApp?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Sí. Prellenando el mensaje con el nombre de la página, o guardando el contacto en tu sistema antes de abrir la conversación."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Necesito WhatsApp Business API para conectar mi web con WhatsApp?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "No. Un enlace con origen funciona con la aplicación normal. La API hace falta cuando quieres que la respuesta y el seguimiento ocurran automáticamente."
+                }
+              }
+            ]
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "https://luenio.com/guias/conectar-web-con-whatsapp#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Inicio",
+                "item": "https://luenio.com/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Guías",
+                "item": "https://luenio.com/guias"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente",
+                "item": "https://luenio.com/guias/conectar-web-con-whatsapp"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+    <meta property="og:type" content="article" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:site_name" content="Luenio" />
+    <meta property="og:title" content="Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente | Luenio" />
+    <meta property="og:description" content="Por qué el botón de WhatsApp borra el origen de cada conversación y cómo montar el puente para que no ocurra." />
+    <meta property="og:image" content="https://luenio.com/og-luenio.png" />
+    <meta property="og:url" content="https://luenio.com/guias/conectar-web-con-whatsapp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente | Luenio" />
+    <meta name="twitter:description" content="Por qué el botón de WhatsApp borra el origen de cada conversación y cómo montar el puente para que no ocurra." />
+    <meta name="twitter:image" content="https://luenio.com/og-luenio.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-stylesheet
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <link rel="stylesheet" href="/apps/web/src/public-site.css" />
+  </head>
+  <body data-page-context="Guía: Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente" data-whatsapp-widget="true">
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+    <!-- include: site-header nav="site" ctaHref="/cotizacion" quoteCta="header" ctaLocation="guide_header" -->
+    <main id="contenido">
+      <section class="legal-hero">
+        <div class="legal-hero__inner">
+          <a class="legal-back" href="/guias">← Volver a las guías</a>
+          <p class="eyebrow">Guía</p>
+          <h1>Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente</h1>
+          <p class="legal-date">Publicada el 10 de septiembre de 2026</p>
+          <p>El botón de WhatsApp es la forma más rápida de recibir un mensaje y la más rápida de perder de vista de dónde salió.</p>
+        </div>
+      </section>
+      <div class="section-shell legal-layout">
+        <nav class="legal-toc" aria-label="Contenido">
+          <strong>Contenido</strong>
+          <a href="#respuesta-corta">1. Respuesta corta</a>
+          <a href="#limite-del-boton">2. Lo que el botón no dice</a>
+          <a href="#mensaje-prellenado">3. Prellenar el origen</a>
+          <a href="#formulario-primero">4. Formulario primero</a>
+          <a href="#guardar-antes">5. Guardar antes de entregar</a>
+          <a href="#medir">6. Qué medir</a>
+          <a href="#errores">7. Errores comunes</a>
+          <a href="#preguntas">Preguntas frecuentes</a>
+        </nav>
+        <article class="legal-article">
+          <section id="respuesta-corta">
+            <h2>1. La respuesta corta</h2>
+            <p>
+              Un enlace de WhatsApp abre la conversación pero no lleva contexto: no sabes qué página
+              estaba mirando el cliente, qué servicio le interesaba ni de qué campaña llegó. Llega un
+              saludo desde un número y ahí empieza y termina la información.
+            </p>
+            <p>
+              La solución tiene dos partes: <strong>prellenar el mensaje con un dato de origen</strong>
+              y <strong>guardar el contacto en tu propio sistema antes</strong> de que la conversación
+              empiece.
+            </p>
+          </section>
+          <section id="limite-del-boton">
+            <h2>2. Lo que el botón no te dice</h2>
+            <p>
+              Con un enlace igual en todo el sitio, todas las conversaciones se ven idénticas. Si
+              tienes tráfico de búsquedas, de redes y de un anuncio pago, dejas de saber cuál de los
+              tres te trae clientes y cuál te trae curiosos. Y si el cliente escribe y luego
+              desaparece, no queda ni rastro en tu lado.
+            </p>
+          </section>
+          <section id="mensaje-prellenado">
+            <h2>3. Prellenar el mensaje con el origen</h2>
+            <p>
+              Los enlaces de WhatsApp aceptan un texto inicial. En vez de dejarlo vacío, ponle algo
+              que identifique la página o el servicio, por ejemplo una frase que mencione la sección
+              desde la que se escribe. Cuando llega el mensaje ya sabes de dónde salió.
+            </p>
+            <p>
+              Es la técnica más barata y funciona sin infraestructura. Su límite es que el cliente
+              puede borrar el texto antes de enviarlo, así que sirve como pista, no como registro.
+            </p>
+          </section>
+          <section id="formulario-primero">
+            <h2>4. Formulario primero, WhatsApp después</h2>
+            <p>
+              Cuando el origen importa de verdad, invierte el orden: un formulario corto que pida lo
+              mínimo, se guarda el contacto, y después se abre WhatsApp con la conversación ya
+              identificada.
+            </p>
+            <p>
+              La ventaja es que <strong>el contacto existe aunque el cliente nunca escriba</strong>. Y
+              existen muchos: gente que llena el formulario, ve abrirse WhatsApp y se arrepiente. Con
+              el botón solo, esos se pierden por completo.
+            </p>
+          </section>
+          <section id="guardar-antes">
+            <h2>5. Guarda antes de entregar</h2>
+            <p>
+              Si el formulario manda el dato directo a una herramienta externa y esa herramienta está
+              caída, el cliente ve un error y tú te quedas sin nada. El orden que evita perderlo es
+              siempre el mismo: <strong>guardar primero en tu propia base, entregar después</strong>,
+              y reintentar la entrega si falla.
+            </p>
+            <p>
+              Es un detalle de plomería que nadie ve hasta el día en que la integración se cae. Ese
+              día decide cuántos clientes pierdes.
+            </p>
+          </section>
+          <section id="medir">
+            <h2>6. Qué medir</h2>
+            <ul>
+              <li>Cuántas personas abren WhatsApp desde cada página.</li>
+              <li>Cuántas de esas escriben de verdad.</li>
+              <li>Cuántas llegan a una conversación con intención de compra.</li>
+            </ul>
+            <p>
+              Sin esos tres números no sabes si tu página funciona: solo sabes que a veces llegan
+              mensajes.
+            </p>
+          </section>
+          <section id="errores">
+            <h2>7. Errores comunes</h2>
+            <ul>
+              <li>El mismo enlace, sin origen, repetido en todo el sitio.</li>
+              <li>
+                Un número distinto en cada página. Cuando la atención se reparte entre líneas, nadie
+                tiene la conversación completa.
+              </li>
+              <li>Abrir WhatsApp en la misma pestaña. El visitante sale de tu web y ya no vuelve.</li>
+              <li>
+                No probarlo en un teléfono real. En escritorio el enlace se comporta distinto y la
+                mayoría de tus visitantes llega desde el celular.
+              </li>
+            </ul>
+          </section>
+          <section id="preguntas">
+            <h2>Preguntas frecuentes</h2>
+            <h3>¿Sirve el botón flotante de WhatsApp en una página web?</h3>
+            <p>Sí, siempre que lleve un dato de origen y no tape el contenido en pantallas pequeñas. Un botón que cubre el texto en el celular estorba más de lo que ayuda.</p>
+            <h3>¿Puedo saber de qué página vino un cliente que escribe por WhatsApp?</h3>
+            <p>Sí. Prellenando el mensaje con el nombre de la página, o guardando el contacto en tu sistema antes de abrir la conversación.</p>
+            <h3>¿Necesito WhatsApp Business API para conectar mi web con WhatsApp?</h3>
+            <p>No. Un enlace con origen funciona con la aplicación normal. La API hace falta cuando quieres que la respuesta y el seguimiento ocurran automáticamente.</p>
+            <div class="legal-contact">
+              <strong>¿Quieres esto funcionando en tu negocio?</strong><br />
+              Cuéntanos qué necesitas y preparamos una propuesta con alcance definido. El
+              diagnóstico no tiene costo.<br /><br />
+              <a href="/cotizacion" data-quote-cta="guide_footer" data-cta-location="guide_footer"
+                >Pedir una cotización</a
+              ><br />
+              <a href="mailto:contacto@luenio.com">contacto@luenio.com</a><br />+57 319 320 3702
+            </div>
+          </section>
+        </article>
+      </div>
+    </main>
+    <!-- include: site-footer variant="explore" -->
+    <script type="module" src="/apps/web/src/public-site.js"></script>
+  </body>
+</html>

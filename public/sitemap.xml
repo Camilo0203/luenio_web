@@ -41,6 +41,22 @@
     <priority>0.4</priority>
   </url>
   <url>
+    <loc>https://luenio.com/guias</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/guias/whatsapp-business-api</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/guias/chatbot-whatsapp</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://luenio.com/guias/conectar-web-con-whatsapp</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://luenio.com/terminos</loc>
     <priority>0.3</priority>
   </url>

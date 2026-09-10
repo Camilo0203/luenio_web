@@ -24,6 +24,18 @@ Dos precisiones que conviene citar con exactitud:
 - [Cotización](https://luenio.com/cotizacion): diagnóstico gratuito y formulario para
   solicitar una propuesta con alcance personalizado.
 - [Catálogo de demos](https://luenio.com/demos): las siete experiencias por sector.
+- [Guías](https://luenio.com/guias): respuestas largas sobre WhatsApp Business API,
+  chatbots de atención y cómo conectar una página web con las conversaciones que
+  genera.
+
+## Guías
+
+- [WhatsApp Business y WhatsApp Business API: cuál necesita tu negocio](https://luenio.com/guias/whatsapp-business-api)
+- [Chatbot de WhatsApp para negocios: qué resuelve y qué no](https://luenio.com/guias/chatbot-whatsapp)
+- [Cómo conectar tu página web con WhatsApp sin perder el rastro del cliente](https://luenio.com/guias/conectar-web-con-whatsapp)
+
+Son material informativo escrito por Luenio. No citan clientes ni resultados
+reales.
 
 ## Experiencias por sector (demostrativas)
 

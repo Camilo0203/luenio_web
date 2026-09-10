@@ -46,17 +46,110 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
         "@context": "https://schema.org",
         "@graph": [
           {
-            "@type": "Organization",
+            "@type": ["Organization", "ProfessionalService"],
             "@id": "https://luenio.com/#organization",
             "name": "Luenio",
             "url": "https://luenio.com/",
             "logo": "https://luenio.com/og-luenio.png",
+            "image": "https://luenio.com/og-luenio.png",
+            "description": "Estudio colombiano que diseña páginas web a medida y las conecta con WhatsApp, automatizaciones y seguimiento comercial. El alcance y el precio se definen por proyecto, sin tarifas publicadas.",
             "email": "contacto@luenio.com",
             "telephone": "+57 319 320 3702",
             "address": {
               "@type": "PostalAddress",
+              "streetAddress": "Carrera 93B #34-15 Sur",
               "addressLocality": "Bogotá D.C.",
               "addressCountry": "CO"
+            },
+            "areaServed": {
+              "@type": "Country",
+              "name": "Colombia"
+            },
+            "knowsAbout": [
+              "Diseño y desarrollo de páginas web",
+              "Automatización comercial",
+              "WhatsApp Business API",
+              "Chatbots de WhatsApp",
+              "Integración con CRM",
+              "Calificación de oportunidades comerciales",
+              "Seguimiento de leads"
+            ],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "sales",
+              "telephone": "+57 319 320 3702",
+              "email": "contacto@luenio.com",
+              "areaServed": "CO",
+              "availableLanguage": ["es"]
+            },
+            "hasOfferCatalog": {
+              "@type": "OfferCatalog",
+              "name": "Páginas web y automatizaciones por sector",
+              "itemListElement": [
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/agencias#service",
+                  "name": "Página web y automatización para agencias",
+                  "url": "https://luenio.com/agencias"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/tiendas-online#service",
+                  "name": "Página web y automatización para tiendas online",
+                  "url": "https://luenio.com/tiendas-online"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/inmobiliarias#service",
+                  "name": "Página web y automatización para inmobiliarias",
+                  "url": "https://luenio.com/inmobiliarias"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/gimnasios#service",
+                  "name": "Página web y automatización para gimnasios",
+                  "url": "https://luenio.com/gimnasios"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/restaurantes#service",
+                  "name": "Página web y automatización para restaurantes",
+                  "url": "https://luenio.com/restaurantes"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/veterinarias#service",
+                  "name": "Página web y automatización para veterinarias",
+                  "url": "https://luenio.com/veterinarias"
+                }
+              },
+              {
+                "@type": "Offer",
+                "itemOffered": {
+                  "@type": "Service",
+                  "@id": "https://luenio.com/esteticas#service",
+                  "name": "Página web y automatización para centros de estética",
+                  "url": "https://luenio.com/esteticas"
+                }
+              }
+              ]
             }
           },
           {
