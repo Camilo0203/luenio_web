@@ -81,11 +81,11 @@ tests. Un sector nuevo son **dos páginas** (`apps/web/pages/<id>/` y
 
 Mismo patrón que los sectores: una fila en una tabla y las páginas.
 
-| Qué | Tabla | Páginas | Ruta pública |
-| --- | --- | --- | --- |
-| Guía | `config/guides.js` | `apps/web/pages/guides/<dir>/` | `/guias/<slug>` |
-| Servicio | `config/services.js` | `apps/web/pages/servicios/<dir>/` | `/<slug>` |
-| Ciudad | `config/locations.js` | `apps/web/pages/ciudades/<dir>/` | `/<slug>` |
+| Qué      | Tabla                 | Páginas                           | Ruta pública    |
+| -------- | --------------------- | --------------------------------- | --------------- |
+| Guía     | `config/guides.js`    | `apps/web/pages/guides/<dir>/`    | `/guias/<slug>` |
+| Servicio | `config/services.js`  | `apps/web/pages/servicios/<dir>/` | `/<slug>`       |
+| Ciudad   | `config/locations.js` | `apps/web/pages/ciudades/<dir>/`  | `/<slug>`       |
 
 De ahí salen las rutas, las entradas de Vite, el sitemap, el conteo de páginas
 del test de arquitectura y las listas de rutas del audit de tema y de la matriz
