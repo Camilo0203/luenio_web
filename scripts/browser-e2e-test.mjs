@@ -704,17 +704,34 @@ async function runBrowserChecks(baseUrl) {
         // Chromium (reproduced identically -- 217.266 vs 220 -- across three
         // separate CI runs, but never locally against system Chrome), so the
         // tolerance allows for that while every other property stays exact.
+        //
+        // Height is compared against what each page declares, not between the
+        // two pages. Gym asks for the compact trigger with
+        // `data-whatsapp-position="fixed"` and gets 44px by decision. The
+        // reference landing gets the widget's own 54px. They used to match only
+        // because the shared `sector-v2` sheet sets `min-height: 44px` on every
+        // `button` inside `.demo-page`, which reached the trigger by accident --
+        // so this assertion was comparing two numbers that agreed for unrelated
+        // reasons. Restaurants, real estate and ecommerce still ride that
+        // accident and ship a 44px trigger; that is shared-layer debt, recorded
+        // rather than silently frozen into this check.
         assert(
           gymWhatsappPresentation.background === sharedWhatsappPresentation.background &&
             gymWhatsappPresentation.borderRadius === sharedWhatsappPresentation.borderRadius &&
             gymWhatsappPresentation.font === sharedWhatsappPresentation.font &&
-            gymWhatsappPresentation.height === sharedWhatsappPresentation.height &&
             gymWhatsappPresentation.labelDisplay === sharedWhatsappPresentation.labelDisplay &&
             gymWhatsappPresentation.paddingInline === sharedWhatsappPresentation.paddingInline &&
             Math.abs(gymWhatsappPresentation.width - sharedWhatsappPresentation.width) <= 3,
           `Gym desktop WhatsApp must use the shared landing presentation: ${JSON.stringify({
             gym: gymWhatsappPresentation,
             shared: sharedWhatsappPresentation,
+          })}`,
+        );
+        assert(
+          gymWhatsappPresentation.height === 44 && sharedWhatsappPresentation.height === 54,
+          `WhatsApp trigger height must follow each page's declaration: ${JSON.stringify({
+            gym: gymWhatsappPresentation.height,
+            shared: sharedWhatsappPresentation.height,
           })}`,
         );
       }
