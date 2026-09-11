@@ -103,6 +103,7 @@
     <link rel="stylesheet" href="/apps/web/pages/veterinary/vet-clinic.css" />
     <script type="module" src="/apps/web/src/niche-landing.js"></script>
     <script type="module" src="/apps/web/pages/veterinary/veterinary-landing.js"></script>
+    <script type="module" src="/apps/web/src/demo-motion.js"></script>
   </head>
   <body
     class="vet-clinic veterinary"
@@ -200,11 +201,11 @@
       <section class="vet-section" id="servicios" aria-labelledby="veterinary-services-title">
         <div class="vet-shell">
           <h2 id="veterinary-services-title">Qué resolvemos</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             Cuatro motivos cubren casi todo lo que llega por mensaje. Los servicios y tiempos de
             esta demo son ilustrativos.
           </p>
-          <ul class="vet-services">
+          <ul class="vet-services" data-reveal-group>
             <li class="vet-service">
               <div class="vet-service__head">
                 <span class="vet-service__icon" aria-hidden="true">
@@ -266,7 +267,7 @@
       >
         <div class="vet-shell">
           <h2 id="veterinary-route-title">Del primer mensaje a una cita con contexto</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             Elige el motivo y la ruta se arma sola. Es la misma mecánica que queda funcionando en la
             clínica: quien escribe llega orientado y el equipo recibe la solicitud con contexto.
           </p>
@@ -333,7 +334,7 @@
       <section class="vet-section" id="agenda" aria-labelledby="veterinary-agenda-title">
         <div class="vet-shell">
           <h2 id="veterinary-agenda-title">Elige un momento para continuar</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             Los horarios muestran cómo funcionaría una agenda conectada. No corresponden a
             disponibilidad real.
           </p>
@@ -379,12 +380,12 @@
       <section class="vet-section" id="equipo" aria-labelledby="veterinary-team-title">
         <div class="vet-shell">
           <h2 id="veterinary-team-title">Quién atiende a tu mascota</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             El equipo de esta demo es ficticio. En una implementación real irían las fotografías y
             las especialidades del equipo del cliente.
           </p>
-          <ul class="vet-team">
-            <li class="vet-person">
+          <ul class="vet-team" data-reveal-group>
+            <li class="vet-person" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/vet-equipo-corgi.avif" type="image/avif" />
                 <img
@@ -407,7 +408,7 @@
                 <p>Consulta diaria y seguimiento de casos crónicos. Habla con calma y sin prisa.</p>
               </div>
             </li>
-            <li class="vet-person">
+            <li class="vet-person" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/vet-diagnostico.avif" type="image/avif" />
                 <img
@@ -430,7 +431,7 @@
                 <p>Imagen y laboratorio. Explica cada resultado antes de proponer nada.</p>
               </div>
             </li>
-            <li class="vet-person">
+            <li class="vet-person" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/vet-gato.avif" type="image/avif" />
                 <img
@@ -464,11 +465,11 @@
       >
         <div class="vet-shell">
           <h2 id="veterinary-place-title">Cómo es por dentro</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             Instalaciones ilustrativas de esta demo. Ver el sitio antes de llegar quita la mitad del
             miedo, sobre todo en una urgencia.
           </p>
-          <ul class="vet-gallery">
+          <ul class="vet-gallery" data-reveal-group>
             <li>
               <figure>
                 <picture>
@@ -539,11 +540,11 @@
       <section class="vet-section" id="opiniones" aria-labelledby="veterinary-reviews-title">
         <div class="vet-shell">
           <h2 id="veterinary-reviews-title">Lo que dicen quienes ya vinieron</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             Reseñas ficticias, escritas para esta demo. No corresponden a personas ni a visitas
             reales.
           </p>
-          <ul class="vet-reviews">
+          <ul class="vet-reviews" data-reveal-group>
             <li class="vet-review">
               <span class="vet-review__stars" role="img" aria-label="5 de 5">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -652,7 +653,7 @@
       >
         <div class="vet-shell">
           <h2 id="veterinary-visit-title">Cuándo y dónde</h2>
-          <p class="vet-section__lead">
+          <p class="vet-section__lead" data-reveal>
             Horarios, dirección y respuestas de esta demo. Son ilustrativos y no corresponden a un
             local real.
           </p>

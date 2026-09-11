@@ -104,6 +104,7 @@
     <script type="module" src="/apps/web/src/niche-landing.js"></script>
     <script type="module" src="/apps/web/src/industry-demos.js"></script>
     <script type="module" src="/apps/web/pages/agencies/agency-landing.js"></script>
+    <script type="module" src="/apps/web/src/demo-motion.js"></script>
   </head>
   <body
     class="agency-desk demo-agency"
@@ -189,7 +190,7 @@
 
       <section class="ag-section" id="alcance" aria-labelledby="agency-scope-title">
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-scope-title">Define tu encargo y mira qué sale.</h2>
             <p>
               El documento se reescribe con lo que elijas. La cláusula de lo que no entra se lee con
@@ -338,14 +339,14 @@
         aria-labelledby="agency-services-title"
       >
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-services-title">Un equipo para convertir estrategia en ejecución.</h2>
             <p>
               No vendemos piezas sueltas. Diseñamos sistemas de marca y experiencias digitales que
               puedan crecer con el negocio.
             </p>
           </div>
-          <ul class="ag-rows">
+          <ul class="ag-rows" data-reveal-group>
             <li class="ag-row">
               <h3>Estrategia y marca</h3>
               <p>
@@ -373,14 +374,14 @@
 
       <section class="ag-section" id="casos" aria-labelledby="agency-cases-title">
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-cases-title">Antes de prometer resultados, mostramos qué recibirías.</h2>
             <p>
               Tres entregables de muestra para evaluar la claridad, la profundidad y la utilidad del
               trabajo antes de iniciar un proyecto.
             </p>
           </div>
-          <figure class="ag-case-shot">
+          <figure class="ag-case-shot" data-zoom>
             <img
               decoding="async"
               loading="lazy"
@@ -397,7 +398,7 @@
             />
             <figcaption>Imagen ilustrativa</figcaption>
           </figure>
-          <ul class="ag-rows">
+          <ul class="ag-rows" data-reveal-group>
             <li class="ag-row">
               <h3>Mapa de posicionamiento y mensajes.</h3>
               <p>
@@ -432,11 +433,11 @@
         aria-labelledby="agency-process-title"
       >
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-process-title">Decisiones claras antes de producir más.</h2>
             <p>Un proceso corto, visible y diseñado para reducir retrabajo.</p>
           </div>
-          <ol class="ag-stages">
+          <ol class="ag-stages" data-reveal-group>
             <li class="ag-stage">
               <h3>Definir</h3>
               <p>
@@ -462,14 +463,14 @@
 
       <section class="ag-section" id="planes" aria-labelledby="agency-plans-title">
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-plans-title">Un alcance apropiado para cada momento.</h2>
             <p>
               Referencias de alcance y presupuesto en pesos colombianos para esta demo. Cada
               propuesta se ajusta al problema, al equipo y a la velocidad del cliente.
             </p>
           </div>
-          <ul class="ag-tiers">
+          <ul class="ag-tiers" data-reveal-group>
             <li class="ag-tier">
               <div class="ag-tier__figure">
                 <span class="ag-tier__price">Desde $4.800.000</span>
@@ -515,7 +516,7 @@
 
       <section class="ag-section ag-section--sheet" aria-labelledby="agency-faq-title">
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-faq-title">Antes de empezar.</h2>
           </div>
           <div class="ag-faq">
@@ -559,15 +560,15 @@
 
       <section class="ag-section" id="trabajo" aria-labelledby="agency-work-title">
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-work-title">Lo que sale de aquí.</h2>
             <p>
               Piezas ilustrativas de esta demo. No corresponden a proyectos ni a clientes reales,
               pero sí al tipo de material que se entrega y se transfiere al equipo.
             </p>
           </div>
-          <ul class="ag-work">
-            <li class="ag-piece">
+          <ul class="ag-work" data-reveal-group>
+            <li class="ag-piece" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/ag-paleta.avif" type="image/avif" />
                 <img
@@ -593,7 +594,7 @@
                 </p>
               </div>
             </li>
-            <li class="ag-piece">
+            <li class="ag-piece" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/ag-identidad.avif" type="image/avif" />
                 <img
@@ -619,7 +620,7 @@
                 </p>
               </div>
             </li>
-            <li class="ag-piece">
+            <li class="ag-piece" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/ag-bocetos.avif" type="image/avif" />
                 <img
@@ -645,7 +646,7 @@
                 </p>
               </div>
             </li>
-            <li class="ag-piece">
+            <li class="ag-piece" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/ag-muestras.avif" type="image/avif" />
                 <img
@@ -681,14 +682,14 @@
         aria-labelledby="agency-studio-title"
       >
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-studio-title">Quién lo hace.</h2>
             <p>
               Un equipo pequeño y fijo. Imágenes ilustrativas de esta demo: no corresponden a las
               personas ni a la oficina de un estudio real.
             </p>
           </div>
-          <ul class="ag-studio">
+          <ul class="ag-studio" data-reveal-group>
             <li>
               <figure>
                 <picture>
@@ -758,14 +759,14 @@
 
       <section class="ag-section" id="opiniones" aria-labelledby="agency-reviews-title">
         <div class="ag-shell">
-          <div class="ag-section__head">
+          <div class="ag-section__head" data-reveal>
             <h2 id="agency-reviews-title">Lo que dicen quienes ya trabajaron con el estudio.</h2>
             <p>
               Testimonios ficticios, escritos para esta demo. No corresponden a personas ni a
               proyectos reales.
             </p>
           </div>
-          <ul class="ag-reviews">
+          <ul class="ag-reviews" data-reveal-group>
             <li class="ag-review">
               <p>
                 Lo que más agradecí fue la lista de lo que no entraba. Sabíamos desde el día uno qué

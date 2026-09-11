@@ -12,6 +12,10 @@
  */
 
 .vet-clinic {
+  /* Curvas de interfaz, tomadas de la tabla, no inventadas. */
+  --m-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --m-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+
   /* Un solo color manda. El cian clínico cubre la cabecera, la acción primaria
      y la franja de cierre; el resto es blanco de sala y tinta. */
   --vet-brand: #0e7490;
@@ -1142,6 +1146,73 @@ html[data-theme="dark"] .vet-clinic .vet-urgent {
     grid-template-rows: repeat(3, 200px);
   }
 }
+
+/* --------------------------------------------------------------- movimiento */
+
+/* Un solo sistema para las tres demos. Las curvas no se inventan: la de salida
+   es la fuerte de interfaz y la de recorrido la de ida y vuelta; la exponencial
+   que ya usaba el momento autoral de cada página se queda donde estaba. */
+
+/* El estado oculto cuelga de `data-motion`, que solo declara el guion cuando
+   hay movimiento permitido. Sin JavaScript o con movimiento reducido, nada se
+   esconde: un fallo de carga no puede dejar media página invisible. */
+html[data-motion="on"] [data-reveal] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 560ms var(--m-ease-out),
+    transform 560ms var(--m-ease-out);
+}
+
+html[data-motion="on"] [data-reveal][data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Escalonado de 60 ms dentro de un grupo: lo justo para que se lea como una
+   secuencia y no como una cascada. */
+html[data-motion="on"] [data-reveal-group] > * {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 520ms var(--m-ease-out),
+    transform 520ms var(--m-ease-out);
+}
+
+html[data-motion="on"] [data-reveal-group][data-visible] > * {
+  opacity: 1;
+  transform: none;
+}
+
+html[data-motion="on"] [data-reveal-group][data-visible] > *:nth-child(2) {
+  transition-delay: 60ms;
+}
+
+html[data-motion="on"] [data-reveal-group][data-visible] > *:nth-child(3) {
+  transition-delay: 120ms;
+}
+
+html[data-motion="on"] [data-reveal-group][data-visible] > *:nth-child(4) {
+  transition-delay: 180ms;
+}
+
+/* Retrato y piezas: el marco recorta y la imagen se acerca muy poco. Solo con
+   ratón de verdad, porque en pantalla táctil un toque dispara un hover falso
+   que deja la foto ampliada sin que nadie lo haya pedido. */
+@media (hover: hover) and (pointer: fine) {
+  [data-zoom] {
+    overflow: hidden;
+  }
+
+  [data-zoom] img {
+    transition: transform 420ms var(--m-ease-out);
+  }
+
+  [data-zoom]:hover img {
+    transform: scale(1.03);
+  }
+}
+
 
 /* ------------------------------------------------------------- adaptación */
 

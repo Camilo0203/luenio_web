@@ -103,6 +103,7 @@
     <link rel="stylesheet" href="/apps/web/pages/aesthetics/skin-studio.css" />
     <script type="module" src="/apps/web/src/niche-landing.js"></script>
     <script type="module" src="/apps/web/pages/aesthetics/aesthetics-landing.js"></script>
+    <script type="module" src="/apps/web/src/demo-motion.js"></script>
   </head>
   <body
     class="skin-studio aesthetics"
@@ -207,7 +208,7 @@
         aria-labelledby="aesthetics-plan-title"
       >
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-plan-title">La pauta se ve antes de reservar.</h2>
             <p>
               Elige qué quieres trabajar. La agenda se arma sola y muestra el intervalo entre
@@ -337,14 +338,14 @@
 
       <section class="skin-section" id="tratamientos" aria-labelledby="aesthetics-treatments-title">
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-treatments-title">Lo que hacemos en cabina.</h2>
             <p>
               Cada tratamiento se confirma en la valoración. Ninguno se vende suelto por catálogo.
             </p>
           </div>
 
-          <ul class="skin-treatments">
+          <ul class="skin-treatments" data-reveal-group>
             <li class="skin-treatment">
               <h3>Valoración facial</h3>
               <p>
@@ -372,7 +373,7 @@
         aria-labelledby="aesthetics-method-title"
       >
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-method-title">Cómo trabajamos.</h2>
           </div>
 
@@ -428,15 +429,15 @@
 
       <section class="skin-section" id="sesion" aria-labelledby="aesthetics-session-title">
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-session-title">Cómo es una sesión aquí.</h2>
             <p>
               Imágenes ilustrativas de esta demo. Ninguna sesión empieza sin la valoración, y la
               valoración puede terminar en que hoy no toca hacer nada.
             </p>
           </div>
-          <ol class="skin-steps-photo">
-            <li class="skin-photo-step">
+          <ol class="skin-steps-photo" data-reveal-group>
+            <li class="skin-photo-step" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/aes-cabina.avif" type="image/avif" />
                 <img
@@ -461,7 +462,7 @@
                 </p>
               </div>
             </li>
-            <li class="skin-photo-step">
+            <li class="skin-photo-step" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/aes-aplicacion.avif" type="image/avif" />
                 <img
@@ -486,7 +487,7 @@
                 </p>
               </div>
             </li>
-            <li class="skin-photo-step">
+            <li class="skin-photo-step" data-zoom>
               <picture>
                 <source srcset="/assets/sectors/aes-masaje.avif" type="image/avif" />
                 <img
@@ -521,14 +522,14 @@
         aria-labelledby="aesthetics-place-title"
       >
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-place-title">El centro por dentro.</h2>
             <p>
               Instalaciones ilustrativas de esta demo. Cabinas individuales, productos a la vista y
               cero prisa entre una clienta y la siguiente.
             </p>
           </div>
-          <ul class="skin-gallery">
+          <ul class="skin-gallery" data-reveal-group>
             <li>
               <figure>
                 <picture>
@@ -598,11 +599,11 @@
 
       <section class="skin-section" id="opiniones" aria-labelledby="aesthetics-reviews-title">
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-reviews-title">Lo que dicen quienes ya vinieron.</h2>
             <p>Reseñas ficticias, escritas para esta demo. No corresponden a personas reales.</p>
           </div>
-          <ul class="skin-reviews">
+          <ul class="skin-reviews" data-reveal-group>
             <li class="skin-review">
               <span class="skin-review__stars" role="img" aria-label="5 de 5">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -710,7 +711,7 @@
         aria-labelledby="aesthetics-visit-title"
       >
         <div class="skin-shell">
-          <div class="skin-section__head">
+          <div class="skin-section__head" data-reveal>
             <h2 id="aesthetics-visit-title">Cuándo y dónde.</h2>
             <p>
               Horarios, dirección y respuestas de esta demo. Son ilustrativos y no corresponden a un
