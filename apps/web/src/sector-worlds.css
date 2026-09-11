@@ -188,8 +188,18 @@ html[data-theme] .demo-agency {
   transform: none !important;
 }
 
-.demo-agency .demo-card.demo-card--featured {
+/* niche-showcase.css paints .demo-price, .demo-number and p with --accent-ink,
+   which is white in light theme. On this card's lime that is invisible, so the
+   card's own ink is restated for its descendants rather than left to a token
+   that was chosen for a different surface. */
+.demo-agency .demo-card.demo-card--featured,
+.demo-agency .demo-card.demo-card--featured .demo-price,
+.demo-agency .demo-card.demo-card--featured .demo-number,
+.demo-agency .demo-card.demo-card--featured p {
   color: #111507;
+}
+
+.demo-agency .demo-card.demo-card--featured {
   background: #c7ff45;
 }
 
@@ -1035,8 +1045,11 @@ html[data-theme="light"] .demo-agency .demo-button--ghost {
   border-color: rgb(23 18 31 / 0.38);
 }
 
+/* The featured card is excluded on purpose. It carries the world's lime, and
+   this selector outweighs the one that paints it, so without the :not() the
+   recommended plan turns white in light theme -- white text included. */
 html[data-theme="light"] .demo-agency .demo-section--surface,
-html[data-theme="light"] .demo-agency .demo-card,
+html[data-theme="light"] .demo-agency .demo-card:not(.demo-card--featured),
 html[data-theme="light"] .demo-agency .agency-case {
   background: #fff;
 }

@@ -938,12 +938,19 @@ html[data-theme] body.gym-board.sector-v2 {
   --gym-subtle: #88958a;
   --gym-line: #4d5b50;
   --gym-line-soft: #263129;
-  --gym-lime: #36d36f;
-  --gym-amber: #36d36f;
-  --gym-amber-hover: #6be394;
-  --gym-amber-ink: #07110b;
-  --gym-success: #36d36f;
-  --signal: #36d36f;
+  /* Amber, not green. apps/web/pages/gym/DESIGN.md makes #ffb400 the action
+     colour and reserves green exclusively for WhatsApp; this block used to
+     repaint every one of these tokens #36d36f, which collapsed the two roles
+     the document says must never be confused -- a class still named
+     .amber-action was rendering the WhatsApp hue. --gym-lime and --signal are
+     v2 inventions with no entry in that document, so they follow the action
+     colour rather than introduce a third one. */
+  --gym-lime: #ffb400;
+  --gym-amber: #ffb400;
+  --gym-amber-hover: #ffc633;
+  --gym-amber-ink: #151000;
+  --gym-success: #86d34f;
+  --signal: #ffb400;
   background: var(--gym-canvas);
 }
 
@@ -958,12 +965,15 @@ html[data-theme="light"] body.gym-board.sector-v2 {
   --gym-subtle: #4f5c51;
   --gym-line: #839086;
   --gym-line-soft: #c9d1ca;
-  --gym-lime: #13783b;
-  --gym-amber: #13783b;
-  --gym-amber-hover: #0e6430;
-  --gym-amber-ink: #fff;
-  --gym-success: #13783b;
-  --signal: #13783b;
+  /* The light-theme amber is the deep #633a00 that gym-board.css already
+     carries, not a tint of #ffb400: on a pale canvas the bright amber cannot
+     hold AA against white ink. Same reasoning as the dark block above. */
+  --gym-lime: #633a00;
+  --gym-amber: #633a00;
+  --gym-amber-hover: #653c00;
+  --gym-amber-ink: #ffffff;
+  --gym-success: #276c39;
+  --signal: #633a00;
   background: var(--gym-canvas);
 }
 
@@ -1013,10 +1023,21 @@ html[data-theme="light"] body.gym-board.sector-v2 {
   align-self: end;
 }
 
-.gym-board.sector-v2 :is(.amber-action, .gym-whatsapp-cta) {
+/* These two buttons are deliberately not grouped. DESIGN.md gives the action
+   its amber and reserves green for WhatsApp alone; painting both from one
+   token is what collapsed the two roles into a single colour, so the WhatsApp
+   trigger keeps its own. */
+.gym-board.sector-v2 .amber-action {
   color: var(--gym-amber-ink);
-  background: var(--gym-lime);
-  border-color: var(--gym-lime);
+  background: var(--gym-amber);
+  border-color: var(--gym-amber);
+  border-radius: 0;
+}
+
+.gym-board.sector-v2 .gym-whatsapp-cta {
+  color: #fff;
+  background: var(--gym-whatsapp);
+  border-color: var(--gym-whatsapp);
   border-radius: 0;
 }
 
