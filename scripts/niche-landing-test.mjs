@@ -124,16 +124,21 @@ const pages = [
   },
   {
     ...sectorIdentity("veterinary"),
-    className: "care-landing veterinary",
-    hero: "Su bienestar empieza con una conversación.",
+    // Ya no es `care-landing`. Esta demo compartía plantilla, azul y esqueleto
+    // con la de estéticas, así que quien abría las dos veía la plantilla en vez
+    // de dos clínicas; ahora tiene hoja propia. La sección "equipo" se plegó
+    // dentro de "ruta", que explica el recorrido completo en lugar de repetir
+    // la misma idea en dos bloques.
+    className: "vet-clinic veterinary",
+    hero: "Del primer mensaje a una cita con contexto",
     minSections: 4,
-    ids: ["servicios", "agenda", "equipo", "contacto"],
-    terms: ["Consulta general", "Vacunas y prevención", "Agenda ilustrativa"],
+    ids: ["servicios", "ruta", "agenda", "contacto"],
+    terms: ["Consulta general", "Vacunas y prevención", "Seguimiento"],
     primaryCta: "Agendar consulta",
     conversionTarget: "agenda",
     legalNotice: "Demo ficticia creada por Luenio",
     disclaimer: "Información y disponibilidad ilustrativas",
-    css: "/apps/web/src/care-landings.css",
+    css: "/apps/web/pages/veterinary/vet-clinic.css",
   },
   {
     ...sectorIdentity("aesthetics"),
