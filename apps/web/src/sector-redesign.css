@@ -1041,6 +1041,22 @@ html[data-theme="light"] body.gym-board.sector-v2 {
   border-radius: 0;
 }
 
+/* El verde de WhatsApp solo viste lo que abre una conversación. Este control
+   lleva al formulario de cotización, así que toma el ámbar del gimnasio. La
+   regla vive aquí y no en `gym-board.css` porque esta hoja se carga después:
+   a igual especificidad, gana la última, y allí nunca llegaba a aplicarse. */
+.gym-board.sector-v2 .gym-whatsapp-cta--quote {
+  color: var(--gym-amber-ink);
+  background: var(--gym-amber);
+  border-color: var(--gym-amber);
+}
+
+.gym-board.sector-v2 .gym-whatsapp-cta--quote:hover {
+  color: var(--gym-amber-ink);
+  background: var(--gym-amber-hover);
+  border-color: var(--gym-amber-hover);
+}
+
 .gym-board.sector-v2 .builder-gallery {
   min-height: 390px;
   grid-column: 3;
