@@ -259,15 +259,22 @@ img {
    y el sistema de diseño lo dice. Este botón lleva a la cotización, así que
    viste el ámbar del gimnasio. Compartía clase con los dos que sí abren el
    modal, y el cambio de tinta del widget lo dejó en evidencia. */
-.gym-whatsapp-cta--quote {
+/* `sector-redesign.css` pinta este control desde `.gym-board.sector-v2
+   .gym-whatsapp-cta`, tres clases, así que una sola no le gana. Se responde a
+   la misma especificidad, nunca con !important. */
+.gym-whatsapp-cta--quote,
+.gym-board.sector-v2 .gym-whatsapp-cta--quote {
   color: var(--gym-amber-ink);
   background: var(--gym-amber);
+  border-color: var(--gym-amber);
   box-shadow: 0 7px 18px rgb(0 0 0 / 0.24);
 }
 
-.gym-whatsapp-cta--quote:hover {
+.gym-whatsapp-cta--quote:hover,
+.gym-board.sector-v2 .gym-whatsapp-cta--quote:hover {
   color: var(--gym-amber-ink);
   background: var(--gym-amber-hover);
+  border-color: var(--gym-amber-hover);
   box-shadow: 0 10px 24px rgb(0 0 0 / 0.3);
 }
 
