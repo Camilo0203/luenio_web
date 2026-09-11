@@ -126,6 +126,9 @@ const pages = [
     legalNotice: "Demo ficticia creada por Luenio",
     disclaimer:
       "Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son ejemplos y no representan proyectos ni resultados de clientes reales.",
+    // El primer viewport es el documento de alcance, no una fotografía: la
+    // única imagen vive en la sección de entregables y se difiere.
+    heroImageAboveFold: false,
     css: "/apps/web/pages/agencies/agency-desk.css",
   },
   {
@@ -252,13 +255,24 @@ for (const page of pages) {
     images.every((image) => /\bwidth="\d+"/.test(image) && /\bheight="\d+"/.test(image)),
     `${page.slug} images must reserve intrinsic layout space.`,
   );
+  // La comprobación mide la intención, no la suposición de que toda landing abre
+  // con una fotografía. Una página cuyo primer viewport es un documento debe
+  // hacer lo contrario: diferir sus imágenes y no reclamar prioridad alta para
+  // algo que el visitante no ve hasta desplazarse.
   if (images.length > 0) {
     const priorityImages = images.filter((image) => /\bfetchpriority="high"/.test(image));
-    assert(
-      priorityImages.length >= 1 &&
-        priorityImages.every((image) => !/\bloading="lazy"/.test(image)),
-      `${page.slug} must prioritize its above-the-fold visual.`,
-    );
+    if (page.heroImageAboveFold === false) {
+      assert(
+        priorityImages.length === 0 && images.every((image) => /\bloading="lazy"/.test(image)),
+        `${page.slug} opens on a document, so its images must be deferred, not prioritized.`,
+      );
+    } else {
+      assert(
+        priorityImages.length >= 1 &&
+          priorityImages.every((image) => !/\bloading="lazy"/.test(image)),
+        `${page.slug} must prioritize its above-the-fold visual.`,
+      );
+    }
   }
   assert(
     /fonts\.googleapis\.com\/css2\?[^"]*wght@\d+\.\.\d+/.test(html),
