@@ -455,11 +455,12 @@ html[data-theme="dark"] .skin-studio .skin-brand__mark {
   display: grid;
   gap: clamp(24px, 3vw, 44px);
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
-  align-items: start;
+  align-items: stretch;
 }
 
 .skin-choices {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   margin: 0;
   padding: 0;
@@ -478,7 +479,9 @@ html[data-theme="dark"] .skin-studio .skin-brand__mark {
    dejaba la sección firma de la página descuadrada. La frase de apoyo baja
    aquí en vez de vivir en el encabezado. */
 .skin-plan__aside {
-  margin-top: 20px;
+  /* Anclada abajo: la columna de opciones acababa doscientos píxeles antes que
+     la tarjeta y dejaba la sección firma de la página descuadrada. */
+  margin-top: auto;
   padding-top: 20px;
   border-top: 1px solid var(--skin-line);
   color: var(--skin-ink-soft);
@@ -942,24 +945,28 @@ html[data-theme="dark"] .skin-studio .skin-close .skin-btn:hover {
     margin-inline: auto 0;
   }
 
-  /* El aviso demostrativo tiene que caber entero en el primer viewport del
-     móvil, así que el héroe cede espaciado y el aviso no cede palabras. El
-     retrato se encuadra más panorámico en teléfono por la misma razón: a 4/3
-     empujaba el aviso once píxeles por debajo del pliegue. */
+  /* En móvil el aviso demostrativo no basta con que quepa en el pliegue: tiene
+     que terminar por encima del disparador flotante de WhatsApp, que se sienta
+     en la banda 778-830 y se comía su última línea. El héroe cede espaciado y
+     el retrato se encuadra panorámico; el aviso no cede palabras. */
   .skin-hero {
-    padding-block: 28px clamp(36px, 5vw, 64px);
+    padding-block: 20px clamp(36px, 5vw, 64px);
   }
 
   .skin-hero__inner {
-    gap: 20px;
+    gap: 14px;
   }
 
   .skin-hero__media img {
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 16 / 9;
+  }
+
+  .skin-hero__copy .skin-lead {
+    margin-top: 14px;
   }
 
   .skin-hero__actions {
-    margin-top: 20px;
+    margin-top: 18px;
   }
 
   .skin-hero__copy .skin-note {

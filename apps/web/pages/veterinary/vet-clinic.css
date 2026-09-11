@@ -818,20 +818,28 @@ html[data-theme="dark"] .vet-clinic {
     order: 3;
   }
 
-  /* El aviso demostrativo tiene que caber entero en el primer viewport de
-     móvil, y en 390 px ocupa cuatro líneas. El héroe cede el espacio: con el
-     ritmo de escritorio el aviso terminaba en 847 px y quedaba cortado por
-     tres. Se aprieta el espaciado, nunca el texto del aviso. */
+  /* El aviso demostrativo no basta con que quepa en el pliegue: tiene que
+     terminar por encima del disparador flotante de WhatsApp, que se sienta en
+     la banda 778-830 y se comía su última línea. El héroe cede espaciado y el
+     retrato se encuadra panorámico; el aviso no cede palabras. */
   .vet-hero {
-    padding-block: 28px clamp(36px, 5vw, 64px);
+    padding-block: 20px clamp(36px, 5vw, 64px);
   }
 
   .vet-hero__inner {
-    gap: 20px;
+    gap: 14px;
+  }
+
+  .vet-hero__media img {
+    aspect-ratio: 16 / 9;
+  }
+
+  .vet-hero__lead {
+    margin-top: 14px;
   }
 
   .vet-hero__actions {
-    margin-top: 20px;
+    margin-top: 18px;
   }
 
   .vet-note {
