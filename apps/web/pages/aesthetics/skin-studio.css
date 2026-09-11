@@ -1044,8 +1044,12 @@ html[data-theme="dark"] .skin-studio .skin-strip {
   overflow: hidden;
 }
 
+/* La pieza alta va a la derecha y se coloca por celda, no por flujo: con un
+   `span 2` al final, la rejilla no encontraba hueco de dos filas en la columna
+   libre, abría una tercera fila y comprimía todo fuera de la altura fijada. */
 .skin-gallery li:last-child {
-  grid-row: span 2;
+  grid-column: 2;
+  grid-row: 1 / span 2;
 }
 
 .skin-gallery figure {
@@ -1238,7 +1242,7 @@ html[data-theme="dark"] .skin-studio .skin-strip {
 
   .skin-gallery li:last-child {
     grid-column: 1 / -1;
-    grid-row: auto;
+    grid-row: 2;
   }
 }
 
@@ -1250,6 +1254,11 @@ html[data-theme="dark"] .skin-studio .skin-strip {
   .skin-gallery {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: repeat(3, 200px);
+  }
+
+  .skin-gallery li:last-child {
+    grid-column: 1;
+    grid-row: 3;
   }
 }
 
