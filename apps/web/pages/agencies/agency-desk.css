@@ -16,6 +16,9 @@
   --ag-mark: #c0392b;
   --ag-mark-hover: #9c2b20;
   --ag-mark-wash: #fbeceb;
+  /* El mismo rojo, saturado, cuando cubre un viewport entero en vez de una
+     etiqueta: a tamaño de campo el tono de galerada se apaga. */
+  --ag-flag: #d81e06;
   --ag-rule: #ddd7c9;
   --ag-rule-strong: #b6ae9b;
   --ag-display: "Instrument Serif", Georgia, "Times New Roman", serif;
@@ -55,6 +58,7 @@ html[data-theme="dark"] .agency-desk {
   --ag-mark: #ef6f5e;
   --ag-mark-hover: #f79484;
   --ag-mark-wash: #2d1b18;
+  --ag-flag: #b81704;
   --ag-rule: #33302a;
   --ag-rule-strong: #524d43;
   --ag-shadow: 0 12px 26px -20px rgba(0, 0, 0, 0.8);
@@ -335,7 +339,7 @@ html[data-theme="dark"] .agency-desk {
   border-bottom: 1px solid var(--ag-rule);
 }
 
-.ag-scope__head h2 {
+.ag-scope__head h3 {
   font-size: 1.4rem;
 }
 
@@ -1223,6 +1227,177 @@ html[data-theme="dark"] .agency-desk .ag-strip {
     grid-row: 3;
   }
 }
+
+
+/* ---------------------------------------------------- héroe a sangre */
+
+/* El registro lo fija Camilo desde una referencia real: fotografía a sangre
+   teñida de un solo color fuerte, marca arriba y la promesa abajo en display
+   con serifa. La composición y la escala vienen de ahí; la fotografía, los
+   textos y la marca son de esta demo.
+   El tinte no es decoración: convierte una toma de banco en material con
+   carácter, que es lo único que esta página tiene a mano. */
+.ag-stage {
+  position: relative;
+  min-height: min(92vh, 860px);
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  background: var(--ag-flag);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.ag-stage__media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  margin: 0;
+}
+
+.ag-stage__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Gris primero y color después: tintar una foto ya coloreada da barro. */
+  filter: grayscale(1) contrast(1.12) brightness(0.92);
+  mix-blend-mode: multiply;
+}
+
+/* Vela oscura al pie para que el display se lea sobre cualquier zona de la
+   fotografía, en vez de confiar en que la imagen sea oscura ahí. */
+.ag-stage__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.34) 0%, rgb(0 0 0 / 0) 38%, rgb(0 0 0 / 0.52) 100%);
+}
+
+.ag-stage__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  align-items: center;
+  padding-block: 20px;
+}
+
+.ag-stage__brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #fff;
+  font-family: var(--ag-display);
+  font-size: 1.3rem;
+  text-decoration: none;
+}
+
+.ag-stage__brand sup {
+  font-size: 0.62em;
+}
+
+.ag-stage__nav {
+  display: flex;
+  gap: 22px;
+  margin-inline: auto;
+}
+
+.ag-stage__nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: rgb(255 255 255 / 0.86);
+  font-size: 0.93rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ag-stage__nav a:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.ag-stage__foot {
+  margin-top: auto;
+  padding-bottom: clamp(28px, 4vw, 56px);
+}
+
+.ag-stage h1 {
+  max-width: 18ch;
+  color: #fff;
+  font-family: var(--ag-display);
+  font-size: clamp(2.9rem, 7.2vw, 6.2rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.ag-stage__lead {
+  max-width: 46ch;
+  margin-top: 18px;
+  color: rgb(255 255 255 / 0.88);
+  font-size: clamp(1rem, 1.4vw, 1.14rem);
+  line-height: 1.55;
+}
+
+.ag-stage__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.agency-desk .ag-stage .ag-btn {
+  color: var(--ag-flag);
+  background: #fff;
+  border-color: #fff;
+}
+
+.agency-desk .ag-stage .ag-btn:hover {
+  color: #fff;
+  background: transparent;
+  border-color: #fff;
+}
+
+.agency-desk .ag-stage .ag-btn--quiet {
+  color: #fff;
+  background: transparent;
+  border-color: rgb(255 255 255 / 0.55);
+}
+
+.agency-desk .ag-stage .ag-btn--quiet:hover {
+  color: var(--ag-flag);
+  background: #fff;
+  border-color: #fff;
+}
+
+.ag-stage .ag-note {
+  max-width: 52ch;
+  margin-top: 20px;
+  padding-left: 14px;
+  color: rgb(255 255 255 / 0.82);
+  border-left: 1px solid rgb(255 255 255 / 0.4);
+}
+
+@media (max-width: 760px) {
+  .ag-stage {
+    min-height: auto;
+  }
+
+  .ag-stage__nav {
+    display: none;
+  }
+
+  .ag-stage__bar {
+    padding-block: 14px;
+  }
+
+  .ag-stage__foot {
+    padding-top: clamp(180px, 42vw, 260px);
+    padding-bottom: 28px;
+  }
+}
+
 
 /* -------------------------------------------------------------- adaptación */
 

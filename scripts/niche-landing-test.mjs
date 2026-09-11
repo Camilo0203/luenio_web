@@ -129,9 +129,6 @@ const pages = [
     legalNotice: "Demo ficticia creada por Luenio",
     disclaimer:
       "Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son ejemplos y no representan proyectos ni resultados de clientes reales.",
-    // El primer viewport es el documento de alcance, no una fotografía: la
-    // única imagen vive en la sección de entregables y se difiere.
-    heroImageAboveFold: false,
     css: "/apps/web/pages/agencies/agency-desk.css",
   },
   {

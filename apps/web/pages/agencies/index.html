@@ -120,59 +120,82 @@
       </div>
     </div>
 
-    <header class="ag-header">
-      <div class="ag-shell ag-header__inner">
-        <a class="ag-brand" href="#contenido" aria-label="Impulso Digital, ir al inicio">
-          <b>Impulso Digital</b><span>Estudio</span>
-        </a>
-        <nav class="ag-nav" aria-label="Navegación principal">
-          <a href="#servicios">Capacidades</a>
-          <a href="#casos">Entregables</a>
-          <a href="#planes">Alcances</a>
-          <a href="#propuesta">Propuesta</a>
-        </nav>
-        <!-- theme-control.js busca `.site-header__actions` y, si no la
-             encuentra, deja el interruptor flotando arriba a la derecha, donde
-             pisaba este botón. Con el contenedor, entra en la fila. -->
-        <div class="site-header__actions ag-header__actions">
-          <a
+    <main id="contenido">
+      <section class="ag-stage" id="inicio" aria-labelledby="agency-title">
+        <figure class="ag-stage__media">
+          <picture>
+            <source srcset="/assets/sectors/ag-sesion.avif" type="image/avif" />
+            <source
+              srcset="/assets/sectors/ag-sesion-1280.webp 1280w, /assets/sectors/ag-sesion.webp 1920w"
+              sizes="100vw"
+              type="image/webp"
+            />
+            <img
+              src="/assets/sectors/ag-sesion-1280.webp"
+              alt="Tres personas del estudio trabajando juntas alrededor de una mesa"
+              width="1280"
+              height="989"
+              fetchpriority="high"
+              decoding="async"
+            />
+          </picture>
+        </figure>
+
+        <header class="ag-shell ag-stage__bar">
+          <a class="ag-stage__brand" href="#inicio" aria-label="Impulso Digital, ir al inicio">
+            Impulso Digital<sup>®</sup>
+          </a>
+          <nav class="ag-stage__nav" aria-label="Navegación principal">
+            <a href="#trabajo">Trabajo</a>
+            <a href="#alcance">Alcance</a>
+            <a href="#estudio">Estudio</a>
+            <a href="#propuesta">Propuesta</a>
+          </nav>
+          <div class="site-header__actions ag-header__actions">
+            <a
             class="ag-btn ag-btn--sm"
             href="/cotizacion?sector=agencia&amp;demo=Impulso+Digital&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+captar+y+calificar+oportunidades+para+los+clientes+de+mi+agencia&amp;source=landing_agencies"
             data-quote-cta="landing_agencies"
             data-cta-location="landing_header"
             >Cotizar mi solución</a
           >
-        </div>
-      </div>
-    </header>
+          </div>
+        </header>
 
-    <main id="contenido">
-      <section class="ag-hero" id="inicio" aria-labelledby="agency-title">
-        <div class="ag-shell ag-hero__inner">
-          <div class="ag-hero__copy">
-            <h1 id="agency-title">Aquí el alcance se escribe antes de empezar.</h1>
-            <p class="ag-lead">
-              Qué entra, qué no entra y cuántas rondas tienes, dicho antes de la primera reunión.
-              Decir que no a tiempo es lo que hace que el sí valga.
-            </p>
-            <div class="ag-hero__actions">
-              <a class="ag-btn" href="#propuesta">Solicitar propuesta</a>
-              <a class="ag-btn ag-btn--quiet" href="#casos">Ver entregables</a>
-            </div>
-            <p
-              class="ag-note luenio-demo-disclosure"
-              data-luenio-disclosure
-              data-luenio-collision-zone
-              role="note"
-            >
-              Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
-              reales. Alcances, tiempos y precios son ejemplos.
+        <div class="ag-shell ag-stage__foot">
+          <h1 id="agency-title">Aquí el alcance se escribe antes de empezar.</h1>
+          <p class="ag-stage__lead">
+            Qué entra, qué no entra y cuántas rondas tienes, dicho antes de la primera reunión.
+            Decir que no a tiempo es lo que hace que el sí valga.
+          </p>
+          <div class="ag-stage__actions">
+            <a class="ag-btn" href="#propuesta">Solicitar propuesta</a>
+            <a class="ag-btn ag-btn--quiet" href="#trabajo">Ver el trabajo</a>
+          </div>
+          <p
+            class="ag-note luenio-demo-disclosure"
+            data-luenio-disclosure
+            data-luenio-collision-zone
+            role="note"
+          >
+            Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.
+            Alcances, tiempos y precios son ejemplos.
+          </p>
+        </div>
+      </section>
+
+      <section class="ag-section" id="alcance" aria-labelledby="agency-scope-title">
+        <div class="ag-shell">
+          <div class="ag-section__head">
+            <h2 id="agency-scope-title">Define tu encargo y mira qué sale.</h2>
+            <p>
+              El documento se reescribe con lo que elijas. La cláusula de lo que no entra se lee con
+              el mismo cuerpo que la de lo que sí, porque es la que evita el problema.
             </p>
           </div>
-
           <div class="ag-scope" data-agency-scope>
             <div class="ag-scope__head">
-              <h2 data-agency-title>Lanzamiento con sitio propio</h2>
+              <h3 data-agency-title>Lanzamiento con sitio propio</h3>
               <p class="ag-scope__ref" data-agency-ref>ALC-01 · 8 a 10 semanas</p>
             </div>
 
