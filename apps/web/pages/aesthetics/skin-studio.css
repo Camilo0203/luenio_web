@@ -1026,15 +1026,34 @@ html[data-theme="dark"] .skin-studio .skin-strip {
 
 /* ------------------------------------------------------------------ centro */
 
+/* Las tres piezas se colocan por celda, no por flujo: forzar una a ocupar dos
+   filas mientras el flujo ya había puesto otra en esa columna hacía que la
+   rejilla abriera una fila más y dejara medio hueco. La toma vertical va a la
+   columna estrecha y ocupa el alto completo. */
 .skin-gallery {
   display: grid;
   gap: 14px;
-  grid-template-columns: 1fr 1.25fr;
+  grid-template-columns: 1.2fr 0.9fr;
   grid-template-rows: repeat(2, minmax(0, 1fr));
   height: clamp(380px, 42vw, 520px);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.skin-gallery li:nth-child(1) {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.skin-gallery li:nth-child(2) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.skin-gallery li:nth-child(3) {
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .skin-gallery li {
@@ -1044,13 +1063,7 @@ html[data-theme="dark"] .skin-studio .skin-strip {
   overflow: hidden;
 }
 
-/* La pieza alta va a la derecha y se coloca por celda, no por flujo: con un
-   `span 2` al final, la rejilla no encontraba hueco de dos filas en la columna
-   libre, abría una tercera fila y comprimía todo fuera de la altura fijada. */
-.skin-gallery li:last-child {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-}
+
 
 .skin-gallery figure {
   height: 100%;
@@ -1240,8 +1253,18 @@ html[data-theme="dark"] .skin-studio .skin-strip {
     height: auto;
   }
 
-  .skin-gallery li:last-child {
+  .skin-gallery li:nth-child(1) {
     grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .skin-gallery li:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .skin-gallery li:nth-child(3) {
+    grid-column: 2;
     grid-row: 2;
   }
 }
@@ -1256,8 +1279,21 @@ html[data-theme="dark"] .skin-studio .skin-strip {
     grid-template-rows: repeat(3, 200px);
   }
 
-  .skin-gallery li:last-child {
+  .skin-gallery li:nth-child(1),
+  .skin-gallery li:nth-child(2),
+  .skin-gallery li:nth-child(3) {
     grid-column: 1;
+  }
+
+  .skin-gallery li:nth-child(1) {
+    grid-row: 1;
+  }
+
+  .skin-gallery li:nth-child(2) {
+    grid-row: 2;
+  }
+
+  .skin-gallery li:nth-child(3) {
     grid-row: 3;
   }
 }
