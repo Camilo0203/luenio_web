@@ -1003,20 +1003,17 @@ html[data-theme="dark"] .agency-desk .ag-close p {
   /* El aviso demostrativo tiene que terminar por encima de la banda 778-830,
      donde se sienta el disparador flotante de WhatsApp. Caber en el pliegue no
      basta: un aviso tapado es un aviso que no existe. */
-  /* En teléfono el documento sube por delante de la promesa: la cláusula de lo
-     que no entra es la razón de ser de esta página y a 390 px quedaba debajo
-     del pliegue y bajo la banda del disparador flotante. Lo que se aprieta es
-     el espaciado, nunca el texto. */
+  /* En teléfono no caben a la vez el documento entero y el aviso demostrativo,
+     y el aviso manda: adelantar el documento lo empujaba a 1237 px, fuera del
+     primer viewport. Así que el orden se queda como en escritorio y la
+     cláusula de exclusiones pide un desplazamiento corto, que es lo que el
+     contrato dice ahora. Lo que se aprieta es el espaciado, nunca el texto. */
   .ag-hero {
     padding-block: 18px clamp(32px, 4.5vw, 60px);
   }
 
   .ag-hero__inner {
     gap: 18px;
-  }
-
-  .ag-hero__copy {
-    order: 2;
   }
 
   .ag-hero__actions {
