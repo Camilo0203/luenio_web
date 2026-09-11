@@ -1378,12 +1378,18 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   border-color: #fff;
 }
 
-.ag-cover .ag-note {
+/* `html[data-theme="dark"] .luenio-demo-disclosure` gana a una regla de dos
+   clases y devolvía el aviso a un lila que no cumple sobre el rojo. Se responde
+   nombrando las dos clases, nunca con !important. */
+.ag-cover .ag-note,
+.ag-cover .ag-note.luenio-demo-disclosure,
+html[data-theme="dark"] .ag-cover .ag-note.luenio-demo-disclosure {
   max-width: 52ch;
   margin-top: 20px;
   padding-left: 14px;
   color: #fff;
   border-left: 1px solid rgb(255 255 255 / 0.55);
+  border-inline-start-color: rgb(255 255 255 / 0.55);
 }
 
 @media (max-width: 760px) {
