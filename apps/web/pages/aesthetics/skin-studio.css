@@ -14,10 +14,13 @@
   --skin-ink-soft: #5d5257;
   --skin-line: #e8dfe2;
   --skin-line-strong: #cdbdc4;
-  --skin-open: #15803d;
-  --skin-open-wash: #dcfce7;
-  --skin-wait: #8a5200;
-  --skin-wait-wash: #fdf0d5;
+  /* Tonos del propio mundo: el verde y el ámbar que traía eran literalmente los
+     tokens de veterinarias, y el verde además rimaba con el de WhatsApp, que
+     no es de esta marca. */
+  --skin-open: #8e3b60;
+  --skin-open-wash: #f7ecf1;
+  --skin-wait: #6d5560;
+  --skin-wait-wash: #f1ebee;
   --skin-focus: #8e3b60;
   --skin-display: "Red Hat Display", "Segoe UI", system-ui, sans-serif;
   --skin-text: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
@@ -57,10 +60,10 @@ html[data-theme="dark"] .skin-studio {
   --skin-ink-soft: #c3b0b8;
   --skin-line: #33242b;
   --skin-line-strong: #4d3841;
-  --skin-open: #7ee2a8;
-  --skin-open-wash: #16301f;
-  --skin-wait: #f0c78a;
-  --skin-wait-wash: #33240f;
+  --skin-open: #e6a2be;
+  --skin-open-wash: #2a1a22;
+  --skin-wait: #c3b0b8;
+  --skin-wait-wash: #241a1e;
   --skin-focus: #e6a2be;
   --skin-shadow: 0 10px 22px -16px rgba(0, 0, 0, 0.7);
 }
@@ -80,6 +83,11 @@ html[data-theme="dark"] .skin-studio {
 .skin-studio ::selection {
   color: var(--skin-white);
   background: var(--skin-plum);
+}
+
+.skin-studio {
+  caret-color: var(--skin-plum);
+  scrollbar-color: var(--skin-line-strong) var(--skin-rest);
 }
 
 .skin-studio :focus-visible {
@@ -222,6 +230,20 @@ html[data-theme="dark"] .skin-studio .skin-btn:hover {
 }
 
 .skin-studio .skin-btn--quiet:hover {
+  color: var(--skin-ink);
+  background: var(--skin-rest);
+  border-color: var(--skin-ink);
+}
+
+/* La regla oscura de `.skin-btn` pinta la tinta del color del fondo para que se
+   lea sobre el ciruela claro, y con una clase más gana a la variante quiet: el
+   botón secundario salía vacío. Se responde a la misma especificidad. */
+html[data-theme="dark"] .skin-studio .skin-btn--quiet {
+  color: var(--skin-ink);
+  border-color: var(--skin-line-strong);
+}
+
+html[data-theme="dark"] .skin-studio .skin-btn--quiet:hover {
   color: var(--skin-ink);
   background: var(--skin-rest);
   border-color: var(--skin-ink);
@@ -450,6 +472,18 @@ html[data-theme="dark"] .skin-studio .skin-brand__mark {
   color: var(--skin-ink-soft);
   font-size: 0.9rem;
   font-weight: 600;
+}
+
+/* La columna izquierda acababa trescientos píxeles antes que la tarjeta y
+   dejaba la sección firma de la página descuadrada. La frase de apoyo baja
+   aquí en vez de vivir en el encabezado. */
+.skin-plan__aside {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--skin-line);
+  color: var(--skin-ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
 }
 
 /* El estado marcado cambia borde, fondo y tinta a la vez, y adelanta la

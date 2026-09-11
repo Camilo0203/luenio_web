@@ -1,3 +1,7 @@
+// El estado describe el ritmo de la pauta, nunca la disponibilidad: una demo
+// que anuncia cupos afirma algo sobre una agenda que no existe, y mete presión
+// de escasez en una página cuya tesis es que aquí no te venden de más.
+//
 // La interacción de esta demo es la pauta, no un configurador de copia. Elegir
 // un motivo no cambia un párrafo: reescribe el calendario completo, porque en
 // estética el valor está en el intervalo entre sesiones y en el punto de
@@ -7,7 +11,7 @@ const plans = {
   luminosidad: {
     title: "Pauta para luminosidad y textura",
     total: "4 citas · 5 semanas",
-    status: { label: "Cupos esta semana", tone: "open" },
+    status: { label: "Ritmo habitual", tone: "open" },
     steps: [
       ["Día 1", "Valoración facial", "Revisamos hábitos y textura visible, sin tratar todavía."],
       ["Misma semana", "Limpieza profunda", "Solo si la valoración lo confirma."],
@@ -19,7 +23,7 @@ const plans = {
   sensibilidad: {
     title: "Pauta para piel sensible",
     total: "4 citas · 7 semanas",
-    status: { label: "Lista de espera de 8 días", tone: "wait" },
+    status: { label: "Ritmo prudente", tone: "wait" },
     steps: [
       ["Día 1", "Valoración facial", "Hablamos de reacciones previas antes de tocar la piel."],
       ["A los 7 días", "Prueba en zona pequeña", "Se prueba en una zona y se espera la respuesta."],
@@ -31,7 +35,7 @@ const plans = {
   continuidad: {
     title: "Pauta para mantener lo logrado",
     total: "Mensual · revisión cada 3 meses",
-    status: { label: "Cupos esta semana", tone: "open" },
+    status: { label: "Ritmo habitual", tone: "open" },
     steps: [
       ["Día 1", "Valoración facial", "Partimos de lo que ya se hizo y de cómo respondió."],
       [

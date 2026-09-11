@@ -316,9 +316,13 @@ function createWhatsappWidget() {
     if (modal?.getAttribute("aria-hidden") === "false") return;
     setTriggerCollisionHidden(false);
 
+    // El aviso demostrativo entra por derecho propio: es un párrafo, así que la
+    // lista de controles nunca lo veía, y en las landings donde cae bajo la
+    // acción del héroe el disparador se sentaba encima de su última línea. Un
+    // aviso tapado es un aviso que no existe.
     const collisionTargets = [
       ...document.querySelectorAll(
-        "a, button, input, select, textarea, [data-luenio-collision-zone]",
+        "a, button, input, select, textarea, [data-luenio-collision-zone], [data-luenio-disclosure]",
       ),
     ].filter((target) => {
       if (target === floatingTrigger || target.closest(".luenio-wa")) return false;
