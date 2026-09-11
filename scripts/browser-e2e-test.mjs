@@ -776,9 +776,16 @@ async function runBrowserChecks(baseUrl) {
         careViewport.scrollWidth <= careViewport.clientWidth + 1,
         `${slug} must not overflow horizontally on mobile: ${JSON.stringify(careViewport)}`,
       );
+      // Counted by what the control does, not by the class it wears: `.care-pill`
+      // belongs to the shared care template, so pinning it here made the check
+      // fail the moment a sector got a world of its own -- which is the point of
+      // the redesign, not a regression.
+      const careConversionPaths = await page
+        .locator('[data-luenio-open], a[href^="/cotizacion"]')
+        .count();
       assert(
-        (await page.locator(".care-pill").count()) >= 2,
-        `${slug} must expose multiple clear conversion paths.`,
+        careConversionPaths >= 2,
+        `${slug} must expose multiple clear conversion paths: found ${careConversionPaths}.`,
       );
       const careDisclosure = await page
         .locator("[data-luenio-disclosure]")
