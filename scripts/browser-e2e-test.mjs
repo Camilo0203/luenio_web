@@ -784,10 +784,7 @@ async function runBrowserChecks(baseUrl) {
       const careChoices = page.locator("[aria-pressed]");
       for (let index = 0; index < (await careChoices.count()); index += 1) {
         await careChoices.nth(index).click();
-        const careGoalHref = await page
-          .locator("[data-quote-link]")
-          .first()
-          .getAttribute("href");
+        const careGoalHref = await page.locator("[data-quote-link]").first().getAttribute("href");
         assert(
           careGoalHref?.includes("goal="),
           `${slug} choice ${index} must keep a canonical goal on the quote link: ${careGoalHref}`,
