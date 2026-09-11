@@ -30,7 +30,7 @@ const plans = {
       ["A los 21 días", "Primera sesión completa", "Solo si la prueba salió bien."],
       ["A las 7 semanas", "Revisión", "Con piel reactiva vamos más lento a propósito."],
     ],
-    goal: "Quiero una landing para mi estética enfocada en consultas de piel sensible",
+    goal: "Quiero una landing para mi estética enfocada en consultas de sensibilidad",
   },
   continuidad: {
     title: "Pauta para mantener lo logrado",

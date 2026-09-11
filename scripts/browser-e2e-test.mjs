@@ -727,6 +727,18 @@ async function runBrowserChecks(baseUrl) {
           (await selectedChoice.getAttribute("aria-pressed")) === "true",
           `${slug} interactive choice must expose its selected state.`,
         );
+        // Un objetivo que la interacción inventa fuera de `goalOptions` no llega
+        // al flujo de cotización: `buildQuoteUrl` lo descarta y el enlace pierde
+        // su contexto sin decir nada. Se comprueba después de elegir, que es
+        // cuando el guion de la demo escribe el objetivo nuevo.
+        const goalAfterChoice = await page
+          .locator("[data-quote-link]")
+          .first()
+          .getAttribute("href");
+        assert(
+          goalAfterChoice?.includes("goal="),
+          `${slug} interactive choice must keep a canonical goal on the quote link: ${goalAfterChoice}`,
+        );
       }
       await runAxe(page, slug);
       await assertThemeSwitch(page, `${slug} landing`);

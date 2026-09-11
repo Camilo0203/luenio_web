@@ -13,6 +13,13 @@ export const PUBLIC_JOURNEYS = Object.freeze([
     landingPath: "/agencias",
     simulationPath: "/demo/agencies",
     goal: "Quiero captar y calificar oportunidades para los clientes de mi agencia",
+    goalOptions: [
+      "Quiero captar y calificar oportunidades para los clientes de mi agencia",
+      "Quiero una landing para mi agencia",
+      "Quiero una landing para mi agencia enfocada en lanzar algo nuevo",
+      "Quiero una landing para mi agencia enfocada en reposicionar la marca",
+      "Quiero una landing para mi agencia enfocada en convertir mejor",
+    ],
     quoteService: "Landing + automatización completa",
   }),
   freezeJourney({
