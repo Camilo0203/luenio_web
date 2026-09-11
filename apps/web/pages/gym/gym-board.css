@@ -241,7 +241,8 @@ img {
   justify-content: center;
   min-height: 44px;
   padding: 0 18px;
-  /* Tinta oscura sobre el verde de marca: blanco sobre #25d366 da 1,98. */
+  /* Letra blanca sobre el verde de marca, decisión de Camilo: ver la nota
+     del token en niche-widget.css y la excepción de theme-audit.mjs. */
   color: var(--gym-whatsapp-ink);
   background: var(--gym-whatsapp);
   border: 0;

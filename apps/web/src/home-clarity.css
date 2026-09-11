@@ -13,7 +13,9 @@
   --hc-whatsapp: var(--luenio-whatsapp);
   --hc-whatsapp-brand: #25d366;
   --hc-whatsapp-brand-hover: #20bd5a;
-  --hc-whatsapp-brand-ink: #072713;
+  /* Letra blanca, igual que en las demos: el mismo botón no puede llevar dos
+     tintas en el mismo sitio. Ver la nota del token en niche-widget.css. */
+  --hc-whatsapp-brand-ink: #ffffff;
   --hc-hero-sheen: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
   --hc-browser-bar: rgba(255, 255, 255, 0.94);
   --hc-browser-address: #f8fafc;

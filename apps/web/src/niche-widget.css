@@ -1,11 +1,15 @@
-/* El verde y su tinta viven en tokens porque otras hojas reafirman el color
-   del botón para ganarle a sus propias reglas de herencia. Con un literal,
-   cada cambio de verde deja una hoja atrás: así pasó con estéticas, que se
-   quedó en blanco sobre el verde de marca, 1,98 de contraste. */
+/* El verde y su tinta viven en tokens porque otras hojas reafirman el color del
+   botón para ganarle a sus propias reglas de herencia. Con un literal, cada
+   cambio deja una hoja atrás.
+   La tinta es blanca por decisión expresa de Camilo, tomada el 2026-09-11 con
+   la medida delante: 1,98 sobre el verde de marca, frente a un mínimo de 4,5.
+   Es como se ve el botón de WhatsApp en todas partes y esa fue su razón. La
+   excepción correspondiente está nombrada y acotada en `theme-audit.mjs`; no
+   se desactivó ninguna comprobación. */
 :root {
   --luenio-wa-green: #25d366;
   --luenio-wa-green-hover: #1da851;
-  --luenio-wa-ink: #0b141a;
+  --luenio-wa-ink: #ffffff;
 }
 
 .luenio-wa,
