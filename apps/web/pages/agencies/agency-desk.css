@@ -18,8 +18,6 @@
   --ag-mark-wash: #fbeceb;
   --ag-rule: #ddd7c9;
   --ag-rule-strong: #b6ae9b;
-  --ag-in: #1f6f4a;
-  --ag-in-wash: #e6f2ec;
   --ag-display: "Instrument Serif", Georgia, "Times New Roman", serif;
   --ag-text: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
   --ag-shell: min(1200px, calc(100% - 64px));
@@ -59,8 +57,6 @@ html[data-theme="dark"] .agency-desk {
   --ag-mark-wash: #2d1b18;
   --ag-rule: #33302a;
   --ag-rule-strong: #524d43;
-  --ag-in: #6fcf9b;
-  --ag-in-wash: #16281f;
   --ag-shadow: 0 12px 26px -20px rgba(0, 0, 0, 0.8);
 }
 
@@ -485,8 +481,10 @@ html[data-theme="dark"] .agency-desk {
 }
 
 .ag-clause__body li::before {
-  content: "—";
-  color: var(--ag-rule-strong);
+  content: "";
+  height: 1px;
+  margin-top: 11px;
+  background: var(--ag-rule-strong);
 }
 
 /* La cláusula de exclusiones lleva el rojo del oficio y su propio filete: es
@@ -495,33 +493,39 @@ html[data-theme="dark"] .agency-desk {
   color: var(--ag-mark);
 }
 
+/* La tachadura de corrección: el trazo cruza lo que queda fuera en vez de
+   marcarlo con una equis prestada a la tipografía. */
 .ag-clause--out .ag-clause__body li::before {
-  content: "×";
-  color: var(--ag-mark);
-  font-weight: 700;
+  height: 0;
+  margin-top: 10px;
+  background: none;
+  border-top: 2px solid var(--ag-mark);
+  transform: rotate(-14deg);
 }
 
+/* Un solo acento en toda la página. La etiqueta de lo incluido va en la tinta
+   del mundo sobre un filete; la de lo excluido lleva el rojo, que es el único
+   color con significado aquí. */
 .ag-flag {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 3px 9px;
-  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: var(--ag-radius);
   font-family: var(--ag-text);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
 .ag-flag--in {
-  color: var(--ag-in);
-  background: var(--ag-in-wash);
+  color: var(--ag-ink-soft);
 }
 
 .ag-flag--out {
   color: var(--ag-mark);
-  background: var(--ag-mark-wash);
 }
 
 .ag-scope__foot {
@@ -544,7 +548,9 @@ html[data-theme="dark"] .agency-desk {
 }
 
 /* Un único momento autoral: el alcance se reasienta al cambiar el encargo. */
-.ag-scope.is-updating .ag-clauses {
+.ag-scope.is-updating .ag-scope__head,
+.ag-scope.is-updating .ag-clauses,
+.ag-scope.is-updating .ag-scope__rounds {
   animation: ag-settle 440ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -648,6 +654,116 @@ html[data-theme="dark"] .agency-desk {
   margin-top: 16px;
 }
 
+/* Dos formas más, para que la segunda mitad de la página deje de ser el mismo
+   contenedor cuatro veces. La prohibición del suelo vale igual para una fila
+   con filete que para una tarjeta. */
+
+/* Proceso: una secuencia, no un listado. Las tres direcciones se leen como
+   etapas encadenadas y el filete corre entre ellas, no bajo cada una. */
+.ag-stages {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  counter-reset: ag-stage;
+}
+
+.ag-stage {
+  padding: 26px 24px 26px 0;
+  border-top: 2px solid var(--ag-ink);
+}
+
+.ag-stage + .ag-stage {
+  padding-left: 24px;
+  border-left: 1px solid var(--ag-rule);
+}
+
+.ag-stage::before {
+  counter-increment: ag-stage;
+  content: counter(ag-stage, decimal-leading-zero);
+  display: block;
+  margin-bottom: 10px;
+  color: var(--ag-mark);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.ag-stage h3 {
+  margin-bottom: 6px;
+}
+
+.ag-stage p {
+  color: var(--ag-ink-soft);
+  font-size: 0.94rem;
+}
+
+.ag-stage__role {
+  display: block;
+  margin-top: 12px;
+  color: var(--ag-ink-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Alcances: el precio a escala de display, que es el dato por el que se entra
+   en esta sección, con su etiqueta debajo y el detalle a un lado. */
+.ag-tiers {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-tier {
+  display: grid;
+  gap: 8px 32px;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: start;
+  padding-block: 28px;
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-tier:first-child {
+  border-top: 2px solid var(--ag-ink);
+}
+
+.ag-tier__figure {
+  display: grid;
+  gap: 4px;
+}
+
+.ag-tier__price {
+  font-family: var(--ag-display);
+  font-size: clamp(1.9rem, 3.4vw, 2.7rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+}
+
+.ag-tier__kind {
+  color: var(--ag-mark);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ag-tier__body h3 {
+  margin-bottom: 6px;
+}
+
+.ag-tier__body p {
+  color: var(--ag-ink-soft);
+  font-size: 0.95rem;
+}
+
 .ag-faq {
   display: grid;
   gap: 0;
@@ -670,15 +786,20 @@ html[data-theme="dark"] .agency-desk {
   display: none;
 }
 
+/* Cruz y raya dibujadas con el mismo grosor que el resto de las marcas. */
 .ag-faq summary::after {
-  content: "+";
+  content: "";
   float: right;
-  color: var(--ag-mark);
-  font-weight: 700;
+  width: 13px;
+  height: 13px;
+  margin-top: 5px;
+  background:
+    linear-gradient(var(--ag-mark), var(--ag-mark)) center / 13px 2px no-repeat,
+    linear-gradient(var(--ag-mark), var(--ag-mark)) center / 2px 13px no-repeat;
 }
 
 .ag-faq details[open] summary::after {
-  content: "–";
+  background: linear-gradient(var(--ag-mark), var(--ag-mark)) center / 13px 2px no-repeat;
 }
 
 .ag-faq details p {
@@ -748,8 +869,9 @@ html[data-theme="dark"] .agency-desk {
 .ag-form-status {
   grid-column: 1 / -1;
   padding: 12px 14px;
-  color: var(--ag-in);
-  background: var(--ag-in-wash);
+  color: var(--ag-ink);
+  background: var(--ag-paper-deep);
+  border-left: 2px solid var(--ag-mark);
   border-radius: var(--ag-radius);
   font-size: 0.92rem;
   font-weight: 600;
@@ -839,6 +961,24 @@ html[data-theme="dark"] .agency-desk .ag-close p {
   .ag-row p {
     grid-column: 1 / -1;
   }
+
+  .ag-stages {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ag-stage {
+    padding-right: 0;
+  }
+
+  .ag-stage + .ag-stage {
+    padding-left: 0;
+    border-left: 0;
+    border-top: 1px solid var(--ag-rule);
+  }
+
+  .ag-tier {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 760px) {
@@ -863,20 +1003,41 @@ html[data-theme="dark"] .agency-desk .ag-close p {
   /* El aviso demostrativo tiene que terminar por encima de la banda 778-830,
      donde se sienta el disparador flotante de WhatsApp. Caber en el pliegue no
      basta: un aviso tapado es un aviso que no existe. */
+  /* En teléfono el documento sube por delante de la promesa: la cláusula de lo
+     que no entra es la razón de ser de esta página y a 390 px quedaba debajo
+     del pliegue y bajo la banda del disparador flotante. Lo que se aprieta es
+     el espaciado, nunca el texto. */
   .ag-hero {
-    padding-block: 22px clamp(32px, 4.5vw, 60px);
+    padding-block: 18px clamp(32px, 4.5vw, 60px);
   }
 
   .ag-hero__inner {
-    gap: 20px;
+    gap: 18px;
+  }
+
+  .ag-hero__copy {
+    order: 2;
   }
 
   .ag-hero__actions {
-    margin-top: 18px;
+    margin-top: 16px;
   }
 
   .ag-hero__copy .ag-lead {
-    margin-top: 14px;
+    margin-top: 12px;
+  }
+
+  .ag-scope__head {
+    padding-block: 14px;
+  }
+
+  .ag-choices {
+    gap: 10px;
+    padding-block: 14px;
+  }
+
+  .ag-clause {
+    padding-block: 13px;
   }
 
   .ag-form {

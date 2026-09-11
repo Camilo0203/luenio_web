@@ -221,17 +221,17 @@ plantilla. Comparten infraestructura de tema, analítica, cotización y WhatsApp
 composición, navegación, ritmo o componente protagonista. Cada mundo alterna blanco y negro,
 con un único acento propio reservado para acciones y estado.
 
-- **Agencias — mesa de campaña:** negro de estudio, papel blanco y señal lima; una navegación lateral acompaña brief, pruebas y entregables físicos.
+- **Agencias — mesa de alcance:** papel hueso, grafito casi negro y el rojo con el que este oficio corrige galeradas; un documento de encargo abre la página y la cláusula de lo que no entra se lee con el mismo cuerpo que la de lo que sí.
 - **Ecommerce — lanzamiento de producto:** escenario blanco o negro y cobalto; el producto central, su configurador y la comparación técnica organizan la página.
 - **Gimnasio — tablero de entrenamiento:** acero negro o marfil y esmeralda; constructor, ruta y clases funcionan como instrumentación real del club.
 - **Inmobiliaria — atlas privado:** negro nocturno o papel blanco y cobre; la fotografía arquitectónica y un dossier de shortlist conducen la visita.
 - **Restaurante — pase de cocina:** carbón o papel hueso y vino; carta, comandas y una franja de reserva dan forma al servicio.
 - **Veterinaria — ruta de barrio:** blanco nítido, azul cobalto, verde hoja y señal amarilla; fotografía de llegada, señalética urbana y una ruta interactiva conectan observación, orientación y agenda sin simular un diagnóstico.
-- **Estética — laboratorio óptico:** blanco mineral, azul ultramar y lila; una gran lente fotográfica, anotaciones de atlas y un protocolo visible conectan prioridad, contexto y valoración sin prometer resultados clínicos.
+- **Estética — estudio de piel:** blanco de sala, ciruela apagada y rosa mineral lavado; un retrato real y una pauta de sesiones con sus intervalos conectan prioridad, continuidad y valoración sin prometer resultados clínicos.
 
 Las fotografías pertenecen al mundo sectorial y nunca se presentan como casos reales de Luenio. En móvil, el instrumento pasa debajo de la promesa sin comprimir el texto ni convertir la página en una sucesión de tarjetas.
 
-Las familias sectoriales también están aisladas: Sora y Archivo Narrow en agencias; Chivo con
+Las familias sectoriales también están aisladas: Instrument Serif y Hanken Grotesk en agencias; Chivo con
 Segoe UI Variable Display como respaldo en ecommerce; Oswald y Archivo Narrow en gimnasio;
 Source Serif 4 y Hanken Grotesk en inmobiliaria; EB Garamond y Hanken Grotesk en restaurante.
 Veterinaria usa Bricolage Grotesque y Figtree; Estética usa Red Hat Display y Red Hat Text.

@@ -106,7 +106,7 @@ const pages = [
     // dos demos con mundo propio en vez de repetir el párrafo de derechos:
     // la reserva vive en la barra legal compartida, que esta página incluye.
     className: "agency-desk demo-agency",
-    hero: "Construimos marcas digitales que avanzan.",
+    hero: "Aquí el alcance se escribe antes de empezar.",
     minSections: 7,
     maxSections: 7,
     ids: ["servicios", "casos", "proceso", "planes", "propuesta"],
