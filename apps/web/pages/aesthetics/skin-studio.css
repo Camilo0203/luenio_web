@@ -1272,8 +1272,23 @@ html[data-theme="dark"] .skin-studio .skin-strip {
 }
 
 @media (max-width: 760px) {
+  /* La franja de arriba empujó el aviso demostrativo seis píxeles fuera del
+     pliegue del teléfono. Cede ella, que es una línea, y no el aviso. */
+  .skin-strip {
+    font-size: 0.82rem;
+  }
+
   .skin-strip__inner {
     justify-content: flex-start;
+    padding-block: 7px;
+  }
+
+  .skin-hero {
+    padding-block: 16px clamp(36px, 5vw, 64px);
+  }
+
+  .skin-hero__actions {
+    margin-top: 16px;
   }
 
   .skin-gallery {
