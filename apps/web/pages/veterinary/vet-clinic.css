@@ -771,6 +771,368 @@ html[data-theme="dark"] .vet-clinic {
   margin: 0;
 }
 
+/* Alterna el lienzo entre secciones para que una página larga no sea una sola
+   sábana blanca. */
+.vet-section--rest {
+  background: var(--vet-ground-2);
+}
+
+/* ------------------------------------------------------ barra de urgencias */
+
+/* Una clínica de barrio se busca de noche y con prisa. El teléfono y el aviso
+   de urgencias van antes que la marca, no escondidos en el pie: es el patrón
+   que las clínicas reales sostienen arriba del todo. */
+.vet-urgent {
+  color: #fff;
+  background: #9f1239;
+  font-size: 0.88rem;
+}
+
+html[data-theme="dark"] .vet-clinic .vet-urgent {
+  background: #7a0f2e;
+}
+
+.vet-urgent__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 9px;
+}
+
+.vet-urgent p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 600;
+}
+
+.vet-urgent p::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #fda4af;
+}
+
+.vet-urgent a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  color: #fff;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --------------------------------------------------------- franja de datos */
+
+.vet-figures {
+  padding-block: clamp(26px, 3vw, 40px);
+  background: var(--vet-ground-2);
+  border-block: 1px solid var(--vet-line);
+}
+
+.vet-figures__grid {
+  display: grid;
+  gap: clamp(18px, 2.5vw, 34px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.vet-figure b {
+  display: block;
+  font-family: var(--vet-display);
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.vet-figure span {
+  display: block;
+  margin-top: 5px;
+  color: var(--vet-ink-soft);
+  font-size: 0.9rem;
+}
+
+/* ----------------------------------------------------------------- equipo */
+
+.vet-team {
+  display: grid;
+  gap: clamp(20px, 2.6vw, 30px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vet-person {
+  display: grid;
+  gap: 0;
+  background: var(--vet-ground);
+  border: 1px solid var(--vet-line);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.vet-person img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.vet-person__body {
+  padding: 18px 20px 20px;
+}
+
+.vet-person__body h3 {
+  font-size: 1.06rem;
+}
+
+.vet-person__role {
+  margin-top: 4px;
+  color: var(--vet-cyan);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.vet-person__body p {
+  margin-top: 10px;
+  color: var(--vet-ink-soft);
+  font-size: 0.93rem;
+}
+
+/* ---------------------------------------------------------- instalaciones */
+
+.vet-gallery {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vet-gallery li {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.vet-gallery img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.vet-gallery li:first-child img {
+  aspect-ratio: 3 / 4;
+}
+
+.vet-gallery figcaption {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 5px 11px;
+  color: var(--vet-ink);
+  background: color-mix(in srgb, var(--vet-ground) 90%, transparent);
+  backdrop-filter: blur(6px);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- reseñas */
+
+.vet-reviews {
+  display: grid;
+  gap: clamp(18px, 2.4vw, 28px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vet-review {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: clamp(20px, 2.4vw, 26px);
+  background: var(--vet-ground);
+  border: 1px solid var(--vet-line);
+  border-radius: 16px;
+}
+
+.vet-review__stars {
+  display: inline-flex;
+  gap: 3px;
+  color: var(--vet-warn);
+}
+
+.vet-review__stars svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.vet-review p {
+  color: var(--vet-ink);
+  font-size: 0.98rem;
+  line-height: 1.58;
+}
+
+.vet-review footer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--vet-ink-soft);
+  font-size: 0.86rem;
+}
+
+.vet-review footer b {
+  color: var(--vet-ink);
+  font-weight: 700;
+}
+
+/* ------------------------------------------------------ preguntas y visita */
+
+.vet-visit {
+  display: grid;
+  gap: clamp(24px, 3vw, 44px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.vet-hours {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--vet-line);
+}
+
+.vet-hours li {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--vet-line);
+  font-variant-numeric: tabular-nums;
+}
+
+.vet-hours li span:first-child {
+  font-weight: 600;
+}
+
+.vet-hours li span:last-child {
+  color: var(--vet-ink-soft);
+}
+
+.vet-hours li[data-today] span:last-child {
+  color: var(--vet-ok);
+  font-weight: 700;
+}
+
+.vet-where {
+  display: grid;
+  gap: 10px;
+  padding: clamp(20px, 2.4vw, 26px);
+  background: var(--vet-ground-2);
+  border: 1px solid var(--vet-line);
+  border-radius: 16px;
+}
+
+.vet-where p {
+  color: var(--vet-ink-soft);
+  font-size: 0.95rem;
+}
+
+.vet-faq {
+  display: grid;
+  border-top: 1px solid var(--vet-line);
+}
+
+.vet-faq details {
+  border-bottom: 1px solid var(--vet-line);
+}
+
+.vet-faq summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 17px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.vet-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.vet-faq summary::after {
+  content: "";
+  flex: none;
+  width: 13px;
+  height: 13px;
+  background:
+    linear-gradient(var(--vet-cyan), var(--vet-cyan)) center / 13px 2px no-repeat,
+    linear-gradient(var(--vet-cyan), var(--vet-cyan)) center / 2px 13px no-repeat;
+}
+
+.vet-faq details[open] summary::after {
+  background: linear-gradient(var(--vet-cyan), var(--vet-cyan)) center / 13px 2px no-repeat;
+}
+
+.vet-faq details p {
+  padding-bottom: 17px;
+  color: var(--vet-ink-soft);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 960px) {
+  .vet-figures__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vet-team,
+  .vet-reviews,
+  .vet-visit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vet-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .vet-gallery li:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .vet-gallery li:first-child img {
+    aspect-ratio: 16 / 9;
+  }
+}
+
+@media (max-width: 720px) {
+  .vet-urgent__inner {
+    justify-content: flex-start;
+  }
+
+  .vet-gallery {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+
 /* ------------------------------------------------------------- adaptación */
 
 @media (max-width: 960px) {

@@ -112,6 +112,13 @@
   >
     <a class="skip-link" href="#inicio">Saltar al contenido</a>
 
+    <div class="vet-urgent">
+      <div class="vet-shell vet-urgent__inner">
+        <p>Urgencias 24 horas, todos los días</p>
+        <a href="tel:+576015550142">601 555 0142</a>
+      </div>
+    </div>
+
     <header class="vet-header">
       <div class="vet-shell vet-header__inner">
         <a class="vet-brand" href="#inicio" aria-label="Huella Veterinaria, ir al inicio">
@@ -167,13 +174,17 @@
 
           <figure class="vet-hero__media">
             <picture>
-              <source srcset="/assets/care/veterinary-neighborhood-v3.avif" type="image/avif" />
-              <source srcset="/assets/care/veterinary-neighborhood-v3.webp" type="image/webp" />
+              <source srcset="/assets/sectors/vet-consulta-bulldog.avif" type="image/avif" />
+              <source
+                srcset="/assets/sectors/vet-consulta-bulldog-1280.webp 1280w, /assets/sectors/vet-consulta-bulldog.webp 1920w"
+                sizes="(max-width: 1000px) calc(100vw - 32px), 620px"
+                type="image/webp"
+              />
               <img
-                src="/assets/care/veterinary-neighborhood-v3.webp"
-                alt="Una persona llega con su perro a la puerta de una clínica veterinaria de barrio"
-                width="1536"
-                height="1024"
+                src="/assets/sectors/vet-consulta-bulldog-1280.webp"
+                alt="Un bulldog francés con pañuelo espera tranquilo sobre la mesa de consulta"
+                width="1280"
+                height="855"
                 decoding="async"
                 fetchpriority="high"
               />
@@ -350,6 +361,269 @@
             </li>
           </ul>
           <button class="vet-btn" type="button" data-luenio-open>Quiero una agenda así</button>
+        </div>
+      </section>
+
+      <section class="vet-figures" aria-label="Datos ilustrativos de la clínica">
+        <div class="vet-shell vet-figures__grid">
+          <p class="vet-figure"><b>12 años</b><span>Atendiendo el barrio</span></p>
+          <p class="vet-figure"><b>4.900</b><span>Mascotas en ficha</span></p>
+          <p class="vet-figure"><b>24 h</b><span>Línea de urgencias</span></p>
+          <p class="vet-figure"><b>4,8</b><span>De 5 en reseñas</span></p>
+        </div>
+      </section>
+
+      <section class="vet-section" id="equipo" aria-labelledby="veterinary-team-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-team-title">Quién atiende a tu mascota</h2>
+          <p class="vet-section__lead">
+            El equipo de esta demo es ficticio. En una implementación real irían las fotografías y
+            las especialidades del equipo del cliente.
+          </p>
+          <ul class="vet-team">
+            <li class="vet-person">
+              <picture>
+                <source srcset="/assets/sectors/vet-equipo-corgi.avif" type="image/avif" />
+                <img
+                  src="/assets/sectors/vet-equipo-corgi-640.webp"
+                  srcset="/assets/sectors/vet-equipo-corgi-640.webp 640w, /assets/sectors/vet-equipo-corgi-1280.webp 1280w"
+                  sizes="(max-width: 960px) calc(100vw - 48px), 360px"
+                  alt="Veterinario sosteniendo a un perro corgi sobre la mesa de consulta"
+                  width="1280"
+                  height="960"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <div class="vet-person__body">
+                <h3>Andrés Melo</h3>
+                <p class="vet-person__role">Medicina general</p>
+                <p>Consulta diaria y seguimiento de casos crónicos. Habla con calma y sin prisa.</p>
+              </div>
+            </li>
+            <li class="vet-person">
+              <picture>
+                <source srcset="/assets/sectors/vet-diagnostico.avif" type="image/avif" />
+                <img
+                  src="/assets/sectors/vet-diagnostico-640.webp"
+                  srcset="/assets/sectors/vet-diagnostico-640.webp 640w, /assets/sectors/vet-diagnostico-1280.webp 1280w"
+                  sizes="(max-width: 960px) calc(100vw - 48px), 360px"
+                  alt="Veterinario con lupa de aumento revisando a un animal pequeño"
+                  width="1280"
+                  height="960"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <div class="vet-person__body">
+                <h3>Rafael Duarte</h3>
+                <p class="vet-person__role">Diagnóstico</p>
+                <p>Imagen y laboratorio. Explica cada resultado antes de proponer nada.</p>
+              </div>
+            </li>
+            <li class="vet-person">
+              <picture>
+                <source srcset="/assets/sectors/vet-gato.avif" type="image/avif" />
+                <img
+                  src="/assets/sectors/vet-gato-640.webp"
+                  srcset="/assets/sectors/vet-gato-640.webp 640w, /assets/sectors/vet-gato-1280.webp 1280w"
+                  sizes="(max-width: 960px) calc(100vw - 48px), 360px"
+                  alt="Una persona acaricia a un gato atigrado durante la consulta"
+                  width="1280"
+                  height="960"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <div class="vet-person__body">
+                <h3>Laura Pineda</h3>
+                <p class="vet-person__role">Felinos</p>
+                <p>Manejo de gatos con miedo al transportín y visitas de bajo estrés.</p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="vet-section vet-section--rest" id="clinica" aria-labelledby="veterinary-place-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-place-title">Cómo es por dentro</h2>
+          <p class="vet-section__lead">
+            Instalaciones ilustrativas de esta demo. Ver el sitio antes de llegar quita la mitad del
+            miedo, sobre todo en una urgencia.
+          </p>
+          <ul class="vet-gallery">
+            <li>
+              <figure>
+                <picture>
+                  <source srcset="/assets/sectors/vet-consulta.avif" type="image/avif" />
+                  <img
+                    src="/assets/sectors/vet-consulta-640.webp"
+                    srcset="/assets/sectors/vet-consulta-640.webp 640w, /assets/sectors/vet-consulta-1280.webp 1280w"
+                    sizes="(max-width: 960px) calc(100vw - 48px), 480px"
+                    alt="Sala de consulta con un perro pequeño sobre la mesa y un ecógrafo al fondo"
+                    width="1280"
+                    height="1707"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <figcaption>Consulta</figcaption>
+              </figure>
+            </li>
+            <li>
+              <figure>
+                <picture>
+                  <source srcset="/assets/sectors/vet-quirofano.avif" type="image/avif" />
+                  <img
+                    src="/assets/sectors/vet-quirofano-640.webp"
+                    srcset="/assets/sectors/vet-quirofano-640.webp 640w, /assets/sectors/vet-quirofano-1280.webp 1280w"
+                    sizes="(max-width: 960px) calc(50vw - 32px), 320px"
+                    alt="Quirófano veterinario preparado, con mesa y lámpara cenital"
+                    width="1280"
+                    height="720"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <figcaption>Quirófano</figcaption>
+              </figure>
+            </li>
+            <li>
+              <figure>
+                <picture>
+                  <source srcset="/assets/sectors/vet-cuidado-unas.avif" type="image/avif" />
+                  <img
+                    src="/assets/sectors/vet-cuidado-unas-640.webp"
+                    srcset="/assets/sectors/vet-cuidado-unas-640.webp 640w, /assets/sectors/vet-cuidado-unas-1280.webp 1280w"
+                    sizes="(max-width: 960px) calc(50vw - 32px), 320px"
+                    alt="Manos con guantes cuidando las uñas de un perro sobre la mesa"
+                    width="1280"
+                    height="1920"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </picture>
+                <figcaption>Cuidados</figcaption>
+              </figure>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="vet-section" id="opiniones" aria-labelledby="veterinary-reviews-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-reviews-title">Lo que dicen quienes ya vinieron</h2>
+          <p class="vet-section__lead">
+            Reseñas ficticias, escritas para esta demo. No corresponden a personas ni a visitas
+            reales.
+          </p>
+          <ul class="vet-reviews">
+            <li class="vet-review">
+              <span class="vet-review__stars" aria-label="5 de 5">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+              </span>
+              <p>
+                Escribí un domingo por la noche porque mi perro no quería comer. Me respondieron con
+                una ruta clara y el lunes ya tenía cita, sin tener que explicar todo otra vez.
+              </p>
+              <footer><b>Marcela R.</b> · Reseña ilustrativa</footer>
+            </li>
+            <li class="vet-review">
+              <span class="vet-review__stars" aria-label="5 de 5">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+              </span>
+              <p>
+                Mi gata se estresa muchísimo en el transportín. Aquí la atendieron sin sacarla a la
+                fuerza y con la luz baja. Es la primera vez que salimos las dos tranquilas.
+              </p>
+              <footer><b>Daniel O.</b> · Reseña ilustrativa</footer>
+            </li>
+            <li class="vet-review">
+              <span class="vet-review__stars" aria-label="4 de 5">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+              </span>
+              <p>
+                Entré por una revisión de rutina y me explicaron qué no hacía falta hacer todavía.
+                Agradezco que no me vendieran de más.
+              </p>
+              <footer><b>Paula G.</b> · Reseña ilustrativa</footer>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="vet-section vet-section--rest" id="visita" aria-labelledby="veterinary-visit-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-visit-title">Cuándo y dónde</h2>
+          <p class="vet-section__lead">
+            Horarios, dirección y respuestas de esta demo. Son ilustrativos y no corresponden a un
+            local real.
+          </p>
+          <div class="vet-visit">
+            <div>
+              <ul class="vet-hours">
+                <li data-today><span>Hoy, jueves</span><span>8:00 – 20:00</span></li>
+                <li><span>Viernes</span><span>8:00 – 20:00</span></li>
+                <li><span>Sábado</span><span>9:00 – 17:00</span></li>
+                <li><span>Domingo</span><span>Solo urgencias</span></li>
+                <li><span>Urgencias</span><span>24 horas, todos los días</span></li>
+              </ul>
+              <div class="vet-where" style="margin-top: 20px">
+                <h3>Huella Veterinaria</h3>
+                <p>Calle 53 con Carrera 24, Chapinero · Bogotá</p>
+                <p>Parqueadero en la puerta y entrada sin escalones para transportines grandes.</p>
+              </div>
+            </div>
+            <div class="vet-faq">
+              <details>
+                <summary>¿Atienden sin cita?</summary>
+                <p>
+                  Sí, pero con espera. Si escribes antes te damos una franja y llegas con la ficha
+                  abierta.
+                </p>
+              </details>
+              <details>
+                <summary>¿Qué hago en una urgencia de noche?</summary>
+                <p>
+                  Llama al número de urgencias antes de salir de casa. Te decimos si puedes esperar
+                  a mañana o si hay que ir ya, y preparamos la sala mientras llegas.
+                </p>
+              </details>
+              <details>
+                <summary>¿Cuánto cuesta una consulta?</summary>
+                <p>
+                  La consulta general de esta demo está en 95.000 pesos. Cualquier procedimiento se
+                  cotiza después de verla, nunca por teléfono.
+                </p>
+              </details>
+              <details>
+                <summary>¿Puedo quedarme durante el procedimiento?</summary>
+                <p>
+                  En consulta y en curas, sí. En cirugía no, por asepsia, pero te llamamos al
+                  terminar y puedes verla en recuperación.
+                </p>
+              </details>
+              <details>
+                <summary>¿Atienden gatos?</summary>
+                <p>
+                  Sí, y con horario separado de perros en la franja de la mañana para que no se
+                  crucen en la sala de espera.
+                </p>
+              </details>
+            </div>
+          </div>
         </div>
       </section>
 
