@@ -175,6 +175,20 @@ html[data-theme="dark"] .vet-clinic {
   margin-inline-start: auto;
 }
 
+.vet-header__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-inline-start: 8px;
+}
+
+/* El nombre de la clínica y la acción no se parten en dos líneas: a ancho de
+   teléfono la cabecera se reordena, nunca se rompe. */
+.vet-brand > span:last-child,
+.vet-header__actions .vet-btn {
+  white-space: nowrap;
+}
+
 .vet-nav a {
   display: inline-flex;
   align-items: center;
@@ -735,6 +749,18 @@ html[data-theme="dark"] .vet-clinic {
 
   .vet-nav {
     display: none;
+  }
+
+  /* Nombre completo arriba, acciones debajo. Se reordena en dos filas antes
+     que apretar la marca y el botón hasta partirlos. */
+  .vet-header__inner {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding-block: 10px;
+  }
+
+  .vet-header__actions {
+    margin-inline: auto 0;
   }
 
   .vet-slot {

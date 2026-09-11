@@ -130,13 +130,18 @@
           <a href="#ruta">Cómo funciona</a>
           <a href="#agenda">Agenda</a>
         </nav>
-        <a
-          class="vet-btn vet-btn--sm"
-          href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=landing_veterinary"
-          data-quote-cta="landing_veterinary"
-          data-cta-location="landing_header"
-          >Cotizar mi solución</a
-        >
+        <!-- theme-control.js busca `.site-header__actions` y, si no la
+             encuentra, fija el interruptor flotando arriba a la derecha, donde
+             pisaba este botón. Con el contenedor, entra en la fila. -->
+        <div class="site-header__actions vet-header__actions">
+          <a
+            class="vet-btn vet-btn--sm"
+            href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=landing_veterinary"
+            data-quote-cta="landing_veterinary"
+            data-cta-location="landing_header"
+            >Cotizar mi solución</a
+          >
+        </div>
       </div>
     </header>
 
