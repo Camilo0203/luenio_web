@@ -898,6 +898,362 @@ html[data-theme="dark"] .skin-studio .skin-close .skin-btn:hover {
   margin: 0;
 }
 
+/* Alterna el lienzo entre secciones para que una página larga no sea una sola
+   sábana blanca. */
+.skin-section--rest {
+  background: var(--skin-rest);
+}
+
+/* ------------------------------------------------------------- franja alta */
+
+/* Una estética se busca con una duda concreta y un miedo: que te vendan de
+   más. La franja de arriba responde lo segundo antes de que lo preguntes. */
+.skin-strip {
+  color: var(--skin-white);
+  background: var(--skin-ink);
+  font-size: 0.87rem;
+}
+
+html[data-theme="dark"] .skin-studio .skin-strip {
+  color: var(--skin-ink);
+  background: var(--skin-rest-deep);
+}
+
+.skin-strip__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 9px;
+}
+
+.skin-strip p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.skin-strip a {
+  color: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --------------------------------------------------------- franja de datos */
+
+.skin-figures {
+  padding-block: clamp(26px, 3vw, 40px);
+  background: var(--skin-rest);
+  border-block: 1px solid var(--skin-line);
+}
+
+.skin-figures__grid {
+  display: grid;
+  gap: clamp(18px, 2.5vw, 34px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.skin-figure b {
+  display: block;
+  font-family: var(--skin-display);
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+.skin-figure span {
+  display: block;
+  margin-top: 5px;
+  color: var(--skin-ink-soft);
+  font-size: 0.9rem;
+}
+
+/* -------------------------------------------------------- cómo es la sesión */
+
+.skin-steps-photo {
+  display: grid;
+  gap: clamp(20px, 2.6vw, 30px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: skin-photo-step;
+}
+
+.skin-photo-step {
+  display: grid;
+  gap: 0;
+  background: var(--skin-white);
+  border: 1px solid var(--skin-line);
+  border-radius: var(--skin-radius);
+  overflow: hidden;
+}
+
+.skin-photo-step img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.skin-photo-step__body {
+  padding: 18px 20px 22px;
+}
+
+.skin-photo-step__body::before {
+  counter-increment: skin-photo-step;
+  content: counter(skin-photo-step, decimal-leading-zero);
+  display: block;
+  margin-bottom: 8px;
+  color: var(--skin-plum);
+  font-size: 0.8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+.skin-photo-step__body h3 {
+  font-size: 1.06rem;
+}
+
+.skin-photo-step__body p {
+  margin-top: 8px;
+  color: var(--skin-ink-soft);
+  font-size: 0.93rem;
+}
+
+/* ------------------------------------------------------------------ centro */
+
+.skin-gallery {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr 1.25fr;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  height: clamp(380px, 42vw, 520px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skin-gallery li {
+  position: relative;
+  min-height: 0;
+  border-radius: var(--skin-radius);
+  overflow: hidden;
+}
+
+.skin-gallery li:last-child {
+  grid-row: span 2;
+}
+
+.skin-gallery figure {
+  height: 100%;
+  margin: 0;
+}
+
+.skin-gallery img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.skin-gallery figcaption {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 5px 11px;
+  color: var(--skin-ink);
+  background: color-mix(in srgb, var(--skin-white) 90%, transparent);
+  backdrop-filter: blur(6px);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------- reseñas */
+
+.skin-reviews {
+  display: grid;
+  gap: clamp(18px, 2.4vw, 28px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skin-review {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: clamp(20px, 2.4vw, 26px);
+  background: var(--skin-white);
+  border: 1px solid var(--skin-line);
+  border-radius: var(--skin-radius);
+}
+
+.skin-review__stars {
+  display: inline-flex;
+  gap: 3px;
+  color: var(--skin-plum);
+}
+
+.skin-review__stars svg {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+.skin-review p {
+  font-size: 0.98rem;
+  line-height: 1.58;
+}
+
+.skin-review footer {
+  color: var(--skin-ink-soft);
+  font-size: 0.86rem;
+}
+
+.skin-review footer b {
+  color: var(--skin-ink);
+  font-weight: 700;
+}
+
+/* -------------------------------------------------------- visita y dudas */
+
+.skin-visit {
+  display: grid;
+  gap: clamp(24px, 3vw, 44px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.skin-hours {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--skin-line);
+}
+
+.skin-hours li {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--skin-line);
+  font-variant-numeric: tabular-nums;
+}
+
+.skin-hours li span:first-child {
+  font-weight: 600;
+}
+
+.skin-hours li span:last-child {
+  color: var(--skin-ink-soft);
+}
+
+.skin-hours li[data-today] span:last-child {
+  color: var(--skin-plum);
+  font-weight: 700;
+}
+
+.skin-where {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+  padding: clamp(20px, 2.4vw, 26px);
+  background: var(--skin-white);
+  border: 1px solid var(--skin-line);
+  border-radius: var(--skin-radius);
+}
+
+.skin-where p {
+  color: var(--skin-ink-soft);
+  font-size: 0.95rem;
+}
+
+.skin-faq {
+  display: grid;
+  border-top: 1px solid var(--skin-line);
+}
+
+.skin-faq details {
+  border-bottom: 1px solid var(--skin-line);
+}
+
+.skin-faq summary {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding-block: 17px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.skin-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.skin-faq summary::after {
+  content: "";
+  flex: none;
+  width: 13px;
+  height: 13px;
+  background:
+    linear-gradient(var(--skin-plum), var(--skin-plum)) center / 13px 2px no-repeat,
+    linear-gradient(var(--skin-plum), var(--skin-plum)) center / 2px 13px no-repeat;
+}
+
+.skin-faq details[open] summary::after {
+  background: linear-gradient(var(--skin-plum), var(--skin-plum)) center / 13px 2px no-repeat;
+}
+
+.skin-faq details p {
+  padding-bottom: 17px;
+  color: var(--skin-ink-soft);
+  font-size: 0.95rem;
+}
+
+@media (max-width: 960px) {
+  .skin-figures__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .skin-steps-photo,
+  .skin-reviews,
+  .skin-visit {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .skin-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 200px 220px;
+    height: auto;
+  }
+
+  .skin-gallery li:last-child {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 760px) {
+  .skin-strip__inner {
+    justify-content: flex-start;
+  }
+
+  .skin-gallery {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(3, 200px);
+  }
+}
+
+
 /* -------------------------------------------------------------- adaptación */
 
 @media (max-width: 1000px) {
