@@ -694,6 +694,7 @@ html[data-theme="dark"] .vet-clinic {
 }
 
 .vet-close h2 {
+  color: var(--vet-brand-ink);
   max-width: 20ch;
   margin: 0 0 16px;
   font-family: var(--vet-display);
