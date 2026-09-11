@@ -107,8 +107,11 @@ const pages = [
     // la reserva vive en la barra legal compartida, que esta página incluye.
     className: "agency-desk demo-agency",
     hero: "Aquí el alcance se escribe antes de empezar.",
-    minSections: 7,
-    maxSections: 7,
+    // El tope de 7 guardaba un conteo destilado. La decisión cambió: estas
+    // demos se juzgan contra webs reales del sector, que corren diez u once
+    // secciones, y quedarse corto era el defecto, no la virtud.
+    minSections: 10,
+    maxSections: 12,
     ids: ["servicios", "casos", "proceso", "planes", "propuesta"],
     terms: ["Mapa de posicionamiento", "Desde $12.500.000", "Lanzar y transferir"],
     primaryCta: "Solicitar propuesta",
