@@ -1035,7 +1035,7 @@ html[data-theme="light"] body.gym-board.sector-v2 {
 }
 
 .gym-board.sector-v2 .gym-whatsapp-cta {
-  color: #fff;
+  color: var(--gym-whatsapp-ink);
   background: var(--gym-whatsapp);
   border-color: var(--gym-whatsapp);
   border-radius: 0;

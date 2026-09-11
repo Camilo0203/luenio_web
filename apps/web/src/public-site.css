@@ -1242,9 +1242,9 @@ html[data-theme="dark"] .footer-credit__mark {
   justify-content: center;
   gap: 9px;
   border: 0;
-  color: #fff;
-  /* Darker WA green so white label meets WCAG AA contrast */
-  background: #0d7a3f;
+  /* Verde de marca de WhatsApp con tinta oscura: 9,38 de contraste. */
+  color: #0b141a;
+  background: #25d366;
   font-weight: 800;
 }
 

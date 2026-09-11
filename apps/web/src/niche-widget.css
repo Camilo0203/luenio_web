@@ -229,9 +229,10 @@ body.luenio-modal-open {
   align-items: center;
   justify-content: center;
   gap: 9px;
-  color: #fff;
-  /* Darker WA green for WCAG AA white text contrast */
-  background: #0d7a3f;
+  /* Verde de marca de WhatsApp con tinta oscura: 9,38 de contraste, por
+     encima del 5,42 que daba el verde oscurecido con letra blanca. */
+  color: #0b141a;
+  background: #25d366;
   border: 0;
   cursor: pointer;
   font:
@@ -253,7 +254,7 @@ body.luenio-modal-open {
 
 .luenio-wa__submit:hover,
 .luenio-wa__trigger:hover {
-  background: #096633;
+  background: #1da851;
   transform: translateY(-1px);
 }
 
@@ -269,7 +270,7 @@ body.luenio-modal-open {
 }
 
 .luenio-wa__trigger[aria-expanded="true"] {
-  background: #0d7a3f;
+  background: #25d366;
   box-shadow: 0 14px 34px rgba(6, 82, 41, 0.34);
 }
 

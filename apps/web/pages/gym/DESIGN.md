@@ -20,7 +20,7 @@ elige objetivo, nivel y horario, y la ruta recomendada se recompone frente a él
 - Blanco señal: `#f2f2f2`
 - Ámbar de acción: `#ffb400`
 - Acero: `#7d838c`
-- Verde WhatsApp: `#0d7a3f`, reservado exclusivamente para WhatsApp
+- Verde WhatsApp: `#25d366` con tinta `#0b141a`, reservado exclusivamente para WhatsApp
 
 El tema claro traduce el mismo objeto a aluminio claro y marfil; no elimina el contraste del tablero
 ni convierte la experiencia en una plantilla blanca.
