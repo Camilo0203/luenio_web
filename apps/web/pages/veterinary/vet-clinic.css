@@ -817,6 +817,26 @@ html[data-theme="dark"] .vet-clinic {
     flex-basis: 100%;
     order: 3;
   }
+
+  /* El aviso demostrativo tiene que caber entero en el primer viewport de
+     móvil, y en 390 px ocupa cuatro líneas. El héroe cede el espacio: con el
+     ritmo de escritorio el aviso terminaba en 847 px y quedaba cortado por
+     tres. Se aprieta el espaciado, nunca el texto del aviso. */
+  .vet-hero {
+    padding-block: 28px clamp(36px, 5vw, 64px);
+  }
+
+  .vet-hero__inner {
+    gap: 20px;
+  }
+
+  .vet-hero__actions {
+    margin-top: 20px;
+  }
+
+  .vet-note {
+    margin-top: 12px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
