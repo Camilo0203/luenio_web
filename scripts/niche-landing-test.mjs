@@ -101,7 +101,11 @@ const pages = [
   },
   {
     ...sectorIdentity("agencies"),
-    className: "demo-agency",
+    // Sale del stack `sector-v2`, que sigue vistiendo a restaurantes,
+    // inmobiliaria y ecommerce. La firma legal se alinea con la de las otras
+    // dos demos con mundo propio en vez de repetir el párrafo de derechos:
+    // la reserva vive en la barra legal compartida, que esta página incluye.
+    className: "agency-desk demo-agency",
     hero: "Construimos marcas digitales que avanzan.",
     minSections: 7,
     maxSections: 7,
@@ -119,8 +123,10 @@ const pages = [
     ],
     asset: "/assets/demo-premium/agency-hero.webp",
     heroAsset: "/assets/demo-premium/agency-hero.webp",
+    legalNotice: "Demo ficticia creada por Luenio",
     disclaimer:
       "Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son ejemplos y no representan proyectos ni resultados de clientes reales.",
+    css: "/apps/web/pages/agencies/agency-desk.css",
   },
   {
     ...sectorIdentity("veterinary"),
