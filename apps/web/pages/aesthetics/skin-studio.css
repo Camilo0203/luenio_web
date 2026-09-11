@@ -1,0 +1,924 @@
+/* Aura Estética — estudio de piel.
+   Mundo propio de esta demo. Sustituye a `care-landings.css`, que compartía con
+   la demo de veterinarias y hacía que dos sectores distintos salieran con la
+   misma marca. No toca el sistema visual global de Luenio. */
+
+.skin-studio {
+  --skin-white: #ffffff;
+  --skin-rest: #faf6f7;
+  --skin-rest-deep: #f3eaed;
+  --skin-plum: #8e3b60;
+  --skin-plum-hover: #73304e;
+  --skin-plum-wash: #f7ecf1;
+  --skin-ink: #211a1e;
+  --skin-ink-soft: #5d5257;
+  --skin-line: #e8dfe2;
+  --skin-line-strong: #cdbdc4;
+  --skin-open: #15803d;
+  --skin-open-wash: #dcfce7;
+  --skin-wait: #8a5200;
+  --skin-wait-wash: #fdf0d5;
+  --skin-focus: #8e3b60;
+  --skin-display: "Red Hat Display", "Segoe UI", system-ui, sans-serif;
+  --skin-text: "Red Hat Text", "Segoe UI", system-ui, sans-serif;
+  --skin-shell: min(1180px, calc(100% - 64px));
+  --skin-radius: 18px;
+  --skin-radius-sm: 12px;
+  --skin-shadow: 0 18px 40px -28px rgba(33, 26, 30, 0.45);
+
+  color: var(--skin-ink);
+  background: var(--skin-white);
+  font-family: var(--skin-text);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* `style.css` pinta el body con un degradado y una rejilla en ::before desde
+   `html[data-theme="light"] body`, que gana a cualquier regla de una sola
+   clase. Se responde con la misma especificidad, nunca con !important. */
+html[data-theme="light"] .skin-studio,
+html[data-theme="dark"] .skin-studio {
+  background: var(--skin-white);
+}
+
+html[data-theme="light"] .skin-studio::before,
+html[data-theme="dark"] .skin-studio::before {
+  content: none;
+}
+
+html[data-theme="dark"] .skin-studio {
+  --skin-white: #171013;
+  --skin-rest: #1e1519;
+  --skin-rest-deep: #251a20;
+  --skin-plum: #e6a2be;
+  --skin-plum-hover: #f3c0d4;
+  --skin-plum-wash: #2a1a22;
+  --skin-ink: #f6eef1;
+  --skin-ink-soft: #c3b0b8;
+  --skin-line: #33242b;
+  --skin-line-strong: #4d3841;
+  --skin-open: #7ee2a8;
+  --skin-open-wash: #16301f;
+  --skin-wait: #f0c78a;
+  --skin-wait-wash: #33240f;
+  --skin-focus: #e6a2be;
+  --skin-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.75);
+}
+
+.skin-studio *,
+.skin-studio *::before,
+.skin-studio *::after {
+  box-sizing: border-box;
+}
+
+.skin-studio img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.skin-studio ::selection {
+  color: var(--skin-white);
+  background: var(--skin-plum);
+}
+
+.skin-studio :focus-visible {
+  outline: 3px solid var(--skin-focus);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* El enlace de salto necesita tinta y fondo propios: heredando los globales
+   quedaba a 1,02:1 contra el lienzo de esta página, es decir, inservible. */
+.skin-studio .skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 10000;
+  padding: 12px 18px;
+  color: var(--skin-white);
+  background: var(--skin-ink);
+  border-radius: 0 0 var(--skin-radius-sm) 0;
+  font-family: var(--skin-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skin-studio .skip-link:focus {
+  left: 0;
+  top: 0;
+}
+
+.skin-shell {
+  width: var(--skin-shell);
+  margin-inline: auto;
+}
+
+/* ------------------------------------------------------------------ tipos */
+
+.skin-studio h1,
+.skin-studio h2,
+.skin-studio h3 {
+  margin: 0;
+  font-family: var(--skin-display);
+  font-weight: 700;
+  /* Nunca por debajo de 1.05: en español, con tildes y descendentes, un
+     titular más apretado hace que los glifos se toquen. */
+  line-height: 1.08;
+  letter-spacing: -0.022em;
+}
+
+.skin-studio h1 {
+  font-size: clamp(2.4rem, 4.8vw, 3.5rem);
+  text-wrap: balance;
+}
+
+.skin-studio h2 {
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  text-wrap: balance;
+}
+
+.skin-studio h3 {
+  font-size: 1.12rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.skin-studio p {
+  margin: 0;
+}
+
+.skin-lead {
+  max-width: 36ch;
+  color: var(--skin-ink-soft);
+  font-size: clamp(1.02rem, 1.5vw, 1.14rem);
+  line-height: 1.62;
+}
+
+.skin-note {
+  max-width: 48ch;
+  color: var(--skin-ink-soft);
+  font-size: 0.87rem;
+  line-height: 1.55;
+}
+
+/* ------------------------------------------------------------------ botón */
+
+/* Una sola familia con sus cinco estados. Cada estado que cambia el fondo
+   restablece también la tinta, en vez de dejar que se herede de otra regla:
+   así es como los botones hechos con enlace perdían su color en la plantilla
+   anterior. */
+.skin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 24px;
+  color: var(--skin-white);
+  background: var(--skin-plum);
+  border: 1px solid var(--skin-plum);
+  border-radius: 999px;
+  font-family: var(--skin-text);
+  font-size: 0.97rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+html[data-theme="dark"] .skin-studio .skin-btn {
+  color: #171013;
+}
+
+.skin-studio .skin-btn:hover {
+  color: var(--skin-white);
+  background: var(--skin-plum-hover);
+  border-color: var(--skin-plum-hover);
+}
+
+html[data-theme="dark"] .skin-studio .skin-btn:hover {
+  color: #171013;
+}
+
+.skin-studio .skin-btn:active {
+  transform: translateY(1px);
+}
+
+.skin-studio .skin-btn[disabled],
+.skin-studio .skin-btn[aria-disabled="true"] {
+  color: var(--skin-ink-soft);
+  background: var(--skin-rest-deep);
+  border-color: var(--skin-line);
+  cursor: not-allowed;
+}
+
+.skin-studio .skin-btn--quiet {
+  color: var(--skin-ink);
+  background: transparent;
+  border-color: var(--skin-line-strong);
+}
+
+.skin-studio .skin-btn--quiet:hover {
+  color: var(--skin-ink);
+  background: var(--skin-rest);
+  border-color: var(--skin-ink);
+}
+
+.skin-studio .skin-btn--sm {
+  min-height: 44px;
+  padding: 0 18px;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------- cabecera */
+
+.skin-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--skin-white) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--skin-line);
+}
+
+.skin-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-block: 14px;
+}
+
+.skin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--skin-ink);
+  font-family: var(--skin-display);
+  font-size: 1.06rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.skin-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--skin-white);
+  background: var(--skin-plum);
+  border-radius: 11px;
+}
+
+html[data-theme="dark"] .skin-studio .skin-brand__mark {
+  color: #171013;
+}
+
+.skin-brand__mark svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.skin-nav {
+  display: flex;
+  gap: 22px;
+  margin-inline: auto;
+}
+
+.skin-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--skin-ink-soft);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.skin-nav a:hover {
+  color: var(--skin-plum);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.skin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------------ héroe */
+
+.skin-hero {
+  padding-block: clamp(44px, 6vw, 80px) clamp(40px, 5vw, 68px);
+}
+
+.skin-hero__inner {
+  display: grid;
+  gap: clamp(28px, 4vw, 56px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+  align-items: center;
+}
+
+.skin-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.skin-hero__copy .skin-lead {
+  margin-top: 18px;
+}
+
+.skin-hero__copy .skin-note {
+  margin-top: 16px;
+  padding-left: 14px;
+  border-left: 1px solid var(--skin-line-strong);
+}
+
+.skin-hero__media {
+  position: relative;
+  margin: 0;
+  border-radius: var(--skin-radius);
+  overflow: hidden;
+  box-shadow: var(--skin-shadow);
+}
+
+.skin-hero__media img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.skin-hero__credit {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  padding: 6px 12px;
+  color: var(--skin-ink);
+  background: color-mix(in srgb, var(--skin-white) 88%, transparent);
+  backdrop-filter: blur(6px);
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------ tratamientos */
+
+.skin-section {
+  padding-block: clamp(44px, 5.5vw, 76px);
+}
+
+.skin-section--rest {
+  background: var(--skin-rest);
+}
+
+.skin-section__head {
+  max-width: 52ch;
+  margin-bottom: clamp(26px, 3vw, 40px);
+}
+
+.skin-section__head p {
+  margin-top: 14px;
+  color: var(--skin-ink-soft);
+  font-size: 1rem;
+}
+
+/* Lista con filete, no rejilla de tarjetas iguales: el precio del sector es
+   que todo termine pareciendo el mismo catálogo. */
+.skin-treatments {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--skin-line);
+}
+
+.skin-treatment {
+  display: grid;
+  gap: 6px 28px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  align-items: baseline;
+  padding-block: 22px;
+  border-bottom: 1px solid var(--skin-line);
+}
+
+.skin-treatment p {
+  color: var(--skin-ink-soft);
+  font-size: 0.96rem;
+}
+
+.skin-treatment__when {
+  color: var(--skin-ink-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ pauta */
+
+.skin-plan {
+  display: grid;
+  gap: clamp(24px, 3vw, 44px);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+}
+
+.skin-choices {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.skin-choices legend {
+  padding: 0;
+  margin-bottom: 12px;
+  color: var(--skin-ink-soft);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* El estado marcado cambia borde, fondo y tinta a la vez, y adelanta la
+   pastilla con un filete propio: el color nunca comunica solo. */
+.skin-choice {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 68px;
+  padding: 14px 18px;
+  color: var(--skin-ink);
+  background: var(--skin-white);
+  border: 1px solid var(--skin-line);
+  border-radius: var(--skin-radius-sm);
+  font-family: var(--skin-text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.skin-choice:hover {
+  border-color: var(--skin-line-strong);
+  background: var(--skin-rest);
+}
+
+.skin-choice[aria-pressed="true"] {
+  color: var(--skin-ink);
+  background: var(--skin-plum-wash);
+  border-color: var(--skin-plum);
+  box-shadow: inset 3px 0 0 var(--skin-plum);
+}
+
+.skin-choice__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 38px;
+  height: 38px;
+  color: var(--skin-ink-soft);
+  background: var(--skin-rest-deep);
+  border-radius: 10px;
+}
+
+.skin-choice[aria-pressed="true"] .skin-choice__icon {
+  color: var(--skin-white);
+  background: var(--skin-plum);
+}
+
+html[data-theme="dark"] .skin-studio .skin-choice[aria-pressed="true"] .skin-choice__icon {
+  color: #171013;
+}
+
+.skin-choice__icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.skin-choice__label {
+  display: grid;
+  gap: 3px;
+}
+
+.skin-choice__label strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.skin-choice__label span {
+  color: var(--skin-ink-soft);
+  font-size: 0.87rem;
+}
+
+.skin-schedule {
+  padding: clamp(22px, 2.6vw, 32px);
+  background: var(--skin-white);
+  border: 1px solid var(--skin-line);
+  border-radius: var(--skin-radius);
+  box-shadow: var(--skin-shadow);
+}
+
+.skin-schedule__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--skin-line);
+}
+
+.skin-schedule__total {
+  color: var(--skin-ink-soft);
+  font-size: 0.86rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La secuencia sí lleva información: son fechas relativas reales, no
+   decoración numérica. */
+.skin-steps {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: skin-step;
+}
+
+.skin-step {
+  position: relative;
+  display: grid;
+  gap: 2px 18px;
+  grid-template-columns: 34px minmax(0, 1fr);
+  padding-block: 18px;
+  border-bottom: 1px solid var(--skin-line);
+}
+
+.skin-step:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.skin-step::before {
+  counter-increment: skin-step;
+  content: counter(skin-step);
+  display: grid;
+  place-items: center;
+  grid-row: span 3;
+  width: 30px;
+  height: 30px;
+  color: var(--skin-plum);
+  background: var(--skin-plum-wash);
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.skin-step__when {
+  color: var(--skin-ink-soft);
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.skin-step__what {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.skin-step__detail {
+  color: var(--skin-ink-soft);
+  font-size: 0.92rem;
+}
+
+.skin-schedule__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 22px;
+  padding-top: 20px;
+  border-top: 1px solid var(--skin-line);
+}
+
+.skin-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.skin-tag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.skin-tag--open {
+  color: var(--skin-open);
+  background: var(--skin-open-wash);
+}
+
+.skin-tag--wait {
+  color: var(--skin-wait);
+  background: var(--skin-wait-wash);
+}
+
+/* La respuesta se reasienta al cambiar de motivo: entrada corta con
+   desaceleración exponencial. Es el único momento autoral de la página. */
+.skin-schedule.is-updating {
+  animation: skin-settle 460ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes skin-settle {
+  from {
+    opacity: 0.55;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------ método */
+
+.skin-method {
+  display: grid;
+  gap: clamp(24px, 3vw, 48px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
+}
+
+.skin-method ol {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: skin-method;
+}
+
+.skin-method ol li {
+  display: grid;
+  gap: 4px 16px;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.skin-method ol li::before {
+  counter-increment: skin-method;
+  content: counter(skin-method);
+  grid-row: span 2;
+  align-self: start;
+  min-width: 26px;
+  color: var(--skin-plum);
+  font-family: var(--skin-display);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.skin-method ol li strong {
+  font-size: 1.02rem;
+}
+
+.skin-method ol li p {
+  color: var(--skin-ink-soft);
+  font-size: 0.95rem;
+}
+
+/* El bloque honesto: lo que esta página no hace. Es el que sostiene todo lo
+   demás, así que no se esconde al final ni se escribe en letra pequeña. */
+.skin-limits {
+  padding: clamp(24px, 2.8vw, 34px);
+  background: var(--skin-white);
+  border: 1px solid var(--skin-line);
+  border-radius: var(--skin-radius);
+}
+
+.skin-limits ul {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.skin-limits li {
+  display: grid;
+  gap: 2px 14px;
+  grid-template-columns: 22px minmax(0, 1fr);
+  font-size: 0.96rem;
+}
+
+.skin-limits li svg {
+  width: 18px;
+  height: 18px;
+  margin-top: 3px;
+  color: var(--skin-ink-soft);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+.skin-limits li span {
+  color: var(--skin-ink-soft);
+}
+
+/* ------------------------------------------------------------------ cierre */
+
+.skin-close {
+  padding-block: clamp(46px, 5.5vw, 78px);
+  color: var(--skin-white);
+  background: var(--skin-ink);
+  text-align: left;
+}
+
+html[data-theme="dark"] .skin-studio .skin-close {
+  color: var(--skin-ink);
+  background: var(--skin-rest-deep);
+}
+
+.skin-close h2 {
+  max-width: 22ch;
+}
+
+.skin-close p {
+  max-width: 54ch;
+  margin-top: 16px;
+  color: #d9ccd2;
+  font-size: 1.02rem;
+}
+
+html[data-theme="dark"] .skin-studio .skin-close p {
+  color: var(--skin-ink-soft);
+}
+
+.skin-close .skin-btn {
+  margin-top: 26px;
+  color: var(--skin-ink);
+  background: var(--skin-white);
+  border-color: var(--skin-white);
+}
+
+.skin-close .skin-btn:hover {
+  color: var(--skin-ink);
+  background: #f0e4e9;
+  border-color: #f0e4e9;
+}
+
+html[data-theme="dark"] .skin-studio .skin-close .skin-btn {
+  color: #171013;
+  background: var(--skin-plum);
+  border-color: var(--skin-plum);
+}
+
+html[data-theme="dark"] .skin-studio .skin-close .skin-btn:hover {
+  color: #171013;
+  background: var(--skin-plum-hover);
+  border-color: var(--skin-plum-hover);
+}
+
+/* --------------------------------------------------------------------- pie */
+
+.skin-footer {
+  padding-block: 26px;
+  border-top: 1px solid var(--skin-line);
+}
+
+.skin-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  color: var(--skin-ink-soft);
+  font-size: 0.86rem;
+}
+
+.skin-footer__inner a {
+  color: var(--skin-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.skin-footer__inner a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.skin-footer__inner p {
+  margin: 0;
+}
+
+/* -------------------------------------------------------------- adaptación */
+
+@media (max-width: 1000px) {
+  .skin-hero__inner,
+  .skin-plan,
+  .skin-method {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .skin-hero__inner {
+    gap: 28px;
+  }
+
+  .skin-hero__media {
+    order: -1;
+  }
+
+  .skin-treatment {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .skin-treatment p {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .skin-studio {
+    --skin-shell: calc(100% - 32px);
+  }
+
+  .skin-nav {
+    display: none;
+  }
+
+  /* Nombre arriba, acción debajo: se reordena en dos filas antes que apretar
+     la marca y el botón hasta partirlos. */
+  .skin-header__inner {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding-block: 10px;
+  }
+
+  .skin-header__actions {
+    margin-inline: auto 0;
+  }
+
+  /* El aviso demostrativo tiene que caber entero en el primer viewport del
+     móvil, así que el héroe cede espaciado y el aviso no cede palabras. */
+  .skin-hero {
+    padding-block: 28px clamp(36px, 5vw, 64px);
+  }
+
+  .skin-hero__actions {
+    margin-top: 20px;
+  }
+
+  .skin-hero__copy .skin-note {
+    margin-top: 12px;
+  }
+
+  .skin-step {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: 2px 14px;
+  }
+
+  .skin-schedule__foot {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skin-studio *,
+  .skin-studio *::before,
+  .skin-studio *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

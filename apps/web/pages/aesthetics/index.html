@@ -1,11 +1,4 @@
 <!doctype html>
-<!--
-THESIS: Una valoración estética se vuelve confiable cuando hace visible cómo observa y decide, no cuando promete transformaciones.
-OWN-WORLD: blanco mineral, azul ultramar y lila óptico; lentes de observación, capas funcionales y reglas de atlas científico.
-STORY: la visitante comprende el método, elige una prioridad, ve cómo cambia el protocolo ilustrativo y reserva una conversación informada.
-FIRST VIEWPORT: promesa ligera a la izquierda; un retrato dentro de una gran lente ocupa la derecha y el método cruza la base como instrumento.
-FORM: “laboratorio de piel”, propuesta E2 aprobada por el usuario; composición óptica aplicada a la semilla 43833d01.
--->
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -13,7 +6,7 @@ FORM: “laboratorio de piel”, propuesta E2 aprobada por el usuario; composici
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#071a33" />
+    <meta name="theme-color" content="#171013" />
     <script src="/theme-boot.js"></script>
     <title>Ejemplo de web para estética: Aura Estética | Luenio</title>
     <meta
@@ -107,233 +100,271 @@ FORM: “laboratorio de piel”, propuesta E2 aprobada por el usuario; composici
     <link rel="stylesheet" href="/apps/web/src/style.css" />
     <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
     <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
-    <link rel="stylesheet" href="/apps/web/src/care-landings.css" />
+    <link rel="stylesheet" href="/apps/web/pages/aesthetics/skin-studio.css" />
     <script type="module" src="/apps/web/src/niche-landing.js"></script>
     <script type="module" src="/apps/web/pages/aesthetics/aesthetics-landing.js"></script>
   </head>
   <body
-    class="care-landing aesthetics"
+    class="skin-studio aesthetics"
     data-demo-name="Aura Estética"
     data-demo-type="estética"
     data-demo-goal="Quiero una landing para mi estética"
   >
     <a class="skip-link" href="#inicio">Saltar al contenido</a>
-    <header class="aura-nav">
-      <a class="aura-brand" href="#inicio" aria-label="Aura Estética, ir al inicio"
-        >AURA <span>Estética</span></a
-      >
-      <nav aria-label="Navegación principal">
-        <a href="/demos">Demos</a><a href="/#soluciones">Soluciones</a
-        ><a href="/#proceso">Proceso</a><a href="/#nosotros">Nosotros</a>
-      </nav>
-      <a
-        class="aura-button aura-button--nav care-pill"
-        href="/cotizacion?sector=est%C3%A9tica&amp;demo=Aura+Est%C3%A9tica&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+tratamientos+en+valoraciones&amp;source=landing_aesthetics"
-        data-quote-cta="landing_aesthetics"
-        data-cta-location="landing_header"
-        >Cotizar mi solución</a
-      >
+
+    <header class="skin-header">
+      <div class="skin-shell skin-header__inner">
+        <a class="skin-brand" href="#inicio" aria-label="Aura Estética, ir al inicio">
+          <span class="skin-brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 4.5c3.6 2.4 5.4 5 5.4 7.7A5.4 5.4 0 0 1 12 18a5.4 5.4 0 0 1-5.4-5.8c0-2.7 1.8-5.3 5.4-7.7Z" />
+              <path d="M12 10.6v3.9" />
+            </svg>
+          </span>
+          <span>Aura Estética</span>
+        </a>
+        <nav class="skin-nav" aria-label="Navegación principal">
+          <a href="#tratamientos">Tratamientos</a>
+          <a href="#filosofia">Cómo trabajamos</a>
+          <a href="#agenda">Agenda</a>
+        </nav>
+        <!-- theme-control.js busca `.site-header__actions` y, si no la
+             encuentra, deja el interruptor flotando arriba a la derecha, donde
+             pisaba este botón. Con el contenedor, entra en la fila. -->
+        <div class="site-header__actions skin-header__actions">
+          <a
+            class="skin-btn skin-btn--sm"
+            href="/cotizacion?sector=est%C3%A9tica&amp;demo=Aura+Est%C3%A9tica&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+tratamientos+en+valoraciones&amp;source=landing_aesthetics"
+            data-quote-cta="landing_aesthetics"
+            data-cta-location="landing_header"
+            >Cotizar mi solución</a
+          >
+        </div>
+      </div>
     </header>
 
     <main id="inicio">
-      <section class="aura-lab" aria-labelledby="aesthetics-title">
-        <div class="aura-lab__copy">
-          <p>Piel real · cuidado con contexto</p>
-          <h1 id="aesthetics-title"><em>Entender tu piel</em> cambia cómo la cuidas.</h1>
-          <p>
-            Una valoración clara para observar prioridades, comprender hábitos y construir una ruta
-            sin promesas imposibles.
-          </p>
-          <a class="aura-button care-pill" href="#agenda"
-            >Comenzar valoración <span aria-hidden="true">→</span></a
-          >
-          <p class="luenio-demo-disclosure" data-luenio-disclosure role="note">
-            Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.
-          </p>
-          <small>Análisis y experiencia ilustrativos · no sustituyen valoración profesional.</small>
-        </div>
-
-        <figure class="aura-lens">
-          <div class="aura-lens__rings" aria-hidden="true"><i></i><i></i><i></i></div>
-          <picture>
-            <source srcset="/assets/care/aesthetics-skin-lab-v3.avif" type="image/avif" />
-            <source srcset="/assets/care/aesthetics-skin-lab-v3.webp" type="image/webp" />
-            <img
-              src="/assets/care/aesthetics-skin-lab-v3.webp"
-              alt="Retrato ilustrativo de una mujer con textura natural de la piel"
-              width="1536"
-              height="1024"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </picture>
-          <div class="aura-lens__map" role="list" aria-label="Aspectos ilustrativos observados">
-            <span role="listitem">Superficie</span><span role="listitem">Hidratación</span
-            ><span role="listitem">Tono</span><span role="listitem">Textura</span
-            ><span role="listitem">Luminosidad</span>
-          </div>
-          <figcaption id="aura-analysis-result" aria-live="polite" aria-atomic="true">
-            <span>Análisis ilustrativo</span><b data-aura-focus-title>Escuchar la piel</b>
-            <p data-aura-focus-copy>
-              La recomendación comienza en una valoración, no en una tendencia.
+      <section class="skin-hero" aria-labelledby="aesthetics-title">
+        <div class="skin-shell skin-hero__inner">
+          <div class="skin-hero__copy">
+            <h1 id="aesthetics-title">Primero entender, después tratar.</h1>
+            <p class="skin-lead">
+              Dinos qué quieres trabajar y te enseñamos la pauta completa antes de reservar: cuántas
+              sesiones, cada cuánto y qué depende de la valoración.
             </p>
-          </figcaption>
-        </figure>
+            <div class="skin-hero__actions">
+              <a class="skin-btn" href="#agenda">Reservar valoración</a>
+              <a class="skin-btn skin-btn--quiet" href="#filosofia">Cómo trabajamos</a>
+            </div>
+            <p class="skin-note luenio-demo-disclosure" data-luenio-disclosure role="note">
+              Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+              reales. Las pautas son ilustrativas y no sustituyen una valoración presencial.
+            </p>
+          </div>
 
-        <div role="group" class="aura-instrument" aria-label="Método ilustrativo de valoración">
-          <div>
-            <b>1</b><span>Observar<small>Analizamos lo visible desde varias capas.</small></span
-            ><svg viewBox="0 0 72 52" aria-hidden="true">
-              <path d="M8 14 36 4l28 10-28 10L8 14Zm0 12 28 10 28-10M8 38l28 10 28-10" />
-            </svg>
-          </div>
-          <div>
-            <b>2</b><span>Comprender<small>Sumamos hábitos, contexto y prioridades.</small></span
-            ><svg viewBox="0 0 72 52" aria-hidden="true">
-              <circle cx="16" cy="15" r="4" />
-              <circle cx="38" cy="8" r="4" />
-              <circle cx="56" cy="24" r="4" />
-              <circle cx="30" cy="42" r="4" />
-              <path d="m19 14 15-5m8 2 11 10M54 28 34 40m-6-2-9-19m1-2 31 8M34 12l-4 26" />
-            </svg>
-          </div>
-          <div>
-            <b>3</b><span>Cuidar<small>Diseñamos una ruta personal y revisable.</small></span
-            ><svg viewBox="0 0 72 52" aria-hidden="true">
-              <path
-                d="M23 18h15v30H23zM27 11h7v7h-7zM42 26h14v22H42zM45 20h8v6h-8M27 30h7m-7 7h7m12-3h6"
+          <figure class="skin-hero__media">
+            <picture>
+              <source srcset="/assets/care/aesthetics-skin-lab-v3.avif" type="image/avif" />
+              <source srcset="/assets/care/aesthetics-skin-lab-v3.webp" type="image/webp" />
+              <img
+                src="/assets/care/aesthetics-skin-lab-v3.webp"
+                alt="Retrato de una mujer con la textura natural de su piel a la vista"
+                width="1536"
+                height="1024"
+                decoding="async"
+                fetchpriority="high"
               />
-            </svg>
-          </div>
+            </picture>
+            <figcaption class="skin-hero__credit">Imagen ilustrativa</figcaption>
+          </figure>
         </div>
       </section>
 
-      <section class="aura-protocol" id="filosofia" aria-labelledby="aesthetics-method-title">
-        <header>
-          <p>Protocolo de cuidado</p>
-          <h2 id="aesthetics-method-title">Ciencia que se adapta a tu piel.</h2>
-          <span
-            >La demo traduce una consulta en un recorrido claro. No realiza diagnóstico ni
-            recomienda tratamientos reales.</span
-          >
-        </header>
-        <ol>
-          <li>
-            <b>Observar</b>
-            <p>Partimos de lo que ves y de lo que quieres entender.</p>
-          </li>
-          <li>
-            <b>Conversar</b>
-            <p>Los hábitos y la tolerancia ayudan a dar contexto.</p>
-          </li>
-          <li>
-            <b>Elegir</b>
-            <p>El siguiente paso se confirma únicamente en valoración.</p>
-          </li>
-          <li>
-            <b>Acompañar</b>
-            <p>La ruta puede revisarse según evoluciona el cuidado.</p>
-          </li>
-        </ol>
-      </section>
-
-      <section
-        class="aura-treatments"
-        id="tratamientos"
-        aria-labelledby="aesthetics-services-title"
-      >
-        <div>
-          <p>Rutas de cuidado</p>
-          <h2 id="aesthetics-services-title">Tu piel no necesita prisa. Necesita atención.</h2>
-        </div>
-        <div class="aura-treatment-list">
-          <article>
-            <span>Valorar</span>
-            <div>
-              <h3>Valoración facial</h3>
-              <p>
-                Una conversación para conocer hábitos, prioridades y el estado visible de la piel.
-              </p>
-            </div>
-            <strong>Empezar aquí</strong>
-          </article>
-          <article>
-            <span>Cuidar</span>
-            <div>
-              <h3>Limpieza profunda</h3>
-              <p>
-                Una posibilidad que solo se considera después de entender las necesidades de tu
-                piel.
-              </p>
-            </div>
-            <strong>Según valoración</strong>
-          </article>
-          <article>
-            <span>Sostener</span>
-            <div>
-              <h3>Plan de seguimiento</h3>
-              <p>Una rutina simple y revisable para dar continuidad entre visitas.</p>
-            </div>
-            <strong>Continuidad</strong>
-          </article>
-        </div>
-      </section>
-
-      <section class="aura-consult" id="agenda" aria-labelledby="aesthetics-agenda-title">
-        <div class="aura-consult__question">
-          <span>Agenda ilustrativa</span>
-          <h2 id="aesthetics-agenda-title">¿Qué quieres entender de tu piel?</h2>
-          <p>
-            Elige una prioridad para ver cómo una web puede preparar la conversación antes de
-            reservar.
-          </p>
-        </div>
-        <form class="aura-options">
-          <fieldset aria-describedby="aura-analysis-result">
-            <legend>Prioridad de la valoración</legend>
-            <label
-              ><input type="radio" name="focus" value="luminosidad" checked /><span
-                >Luminosidad</span
-              ><small>Rutina y textura visible</small></label
-            >
-            <label
-              ><input type="radio" name="focus" value="sensibilidad" /><span>Sensibilidad</span
-              ><small>Hábitos y tolerancia</small></label
-            >
-            <label
-              ><input type="radio" name="focus" value="continuidad" /><span>Continuidad</span
-              ><small>Seguimiento de cuidado</small></label
-            >
-          </fieldset>
-          <div class="aura-booking">
-            <span>Valoración inicial</span><strong>45 min</strong>
-            <p data-aura-booking-copy>
-              Prioridad: luminosidad. Horario y tratamiento por confirmar con el equipo.
+      <section class="skin-section skin-section--rest" id="agenda" aria-labelledby="aesthetics-plan-title">
+        <div class="skin-shell">
+          <div class="skin-section__head">
+            <h2 id="aesthetics-plan-title">La pauta se ve antes de reservar.</h2>
+            <p>
+              Elige qué quieres trabajar. La agenda se arma sola y muestra el intervalo entre
+              sesiones, que es donde de verdad se juega el resultado.
             </p>
-            <button class="aura-button aura-button--light care-pill" type="button" data-luenio-open>
-              Quiero una web así
-            </button>
           </div>
-        </form>
+
+          <div class="skin-plan">
+            <fieldset class="skin-choices">
+              <legend>¿Qué quieres trabajar?</legend>
+              <button class="skin-choice" type="button" data-skin-goal="luminosidad" aria-pressed="true">
+                <span class="skin-choice__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6l1.4 1.4m10 10 1.4 1.4m0-12.8-1.4 1.4m-10 10-1.4 1.4" />
+                  </svg>
+                </span>
+                <span class="skin-choice__label">
+                  <strong>Luminosidad y textura</strong>
+                  <span>Piel apagada o irregular</span>
+                </span>
+              </button>
+              <button class="skin-choice" type="button" data-skin-goal="sensibilidad" aria-pressed="false">
+                <span class="skin-choice__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 4c3.3 2.4 5 4.9 5 7.5A5 5 0 0 1 7 11.5C7 8.9 8.7 6.4 12 4Z" />
+                    <path d="M4 19h16" />
+                  </svg>
+                </span>
+                <span class="skin-choice__label">
+                  <strong>Piel sensible</strong>
+                  <span>Reacciona con facilidad</span>
+                </span>
+              </button>
+              <button class="skin-choice" type="button" data-skin-goal="continuidad" aria-pressed="false">
+                <span class="skin-choice__icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M20 12a8 8 0 1 1-2.3-5.6" />
+                    <path d="M20 5v4h-4" />
+                  </svg>
+                </span>
+                <span class="skin-choice__label">
+                  <strong>Mantener lo logrado</strong>
+                  <span>Ya hiciste un tratamiento</span>
+                </span>
+              </button>
+            </fieldset>
+
+            <div class="skin-schedule" id="aesthetics-schedule" aria-live="polite" aria-atomic="true">
+              <div class="skin-schedule__head">
+                <h3 data-skin-plan-title>Pauta para luminosidad y textura</h3>
+                <p class="skin-schedule__total" data-skin-plan-total>4 citas · 5 semanas</p>
+              </div>
+
+              <ol class="skin-steps" data-skin-steps>
+                <li class="skin-step">
+                  <p class="skin-step__when">Día 1</p>
+                  <p class="skin-step__what">Valoración facial</p>
+                  <p class="skin-step__detail">Revisamos hábitos y textura visible, sin tratar todavía.</p>
+                </li>
+                <li class="skin-step">
+                  <p class="skin-step__when">Misma semana</p>
+                  <p class="skin-step__what">Limpieza profunda</p>
+                  <p class="skin-step__detail">Solo si la valoración lo confirma.</p>
+                </li>
+                <li class="skin-step">
+                  <p class="skin-step__when">A los 15 días</p>
+                  <p class="skin-step__what">Segunda sesión</p>
+                  <p class="skin-step__detail">El intervalo es parte del tratamiento, no una espera.</p>
+                </li>
+                <li class="skin-step">
+                  <p class="skin-step__when">Al mes</p>
+                  <p class="skin-step__what">Revisión</p>
+                  <p class="skin-step__detail">Decidimos si continuar, espaciar o parar.</p>
+                </li>
+              </ol>
+
+              <div class="skin-schedule__foot">
+                <span class="skin-tag skin-tag--open" data-skin-plan-status>Cupos esta semana</span>
+                <button class="skin-btn skin-btn--sm" type="button" data-luenio-open>
+                  Reservar esta pauta
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section class="aura-close" id="contacto">
-        <p>Una web que observa antes de ofrecer</p>
-        <h2>Convierte una pregunta sobre tratamientos en una visita con intención.</h2>
-        <div>
+      <section class="skin-section" id="tratamientos" aria-labelledby="aesthetics-treatments-title">
+        <div class="skin-shell">
+          <div class="skin-section__head">
+            <h2 id="aesthetics-treatments-title">Lo que hacemos en cabina.</h2>
+            <p>
+              Cada tratamiento se confirma en la valoración. Ninguno se vende suelto por catálogo.
+            </p>
+          </div>
+
+          <ul class="skin-treatments">
+            <li class="skin-treatment">
+              <h3>Valoración facial</h3>
+              <p>Una conversación para conocer hábitos, prioridades y el estado visible de la piel.</p>
+              <p class="skin-treatment__when">45 min · empieza aquí</p>
+            </li>
+            <li class="skin-treatment">
+              <h3>Limpieza profunda</h3>
+              <p>Se considera solo después de entender qué necesita tu piel y qué tolera.</p>
+              <p class="skin-treatment__when">60 min · según valoración</p>
+            </li>
+            <li class="skin-treatment">
+              <h3>Plan de seguimiento</h3>
+              <p>Una rutina simple y revisable para sostener el cuidado entre visitas.</p>
+              <p class="skin-treatment__when">Revisión mensual</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="skin-section skin-section--rest" id="filosofia" aria-labelledby="aesthetics-method-title">
+        <div class="skin-shell">
+          <div class="skin-section__head">
+            <h2 id="aesthetics-method-title">Cómo trabajamos.</h2>
+          </div>
+
+          <div class="skin-method">
+            <ol>
+              <li>
+                <strong>Escuchamos</strong>
+                <p>Qué te molesta, qué has probado y qué esperas de verdad.</p>
+              </li>
+              <li>
+                <strong>Miramos</strong>
+                <p>Lo visible de la piel, con luz y tiempo, sin aparatos que prometan cifras.</p>
+              </li>
+              <li>
+                <strong>Proponemos una pauta</strong>
+                <p>Con sesiones, intervalos y un punto de revisión escrito desde el principio.</p>
+              </li>
+              <li>
+                <strong>Revisamos</strong>
+                <p>Si no está funcionando, se cambia o se para. Eso también es parte del plan.</p>
+              </li>
+            </ol>
+
+            <div class="skin-limits">
+              <h3>Lo que esta página no hace</h3>
+              <ul>
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
+                  <span>No diagnostica. Ninguna pauta sustituye una valoración presencial.</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
+                  <span>No promete resultados ni plazos garantizados para ninguna piel.</span>
+                </li>
+                <li>
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" /></svg>
+                  <span>No cobra por reservar: la valoración decide si hay tratamiento.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="skin-close" id="contacto" aria-labelledby="aesthetics-close-title">
+        <div class="skin-shell">
+          <h2 id="aesthetics-close-title">Convierte preguntas de precio en valoraciones reservadas.</h2>
           <p>
-            Luenio convierte tu método en una experiencia clara, conecta la agenda y entrega cada
-            consulta con contexto.
+            Luenio diseña la experiencia, conecta tu agenda y entrega cada solicitud con el contexto
+            que tu equipo necesita para responder una sola vez.
           </p>
-          <button class="aura-button care-pill" type="button" data-luenio-open>
-            Cotizar esta experiencia
-          </button>
+          <button class="skin-btn" type="button" data-luenio-open>Cotizar esta experiencia</button>
         </div>
       </section>
     </main>
-    <footer class="care-footer">
-      <a href="/">Luenio</a><span>Demo ficticia creada por Luenio</span
-      ><span>Tratamientos y horarios ilustrativos</span>
+
+    <footer class="skin-footer">
+      <div class="skin-shell skin-footer__inner">
+        <a href="/">Luenio</a>
+        <p>Demo ficticia creada por Luenio</p>
+        <p>Tratamientos y horarios ilustrativos</p>
+      </div>
     </footer>
     <!-- include: legal-bar -->
   </body>

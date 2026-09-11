@@ -142,16 +142,20 @@ const pages = [
   },
   {
     ...sectorIdentity("aesthetics"),
-    className: "care-landing aesthetics",
-    hero: "Tu piel no necesita prisa. Necesita atención.",
+    // Ya no es `care-landing`. Era la otra mitad de la plantilla compartida con
+    // veterinarias, así que al independizarse esa demo esta se quedó sola con
+    // una hoja de dos dueños. Ahora tiene mundo propio y `care-landings.css`
+    // desapareció por falta de consumidores.
+    className: "skin-studio aesthetics",
+    hero: "Primero entender, después tratar.",
     minSections: 4,
     ids: ["tratamientos", "agenda", "filosofia", "contacto"],
-    terms: ["Valoración facial", "Limpieza profunda", "Agenda ilustrativa"],
+    terms: ["Valoración facial", "Limpieza profunda", "Plan de seguimiento"],
     primaryCta: "Reservar valoración",
     conversionTarget: "agenda",
     legalNotice: "Demo ficticia creada por Luenio",
     disclaimer: "Tratamientos y horarios ilustrativos",
-    css: "/apps/web/src/care-landings.css",
+    css: "/apps/web/pages/aesthetics/skin-studio.css",
   },
 ];
 
