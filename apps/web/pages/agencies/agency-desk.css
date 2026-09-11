@@ -1419,7 +1419,6 @@ html[data-theme="dark"] .ag-cover .ag-note.luenio-demo-disclosure {
   }
 }
 
-
 /* ------------------------------------------------- entrada de la portada */
 
 /* El único momento de deleite de la página, y se ve una vez por visita: el
@@ -1520,7 +1519,6 @@ html[data-motion="on"] [data-reveal-group][data-visible] > *:nth-child(4) {
     transform: scale(1.03);
   }
 }
-
 
 /* -------------------------------------------------------------- adaptación */
 

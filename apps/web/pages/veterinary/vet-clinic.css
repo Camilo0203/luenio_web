@@ -1213,7 +1213,6 @@ html[data-motion="on"] [data-reveal-group][data-visible] > *:nth-child(4) {
   }
 }
 
-
 /* ------------------------------------------------------------- adaptación */
 
 @media (max-width: 960px) {
