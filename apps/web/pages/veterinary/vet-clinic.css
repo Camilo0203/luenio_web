@@ -120,6 +120,22 @@ html[data-theme="dark"] .vet-clinic {
   text-decoration-thickness: from-font;
 }
 
+/* El reinicio de arriba es clase + tipo, así que gana a `.vet-btn`, que es una
+   sola clase: los botones hechos con enlace perdían su tinta y quedaban en
+   tinta de cuerpo sobre cian, a 3,33:1. La familia de botón la restablece a la
+   misma especificidad en vez de subir la de todas sus reglas. */
+.vet-clinic a.vet-btn {
+  color: var(--vet-brand-ink);
+}
+
+.vet-clinic a.vet-btn--quiet {
+  color: var(--vet-ink);
+}
+
+.vet-clinic .vet-close a.vet-btn {
+  color: var(--vet-brand);
+}
+
 .vet-clinic time,
 .vet-clinic .vet-slot__time {
   font-variant-numeric: tabular-nums;
