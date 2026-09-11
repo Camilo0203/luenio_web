@@ -909,10 +909,16 @@ html[data-theme="dark"] .vet-clinic .vet-urgent {
 
 /* ---------------------------------------------------------- instalaciones */
 
+/* Dos columnas y dos filas: una toma alta a la izquierda y dos apiladas a la
+   derecha. Con `aspect-ratio` por pieza cada una imponía su propia altura y la
+   fila quedaba con un pozo debajo de las dos pequeñas. Aquí manda la rejilla y
+   las imágenes llenan su celda. */
 .vet-gallery {
   display: grid;
   gap: 14px;
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1.25fr 1fr;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  height: clamp(380px, 42vw, 520px);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -920,19 +926,24 @@ html[data-theme="dark"] .vet-clinic .vet-urgent {
 
 .vet-gallery li {
   position: relative;
+  min-height: 0;
   border-radius: 16px;
   overflow: hidden;
+}
+
+.vet-gallery li:first-child {
+  grid-row: span 2;
+}
+
+.vet-gallery figure {
+  height: 100%;
+  margin: 0;
 }
 
 .vet-gallery img {
   width: 100%;
   height: 100%;
-  aspect-ratio: 4 / 3;
   object-fit: cover;
-}
-
-.vet-gallery li:first-child img {
-  aspect-ratio: 3 / 4;
 }
 
 .vet-gallery figcaption {
@@ -1111,14 +1122,13 @@ html[data-theme="dark"] .vet-clinic .vet-urgent {
 
   .vet-gallery {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: 220px 200px;
+    height: auto;
   }
 
   .vet-gallery li:first-child {
     grid-column: 1 / -1;
-  }
-
-  .vet-gallery li:first-child img {
-    aspect-ratio: 16 / 9;
+    grid-row: auto;
   }
 }
 
@@ -1129,6 +1139,7 @@ html[data-theme="dark"] .vet-clinic .vet-urgent {
 
   .vet-gallery {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: repeat(3, 200px);
   }
 }
 
