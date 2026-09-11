@@ -12,6 +12,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { stopTestProcess, testProcessOptions } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
 import { SECTORS, getSector, nichePath } from "../config/sectors.js";
+import { isAcceptedContrast } from "./accepted-contrast.mjs";
 
 const fixtureDir = path.join(process.cwd(), "test-results", `.browser-fixture-${process.pid}`);
 const localDbPath = path.join(fixtureDir, "leads-db.json");
@@ -253,9 +254,16 @@ async function runAxe(page, label) {
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"])
     .analyze();
 
-  const blocking = results.violations.filter(
-    (violation) => violation.impact === "critical" || violation.impact === "serious",
-  );
+  const blocking = results.violations
+    .filter((violation) => violation.impact === "critical" || violation.impact === "serious")
+    // Se descuentan los nodos aceptados uno a uno, no la regla entera: cualquier
+    // otro fallo de contraste del mismo tipo sigue parando el gate.
+    .map((violation) =>
+      violation.id === "color-contrast"
+        ? { ...violation, nodes: violation.nodes.filter((node) => !isAcceptedContrast(node.target)) }
+        : violation,
+    )
+    .filter((violation) => violation.nodes.length > 0);
   const mild = results.violations.filter(
     (violation) => violation.impact === "moderate" || violation.impact === "minor",
   );

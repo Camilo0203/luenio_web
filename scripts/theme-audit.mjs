@@ -6,6 +6,7 @@ import { stopTestProcess } from "./test-process.mjs";
 import { getFreePort, waitForServer } from "./test-server.mjs";
 import { SECTORS, demoPath } from "../config/sectors.js";
 import { canonicalPublicPaths } from "../lib/public-routes.js";
+import { isAcceptedContrast } from "./accepted-contrast.mjs";
 
 let baseUrl = process.env.THEME_AUDIT_BASE_URL || "";
 // Every indexable page plus the simulations, derived from the same table the
@@ -19,30 +20,6 @@ const routes = process.env.THEME_AUDIT_ROUTES
 const themes = process.env.THEME_AUDIT_THEMES
   ? process.env.THEME_AUDIT_THEMES.split(",").map((theme) => theme.trim())
   : ["light", "dark"];
-
-// Excepciones de contraste, aceptadas a mano y con nombre.
-//
-// El botón de WhatsApp lleva letra blanca sobre el verde de marca por decisión
-// expresa de Camilo el 2026-09-11, tomada con la medida delante: 1,98 frente a
-// un mínimo de 4,5. Se le ofrecieron las tres combinaciones que sí cumplen con
-// letra blanca (#075e54 da 7,67, #0d7a3f da 5,42) y la tinta oscura sobre este
-// mismo verde, que da 9,38. Eligió el verde de marca con letra blanca porque es
-// como se ve el botón de WhatsApp en todas partes.
-//
-// La excepción es lo más estrecha que se puede escribir: solo ese control, solo
-// contraste. Cualquier otro fallo de contraste en cualquier otro sitio sigue
-// parando el gate.
-const ACCEPTED_CONTRAST = [
-  ".luenio-wa__trigger",
-  ".luenio-wa__submit",
-  ".wa-widget__trigger",
-  ".wa-widget__submit",
-  ".gym-whatsapp-cta",
-];
-
-function isAcceptedContrast(target) {
-  return ACCEPTED_CONTRAST.some((selector) => target.includes(selector));
-}
 
 async function launchBrowser() {
   try {
