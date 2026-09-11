@@ -1063,8 +1063,6 @@ html[data-theme="dark"] .skin-studio .skin-strip {
   overflow: hidden;
 }
 
-
-
 .skin-gallery figure {
   height: 100%;
   margin: 0;
@@ -1297,7 +1295,6 @@ html[data-theme="dark"] .skin-studio .skin-strip {
     grid-row: 3;
   }
 }
-
 
 /* -------------------------------------------------------------- adaptación */
 

@@ -176,7 +176,10 @@
             <picture>
               <source srcset="/assets/sectors/vet-consulta-bulldog.avif" type="image/avif" />
               <source
-                srcset="/assets/sectors/vet-consulta-bulldog-1280.webp 1280w, /assets/sectors/vet-consulta-bulldog.webp 1920w"
+                srcset="
+                  /assets/sectors/vet-consulta-bulldog-1280.webp 1280w,
+                  /assets/sectors/vet-consulta-bulldog.webp      1920w
+                "
                 sizes="(max-width: 1000px) calc(100vw - 32px), 620px"
                 type="image/webp"
               />
@@ -386,7 +389,10 @@
                 <source srcset="/assets/sectors/vet-equipo-corgi.avif" type="image/avif" />
                 <img
                   src="/assets/sectors/vet-equipo-corgi-640.webp"
-                  srcset="/assets/sectors/vet-equipo-corgi-640.webp 640w, /assets/sectors/vet-equipo-corgi-1280.webp 1280w"
+                  srcset="
+                    /assets/sectors/vet-equipo-corgi-640.webp   640w,
+                    /assets/sectors/vet-equipo-corgi-1280.webp 1280w
+                  "
                   sizes="(max-width: 960px) calc(100vw - 48px), 360px"
                   alt="Veterinario sosteniendo a un perro corgi sobre la mesa de consulta"
                   width="1280"
@@ -406,7 +412,10 @@
                 <source srcset="/assets/sectors/vet-diagnostico.avif" type="image/avif" />
                 <img
                   src="/assets/sectors/vet-diagnostico-640.webp"
-                  srcset="/assets/sectors/vet-diagnostico-640.webp 640w, /assets/sectors/vet-diagnostico-1280.webp 1280w"
+                  srcset="
+                    /assets/sectors/vet-diagnostico-640.webp   640w,
+                    /assets/sectors/vet-diagnostico-1280.webp 1280w
+                  "
                   sizes="(max-width: 960px) calc(100vw - 48px), 360px"
                   alt="Veterinario con lupa de aumento revisando a un animal pequeño"
                   width="1280"
@@ -426,7 +435,10 @@
                 <source srcset="/assets/sectors/vet-gato.avif" type="image/avif" />
                 <img
                   src="/assets/sectors/vet-gato-640.webp"
-                  srcset="/assets/sectors/vet-gato-640.webp 640w, /assets/sectors/vet-gato-1280.webp 1280w"
+                  srcset="
+                    /assets/sectors/vet-gato-640.webp   640w,
+                    /assets/sectors/vet-gato-1280.webp 1280w
+                  "
                   sizes="(max-width: 960px) calc(100vw - 48px), 360px"
                   alt="Una persona acaricia a un gato atigrado durante la consulta"
                   width="1280"
@@ -445,7 +457,11 @@
         </div>
       </section>
 
-      <section class="vet-section vet-section--rest" id="clinica" aria-labelledby="veterinary-place-title">
+      <section
+        class="vet-section vet-section--rest"
+        id="clinica"
+        aria-labelledby="veterinary-place-title"
+      >
         <div class="vet-shell">
           <h2 id="veterinary-place-title">Cómo es por dentro</h2>
           <p class="vet-section__lead">
@@ -459,7 +475,10 @@
                   <source srcset="/assets/sectors/vet-consulta.avif" type="image/avif" />
                   <img
                     src="/assets/sectors/vet-consulta-640.webp"
-                    srcset="/assets/sectors/vet-consulta-640.webp 640w, /assets/sectors/vet-consulta-1280.webp 1280w"
+                    srcset="
+                      /assets/sectors/vet-consulta-640.webp   640w,
+                      /assets/sectors/vet-consulta-1280.webp 1280w
+                    "
                     sizes="(max-width: 960px) calc(100vw - 48px), 480px"
                     alt="Sala de consulta con un perro pequeño sobre la mesa y un ecógrafo al fondo"
                     width="1280"
@@ -477,7 +496,10 @@
                   <source srcset="/assets/sectors/vet-quirofano.avif" type="image/avif" />
                   <img
                     src="/assets/sectors/vet-quirofano-640.webp"
-                    srcset="/assets/sectors/vet-quirofano-640.webp 640w, /assets/sectors/vet-quirofano-1280.webp 1280w"
+                    srcset="
+                      /assets/sectors/vet-quirofano-640.webp   640w,
+                      /assets/sectors/vet-quirofano-1280.webp 1280w
+                    "
                     sizes="(max-width: 960px) calc(50vw - 32px), 320px"
                     alt="Quirófano veterinario preparado, con mesa y lámpara cenital"
                     width="1280"
@@ -495,7 +517,10 @@
                   <source srcset="/assets/sectors/vet-cuidado-unas.avif" type="image/avif" />
                   <img
                     src="/assets/sectors/vet-cuidado-unas-640.webp"
-                    srcset="/assets/sectors/vet-cuidado-unas-640.webp 640w, /assets/sectors/vet-cuidado-unas-1280.webp 1280w"
+                    srcset="
+                      /assets/sectors/vet-cuidado-unas-640.webp   640w,
+                      /assets/sectors/vet-cuidado-unas-1280.webp 1280w
+                    "
                     sizes="(max-width: 960px) calc(50vw - 32px), 320px"
                     alt="Manos con guantes cuidando las uñas de un perro sobre la mesa"
                     width="1280"
@@ -521,11 +546,31 @@
           <ul class="vet-reviews">
             <li class="vet-review">
               <span class="vet-review__stars" aria-label="5 de 5">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
               </span>
               <p>
                 Escribí un domingo por la noche porque mi perro no quería comer. Me respondieron con
@@ -535,11 +580,31 @@
             </li>
             <li class="vet-review">
               <span class="vet-review__stars" aria-label="5 de 5">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
               </span>
               <p>
                 Mi gata se estresa muchísimo en el transportín. Aquí la atendieron sin sacarla a la
@@ -549,10 +614,26 @@
             </li>
             <li class="vet-review">
               <span class="vet-review__stars" aria-label="4 de 5">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="m12 3 2.6 5.6 6 .8-4.4 4.3 1.1 6.1L12 17l-5.3 2.8 1.1-6.1L3.4 9.4l6-.8Z"
+                  />
+                </svg>
               </span>
               <p>
                 Entré por una revisión de rutina y me explicaron qué no hacía falta hacer todavía.
@@ -564,7 +645,11 @@
         </div>
       </section>
 
-      <section class="vet-section vet-section--rest" id="visita" aria-labelledby="veterinary-visit-title">
+      <section
+        class="vet-section vet-section--rest"
+        id="visita"
+        aria-labelledby="veterinary-visit-title"
+      >
         <div class="vet-shell">
           <h2 id="veterinary-visit-title">Cuándo y dónde</h2>
           <p class="vet-section__lead">
