@@ -1,19 +1,12 @@
 <!doctype html>
 <html lang="es">
-  <!--
-    THESIS: La agencia convierte una necesidad ambigua en una ruta visible; evita el portafolio genérico de tarjetas.
-    OWN-WORLD: Estudio nocturno, notas de trabajo lavanda, cinta translúcida y señal verde lima.
-    STORY: El visitante arma un brief, reconoce el método, explora trabajo y solicita una propuesta.
-    FIRST VIEWPORT: Promesa y acciones a la izquierda; brief manipulable clavado sobre el estudio a la derecha.
-    FORM: Muro de lanzamiento, estructura asignada 6. Seed 37ebd39f.
-  -->
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#071a33" />
+    <meta name="theme-color" content="#16150f" />
     <script src="/theme-boot.js"></script>
     <title>Ejemplo de web para agencias: Impulso Digital | Luenio</title>
     <meta
@@ -104,356 +97,393 @@
         rel="stylesheet"
       />
     </noscript>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      rel="preload"
-      as="image"
-      href="/assets/demo-premium/agency-hero-960.webp"
-      imagesrcset="
-        /assets/demo-premium/agency-hero-480.webp  480w,
-        /assets/demo-premium/agency-hero-960.webp  960w,
-        /assets/demo-premium/agency-hero.webp     1774w
-      "
-      imagesizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
-      type="image/webp"
-      fetchpriority="high"
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400..800&display=swap"
+      media="print"
+      data-font-stylesheet
     />
-    <link rel="stylesheet" href="/apps/web/src/niche-showcase.css" />
-    <link rel="stylesheet" href="/apps/web/src/industry-demos.css" />
-    <link rel="stylesheet" href="/apps/web/src/sector-worlds.css" />
-    <link rel="stylesheet" href="/apps/web/src/sector-redesign.css" />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Hanken+Grotesk:wght@400..800&display=swap"
+      />
+    </noscript>
+    <link rel="stylesheet" href="/apps/web/src/style.css" />
+    <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
     <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
+    <link rel="stylesheet" href="/apps/web/pages/agencies/agency-desk.css" />
     <script type="module" src="/apps/web/src/niche-landing.js"></script>
     <script type="module" src="/apps/web/src/industry-demos.js"></script>
+    <script type="module" src="/apps/web/pages/agencies/agency-landing.js"></script>
   </head>
   <body
-    class="demo-page demo-agency sector-v2"
+    class="agency-desk demo-agency"
     data-demo-name="Impulso Digital"
     data-demo-type="agencia"
     data-demo-goal="Quiero una landing para mi agencia"
   >
     <a class="skip-link" href="#contenido">Saltar al contenido</a>
-    <header class="demo-header">
-      <div class="demo-shell demo-header__inner">
-        <a class="demo-brand" href="#inicio">Impulso Digital</a>
-        <nav class="demo-nav" id="agency-navigation" data-navigation data-open="false">
-          <a href="/demos">Demos</a><a href="/#soluciones">Soluciones</a
-          ><a href="/#proceso">Proceso</a><a href="/#nosotros">Nosotros</a>
+
+    <header class="ag-header">
+      <div class="ag-shell ag-header__inner">
+        <a class="ag-brand" href="#contenido" aria-label="Impulso Digital, ir al inicio">
+          <b>Impulso Digital</b><span>Estudio</span>
+        </a>
+        <nav class="ag-nav" aria-label="Navegación principal">
+          <a href="#servicios">Capacidades</a>
+          <a href="#casos">Entregables</a>
+          <a href="#planes">Alcances</a>
+          <a href="#propuesta">Propuesta</a>
         </nav>
-        <a
-          class="demo-button"
-          href="/cotizacion?sector=agencia&amp;demo=Impulso+Digital&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+captar+y+calificar+oportunidades+para+los+clientes+de+mi+agencia&amp;source=landing_agencies"
-          data-quote-cta="landing_agencies"
-          data-cta-location="landing_header"
-          >Cotizar mi solución</a
-        >
-        <button
-          class="demo-menu-toggle"
-          type="button"
-          data-menu-toggle
-          aria-controls="agency-navigation"
-          aria-expanded="false"
-          aria-label="Abrir menú"
-        >
-          <span></span>
-        </button>
+        <!-- theme-control.js busca `.site-header__actions` y, si no la
+             encuentra, deja el interruptor flotando arriba a la derecha, donde
+             pisaba este botón. Con el contenedor, entra en la fila. -->
+        <div class="site-header__actions ag-header__actions">
+          <a
+            class="ag-btn ag-btn--sm"
+            href="/cotizacion?sector=agencia&amp;demo=Impulso+Digital&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+captar+y+calificar+oportunidades+para+los+clientes+de+mi+agencia&amp;source=landing_agencies"
+            data-quote-cta="landing_agencies"
+            data-cta-location="landing_header"
+            >Cotizar mi solución</a
+          >
+        </div>
       </div>
     </header>
 
     <main id="contenido">
-      <section class="demo-hero" id="inicio">
-        <div class="demo-hero__media">
-          <img
-            decoding="async"
-            width="1774"
-            height="887"
-            src="/assets/demo-premium/agency-hero.webp"
-            srcset="
-              /assets/demo-premium/agency-hero-480.webp  480w,
-              /assets/demo-premium/agency-hero-960.webp  960w,
-              /assets/demo-premium/agency-hero.webp     1774w
-            "
-            sizes="(max-width: 620px) calc(100vw - 32px), (max-width: 1024px) 50vw, 33vw"
-            alt="Equipo creativo trabajando en estrategia digital"
-            fetchpriority="high"
-          />
-        </div>
-        <div class="demo-shell demo-hero__content">
-          <p class="demo-eyebrow">Estrategia · Diseño · Tecnología</p>
-          <p class="luenio-demo-disclosure" data-luenio-disclosure role="note">
-            Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.
-          </p>
-          <h1>Construimos marcas digitales que avanzan.</h1>
-          <p>
-            Unimos estrategia, identidad y producto digital para empresas que necesitan crecer con
-            más claridad y menos improvisación.
-          </p>
-          <div class="demo-actions">
-            <a class="demo-button" href="#propuesta">Solicitar propuesta</a
-            ><a class="demo-button demo-button--ghost" href="#casos">Ver entregables</a>
+      <section class="ag-hero" id="inicio" aria-labelledby="agency-title">
+        <div class="ag-shell ag-hero__inner">
+          <div class="ag-hero__copy">
+            <h1 id="agency-title">Construimos marcas digitales que avanzan.</h1>
+            <p class="ag-lead">
+              Antes de la primera reunión ya sabes qué entra, qué no entra y cuántas rondas tienes.
+              Decir que no a tiempo es lo que hace que el sí valga.
+            </p>
+            <div class="ag-hero__actions">
+              <a class="ag-btn" href="#propuesta">Solicitar propuesta</a>
+              <a class="ag-btn ag-btn--quiet" href="#casos">Ver entregables</a>
+            </div>
+            <p
+              class="ag-note luenio-demo-disclosure"
+              data-luenio-disclosure
+              data-luenio-collision-zone
+              role="note"
+            >
+              Experiencia demostrativa de Luenio · No representa un cliente real ni resultados
+              reales. Alcances, tiempos y precios son ejemplos.
+            </p>
           </div>
-          <aside
-            class="agency-brief-wall"
-            data-agency-brief
-            data-luenio-collision-zone
-            aria-label="Constructor de brief"
-          >
-            <div class="agency-brief-wall__head">
-              <strong>Brief de salida</strong>
-              <span>Ejercicio interactivo</span>
+
+          <div class="ag-scope" data-agency-scope>
+            <div class="ag-scope__head">
+              <h2 data-agency-title>Lanzamiento con sitio propio</h2>
+              <p class="ag-scope__ref" data-agency-ref>ALC-01 · 8 a 10 semanas</p>
             </div>
-            <div
-              role="group"
-              class="agency-brief-wall__group"
-              data-demo-choice-group="goal"
-              aria-label="Objetivo del proyecto"
-            >
-              <span class="demo-lab-label">¿Qué quieres lograr?</span>
-              <div class="demo-choice-row">
-                <button
-                  class="demo-choice is-selected"
-                  type="button"
-                  data-demo-choice="Lanzar"
-                  aria-pressed="true"
-                >
-                  Lanzar
-                </button>
-                <button
-                  class="demo-choice"
-                  type="button"
-                  data-demo-choice="Posicionar"
-                  aria-pressed="false"
-                >
-                  Posicionar
-                </button>
-                <button
-                  class="demo-choice"
-                  type="button"
-                  data-demo-choice="Convertir"
-                  aria-pressed="false"
-                >
-                  Convertir
-                </button>
+
+            <fieldset class="ag-choices">
+              <legend class="ag-choices__label">Define tu encargo</legend>
+              <div
+                class="ag-choices__group"
+                data-demo-choice-group="goal"
+                role="group"
+                aria-label="Objetivo del proyecto"
+              >
+                <span class="ag-choices__label">¿Qué quieres lograr?</span>
+                <div class="ag-choices__row">
+                  <button
+                    class="ag-choice is-selected"
+                    type="button"
+                    data-demo-choice="Lanzar"
+                    aria-pressed="true"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    Lanzar
+                  </button>
+                  <button
+                    class="ag-choice"
+                    type="button"
+                    data-demo-choice="Posicionar"
+                    aria-pressed="false"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    Posicionar
+                  </button>
+                  <button
+                    class="ag-choice"
+                    type="button"
+                    data-demo-choice="Convertir"
+                    aria-pressed="false"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    Convertir
+                  </button>
+                </div>
               </div>
-            </div>
-            <div
-              role="group"
-              class="agency-brief-wall__group"
-              data-demo-choice-group="channel"
-              aria-label="Canal principal"
-            >
-              <span class="demo-lab-label">Punto de partida</span>
-              <div class="demo-choice-row">
-                <button
-                  class="demo-choice is-selected"
-                  type="button"
-                  data-demo-choice="Web"
-                  aria-pressed="true"
-                >
-                  Web
-                </button>
-                <button
-                  class="demo-choice"
-                  type="button"
-                  data-demo-choice="Contenido"
-                  aria-pressed="false"
-                >
-                  Contenido
-                </button>
-                <button
-                  class="demo-choice"
-                  type="button"
-                  data-demo-choice="Campaña"
-                  aria-pressed="false"
-                >
-                  Campaña
-                </button>
+              <div
+                class="ag-choices__group"
+                data-demo-choice-group="channel"
+                role="group"
+                aria-label="Punto de partida"
+              >
+                <span class="ag-choices__label">Punto de partida</span>
+                <div class="ag-choices__row">
+                  <button
+                    class="ag-choice is-selected"
+                    type="button"
+                    data-demo-choice="Web"
+                    aria-pressed="true"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    Web
+                  </button>
+                  <button
+                    class="ag-choice"
+                    type="button"
+                    data-demo-choice="Contenido"
+                    aria-pressed="false"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    Contenido
+                  </button>
+                  <button
+                    class="ag-choice"
+                    type="button"
+                    data-demo-choice="Campaña"
+                    aria-pressed="false"
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="m5 12.5 4.5 4.5L19 7.5" />
+                    </svg>
+                    Campaña
+                  </button>
+                </div>
               </div>
+            </fieldset>
+
+            <ol class="ag-clauses" data-agency-clauses aria-live="polite">
+              <li class="ag-clause">
+                <p class="ag-clause__title">
+                  Qué entra<span class="ag-flag ag-flag--in">Incluido</span>
+                </p>
+                <div class="ag-clause__body">
+                  <ul>
+                    <li><span>Estrategia de marca y mensajes</span></li>
+                    <li><span>Sistema visual aplicado</span></li>
+                    <li><span>Sitio corporativo hasta seis plantillas</span></li>
+                  </ul>
+                </div>
+              </li>
+              <li class="ag-clause ag-clause--out">
+                <p class="ag-clause__title">
+                  Qué no entra<span class="ag-flag ag-flag--out">Fuera</span>
+                </p>
+                <div class="ag-clause__body">
+                  <ul>
+                    <li><span>Producción audiovisual</span></li>
+                    <li><span>Pauta y medios pagados</span></li>
+                    <li><span>Mantenimiento posterior al traspaso</span></li>
+                  </ul>
+                </div>
+              </li>
+            </ol>
+
+            <div class="ag-scope__foot">
+              <p class="ag-scope__rounds" data-agency-rounds>
+                Rondas de revisión incluidas: <b>2</b>. A partir de ahí se cotizan aparte, y eso se
+                dice ahora, no al final.
+              </p>
+              <button class="ag-btn ag-btn--sm" type="button" data-luenio-open>
+                Pedir este alcance
+              </button>
             </div>
-            <div class="agency-brief-wall__result" aria-live="polite">
-              <strong data-agency-output>Plan de lanzamiento · Web</strong>
-              <p data-agency-note></p>
-            </div>
-          </aside>
+          </div>
         </div>
       </section>
 
-      <section class="demo-section demo-section--surface" id="servicios">
-        <div class="demo-shell">
-          <div class="demo-section-head">
-            <div>
-              <p class="demo-eyebrow">Capacidades</p>
-              <h2>Un equipo para convertir estrategia en ejecución.</h2>
-            </div>
+      <section
+        class="ag-section ag-section--sheet"
+        id="servicios"
+        aria-labelledby="agency-services-title"
+      >
+        <div class="ag-shell">
+          <div class="ag-section__head">
+            <h2 id="agency-services-title">Un equipo para convertir estrategia en ejecución.</h2>
             <p>
               No vendemos piezas sueltas. Diseñamos sistemas de marca y experiencias digitales que
               puedan crecer con el negocio.
             </p>
           </div>
-          <div class="demo-grid demo-grid--3">
-            <article class="demo-card">
-              <span class="demo-number">01 · DEFINIR</span>
+          <ul class="ag-rows">
+            <li class="ag-row">
               <h3>Estrategia y marca</h3>
               <p>
                 Posicionamiento, mensajes e identidad para que cada canal cuente la misma historia.
               </p>
-            </article>
-            <article class="demo-card">
-              <span class="demo-number">02 · CONSTRUIR</span>
+              <p class="ag-row__meta">Definir</p>
+            </li>
+            <li class="ag-row">
               <h3>Web y contenido</h3>
-              <p>
-                Sitios, productos y sistemas editoriales rápidos, medibles y fáciles de mantener.
-              </p>
-            </article>
-            <article class="demo-card">
-              <span class="demo-number">03 · CRECER</span>
+              <p>Sitios, productos y sistemas editoriales rápidos, medibles y fáciles de mantener.</p>
+              <p class="ag-row__meta">Construir</p>
+            </li>
+            <li class="ag-row">
               <h3>Growth y automatización</h3>
               <p>
                 Experimentos y flujos para convertir oportunidades en aprendizaje y seguimiento.
               </p>
-            </article>
-          </div>
+              <p class="ag-row__meta">Crecer</p>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="demo-section" id="casos">
-        <div class="demo-shell">
-          <div class="demo-section-head">
-            <div>
-              <p class="demo-eyebrow">Prueba de trabajo</p>
-              <h2>Antes de prometer resultados, mostramos qué recibirías.</h2>
-            </div>
+      <section class="ag-section" id="casos" aria-labelledby="agency-cases-title">
+        <div class="ag-shell">
+          <div class="ag-section__head">
+            <h2 id="agency-cases-title">Antes de prometer resultados, mostramos qué recibirías.</h2>
             <p>
-              Tres entregables de muestra para evaluar la claridad, profundidad y utilidad del
+              Tres entregables de muestra para evaluar la claridad, la profundidad y la utilidad del
               trabajo antes de iniciar un proyecto.
             </p>
           </div>
-          <div class="demo-grid demo-grid--3">
-            <article class="agency-case">
-              <div class="agency-case__visual">
-                <span>Estrategia · Entregable 01</span><strong>Mapa</strong>
-                <p>Audiencia, problema, promesa y prioridades en una sola vista.</p>
-              </div>
-              <div class="agency-case__body">
-                <h3>Mapa de posicionamiento y mensajes.</h3>
-                <p>Un criterio común para decidir qué decir, a quién y en qué orden.</p>
-              </div>
-            </article>
-            <article class="agency-case">
-              <div class="agency-case__visual">
-                <span>Diseño · Entregable 02</span><strong>Sistema</strong>
-                <p>Tipografía, color, componentes y reglas listos para crecer.</p>
-              </div>
-              <div class="agency-case__body">
-                <h3>Dirección visual aplicada.</h3>
-                <p>No solo pantallas: un lenguaje reutilizable por el equipo.</p>
-              </div>
-            </article>
-            <article class="agency-case">
-              <div class="agency-case__visual">
-                <span>Producto · Entregable 03</span><strong>Flujo</strong>
-                <p>Prototipo, estados clave y recorrido de conversión medible.</p>
-              </div>
-              <div class="agency-case__body">
-                <h3>Prototipo listo para validar.</h3>
-                <p>Interacciones, contenido y criterios claros antes del desarrollo.</p>
-              </div>
-            </article>
-          </div>
+          <figure class="ag-case-shot">
+            <img
+              decoding="async"
+              width="1774"
+              height="887"
+              src="/assets/demo-premium/agency-hero.webp"
+              srcset="
+                /assets/demo-premium/agency-hero-480.webp  480w,
+                /assets/demo-premium/agency-hero-960.webp  960w,
+                /assets/demo-premium/agency-hero.webp     1774w
+              "
+              sizes="(max-width: 1000px) calc(100vw - 32px), 1140px"
+              alt="Equipo creativo revisando material de estrategia sobre una mesa de trabajo"
+            />
+            <figcaption>Imagen ilustrativa</figcaption>
+          </figure>
+          <ul class="ag-rows">
+            <li class="ag-row">
+              <h3>Mapa de posicionamiento y mensajes.</h3>
+              <p>
+                Audiencia, problema, promesa y prioridades en una sola vista, con un criterio común
+                para decidir qué decir y en qué orden.
+              </p>
+              <p class="ag-row__meta">Entregable 01</p>
+            </li>
+            <li class="ag-row">
+              <h3>Dirección visual aplicada.</h3>
+              <p>
+                Tipografía, color, componentes y reglas listos para crecer: un lenguaje reutilizable
+                por el equipo, no solo pantallas.
+              </p>
+              <p class="ag-row__meta">Entregable 02</p>
+            </li>
+            <li class="ag-row">
+              <h3>Sistema entregado y transferido.</h3>
+              <p>
+                Archivos, componentes y decisiones documentadas, para que el equipo siga sin
+                depender de nosotros.
+              </p>
+              <p class="ag-row__meta">Entregable 03</p>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="demo-section demo-section--surface" id="proceso">
-        <div class="demo-shell">
-          <div class="demo-section-head">
-            <div>
-              <p class="demo-eyebrow">Cómo trabajamos</p>
-              <h2>Decisiones claras antes de producir más.</h2>
-            </div>
+      <section
+        class="ag-section ag-section--sheet"
+        id="proceso"
+        aria-labelledby="agency-process-title"
+      >
+        <div class="ag-shell">
+          <div class="ag-section__head">
+            <h2 id="agency-process-title">Decisiones claras antes de producir más.</h2>
             <p>Un proceso corto, visible y diseñado para reducir retrabajo.</p>
           </div>
-          <div class="demo-grid demo-grid--3">
-            <article class="demo-card">
-              <span class="demo-number">01 · ESTRATEGIA</span>
+          <ul class="ag-rows">
+            <li class="ag-row">
               <h3>Definir</h3>
-              <p>
-                La dirección estratégica alinea problema, audiencia, promesa y criterios de éxito.
-              </p>
-            </article>
-            <article class="demo-card">
-              <span class="demo-number">02 · CREATIVIDAD</span>
+              <p>La dirección estratégica alinea problema, audiencia, promesa y criterios de éxito.</p>
+              <p class="ag-row__meta">Estrategia</p>
+            </li>
+            <li class="ag-row">
               <h3>Construir</h3>
-              <p>
-                La dirección creativa convierte el criterio en identidad, contenido y experiencia.
-              </p>
-            </article>
-            <article class="demo-card">
-              <span class="demo-number">03 · TECNOLOGÍA</span>
+              <p>La dirección creativa convierte el criterio en identidad, contenido y experiencia.</p>
+              <p class="ag-row__meta">Creatividad</p>
+            </li>
+            <li class="ag-row">
               <h3>Lanzar y transferir</h3>
               <p>La dirección técnica valida, mide y entrega archivos, componentes y decisiones.</p>
-            </article>
-          </div>
+              <p class="ag-row__meta">Tecnología</p>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="demo-section demo-section--surface" id="planes">
-        <div class="demo-shell">
-          <div class="demo-section-head">
-            <div>
-              <p class="demo-eyebrow">Formas de trabajar</p>
-              <h2>Un alcance apropiado para cada momento.</h2>
-            </div>
+      <section class="ag-section" id="planes" aria-labelledby="agency-plans-title">
+        <div class="ag-shell">
+          <div class="ag-section__head">
+            <h2 id="agency-plans-title">Un alcance apropiado para cada momento.</h2>
             <p>
-              Referencias de alcance y presupuesto en COP para esta demo. Cada propuesta se ajusta
-              al problema, equipo y velocidad del cliente.
+              Referencias de alcance y presupuesto en pesos colombianos para esta demo. Cada
+              propuesta se ajusta al problema, al equipo y a la velocidad del cliente.
             </p>
           </div>
-          <div class="demo-grid demo-grid--3">
-            <article class="demo-card">
-              <span class="demo-number">ALCANCE CERRADO</span>
+          <ul class="ag-rows">
+            <li class="ag-row">
               <h3>Dirección estratégica</h3>
-              <strong class="demo-price">Desde $4.800.000</strong>
-              <p>Para ordenar una decisión antes de invertir en producción.</p>
-              <ul class="demo-list">
-                <li>Diagnóstico</li>
-                <li>Propuesta de valor</li>
-                <li>Roadmap de 90 días</li>
-              </ul>
-            </article>
-            <article class="demo-card demo-card--featured">
-              <span class="demo-number">ALCANCE RECOMENDADO</span>
+              <p>
+                Para ordenar una decisión antes de invertir en producción. Diagnóstico, propuesta de
+                valor y ruta de noventa días.
+              </p>
+              <p class="ag-row__meta">
+                <span class="ag-price">Desde $4.800.000</span><br />Alcance cerrado
+              </p>
+            </li>
+            <li class="ag-row">
               <h3>Marca + web</h3>
-              <strong class="demo-price">Desde $12.500.000</strong>
-              <p>Para lanzar con estrategia, identidad y experiencia digital coherentes.</p>
-              <ul class="demo-list">
-                <li>Estrategia de marca</li>
-                <li>Sistema visual</li>
-                <li>Landing o sitio corporativo</li>
-              </ul>
-            </article>
-            <article class="demo-card">
-              <span class="demo-number">ACOMPAÑAMIENTO MENSUAL</span>
+              <p>
+                Para lanzar con estrategia, identidad y experiencia digital coherentes. Estrategia de
+                marca, sistema visual y sitio.
+              </p>
+              <p class="ag-row__meta">
+                <span class="ag-price">Desde $12.500.000</span><br />Alcance recomendado
+              </p>
+            </li>
+            <li class="ag-row">
               <h3>Equipo extendido</h3>
-              <strong class="demo-price">Desde $8.000.000/mes</strong>
-              <p>Diseño y crecimiento continuo junto al equipo interno.</p>
-              <ul class="demo-list">
-                <li>Bolsa mensual</li>
-                <li>Prioridades quincenales</li>
-                <li>Medición y optimización</li>
-              </ul>
-            </article>
-          </div>
+              <p>
+                Diseño y crecimiento continuo junto al equipo interno, con bolsa mensual y
+                prioridades quincenales.
+              </p>
+              <p class="ag-row__meta">
+                <span class="ag-price">Desde $8.000.000/mes</span><br />Acompañamiento
+              </p>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="demo-section demo-section--surface">
-        <div class="demo-shell">
-          <div class="demo-section-head">
-            <div>
-              <p class="demo-eyebrow">Preguntas frecuentes</p>
-              <h2>Antes de empezar.</h2>
-            </div>
+      <section class="ag-section ag-section--sheet" aria-labelledby="agency-faq-title">
+        <div class="ag-shell">
+          <div class="ag-section__head">
+            <h2 id="agency-faq-title">Antes de empezar.</h2>
           </div>
-          <div class="demo-faq">
+          <div class="ag-faq">
             <details>
               <summary>¿Trabajan con equipos internos?</summary>
               <p>
@@ -472,114 +502,69 @@
               <summary>¿Cómo se define el precio?</summary>
               <p>Se define por alcance, complejidad, tiempos y nivel de acompañamiento.</p>
             </details>
+            <details>
+              <summary>¿Qué pasa si necesito más rondas?</summary>
+              <p>
+                Se cotizan aparte y se dice desde el principio. Una ronda extra no es un problema;
+                descubrirla al final, sí.
+              </p>
+            </details>
           </div>
         </div>
       </section>
 
-      <aside class="sector-sales" aria-labelledby="agency-sales-title">
-        <div class="demo-shell sector-sales__grid">
+      <section class="ag-section" id="propuesta" aria-labelledby="agency-request-title">
+        <div class="ag-shell ag-request">
           <div>
-            <p class="demo-eyebrow">Una experiencia así para tu negocio</p>
-            <h2 id="agency-sales-title">Tu agencia, con un sistema comercial propio.</h2>
-          </div>
-          <ul class="sector-sales__list">
-            <li>Identidad y dirección visual adaptadas</li>
-            <li>Brief, formularios y WhatsApp conectados</li>
-            <li>Analítica y automatización opcional</li>
-          </ul>
-          <div class="sector-sales__actions">
-            <button class="demo-button" type="button" data-luenio-open>
-              Cotizar esta experiencia
-            </button>
-            <a class="demo-button demo-button--ghost" href="#propuesta">Probar el brief</a>
-          </div>
-        </div>
-      </aside>
-
-      <section class="demo-section" id="propuesta">
-        <div class="demo-shell demo-grid demo-grid--2">
-          <div>
-            <p class="demo-eyebrow">Solicitar propuesta</p>
-            <h2>Cuéntanos qué quieres lanzar o mejorar.</h2>
-            <p class="demo-section-copy">
+            <h2 id="agency-request-title">Cuéntanos qué quieres lanzar o mejorar.</h2>
+            <p class="ag-lead ag-request__lead">
               Puedes probar este formulario: no envía la solicitud. En una implementación real se
               conectaría al CRM y al proceso comercial de la agencia.
             </p>
           </div>
           <form
-            class="demo-form"
+            class="ag-form"
             data-demo-form
             data-demo-success="Solicitud de propuesta simulada. No se enviaron datos; en un proyecto real el equipo recibiría este brief."
           >
-            <label>Nombre<input name="name" autocomplete="name" required /></label
-            ><label>Empresa<input name="company" autocomplete="organization" required /></label
-            ><label
+            <label>Nombre<input name="name" autocomplete="name" required /></label>
+            <label>Empresa<input name="company" autocomplete="organization" required /></label>
+            <label
               >Objetivo<select name="goal" data-agency-goal>
                 <option>Lanzar</option>
                 <option>Posicionar</option>
                 <option>Convertir</option>
               </select></label
-            ><label
+            >
+            <label
               >Punto de partida<select name="channel" data-agency-channel>
                 <option>Web</option>
                 <option>Contenido</option>
                 <option>Campaña</option>
               </select></label
-            ><label class="demo-form__wide"
+            >
+            <label class="ag-form__wide"
               >Contexto<textarea
                 name="context"
                 rows="4"
                 placeholder="Qué quieres lanzar o mejorar"
-              ></textarea></label
-            ><button class="demo-button demo-form__wide" type="submit">
-              Probar solicitud de propuesta
-            </button>
-            <p
-              class="demo-form-status"
-              role="status"
-              aria-live="polite"
-              data-demo-status
-              hidden
-            ></p>
+              ></textarea
+            ></label>
+            <button class="ag-btn ag-form__wide" type="submit">Probar solicitud de propuesta</button>
+            <p class="ag-form-status" role="status" aria-live="polite" data-demo-status hidden></p>
           </form>
         </div>
       </section>
     </main>
 
-    <footer class="demo-footer">
-      <div class="demo-shell">
-        <div class="demo-footer__main">
-          <div>
-            <h2>Impulso Digital</h2>
-            <p>Estrategia, identidad y producto digital para empresas que necesitan avanzar.</p>
-          </div>
-          <div>
-            <h3>Trabajo</h3>
-            <nav>
-              <a href="#servicios">Servicios</a><a href="#casos">Entregables</a
-              ><a href="#proceso">Proceso</a>
-            </nav>
-          </div>
-          <div>
-            <h3>Estudio</h3>
-            <nav><a href="#planes">Planes</a><a href="#propuesta">Contacto</a></nav>
-          </div>
-          <div>
-            <h3>Bogotá</h3>
-            <p>Colombia<br />Proyectos remotos</p>
-          </div>
-        </div>
-        <div class="demo-footer__legal">
-          <strong
-            ><a href="/"
-              >© 2026 Luenio. Diseño y desarrollo de esta landing demostrativa. Todos los derechos
-              reservados por Luenio.</a
-            ></strong
-          ><span
-            >Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son
-            ejemplos y no representan proyectos ni resultados de clientes reales.</span
-          >
-        </div>
+    <footer class="ag-footer">
+      <div class="ag-shell ag-footer__inner">
+        <a href="/">Luenio</a>
+        <p>Demo ficticia creada por Luenio</p>
+        <p>
+          Impulso Digital es una marca demostrativa. Los entregables, alcances y precios son ejemplos
+          y no representan proyectos ni resultados de clientes reales.
+        </p>
       </div>
     </footer>
     <!-- include: legal-bar -->

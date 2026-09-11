@@ -1,0 +1,906 @@
+/* Impulso Digital — mesa de alcance.
+   Mundo propio de esta demo. Sale del stack compartido `sector-v2`
+   (`niche-showcase.css`, `industry-demos.css`, `sector-worlds.css`,
+   `sector-redesign.css`), que sigue sirviendo a restaurantes, inmobiliaria y
+   ecommerce y por eso no se toca. No altera el sistema visual global de Luenio.
+
+   El acento es el rojo con el que este oficio corrige galeradas: aquí marca el
+   límite del encargo, que es lo que la página viene a enseñar. */
+
+.agency-desk {
+  --ag-paper: #faf8f3;
+  --ag-paper-deep: #f1ede3;
+  --ag-sheet: #ffffff;
+  --ag-ink: #16150f;
+  --ag-ink-soft: #55524a;
+  --ag-mark: #c0392b;
+  --ag-mark-hover: #9c2b20;
+  --ag-mark-wash: #fbeceb;
+  --ag-rule: #ddd7c9;
+  --ag-rule-strong: #b6ae9b;
+  --ag-in: #1f6f4a;
+  --ag-in-wash: #e6f2ec;
+  --ag-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --ag-text: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+  --ag-shell: min(1200px, calc(100% - 64px));
+  --ag-radius: 4px;
+  --ag-shadow: 0 12px 26px -20px rgba(22, 21, 15, 0.5);
+
+  color: var(--ag-ink);
+  background: var(--ag-paper);
+  font-family: var(--ag-text);
+  font-size: 16px;
+  line-height: 1.6;
+  caret-color: var(--ag-mark);
+  scrollbar-color: var(--ag-rule-strong) var(--ag-paper-deep);
+}
+
+/* `style.css` pinta el body con un degradado y una rejilla en ::before desde
+   `html[data-theme="light"] body`, que gana a cualquier regla de una sola
+   clase. Se responde con la misma especificidad, nunca con !important. */
+html[data-theme="light"] .agency-desk,
+html[data-theme="dark"] .agency-desk {
+  background: var(--ag-paper);
+}
+
+html[data-theme="light"] .agency-desk::before,
+html[data-theme="dark"] .agency-desk::before {
+  content: none;
+}
+
+html[data-theme="dark"] .agency-desk {
+  --ag-paper: #14130f;
+  --ag-paper-deep: #1b1a15;
+  --ag-sheet: #1e1c17;
+  --ag-ink: #f5f1e6;
+  --ag-ink-soft: #b8b2a3;
+  --ag-mark: #ef6f5e;
+  --ag-mark-hover: #f79484;
+  --ag-mark-wash: #2d1b18;
+  --ag-rule: #33302a;
+  --ag-rule-strong: #524d43;
+  --ag-in: #6fcf9b;
+  --ag-in-wash: #16281f;
+  --ag-shadow: 0 12px 26px -20px rgba(0, 0, 0, 0.8);
+}
+
+.agency-desk *,
+.agency-desk *::before,
+.agency-desk *::after {
+  box-sizing: border-box;
+}
+
+.agency-desk img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.agency-desk ::selection {
+  color: var(--ag-paper);
+  background: var(--ag-mark);
+}
+
+.agency-desk :focus-visible {
+  outline: 3px solid var(--ag-mark);
+  outline-offset: 3px;
+}
+
+/* Tinta y fondo propios: heredando los globales el enlace de salto quedaba
+   ilegible contra el papel de esta página. */
+.agency-desk .skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 10000;
+  padding: 12px 18px;
+  color: var(--ag-paper);
+  background: var(--ag-ink);
+  font-family: var(--ag-text);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.agency-desk .skip-link:focus {
+  left: 0;
+  top: 0;
+}
+
+.ag-shell {
+  width: var(--ag-shell);
+  margin-inline: auto;
+}
+
+/* ------------------------------------------------------------------ tipos */
+
+.agency-desk h1,
+.agency-desk h2,
+.agency-desk h3 {
+  margin: 0;
+  font-family: var(--ag-display);
+  font-weight: 400;
+  /* Nunca por debajo de 1.05: en español, con tildes y descendentes, un
+     titular más apretado hace que los glifos se toquen. */
+  line-height: 1.07;
+  letter-spacing: -0.012em;
+}
+
+.agency-desk h1 {
+  font-size: clamp(2.6rem, 5.2vw, 4rem);
+  text-wrap: balance;
+}
+
+.agency-desk h2 {
+  font-size: clamp(1.9rem, 3.2vw, 2.6rem);
+  text-wrap: balance;
+}
+
+.agency-desk h3 {
+  font-size: 1.2rem;
+  line-height: 1.22;
+}
+
+.agency-desk p {
+  margin: 0;
+}
+
+.ag-lead {
+  max-width: 38ch;
+  color: var(--ag-ink-soft);
+  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+  line-height: 1.6;
+}
+
+.ag-note {
+  max-width: 46ch;
+  color: var(--ag-ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+/* ------------------------------------------------------------------ botón */
+
+/* Una sola familia con sus cinco estados. Cada estado que cambia el fondo
+   restablece también la tinta, en vez de dejar que se herede de otra regla. */
+.ag-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 22px;
+  color: var(--ag-paper);
+  background: var(--ag-ink);
+  border: 1px solid var(--ag-ink);
+  border-radius: var(--ag-radius);
+  font-family: var(--ag-text);
+  font-size: 0.96rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.agency-desk .ag-btn:hover {
+  color: var(--ag-paper);
+  background: var(--ag-mark);
+  border-color: var(--ag-mark);
+}
+
+.agency-desk .ag-btn:active {
+  transform: translateY(1px);
+}
+
+.agency-desk .ag-btn[disabled] {
+  color: var(--ag-ink-soft);
+  background: var(--ag-paper-deep);
+  border-color: var(--ag-rule);
+  cursor: not-allowed;
+}
+
+.agency-desk .ag-btn--quiet {
+  color: var(--ag-ink);
+  background: transparent;
+  border-color: var(--ag-rule-strong);
+}
+
+.agency-desk .ag-btn--quiet:hover {
+  color: var(--ag-ink);
+  background: var(--ag-paper-deep);
+  border-color: var(--ag-ink);
+}
+
+.agency-desk .ag-btn--sm {
+  min-height: 44px;
+  padding: 0 16px;
+  font-size: 0.89rem;
+}
+
+/* ---------------------------------------------------------------- cabecera */
+
+.ag-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--ag-paper) 93%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-header__inner {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding-block: 14px;
+}
+
+.ag-brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--ag-ink);
+  font-family: var(--ag-display);
+  font-size: 1.22rem;
+  text-decoration: none;
+}
+
+.ag-brand b {
+  font-weight: 400;
+}
+
+.ag-brand span {
+  color: var(--ag-ink-soft);
+  font-family: var(--ag-text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ag-nav {
+  display: flex;
+  gap: 22px;
+  margin-inline: auto;
+}
+
+.ag-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ag-ink-soft);
+  font-size: 0.94rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.ag-nav a:hover {
+  color: var(--ag-mark);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+
+.ag-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ------------------------------------------------------------------ héroe */
+
+.ag-hero {
+  padding-block: clamp(40px, 5.5vw, 76px) clamp(36px, 4.5vw, 60px);
+}
+
+.ag-hero__inner {
+  display: grid;
+  gap: clamp(28px, 3.5vw, 52px);
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  align-items: start;
+}
+
+.ag-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.ag-hero__copy .ag-lead {
+  margin-top: 18px;
+}
+
+.ag-hero__copy .ag-note {
+  margin-top: 16px;
+  padding-left: 14px;
+  border-left: 1px solid var(--ag-rule-strong);
+}
+
+/* ------------------------------------------------- el documento de alcance */
+
+/* La pieza firma: el encargo escrito como documento, con las exclusiones en el
+   mismo cuerpo que las inclusiones. Esconderlas en letra pequeña es la
+   costumbre que esta página rechaza. */
+.ag-scope {
+  background: var(--ag-sheet);
+  border: 1px solid var(--ag-rule);
+  border-radius: var(--ag-radius);
+  box-shadow: var(--ag-shadow);
+}
+
+.ag-scope__head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-scope__head h2 {
+  font-size: 1.4rem;
+}
+
+.ag-scope__ref {
+  color: var(--ag-ink-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ag-choices {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 18px 22px;
+  border: 0;
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-choices__group {
+  display: grid;
+  gap: 8px;
+}
+
+.ag-choices__label {
+  color: var(--ag-ink-soft);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.ag-choices__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* El estado marcado cambia fondo, tinta y grosor de filete a la vez, y añade
+   una marca dibujada: el color nunca comunica solo. */
+.ag-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  padding: 0 15px;
+  color: var(--ag-ink);
+  background: var(--ag-paper);
+  border: 1px solid var(--ag-rule);
+  border-radius: var(--ag-radius);
+  font-family: var(--ag-text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.ag-choice:hover {
+  border-color: var(--ag-rule-strong);
+  background: var(--ag-paper-deep);
+}
+
+.ag-choice[aria-pressed="true"] {
+  color: var(--ag-paper);
+  background: var(--ag-ink);
+  border-color: var(--ag-ink);
+}
+
+.ag-choice svg {
+  width: 15px;
+  height: 15px;
+  opacity: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 160ms ease;
+}
+
+.ag-choice[aria-pressed="true"] svg {
+  opacity: 1;
+}
+
+.ag-clauses {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: ag-clause;
+}
+
+.ag-clause {
+  display: grid;
+  gap: 4px 16px;
+  grid-template-columns: 42px minmax(0, 1fr);
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-clause::before {
+  counter-increment: ag-clause;
+  content: counter(ag-clause, decimal-leading-zero);
+  grid-row: span 2;
+  color: var(--ag-ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ag-clause__title {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ag-clause__body {
+  color: var(--ag-ink-soft);
+  font-size: 0.94rem;
+}
+
+.ag-clause__body ul {
+  display: grid;
+  gap: 5px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ag-clause__body li {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 14px minmax(0, 1fr);
+}
+
+.ag-clause__body li::before {
+  content: "—";
+  color: var(--ag-rule-strong);
+}
+
+/* La cláusula de exclusiones lleva el rojo del oficio y su propio filete: es
+   la que la costumbre del sector esconde. */
+.ag-clause--out .ag-clause__title {
+  color: var(--ag-mark);
+}
+
+.ag-clause--out .ag-clause__body li::before {
+  content: "×";
+  color: var(--ag-mark);
+  font-weight: 700;
+}
+
+.ag-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-family: var(--ag-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ag-flag--in {
+  color: var(--ag-in);
+  background: var(--ag-in-wash);
+}
+
+.ag-flag--out {
+  color: var(--ag-mark);
+  background: var(--ag-mark-wash);
+}
+
+.ag-scope__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px;
+}
+
+.ag-scope__rounds {
+  color: var(--ag-ink-soft);
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ag-scope__rounds b {
+  color: var(--ag-ink);
+}
+
+/* Un único momento autoral: el alcance se reasienta al cambiar el encargo. */
+.ag-scope.is-updating .ag-clauses {
+  animation: ag-settle 440ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ag-settle {
+  from {
+    opacity: 0.5;
+    transform: translateY(7px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------- secciones */
+
+.ag-section {
+  padding-block: clamp(42px, 5vw, 72px);
+}
+
+.ag-section--sheet {
+  background: var(--ag-paper-deep);
+}
+
+.ag-section__head {
+  max-width: 54ch;
+  margin-bottom: clamp(24px, 3vw, 38px);
+}
+
+.ag-section__head p {
+  margin-top: 14px;
+  color: var(--ag-ink-soft);
+}
+
+/* Lista con filete, no rejilla de tarjetas gemelas. */
+.ag-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--ag-rule);
+}
+
+.ag-row {
+  display: grid;
+  gap: 6px 28px;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr) auto;
+  align-items: baseline;
+  padding-block: 20px;
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-row p {
+  color: var(--ag-ink-soft);
+  font-size: 0.95rem;
+}
+
+.ag-row__meta {
+  color: var(--ag-ink-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.ag-price {
+  color: var(--ag-ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* La única materia fotográfica de la página, y va donde se juzga el trabajo,
+   no en el héroe: aquí el protagonista es el documento de alcance. */
+.ag-case-shot {
+  margin: 0 0 clamp(22px, 2.6vw, 32px);
+  background: var(--ag-sheet);
+  border: 1px solid var(--ag-rule);
+  border-radius: var(--ag-radius);
+  overflow: hidden;
+}
+
+.ag-case-shot img {
+  width: 100%;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+}
+
+.ag-case-shot figcaption {
+  padding: 10px 16px;
+  color: var(--ag-ink-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-top: 1px solid var(--ag-rule);
+}
+
+.ag-request__lead {
+  margin-top: 16px;
+}
+
+.ag-faq {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--ag-rule);
+}
+
+.ag-faq details {
+  border-bottom: 1px solid var(--ag-rule);
+}
+
+.ag-faq summary {
+  padding-block: 18px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ag-faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.ag-faq summary::after {
+  content: "+";
+  float: right;
+  color: var(--ag-mark);
+  font-weight: 700;
+}
+
+.ag-faq details[open] summary::after {
+  content: "–";
+}
+
+.ag-faq details p {
+  padding-bottom: 18px;
+  color: var(--ag-ink-soft);
+  font-size: 0.95rem;
+}
+
+/* ---------------------------------------------------------- solicitud */
+
+.ag-request {
+  display: grid;
+  gap: clamp(24px, 3vw, 48px);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: start;
+}
+
+.ag-form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: clamp(20px, 2.4vw, 28px);
+  background: var(--ag-sheet);
+  border: 1px solid var(--ag-rule);
+  border-radius: var(--ag-radius);
+}
+
+.ag-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--ag-ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ag-form input,
+.ag-form select,
+.ag-form textarea {
+  min-height: 46px;
+  padding: 10px 12px;
+  color: var(--ag-ink);
+  background: var(--ag-paper);
+  border: 1px solid var(--ag-rule-strong);
+  border-radius: var(--ag-radius);
+  font-family: var(--ag-text);
+  font-size: 0.96rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.ag-form textarea {
+  resize: vertical;
+}
+
+.ag-form input::placeholder,
+.ag-form textarea::placeholder {
+  color: var(--ag-ink-soft);
+}
+
+.ag-form__wide {
+  grid-column: 1 / -1;
+}
+
+.ag-form-status {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  color: var(--ag-in);
+  background: var(--ag-in-wash);
+  border-radius: var(--ag-radius);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ cierre */
+
+.ag-close {
+  padding-block: clamp(44px, 5vw, 72px);
+  color: var(--ag-paper);
+  background: var(--ag-ink);
+}
+
+html[data-theme="dark"] .agency-desk .ag-close {
+  color: var(--ag-ink);
+  background: var(--ag-sheet);
+}
+
+.ag-close h2 {
+  max-width: 24ch;
+}
+
+.ag-close p {
+  max-width: 56ch;
+  margin-top: 16px;
+  color: #d8d3c4;
+}
+
+html[data-theme="dark"] .agency-desk .ag-close p {
+  color: var(--ag-ink-soft);
+}
+
+.ag-close .ag-btn {
+  margin-top: 24px;
+  color: var(--ag-ink);
+  background: var(--ag-paper);
+  border-color: var(--ag-paper);
+}
+
+.agency-desk .ag-close .ag-btn:hover {
+  color: var(--ag-paper);
+  background: var(--ag-mark);
+  border-color: var(--ag-mark);
+}
+
+.ag-footer {
+  padding-block: 26px;
+  border-top: 1px solid var(--ag-rule);
+}
+
+.ag-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: center;
+  color: var(--ag-ink-soft);
+  font-size: 0.85rem;
+}
+
+.ag-footer__inner a {
+  color: var(--ag-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ag-footer__inner a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.ag-footer__inner p {
+  margin: 0;
+}
+
+/* -------------------------------------------------------------- adaptación */
+
+@media (max-width: 1000px) {
+  .ag-hero__inner,
+  .ag-request {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ag-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ag-row p {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .agency-desk {
+    --ag-shell: calc(100% - 32px);
+  }
+
+  .ag-nav {
+    display: none;
+  }
+
+  .ag-header__inner {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding-block: 10px;
+  }
+
+  .ag-header__actions {
+    margin-inline: auto 0;
+  }
+
+  /* El aviso demostrativo tiene que terminar por encima de la banda 778-830,
+     donde se sienta el disparador flotante de WhatsApp. Caber en el pliegue no
+     basta: un aviso tapado es un aviso que no existe. */
+  .ag-hero {
+    padding-block: 22px clamp(32px, 4.5vw, 60px);
+  }
+
+  .ag-hero__inner {
+    gap: 20px;
+  }
+
+  .ag-hero__actions {
+    margin-top: 18px;
+  }
+
+  .ag-hero__copy .ag-lead {
+    margin-top: 14px;
+  }
+
+  .ag-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ag-clause {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding-inline: 16px;
+  }
+
+  .ag-choices,
+  .ag-scope__head,
+  .ag-scope__foot {
+    padding-inline: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agency-desk *,
+  .agency-desk *::before,
+  .agency-desk *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
