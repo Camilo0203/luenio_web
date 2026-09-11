@@ -705,7 +705,7 @@ html[data-theme="dark"] .agency-desk {
   font-size: 0.94rem;
 }
 
-.ag-stage__role {
+.ag-cover__role {
   display: block;
   margin-top: 12px;
   color: var(--ag-ink-soft);
@@ -1237,7 +1237,7 @@ html[data-theme="dark"] .agency-desk .ag-strip {
    textos y la marca son de esta demo.
    El tinte no es decoración: convierte una toma de banco en material con
    carácter, que es lo único que esta página tiene a mano. */
-.ag-stage {
+.ag-cover {
   position: relative;
   min-height: min(92vh, 860px);
   display: flex;
@@ -1248,14 +1248,13 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   overflow: hidden;
 }
 
-.ag-stage__media {
+.ag-cover__media {
   position: absolute;
   inset: 0;
-  z-index: -1;
   margin: 0;
 }
 
-.ag-stage__media img {
+.ag-cover__media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -1266,14 +1265,22 @@ html[data-theme="dark"] .agency-desk .ag-strip {
 
 /* Vela oscura al pie para que el display se lea sobre cualquier zona de la
    fotografía, en vez de confiar en que la imagen sea oscura ahí. */
-.ag-stage__media::after {
+.ag-cover__media::after {
   content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(180deg, rgb(0 0 0 / 0.34) 0%, rgb(0 0 0 / 0) 38%, rgb(0 0 0 / 0.52) 100%);
 }
 
-.ag-stage__bar {
+/* Por encima de la capa tintada, que ahora ocupa su sitio en el flujo de
+   pintado en vez de esconderse detrás del fondo. */
+.ag-cover__bar,
+.ag-cover__foot {
+  position: relative;
+  z-index: 1;
+}
+
+.ag-cover__bar {
   display: flex;
   flex-wrap: wrap;
   gap: 16px 28px;
@@ -1281,7 +1288,7 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   padding-block: 20px;
 }
 
-.ag-stage__brand {
+.ag-cover__brand {
   display: inline-flex;
   align-items: baseline;
   gap: 8px;
@@ -1291,17 +1298,17 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   text-decoration: none;
 }
 
-.ag-stage__brand sup {
+.ag-cover__brand sup {
   font-size: 0.62em;
 }
 
-.ag-stage__nav {
+.ag-cover__nav {
   display: flex;
   gap: 22px;
   margin-inline: auto;
 }
 
-.ag-stage__nav a {
+.ag-cover__nav a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -1311,18 +1318,18 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   text-decoration: none;
 }
 
-.ag-stage__nav a:hover {
+.ag-cover__nav a:hover {
   color: #fff;
   text-decoration: underline;
   text-underline-offset: 5px;
 }
 
-.ag-stage__foot {
+.ag-cover__foot {
   margin-top: auto;
   padding-bottom: clamp(28px, 4vw, 56px);
 }
 
-.ag-stage h1 {
+.ag-cover h1 {
   max-width: 18ch;
   color: #fff;
   font-family: var(--ag-display);
@@ -1332,7 +1339,7 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   letter-spacing: -0.02em;
 }
 
-.ag-stage__lead {
+.ag-cover__lead {
   max-width: 46ch;
   margin-top: 18px;
   color: rgb(255 255 255 / 0.88);
@@ -1340,38 +1347,38 @@ html[data-theme="dark"] .agency-desk .ag-strip {
   line-height: 1.55;
 }
 
-.ag-stage__actions {
+.ag-cover__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 26px;
 }
 
-.agency-desk .ag-stage .ag-btn {
+.agency-desk .ag-cover .ag-btn {
   color: var(--ag-flag);
   background: #fff;
   border-color: #fff;
 }
 
-.agency-desk .ag-stage .ag-btn:hover {
+.agency-desk .ag-cover .ag-btn:hover {
   color: #fff;
   background: transparent;
   border-color: #fff;
 }
 
-.agency-desk .ag-stage .ag-btn--quiet {
+.agency-desk .ag-cover .ag-btn--quiet {
   color: #fff;
   background: transparent;
   border-color: rgb(255 255 255 / 0.55);
 }
 
-.agency-desk .ag-stage .ag-btn--quiet:hover {
+.agency-desk .ag-cover .ag-btn--quiet:hover {
   color: var(--ag-flag);
   background: #fff;
   border-color: #fff;
 }
 
-.ag-stage .ag-note {
+.ag-cover .ag-note {
   max-width: 52ch;
   margin-top: 20px;
   padding-left: 14px;
@@ -1380,19 +1387,19 @@ html[data-theme="dark"] .agency-desk .ag-strip {
 }
 
 @media (max-width: 760px) {
-  .ag-stage {
+  .ag-cover {
     min-height: auto;
   }
 
-  .ag-stage__nav {
+  .ag-cover__nav {
     display: none;
   }
 
-  .ag-stage__bar {
+  .ag-cover__bar {
     padding-block: 14px;
   }
 
-  .ag-stage__foot {
+  .ag-cover__foot {
     padding-top: clamp(180px, 42vw, 260px);
     padding-bottom: 28px;
   }
