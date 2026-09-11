@@ -24,7 +24,7 @@
   --skin-shell: min(1180px, calc(100% - 64px));
   --skin-radius: 18px;
   --skin-radius-sm: 12px;
-  --skin-shadow: 0 18px 40px -28px rgba(33, 26, 30, 0.45);
+  --skin-shadow: 0 10px 22px -16px rgba(33, 26, 30, 0.4);
 
   color: var(--skin-ink);
   background: var(--skin-white);
@@ -62,7 +62,7 @@ html[data-theme="dark"] .skin-studio {
   --skin-wait: #f0c78a;
   --skin-wait-wash: #33240f;
   --skin-focus: #e6a2be;
-  --skin-shadow: 0 18px 40px -28px rgba(0, 0, 0, 0.75);
+  --skin-shadow: 0 10px 22px -16px rgba(0, 0, 0, 0.7);
 }
 
 .skin-studio *,
@@ -483,7 +483,27 @@ html[data-theme="dark"] .skin-studio .skin-brand__mark {
   color: var(--skin-ink);
   background: var(--skin-plum-wash);
   border-color: var(--skin-plum);
-  box-shadow: inset 3px 0 0 var(--skin-plum);
+}
+
+/* La marca de elegido es una forma dibujada, no una franja de color al borde:
+   quien no distingue el ciruela del gris sigue viendo cuál está activo. */
+.skin-choice__check {
+  flex: none;
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  color: var(--skin-plum);
+  opacity: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: opacity 180ms ease;
+}
+
+.skin-choice[aria-pressed="true"] .skin-choice__check {
+  opacity: 1;
 }
 
 .skin-choice__icon {
