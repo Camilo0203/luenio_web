@@ -777,6 +777,22 @@ async function runBrowserChecks(baseUrl) {
           careDesktopDisclosure.bottom <= 800 + 1,
         `${slug} disclosure must be visible in the first desktop viewport: ${JSON.stringify(careDesktopDisclosure)}`,
       );
+      // Estas dos demos no usan `data-demo-choice`, así que la comprobación del
+      // objetivo canónico del bucle de sectores no las alcanza. Cada control de
+      // elección escribe un objetivo distinto, y uno solo fuera de `goalOptions`
+      // basta para que el enlace de cotización pierda el contexto en silencio.
+      const careChoices = page.locator("[aria-pressed]");
+      for (let index = 0; index < (await careChoices.count()); index += 1) {
+        await careChoices.nth(index).click();
+        const careGoalHref = await page
+          .locator("[data-quote-link]")
+          .first()
+          .getAttribute("href");
+        assert(
+          careGoalHref?.includes("goal="),
+          `${slug} choice ${index} must keep a canonical goal on the quote link: ${careGoalHref}`,
+        );
+      }
       await runAxe(page, slug);
       await assertThemeSwitch(page, `${slug} landing`);
       await page.setViewportSize({ width: 390, height: 844 });
