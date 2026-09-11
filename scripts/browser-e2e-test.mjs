@@ -807,6 +807,9 @@ async function runBrowserChecks(baseUrl) {
           `${slug} choice ${index} must keep a canonical goal on the quote link: ${careGoalHref}`,
         );
       }
+      // Pulsar un control desplaza la página hacia él, y las medidas de pliegue
+      // que vienen después se toman desde arriba.
+      await page.evaluate(() => globalThis.scrollTo(0, 0));
       await runAxe(page, slug);
       await assertThemeSwitch(page, `${slug} landing`);
       await page.setViewportSize({ width: 390, height: 844 });
