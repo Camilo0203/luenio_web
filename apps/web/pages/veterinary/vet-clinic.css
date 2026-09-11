@@ -1,0 +1,758 @@
+/*
+ * Huella Veterinaria — hoja propia de la demo.
+ *
+ * Reemplaza a `care-landings.css`, que esta página compartía con la demo de
+ * estéticas: dos sectores distintos salían con la misma marca, el mismo azul y
+ * el mismo esqueleto, y un prospecto que abría las dos veía la plantilla.
+ *
+ * El mundo es el estándar del sector ejecutado en serio, elegido a propósito
+ * sobre las direcciones de autor. El listón de oficio son Chewy y Rover:
+ * fotografía real, tipografía con criterio y estados completos. Nada de ironía
+ * y nada de rarezas metidas de contrabando.
+ */
+
+.vet-clinic {
+  /* Un solo color manda. El cian clínico cubre la cabecera, la acción primaria
+     y la franja de cierre; el resto es blanco de sala y tinta. */
+  --vet-brand: #0e7490;
+  --vet-brand-strong: #155e75;
+  --vet-brand-soft: #f0fdfa;
+  --vet-brand-ink: #ffffff;
+
+  --vet-ground: #ffffff;
+  --vet-ground-2: #f6fbfb;
+  --vet-ink: #0f172a;
+  --vet-ink-soft: #475569;
+  --vet-line: rgb(15 23 42 / 0.12);
+  --vet-line-strong: rgb(15 23 42 / 0.22);
+
+  --vet-ok: #15803d;
+  --vet-ok-soft: #dcfce7;
+  --vet-warn: #9a5b00;
+  --vet-warn-soft: #fdf0d5;
+
+  --vet-radius: 14px;
+  --vet-radius-lg: 22px;
+  /* Sombras con desplazamiento y difuminado. Nunca un halo de color sin offset. */
+  --vet-shadow-1: 0 1px 2px rgb(15 23 42 / 0.06);
+  --vet-shadow-2:
+    0 1px 2px rgb(15 23 42 / 0.06), 0 14px 28px -14px rgb(15 23 42 / 0.22);
+  --vet-shadow-3:
+    0 2px 4px rgb(15 23 42 / 0.06), 0 28px 48px -24px rgb(15 23 42 / 0.28);
+
+  --vet-display: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --vet-text: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --vet-shell: min(1180px, calc(100% - 48px));
+
+  color-scheme: light;
+  background: var(--vet-ground);
+  color: var(--vet-ink);
+  font-family: var(--vet-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme="dark"] .vet-clinic {
+  /* Oscuro derivado del mismo cian, no del azul corporativo heredado: la sala
+     de noche, no un panel de banco. */
+  --vet-brand: #2bb3c7;
+  --vet-brand-strong: #4ecbdb;
+  --vet-brand-soft: #10262b;
+  --vet-brand-ink: #04232a;
+
+  --vet-ground: #0b1417;
+  --vet-ground-2: #101e22;
+  --vet-ink: #e9f3f3;
+  --vet-ink-soft: #a3b8ba;
+  --vet-line: rgb(233 243 243 / 0.16);
+  --vet-line-strong: rgb(233 243 243 / 0.3);
+
+  --vet-ok: #6ee7a5;
+  --vet-ok-soft: #0c2b1d;
+  --vet-warn: #f0bc6e;
+  --vet-warn-soft: #2e2312;
+
+  --vet-shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+  --vet-shadow-2: 0 1px 2px rgb(0 0 0 / 0.4), 0 14px 28px -14px rgb(0 0 0 / 0.6);
+  --vet-shadow-3: 0 2px 4px rgb(0 0 0 / 0.4), 0 28px 48px -24px rgb(0 0 0 / 0.7);
+
+  color-scheme: dark;
+}
+
+/* Superficies del navegador: lo que no dibujamos también lleva el diseño. */
+.vet-clinic ::selection {
+  color: var(--vet-brand-ink);
+  background: var(--vet-brand);
+}
+
+.vet-clinic {
+  accent-color: var(--vet-brand);
+  caret-color: var(--vet-brand);
+  scrollbar-color: var(--vet-line-strong) transparent;
+}
+
+.vet-clinic :focus-visible {
+  outline: 3px solid var(--vet-brand);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.vet-clinic a {
+  color: inherit;
+  text-underline-offset: 0.22em;
+  text-decoration-thickness: from-font;
+}
+
+.vet-clinic time,
+.vet-clinic .vet-slot__time {
+  font-variant-numeric: tabular-nums;
+}
+
+.vet-clinic img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.vet-shell {
+  width: var(--vet-shell);
+  margin-inline: auto;
+}
+
+/* ---------------------------------------------------------------- cabecera */
+
+.vet-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in srgb, var(--vet-ground) 88%, transparent);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--vet-line);
+}
+
+.vet-header__inner {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  min-height: 72px;
+}
+
+.vet-brand {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 4px;
+  font-family: var(--vet-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+
+.vet-brand__mark {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  color: var(--vet-brand-ink);
+  background: var(--vet-brand);
+  border-radius: 11px;
+}
+
+.vet-brand__mark svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vet-nav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  margin-inline-start: auto;
+}
+
+.vet-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 12px;
+  color: var(--vet-ink-soft);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 10px;
+  transition: color 0.18s ease-out, background-color 0.18s ease-out;
+}
+
+.vet-nav a:hover {
+  color: var(--vet-ink);
+  background: var(--vet-ground-2);
+}
+
+/* ------------------------------------------------------------------ botones */
+
+.vet-btn {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding-inline: 22px;
+  color: var(--vet-brand-ink);
+  font-family: var(--vet-text);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  background: var(--vet-brand);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  box-shadow: var(--vet-shadow-1);
+  cursor: pointer;
+  transition:
+    background-color 0.18s ease-out,
+    box-shadow 0.18s ease-out,
+    transform 0.18s ease-out;
+}
+
+.vet-btn:hover {
+  background: var(--vet-brand-strong);
+  box-shadow: var(--vet-shadow-2);
+}
+
+.vet-btn:active {
+  transform: translateY(1px);
+  box-shadow: var(--vet-shadow-1);
+}
+
+.vet-btn[disabled],
+.vet-btn[aria-disabled="true"] {
+  background: var(--vet-line);
+  color: var(--vet-ink-soft);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.vet-btn--quiet {
+  color: var(--vet-ink);
+  background: transparent;
+  border-color: var(--vet-line-strong);
+  box-shadow: none;
+}
+
+.vet-btn--quiet:hover {
+  background: var(--vet-ground-2);
+  border-color: var(--vet-ink-soft);
+  box-shadow: none;
+}
+
+.vet-btn--sm {
+  min-height: 44px;
+  padding-inline: 16px;
+  font-size: 0.94rem;
+}
+
+/* -------------------------------------------------------------------- héroe */
+
+.vet-hero {
+  padding-block: clamp(40px, 6vw, 76px) clamp(36px, 5vw, 64px);
+}
+
+.vet-hero__inner {
+  display: grid;
+  gap: clamp(28px, 4vw, 56px);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+}
+
+.vet-hero__copy h1 {
+  margin: 0;
+  font-family: var(--vet-display);
+  /* Interlínea por encima de 1: en español, con tildes y descendentes, un
+     titular a 0.95 hace que los glifos se toquen. */
+  font-size: clamp(2.3rem, 4.6vw, 3.4rem);
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.vet-hero__lead {
+  max-width: 34ch;
+  margin: 18px 0 0;
+  color: var(--vet-ink-soft);
+  font-size: clamp(1.02rem, 1.5vw, 1.16rem);
+  line-height: 1.6;
+}
+
+.vet-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.vet-note {
+  max-width: 46ch;
+  margin: 16px 0 0;
+  color: var(--vet-ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.vet-hero__media {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: var(--vet-ground-2);
+  border-radius: var(--vet-radius-lg);
+  box-shadow: var(--vet-shadow-3);
+}
+
+.vet-hero__media img {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.vet-hero__credit {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 6px 12px;
+  color: var(--vet-ink);
+  font-size: 0.76rem;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--vet-ground) 88%, transparent);
+  backdrop-filter: blur(6px);
+  border-radius: 999px;
+}
+
+/* ------------------------------------------------------------------ secciones */
+
+.vet-section {
+  padding-block: clamp(44px, 6vw, 84px);
+}
+
+.vet-section--tint {
+  background: var(--vet-ground-2);
+  border-block: 1px solid var(--vet-line);
+}
+
+/* Más aire encima del encabezado que debajo. */
+.vet-section h2 {
+  margin: 0 0 14px;
+  font-family: var(--vet-display);
+  font-size: clamp(1.7rem, 2.9vw, 2.3rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.vet-section__lead {
+  max-width: 62ch;
+  margin: 0;
+  color: var(--vet-ink-soft);
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+
+/* ------------------------------------------------------------------ servicios */
+
+.vet-services {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  margin-top: 34px;
+  padding: 0;
+  list-style: none;
+}
+
+.vet-service {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px;
+  background: var(--vet-ground);
+  border: 1px solid var(--vet-line);
+  border-radius: var(--vet-radius);
+  box-shadow: var(--vet-shadow-1);
+}
+
+.vet-service__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--vet-brand);
+  background: var(--vet-brand-soft);
+  border-radius: 12px;
+}
+
+.vet-service__icon svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vet-service h3 {
+  margin: 4px 0 0;
+  font-family: var(--vet-display);
+  font-size: 1.08rem;
+  letter-spacing: -0.01em;
+}
+
+.vet-service p {
+  margin: 0;
+  color: var(--vet-ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.vet-service__meta {
+  margin-top: auto;
+  padding-top: 12px;
+  color: var(--vet-ink-soft);
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-top: 1px solid var(--vet-line);
+}
+
+/* -------------------------------------------------------------------- ruta */
+
+.vet-route {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  align-items: start;
+  margin-top: 34px;
+  padding: clamp(20px, 3vw, 30px);
+  background: var(--vet-ground);
+  border: 1px solid var(--vet-line);
+  border-radius: var(--vet-radius-lg);
+  box-shadow: var(--vet-shadow-2);
+}
+
+.vet-route__choices {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vet-choice {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 14px 16px;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  background: var(--vet-ground);
+  border: 1px solid var(--vet-line);
+  border-radius: var(--vet-radius);
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease-out,
+    background-color 0.18s ease-out,
+    box-shadow 0.18s ease-out;
+}
+
+.vet-choice:hover {
+  border-color: var(--vet-ink-soft);
+  background: var(--vet-ground-2);
+}
+
+.vet-choice[aria-pressed="true"] {
+  border-color: var(--vet-brand);
+  background: var(--vet-brand-soft);
+  box-shadow: inset 0 0 0 1px var(--vet-brand);
+}
+
+.vet-choice__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: var(--vet-brand);
+  background: var(--vet-brand-soft);
+  border-radius: 11px;
+}
+
+.vet-choice[aria-pressed="true"] .vet-choice__icon {
+  color: var(--vet-brand-ink);
+  background: var(--vet-brand);
+}
+
+.vet-choice__icon svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentcolor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.vet-choice__label {
+  display: grid;
+  gap: 2px;
+}
+
+.vet-choice__label strong {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.vet-choice__label span {
+  color: var(--vet-ink-soft);
+  font-size: 0.88rem;
+}
+
+.vet-answer {
+  padding: 20px;
+  background: var(--vet-brand-soft);
+  border: 1px solid var(--vet-line);
+  border-radius: var(--vet-radius);
+}
+
+.vet-answer__flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 14px;
+  color: var(--vet-ink-soft);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.vet-answer__flow i {
+  font-style: normal;
+  opacity: 0.55;
+}
+
+.vet-answer strong {
+  display: block;
+  font-family: var(--vet-display);
+  font-size: 1.18rem;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.vet-answer p {
+  margin: 8px 0 0;
+  color: var(--vet-ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* El único momento de movimiento de la página: la respuesta se reasienta. */
+.vet-answer.is-updating {
+  animation: vet-settle 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes vet-settle {
+  from {
+    opacity: 0.35;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ------------------------------------------------------------------- agenda */
+
+.vet-slots {
+  display: grid;
+  gap: 12px;
+  margin: 30px 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.vet-slot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  background: var(--vet-ground);
+  border: 1px solid var(--vet-line);
+  border-radius: var(--vet-radius);
+  box-shadow: var(--vet-shadow-1);
+}
+
+.vet-slot__time {
+  min-width: 4.5ch;
+  font-family: var(--vet-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.vet-slot__what {
+  display: grid;
+  gap: 2px;
+  margin-inline-end: auto;
+}
+
+.vet-slot__what strong {
+  font-size: 1rem;
+}
+
+.vet-slot__what span {
+  color: var(--vet-ink-soft);
+  font-size: 0.88rem;
+}
+
+.vet-tag {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.vet-tag--ok {
+  color: var(--vet-ok);
+  background: var(--vet-ok-soft);
+}
+
+.vet-tag--last {
+  color: var(--vet-warn);
+  background: var(--vet-warn-soft);
+}
+
+/* ------------------------------------------------------------------- cierre */
+
+.vet-close {
+  padding-block: clamp(48px, 6vw, 88px);
+  color: var(--vet-brand-ink);
+  background: var(--vet-brand);
+}
+
+.vet-close h2 {
+  max-width: 20ch;
+  margin: 0 0 16px;
+  font-family: var(--vet-display);
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+  line-height: 1.14;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.vet-close p {
+  max-width: 58ch;
+  margin: 0 0 26px;
+  color: color-mix(in srgb, var(--vet-brand-ink) 88%, transparent);
+  font-size: 1.02rem;
+  line-height: 1.62;
+}
+
+.vet-close .vet-btn {
+  color: var(--vet-brand);
+  background: var(--vet-brand-ink);
+}
+
+.vet-close .vet-btn:hover {
+  background: color-mix(in srgb, var(--vet-brand-ink) 90%, var(--vet-brand));
+}
+
+.vet-close :focus-visible {
+  outline-color: var(--vet-brand-ink);
+}
+
+/* --------------------------------------------------------------------- pie */
+
+.vet-footer {
+  padding-block: 28px;
+  color: var(--vet-ink-soft);
+  font-size: 0.88rem;
+  background: var(--vet-ground);
+  border-top: 1px solid var(--vet-line);
+}
+
+/* Separadores reales. El pie anterior concatenaba tres cadenas sin espacio y
+   se leía "LuenioDemo ficticia creada por LuenioInformación ilustrativa". */
+.vet-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+}
+
+.vet-footer__inner a {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 700;
+  color: var(--vet-ink);
+}
+
+.vet-footer__inner p {
+  margin: 0;
+}
+
+/* ------------------------------------------------------------- adaptación */
+
+@media (max-width: 960px) {
+  .vet-hero__inner,
+  .vet-route {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .vet-hero__inner {
+    gap: 28px;
+  }
+
+  .vet-hero__media {
+    order: -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .vet-clinic {
+    --vet-shell: calc(100% - 32px);
+  }
+
+  .vet-nav {
+    display: none;
+  }
+
+  .vet-slot {
+    align-items: flex-start;
+  }
+
+  .vet-slot__what {
+    flex-basis: 100%;
+    order: 3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vet-clinic *,
+  .vet-clinic *::before,
+  .vet-clinic *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -107,201 +107,266 @@ FORM: “ruta de barrio”, propuesta V2 aprobada por el usuario; composición d
     <link rel="stylesheet" href="/apps/web/src/style.css" />
     <link rel="stylesheet" href="/apps/web/src/theme-control.css" />
     <link rel="stylesheet" href="/apps/web/src/niche-widget.css" />
-    <link rel="stylesheet" href="/apps/web/src/care-landings.css" />
+    <link rel="stylesheet" href="/apps/web/pages/veterinary/vet-clinic.css" />
     <script type="module" src="/apps/web/src/niche-landing.js"></script>
     <script type="module" src="/apps/web/pages/veterinary/veterinary-landing.js"></script>
   </head>
   <body
-    class="care-landing veterinary"
+    class="vet-clinic veterinary"
     data-demo-name="Huella Veterinaria"
     data-demo-type="veterinaria"
     data-demo-goal="Quiero una landing para mi veterinaria"
   >
     <a class="skip-link" href="#inicio">Saltar al contenido</a>
-    <header class="vet-nav">
-      <a class="vet-brand" href="#inicio" aria-label="Huella Veterinaria, ir al inicio">
-        <span aria-hidden="true">H<i></i></span><strong>Huella <small>Veterinaria</small></strong>
-      </a>
-      <nav aria-label="Navegación principal">
-        <a href="/demos">Demos</a><a href="/#soluciones">Soluciones</a
-        ><a href="/#proceso">Proceso</a><a href="/#nosotros">Nosotros</a>
-      </nav>
-      <a
-        class="vet-button vet-button--nav care-pill"
-        href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=landing_veterinary"
-        data-quote-cta="landing_veterinary"
-        data-cta-location="landing_header"
-        >Cotizar mi solución</a
-      >
+
+    <header class="vet-header">
+      <div class="vet-shell vet-header__inner">
+        <a class="vet-brand" href="#inicio" aria-label="Huella Veterinaria, ir al inicio">
+          <span class="vet-brand__mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 20s-7-4.2-7-9.3A4.7 4.7 0 0 1 12 8a4.7 4.7 0 0 1 7 2.7c0 5.1-7 9.3-7 9.3Z" />
+              <path d="M12 12.5v3.2M10.4 14.1h3.2" />
+            </svg>
+          </span>
+          <span>Huella Veterinaria</span>
+        </a>
+        <nav class="vet-nav" aria-label="Navegación principal">
+          <a href="#servicios">Servicios</a>
+          <a href="#ruta">Cómo funciona</a>
+          <a href="#agenda">Agenda</a>
+        </nav>
+        <a
+          class="vet-btn vet-btn--sm"
+          href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=landing_veterinary"
+          data-quote-cta="landing_veterinary"
+          data-cta-location="landing_header"
+          >Cotizar mi solución</a
+        >
+      </div>
     </header>
 
     <main id="inicio">
-      <section class="vet-stage" aria-labelledby="veterinary-title">
-        <figure class="vet-arrival">
-          <picture>
-            <source srcset="/assets/care/veterinary-neighborhood-v3.avif" type="image/avif" />
-            <source srcset="/assets/care/veterinary-neighborhood-v3.webp" type="image/webp" />
-            <img
-              src="/assets/care/veterinary-neighborhood-v3.webp"
-              alt="Persona llegando con su perro a una clínica veterinaria de barrio"
-              width="1536"
-              height="1024"
-              decoding="async"
-              fetchpriority="high"
-            />
-          </picture>
-          <figcaption><span>Clínica de barrio</span><small>Imagen ilustrativa</small></figcaption>
-        </figure>
-
-        <div class="vet-promise">
-          <p>Veterinaria cercana · Bogotá</p>
-          <h1 id="veterinary-title">Cuidar empieza por saber qué pasa.</h1>
-          <p class="vet-promise__lead">
-            Cuéntanos qué has observado y encuentra una ruta clara para conversar con el equipo.
-          </p>
-          <a class="vet-button vet-button--yellow care-pill" href="#agenda"
-            >Agendar consulta <span aria-hidden="true">→</span></a
-          >
-          <p class="luenio-demo-disclosure" data-luenio-disclosure role="note">
-            Experiencia demostrativa de Luenio · No representa un cliente real ni resultados reales.
-          </p>
-          <small>Experiencia demostrativa · no realiza diagnóstico médico.</small>
-        </div>
-
-        <aside class="vet-route" aria-label="Ruta ilustrativa para orientar una consulta">
-          <header>
-            <p>Tu ruta de atención</p>
-            <strong>Del primer mensaje a una cita con contexto.</strong>
-          </header>
-          <div
-            role="group"
-            class="vet-route__process"
-            aria-label="Proceso: Cuéntanos, orientamos y agendamos"
-          >
-            <span>Cuéntanos</span><i aria-hidden="true">→</i><span>Orientamos</span
-            ><i aria-hidden="true">→</i><span>Agendamos</span>
+      <section class="vet-hero vet-stage" aria-labelledby="veterinary-title">
+        <div class="vet-shell vet-hero__inner">
+          <div class="vet-hero__copy">
+            <h1 id="veterinary-title">Cuidar empieza por saber qué pasa.</h1>
+            <p class="vet-hero__lead">
+              Cuéntanos qué has observado y te damos una ruta clara para hablar con el equipo, a la
+              hora que sea.
+            </p>
+            <div class="vet-hero__actions">
+              <a class="vet-btn" href="#agenda">Agendar una consulta</a>
+              <a class="vet-btn vet-btn--quiet" href="#ruta">Ver cómo funciona</a>
+            </div>
+            <p class="vet-note luenio-demo-disclosure" data-luenio-disclosure role="note">
+              Experiencia demostrativa de Luenio. No representa un cliente real ni resultados
+              reales, y no realiza diagnóstico médico: orienta, agenda y pasa a una persona ante
+              cualquier señal de urgencia.
+            </p>
           </div>
-          <div class="vet-route__choices">
-            <button type="button" data-vet-care="general" aria-pressed="true">
-              <b aria-hidden="true"
-                ><svg viewBox="0 0 32 32">
-                  <path d="M8 5v8a8 8 0 0 0 16 0V5M5 5h6m10 0h6M16 21v5a4 4 0 0 0 8 0v-2" /></svg
-              ></b>
-              <span>Consulta general<small>Revisión y orientación</small></span>
-            </button>
-            <button type="button" data-vet-care="prevention" aria-pressed="false">
-              <b aria-hidden="true"
-                ><svg viewBox="0 0 32 32">
-                  <path d="m9 23 14-14m-3-3 6 6M6 20l6 6m-7 1 4-1-3-3-1 4Zm9-13 4 4" /></svg
-              ></b>
-              <span>Prevención<small>Vacunas y antecedentes</small></span>
-            </button>
-            <button type="button" data-vet-care="followup" aria-pressed="false">
-              <b aria-hidden="true"
-                ><svg viewBox="0 0 32 32">
-                  <path d="M25 11a10 10 0 1 0 1 9M25 11V5m0 6h-6M11 17l3 3 7-8" /></svg
-              ></b>
-              <span>Seguimiento<small>Continuidad de un caso</small></span>
-            </button>
-          </div>
-          <div class="vet-route__answer" aria-live="polite">
-            <span>Siguiente paso</span><strong data-vet-next-title>Revisión con el equipo</strong>
-            <p data-vet-next-copy>Cuéntanos qué has observado antes de elegir horario.</p>
-          </div>
-        </aside>
-      </section>
 
-      <section class="vet-services" id="servicios" aria-label="Servicios veterinarios ilustrativos">
-        <div>
-          <span aria-hidden="true"
-            ><svg viewBox="0 0 32 32">
-              <path d="M8 5v8a8 8 0 0 0 16 0V5M5 5h6m10 0h6M16 21v5a4 4 0 0 0 8 0v-2" /></svg></span
-          ><strong>Consulta general</strong>
-        </div>
-        <div>
-          <span aria-hidden="true"
-            ><svg viewBox="0 0 32 32">
-              <path d="m9 23 14-14m-3-3 6 6M6 20l6 6m-7 1 4-1-3-3-1 4Zm9-13 4 4" /></svg></span
-          ><strong>Vacunas y prevención</strong>
-        </div>
-        <div>
-          <span aria-hidden="true"
-            ><svg viewBox="0 0 32 32">
-              <path d="M25 11a10 10 0 1 0 1 9M25 11V5m0 6h-6M11 17l3 3 7-8" /></svg></span
-          ><strong>Seguimiento</strong>
-        </div>
-        <div>
-          <span aria-hidden="true"
-            ><svg viewBox="0 0 32 32">
-              <path
-                d="M16 27S5 21 5 13a6 6 0 0 1 11-3 6 6 0 0 1 11 3c0 8-11 14-11 14Zm0-13v7m-4-3.5h8"
-              /></svg></span
-          ><strong>Acompañamiento cercano</strong>
+          <figure class="vet-hero__media">
+            <picture>
+              <source srcset="/assets/care/veterinary-neighborhood-v3.avif" type="image/avif" />
+              <source srcset="/assets/care/veterinary-neighborhood-v3.webp" type="image/webp" />
+              <img
+                src="/assets/care/veterinary-neighborhood-v3.webp"
+                alt="Una persona llega con su perro a la puerta de una clínica veterinaria de barrio"
+                width="1536"
+                height="1024"
+                decoding="async"
+                fetchpriority="high"
+              />
+            </picture>
+            <figcaption class="vet-hero__credit">Imagen ilustrativa</figcaption>
+          </figure>
         </div>
       </section>
 
-      <section class="vet-story" id="equipo" aria-labelledby="veterinary-story-title">
-        <div>
-          <p>Una conversación antes de una cita</p>
-          <h2 id="veterinary-story-title">Su bienestar empieza con una conversación.</h2>
-        </div>
-        <div class="vet-story__copy">
-          <p>
-            Una web puede ordenar el motivo, explicar el proceso y entregar cada solicitud con
-            contexto. La disponibilidad y los datos de esta demo son ilustrativos.
+      <section class="vet-section" id="servicios" aria-labelledby="veterinary-services-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-services-title">Qué resolvemos</h2>
+          <p class="vet-section__lead">
+            Cuatro motivos cubren casi todo lo que llega por mensaje. Los servicios y tiempos de
+            esta demo son ilustrativos.
           </p>
-          <a href="#agenda">Ver agenda de muestra <span aria-hidden="true">↓</span></a>
+          <ul class="vet-services">
+            <li class="vet-service">
+              <span class="vet-service__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32">
+                  <path d="M8 5v8a8 8 0 0 0 16 0V5M5 5h6m10 0h6M16 21v5a4 4 0 0 0 8 0v-2" />
+                </svg>
+              </span>
+              <h3>Consulta general</h3>
+              <p>Revisión, orientación y un plan de siguiente paso cuando algo no va bien.</p>
+              <span class="vet-service__meta">30 minutos</span>
+            </li>
+            <li class="vet-service">
+              <span class="vet-service__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32">
+                  <path d="m9 23 14-14m-3-3 6 6M6 20l6 6m-7 1 4-1-3-3-1 4Zm9-13 4 4" />
+                </svg>
+              </span>
+              <h3>Vacunas y prevención</h3>
+              <p>Refuerzos, desparasitación y el recordatorio que evita que se pasen de fecha.</p>
+              <span class="vet-service__meta">20 minutos</span>
+            </li>
+            <li class="vet-service">
+              <span class="vet-service__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32">
+                  <path d="M25 11a10 10 0 1 0 1 9M25 11V5m0 6h-6M11 17l3 3 7-8" />
+                </svg>
+              </span>
+              <h3>Seguimiento</h3>
+              <p>Continuidad de un caso abierto, con el historial de la conversación a la vista.</p>
+              <span class="vet-service__meta">20 minutos</span>
+            </li>
+            <li class="vet-service">
+              <span class="vet-service__icon" aria-hidden="true">
+                <svg viewBox="0 0 32 32">
+                  <path
+                    d="M16 27S5 21 5 13a6 6 0 0 1 11-3 6 6 0 0 1 11 3c0 8-11 14-11 14Zm0-13v7m-4-3.5h8"
+                  />
+                </svg>
+              </span>
+              <h3>Acompañamiento</h3>
+              <p>Dudas de cuidado en casa, resueltas sin que tengas que volver a explicar todo.</p>
+              <span class="vet-service__meta">Por mensaje</span>
+            </li>
+          </ul>
         </div>
       </section>
 
-      <section class="vet-agenda" id="agenda" aria-labelledby="veterinary-agenda-title">
-        <header>
-          <p>Agenda ilustrativa</p>
-          <h2 id="veterinary-agenda-title">Elige un momento para continuar la conversación.</h2>
-          <span
-            >Los horarios muestran cómo funcionaría una agenda conectada. No corresponden a
-            disponibilidad real.</span
-          >
-        </header>
-        <div role="group" class="vet-slots" aria-label="Horarios ilustrativos">
-          <article>
-            <time datetime="16:30">16:30</time>
-            <div><strong>Consulta general</strong><span>Hoy · Equipo Huella</span></div>
-            <b>Disponible</b>
-          </article>
-          <article>
-            <time datetime="18:00">18:00</time>
-            <div><strong>Vacunas y prevención</strong><span>Hoy · Equipo Huella</span></div>
-            <b>Último cupo</b>
-          </article>
-          <article>
-            <time datetime="09:00">09:00</time>
-            <div><strong>Seguimiento</strong><span>Mañana · Equipo Huella</span></div>
-            <b>Disponible</b>
-          </article>
+      <section class="vet-section vet-section--tint" id="ruta" aria-labelledby="veterinary-route-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-route-title">Del primer mensaje a una cita con contexto</h2>
+          <p class="vet-section__lead">
+            Elige el motivo y la ruta se arma sola. Es la misma mecánica que queda funcionando en la
+            clínica: quien escribe llega orientado y el equipo recibe la solicitud con contexto.
+          </p>
+
+          <div class="vet-route">
+            <ul class="vet-route__choices" role="group" aria-label="Motivo de la consulta">
+              <li>
+                <button class="vet-choice" type="button" data-vet-care="general" aria-pressed="true">
+                  <span class="vet-choice__icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 32">
+                      <path d="M8 5v8a8 8 0 0 0 16 0V5M5 5h6m10 0h6M16 21v5a4 4 0 0 0 8 0v-2" />
+                    </svg>
+                  </span>
+                  <span class="vet-choice__label">
+                    <strong>Consulta general</strong>
+                    <span>Revisión y orientación</span>
+                  </span>
+                </button>
+              </li>
+              <li>
+                <button
+                  class="vet-choice"
+                  type="button"
+                  data-vet-care="prevention"
+                  aria-pressed="false"
+                >
+                  <span class="vet-choice__icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 32">
+                      <path d="m9 23 14-14m-3-3 6 6M6 20l6 6m-7 1 4-1-3-3-1 4Zm9-13 4 4" />
+                    </svg>
+                  </span>
+                  <span class="vet-choice__label">
+                    <strong>Prevención</strong>
+                    <span>Vacunas y antecedentes</span>
+                  </span>
+                </button>
+              </li>
+              <li>
+                <button
+                  class="vet-choice"
+                  type="button"
+                  data-vet-care="followup"
+                  aria-pressed="false"
+                >
+                  <span class="vet-choice__icon" aria-hidden="true">
+                    <svg viewBox="0 0 32 32">
+                      <path d="M25 11a10 10 0 1 0 1 9M25 11V5m0 6h-6M11 17l3 3 7-8" />
+                    </svg>
+                  </span>
+                  <span class="vet-choice__label">
+                    <strong>Seguimiento</strong>
+                    <span>Continuidad de un caso</span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+
+            <div class="vet-answer vet-route__answer" aria-live="polite">
+              <p class="vet-answer__flow">
+                <span>Cuéntanos</span><i aria-hidden="true">→</i><span>Orientamos</span
+                ><i aria-hidden="true">→</i><span>Agendamos</span>
+              </p>
+              <strong data-vet-next-title>Revisión con el equipo</strong>
+              <p data-vet-next-copy>Cuéntanos qué has observado antes de elegir horario.</p>
+            </div>
+          </div>
         </div>
-        <button class="vet-button care-pill" type="button" data-luenio-open>
-          Quiero una agenda así
-        </button>
       </section>
 
-      <section class="vet-close" id="contacto">
-        <p>Una ruta clara para tus clientes</p>
-        <h2>Convierte preguntas sueltas en consultas listas para atender.</h2>
-        <div>
+      <section class="vet-section" id="agenda" aria-labelledby="veterinary-agenda-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-agenda-title">Elige un momento para continuar</h2>
+          <p class="vet-section__lead">
+            Los horarios muestran cómo funcionaría una agenda conectada. No corresponden a
+            disponibilidad real.
+          </p>
+          <ul class="vet-slots">
+            <li class="vet-slot">
+              <time class="vet-slot__time" datetime="16:30">16:30</time>
+              <span class="vet-slot__what">
+                <strong>Consulta general</strong>
+                <span>Hoy · Equipo Huella</span>
+              </span>
+              <span class="vet-tag vet-tag--ok">Disponible</span>
+            </li>
+            <li class="vet-slot">
+              <time class="vet-slot__time" datetime="18:00">18:00</time>
+              <span class="vet-slot__what">
+                <strong>Vacunas y prevención</strong>
+                <span>Hoy · Equipo Huella</span>
+              </span>
+              <span class="vet-tag vet-tag--last">Último cupo</span>
+            </li>
+            <li class="vet-slot">
+              <time class="vet-slot__time" datetime="09:00">09:00</time>
+              <span class="vet-slot__what">
+                <strong>Seguimiento</strong>
+                <span>Mañana · Equipo Huella</span>
+              </span>
+              <span class="vet-tag vet-tag--ok">Disponible</span>
+            </li>
+          </ul>
+          <button class="vet-btn" type="button" data-luenio-open>Quiero una agenda así</button>
+        </div>
+      </section>
+
+      <section class="vet-close" id="contacto" aria-labelledby="veterinary-close-title">
+        <div class="vet-shell">
+          <h2 id="veterinary-close-title">
+            Convierte preguntas sueltas en consultas listas para atender.
+          </h2>
           <p>
             Luenio diseña la experiencia, conecta tus canales y organiza cada solicitud sin
             mezclarla con datos reales del CRM.
           </p>
-          <button class="vet-button vet-button--yellow care-pill" type="button" data-luenio-open>
-            Cotizar esta experiencia
-          </button>
+          <button class="vet-btn" type="button" data-luenio-open>Cotizar esta experiencia</button>
         </div>
       </section>
     </main>
-    <footer class="care-footer">
-      <a href="/">Luenio</a><span>Demo ficticia creada por Luenio</span
-      ><span>Información y disponibilidad ilustrativas</span>
+
+    <footer class="vet-footer">
+      <div class="vet-shell vet-footer__inner">
+        <a href="/">Luenio</a>
+        <p>Demo ficticia creada por Luenio</p>
+        <p>Información y disponibilidad ilustrativas</p>
+      </div>
     </footer>
     <!-- include: legal-bar -->
   </body>
