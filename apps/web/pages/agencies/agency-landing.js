@@ -21,14 +21,22 @@ const scopes = {
       "Sistema visual aplicado",
       "Sitio corporativo hasta seis plantillas",
     ],
-    out: ["Producción audiovisual", "Pauta y medios pagados", "Mantenimiento posterior al traspaso"],
+    out: [
+      "Producción audiovisual",
+      "Pauta y medios pagados",
+      "Mantenimiento posterior al traspaso",
+    ],
   },
   "Lanzar|Contenido": {
     title: "Lanzamiento apoyado en contenido",
     ref: "ALC-02",
     rounds: 2,
     weeks: "6 a 8 semanas",
-    in: ["Estrategia editorial", "Sistema visual para piezas", "Calendario de los tres primeros meses"],
+    in: [
+      "Estrategia editorial",
+      "Sistema visual para piezas",
+      "Calendario de los tres primeros meses",
+    ],
     out: ["Sitio web", "Gestión diaria de redes", "Producción fotográfica"],
   },
   "Lanzar|Campaña": {
@@ -68,7 +76,11 @@ const scopes = {
     ref: "ALC-07",
     rounds: 2,
     weeks: "4 a 6 semanas",
-    in: ["Auditoría de la ruta actual", "Rediseño de formularios y páginas de entrada", "Conexión con el CRM"],
+    in: [
+      "Auditoría de la ruta actual",
+      "Rediseño de formularios y páginas de entrada",
+      "Conexión con el CRM",
+    ],
     out: ["Rediseño de marca", "Contenido editorial", "Pauta y medios pagados"],
   },
   "Convertir|Contenido": {
@@ -167,7 +179,9 @@ if (root) {
       rounds.replaceChildren(
         document.createTextNode("Rondas de revisión incluidas: "),
         Object.assign(document.createElement("b"), { textContent: String(scope.rounds) }),
-        document.createTextNode(". A partir de ahí se cotizan aparte, y eso se dice ahora, no al final."),
+        document.createTextNode(
+          ". A partir de ahí se cotizan aparte, y eso se dice ahora, no al final.",
+        ),
       );
     }
 
