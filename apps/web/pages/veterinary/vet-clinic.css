@@ -77,6 +77,18 @@ html[data-theme="dark"] .vet-clinic {
   color-scheme: dark;
 }
 
+/* `style.css` pinta el body con un degradado azul global y una rejilla en
+   ::before. Esta demo es una sala blanca y no ese lienzo, así que se declara
+   con la misma especificidad que la regla global en vez de con !important. */
+html[data-theme="light"] .vet-clinic,
+html[data-theme="dark"] .vet-clinic {
+  background: var(--vet-ground);
+}
+
+.vet-clinic::before {
+  content: none;
+}
+
 /* Superficies del navegador: lo que no dibujamos también lleva el diseño. */
 .vet-clinic ::selection {
   color: var(--vet-brand-ink);
