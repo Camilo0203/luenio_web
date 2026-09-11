@@ -34,7 +34,11 @@ const plans = {
     status: { label: "Cupos esta semana", tone: "open" },
     steps: [
       ["Día 1", "Valoración facial", "Partimos de lo que ya se hizo y de cómo respondió."],
-      ["Cada mes", "Plan de seguimiento", "Una sesión corta para sostener, no para empezar de cero."],
+      [
+        "Cada mes",
+        "Plan de seguimiento",
+        "Una sesión corta para sostener, no para empezar de cero.",
+      ],
       ["Cada 3 meses", "Revisión", "Se ajusta la frecuencia o se espacia si ya no hace falta."],
     ],
     goal: "Quiero una landing para mi estética enfocada en seguimiento de cuidado",
