@@ -37,11 +37,14 @@
 .care-landing button {
   color: inherit;
 }
+/* `.care-landing button { color: inherit }` le gana al widget compartido, así
+   que hay que reafirmar su tinta aquí. Se toma del token, nunca de un literal:
+   con `#fff` esta hoja se quedó en 1,98 cuando el verde volvió al de marca. */
 .care-landing .luenio-wa__trigger,
 .care-landing .luenio-wa__trigger span,
 .care-landing .luenio-wa__submit,
 .care-landing .luenio-wa__submit span {
-  color: #fff;
+  color: var(--luenio-wa-ink, #0b141a);
 }
 .care-landing :is(a, button, input):focus-visible {
   outline: 3px solid var(--care-focus);

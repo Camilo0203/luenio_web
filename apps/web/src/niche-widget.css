@@ -1,3 +1,13 @@
+/* El verde y su tinta viven en tokens porque otras hojas reafirman el color
+   del botón para ganarle a sus propias reglas de herencia. Con un literal,
+   cada cambio de verde deja una hoja atrás: así pasó con estéticas, que se
+   quedó en blanco sobre el verde de marca, 1,98 de contraste. */
+:root {
+  --luenio-wa-green: #25d366;
+  --luenio-wa-green-hover: #1da851;
+  --luenio-wa-ink: #0b141a;
+}
+
 .luenio-wa,
 .luenio-wa *,
 .luenio-wa__trigger,
@@ -231,8 +241,8 @@ body.luenio-modal-open {
   gap: 9px;
   /* Verde de marca de WhatsApp con tinta oscura: 9,38 de contraste, por
      encima del 5,42 que daba el verde oscurecido con letra blanca. */
-  color: #0b141a;
-  background: #25d366;
+  color: var(--luenio-wa-ink);
+  background: var(--luenio-wa-green);
   border: 0;
   cursor: pointer;
   font:
@@ -254,7 +264,7 @@ body.luenio-modal-open {
 
 .luenio-wa__submit:hover,
 .luenio-wa__trigger:hover {
-  background: #1da851;
+  background: var(--luenio-wa-green-hover);
   transform: translateY(-1px);
 }
 
@@ -270,7 +280,7 @@ body.luenio-modal-open {
 }
 
 .luenio-wa__trigger[aria-expanded="true"] {
-  background: #25d366;
+  background: var(--luenio-wa-green);
   box-shadow: 0 14px 34px rgba(6, 82, 41, 0.34);
 }
 

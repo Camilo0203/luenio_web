@@ -502,12 +502,11 @@ html[data-theme="dark"] .vet-clinic {
   box-shadow: var(--vet-shadow-2);
 }
 
+/* Grupo de controles, no lista de contenido: un <ul role="group"> deja a sus
+   <li> sin padre de lista y axe lo marca como violación seria. */
 .vet-route__choices {
   display: grid;
   gap: 10px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 .vet-choice {

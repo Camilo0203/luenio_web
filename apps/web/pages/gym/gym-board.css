@@ -17,9 +17,9 @@
   --gym-success: #86d34f;
   --gym-error: #ff8a73;
   --gym-placeholder: #9fa29c;
-  --gym-whatsapp: #25d366;
-  --gym-whatsapp-hover: #1da851;
-  --gym-whatsapp-ink: #0b141a;
+  --gym-whatsapp: var(--luenio-wa-green, #25d366);
+  --gym-whatsapp-hover: var(--luenio-wa-green-hover, #1da851);
+  --gym-whatsapp-ink: var(--luenio-wa-ink, #0b141a);
   --gym-shadow: rgba(0, 0, 0, 0.44);
   --gym-frame-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
   --gym-max: 1540px;

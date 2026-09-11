@@ -1243,8 +1243,8 @@ html[data-theme="dark"] .footer-credit__mark {
   gap: 9px;
   border: 0;
   /* Verde de marca de WhatsApp con tinta oscura: 9,38 de contraste. */
-  color: #0b141a;
-  background: #25d366;
+  color: var(--luenio-wa-ink, #0b141a);
+  background: var(--luenio-wa-green, #25d366);
   font-weight: 800;
 }
 
