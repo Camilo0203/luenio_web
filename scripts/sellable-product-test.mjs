@@ -75,10 +75,14 @@ const homeClarityCss = readText("apps/web/src/home-clarity.css");
       landingHtml.includes("ficticias") &&
       landingHtml.includes("No representan resultados ni clientes reales"),
   ],
+  // The trio is written out rather than derived so that dropping a sector from
+  // the home switcher fails here instead of passing on an empty list. Keep it in
+  // step with the buttons in apps/web/pages/home/index.html: today the home
+  // fronts the three demos that were rebuilt with a visual world of their own.
   [
     "demonstrative cases",
-    ["Agencias", "Ecommerce", "Inmobiliarias"].every((sector) => landingHtml.includes(sector)) &&
-      ["/inmobiliarias", "/tiendas-online", "/agencias"].every(
+    ["Veterinarias", "Estéticas", "Agencias"].every((sector) => landingHtml.includes(sector)) &&
+      ["/veterinarias", "/esteticas", "/agencias"].every(
         (route) =>
           landingHtml.includes(`href="${route}"`) ||
           landingHtml.includes(`data-demo-href="${route}"`),
