@@ -495,21 +495,21 @@ async function runBrowserChecks(baseUrl) {
       );
     }
 
-    const ecommerceDemoButton = page.getByRole("button", { name: "Ecommerce", exact: true });
-    await ecommerceDemoButton.evaluate((button) => button.click());
+    const aestheticsDemoButton = page.getByRole("button", { name: "Estéticas", exact: true });
+    await aestheticsDemoButton.evaluate((button) => button.click());
     await page.waitForFunction(
       () =>
         globalThis.document
-          .querySelector('[data-demo-target="ecommerce"]')
+          .querySelector('[data-demo-target="esteticas"]')
           ?.getAttribute("aria-pressed") === "true",
     );
-    await page.getByText("Mostrando demo ficticia de Ecommerce", { exact: true }).waitFor({
+    await page.getByText("Mostrando demo ficticia de Estéticas", { exact: true }).waitFor({
       state: "visible",
     });
     assert(
       (await page
-        .getByRole("link", { name: "Abrir demo de Ecommerce, demostración ficticia" })
-        .getAttribute("href")) === "/tiendas-online",
+        .getByRole("link", { name: "Abrir demo de Estéticas, demostración ficticia" })
+        .getAttribute("href")) === "/esteticas",
       "Mobile demo selection must expose the selected demo destination.",
     );
     const agencyDemoButton = page.getByRole("button", { name: "Agencias", exact: true });

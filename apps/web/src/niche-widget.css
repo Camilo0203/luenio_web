@@ -207,7 +207,20 @@ body.luenio-modal-open {
 .luenio-wa__form select:focus,
 .luenio-wa__form textarea:focus {
   border-color: #6f8856;
-  box-shadow: 0 0 0 3px rgba(111, 136, 86, 0.12);
+}
+
+/* El anillo de foco se pinta aquí y en ningún otro sitio.
+   Salían dos superpuestos: este halo propio y, encima, el `outline` de la
+   página anfitriona, que alcanza al modal porque el widget vive dentro de ella.
+   Son cuatro las reglas de página que llegan hasta aquí (`public-site`,
+   `industry-demos`, `sector-redesign` y la hoja de cada mundo rediseñado) y
+   todas traen el acento del sector, ajeno al verde de este panel.
+   La especificidad (0,3,1) es la mínima que le gana a la mayor de las cuatro,
+   `.demo-page:not(.gym-board) :focus-visible`, que vale (0,3,0). Subir más
+   sería tapar reglas que no estorban. */
+.luenio-wa__panel .luenio-wa__form :is(input, select, textarea):focus-visible {
+  outline: 2px solid #6f8856;
+  outline-offset: 2px;
 }
 
 .luenio-wa__form [aria-invalid="true"] {
@@ -578,7 +591,13 @@ html[data-theme="dark"] .luenio-wa__form input:focus,
 html[data-theme="dark"] .luenio-wa__form select:focus,
 html[data-theme="dark"] .luenio-wa__form textarea:focus {
   border-color: #8fb87a;
-  box-shadow: 0 0 0 3px rgba(143, 184, 122, 0.22);
+}
+
+html[data-theme="dark"]
+  .luenio-wa__panel
+  .luenio-wa__form
+  :is(input, select, textarea):focus-visible {
+  outline-color: #8fb87a;
 }
 
 html[data-theme="dark"] .luenio-wa__form [aria-invalid="true"] {
