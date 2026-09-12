@@ -19,14 +19,22 @@ const sectors = requestedSectors.size
   ? allSectors.filter(([name]) => requestedSectors.has(name))
   : allSectors;
 
-// One 1440x1000 capture feeds every variant; the mobile cut is that same frame
+// One 2880x2000 capture feeds every variant; the mobile cut is that same frame
 // downscaled, not a phone-viewport screenshot, so both show the identical layout.
 // Phones only get AVIF: the WebP fallback is for engines without AVIF support,
 // and serving those the desktop cut is an acceptable trade for 7 fewer files.
 // The og cut is 1200x630 JPEG: that is the ratio social platforms crop to, and
 // JPEG is the only format every scraper reads reliably.
+//
+// The capture is taken at twice the delivered size and reduced. Shooting 1440
+// native left the interface text aliased, and the home puts one of these inside
+// a browser frame where that is the first thing anyone looks at. Supersampling
+// buys the detail in the downscale instead of in the file: the delivered cut
+// stays 1440x1000, so neither the transfer budget nor the LCP measurement move
+// much, and the home prefetches all three shots on idle, which is why a 2x
+// delivered variant was rejected — it would triple what every visitor pays.
 const allVariants = [
-  { suffix: "desktop", width: null, formats: ["webp", "avif"] },
+  { suffix: "desktop", width: 1440, formats: ["webp", "avif"] },
   { suffix: "mobile", width: 640, formats: ["avif"] },
   { suffix: "og", width: 1200, height: 630, fit: "cover", position: "top", formats: ["jpg"] },
 ];
@@ -40,10 +48,13 @@ const variants = requestedVariants.size
   ? allVariants.filter(({ suffix }) => requestedVariants.has(suffix))
   : allVariants;
 
+// Quality sits a notch above the old numbers because the source now carries
+// detail worth keeping; at the previous 62 the downscale was thrown away again
+// in the encode.
 function encode(pipeline, format) {
-  if (format === "webp") return pipeline.webp({ quality: 82, effort: 5 });
-  if (format === "jpg") return pipeline.jpeg({ quality: 82, mozjpeg: true });
-  return pipeline.avif({ quality: 62, effort: 5 });
+  if (format === "webp") return pipeline.webp({ quality: 86, effort: 6 });
+  if (format === "jpg") return pipeline.jpeg({ quality: 84, mozjpeg: true });
+  return pipeline.avif({ quality: 70, effort: 6 });
 }
 
 function resizeFor(pipeline, variant) {
@@ -76,7 +87,7 @@ async function launchBrowser() {
 const browser = await launchBrowser();
 const context = await browser.newContext({
   viewport: { width: 1440, height: 1000 },
-  deviceScaleFactor: 1,
+  deviceScaleFactor: 2,
   locale: "es-CO",
   reducedMotion: "reduce",
 });

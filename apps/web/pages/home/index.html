@@ -218,7 +218,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
     <link
       rel="preload"
       as="image"
-      href="/assets/previews/agency-mobile.avif"
+      href="/assets/previews/veterinary-mobile.avif"
       type="image/avif"
       media="(max-width: 767px)"
       fetchpriority="high"
@@ -226,7 +226,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
     <link
       rel="preload"
       as="image"
-      href="/assets/previews/agency-desktop.avif"
+      href="/assets/previews/veterinary-desktop.avif"
       type="image/avif"
       media="(min-width: 768px)"
       fetchpriority="high"
@@ -289,7 +289,7 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
             <div class="hc-stage-aura" aria-hidden="true"></div>
             <div class="hc-stage-heading">
               <span>Experiencia demostrativa de Luenio</span>
-              <strong data-demo-active-label>Agencias</strong>
+              <strong data-demo-active-label>Veterinarias</strong>
             </div>
             <article class="hc-browser" aria-label="Vista previa de una demo ficticia">
               <div class="hc-browser__bar">
@@ -302,9 +302,9 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 </div>
                 <a
                   class="hc-browser__open"
-                  href="/agencias"
+                  href="/veterinarias"
                   data-active-demo-link
-                  data-demo-case="impulso-digital"
+                  data-demo-case="huella-veterinaria"
                 >
                   Abrir demo
                   <svg viewBox="0 0 20 20" aria-hidden="true">
@@ -316,41 +316,41 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
                 <picture>
                   <source
                     media="(max-width: 767px)"
-                    srcset="/assets/previews/agency-mobile.avif"
+                    srcset="/assets/previews/veterinary-mobile.avif"
                     type="image/avif"
                   />
-                  <source srcset="/assets/previews/agency-desktop.avif" type="image/avif" />
+                  <source srcset="/assets/previews/veterinary-desktop.avif" type="image/avif" />
                   <img
                     class="hc-demo-shot is-active"
-                    src="/assets/previews/agency-desktop.webp"
-                    alt="Captura de la demo ficticia para agencias"
+                    src="/assets/previews/veterinary-desktop.webp"
+                    alt="Captura de la demo ficticia para veterinarias"
                     width="1440"
                     height="1000"
                     loading="eager"
                     decoding="async"
                     fetchpriority="high"
-                    data-demo-shot="agencias"
+                    data-demo-shot="veterinarias"
                   />
                 </picture>
                 <img
                   class="hc-demo-shot"
-                  alt="Captura de la demo ficticia para ecommerce"
+                  alt="Captura de la demo ficticia para estéticas"
                   width="1440"
                   height="1000"
-                  data-src="/assets/previews/ecommerce-desktop.avif"
-                  data-mobile-src="/assets/previews/ecommerce-mobile.avif"
-                  data-fallback-src="/assets/previews/ecommerce-desktop.webp"
-                  data-demo-shot="ecommerce"
+                  data-src="/assets/previews/aesthetics-desktop.avif"
+                  data-mobile-src="/assets/previews/aesthetics-mobile.avif"
+                  data-fallback-src="/assets/previews/aesthetics-desktop.webp"
+                  data-demo-shot="esteticas"
                 />
                 <img
                   class="hc-demo-shot"
-                  alt="Captura de la demo ficticia para inmobiliarias"
+                  alt="Captura de la demo ficticia para agencias"
                   width="1440"
                   height="1000"
-                  data-src="/assets/previews/real-estate-desktop.avif"
-                  data-mobile-src="/assets/previews/real-estate-mobile.avif"
-                  data-fallback-src="/assets/previews/real-estate-desktop.webp"
-                  data-demo-shot="inmobiliarias"
+                  data-src="/assets/previews/agency-desktop.avif"
+                  data-mobile-src="/assets/previews/agency-mobile.avif"
+                  data-fallback-src="/assets/previews/agency-desktop.webp"
+                  data-demo-shot="agencias"
                 />
               </div>
             </article>
@@ -363,42 +363,42 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               <button
                 class="is-active"
                 type="button"
+                data-demo-target="veterinarias"
+                data-demo-journey-id="veterinary"
+                data-demo-href="/veterinarias"
+                data-demo-case-id="huella-veterinaria"
+                aria-pressed="true"
+              >
+                Veterinarias
+              </button>
+              <button
+                type="button"
+                data-demo-target="esteticas"
+                data-demo-journey-id="aesthetics"
+                data-demo-href="/esteticas"
+                data-demo-case-id="aura-estetica"
+                aria-pressed="false"
+              >
+                Estéticas
+              </button>
+              <button
+                type="button"
                 data-demo-target="agencias"
                 data-demo-journey-id="agencies"
                 data-demo-href="/agencias"
                 data-demo-case-id="impulso-digital"
-                aria-pressed="true"
+                aria-pressed="false"
               >
                 Agencias
-              </button>
-              <button
-                type="button"
-                data-demo-target="ecommerce"
-                data-demo-journey-id="ecommerce"
-                data-demo-href="/tiendas-online"
-                data-demo-case-id="novastore"
-                aria-pressed="false"
-              >
-                Ecommerce
-              </button>
-              <button
-                type="button"
-                data-demo-target="inmobiliarias"
-                data-demo-journey-id="real-estate"
-                data-demo-href="/inmobiliarias"
-                data-demo-case-id="hogar-prime"
-                aria-pressed="false"
-              >
-                Inmobiliarias
               </button>
             </div>
             <div class="hc-demo-action-row">
               <p class="hc-demo-status" aria-live="polite" data-demo-status>
-                Mostrando demo ficticia de Agencias
+                Mostrando demo ficticia de Veterinarias
               </p>
               <a
                 class="hc-demo-quote"
-                href="/cotizacion?sector=agencia&amp;demo=Impulso+Digital&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+captar+y+calificar+oportunidades+para+los+clientes+de+mi+agencia&amp;source=home_demo"
+                href="/cotizacion?sector=veterinaria&amp;demo=Huella+Veterinaria&amp;service=Landing+%2B+automatizaci%C3%B3n+completa&amp;goal=Quiero+convertir+consultas+de+mascotas+en+citas+atendidas&amp;source=home_demo"
                 data-demo-quote-link
                 data-quote-cta="home_demo"
                 data-cta-location="home_demo_preview"
@@ -407,12 +407,12 @@ FORM: composición centrada “Demo protagonista”, segunda de tres pruebas; re
               </a>
               <a
                 class="hc-demo-mobile-open"
-                href="/agencias"
+                href="/veterinarias"
                 data-mobile-demo-link
-                data-demo-case="impulso-digital"
-                aria-label="Abrir demo de Agencias, demostración ficticia"
+                data-demo-case="huella-veterinaria"
+                aria-label="Abrir demo de Veterinarias, demostración ficticia"
               >
-                Abrir demo de Agencias
+                Abrir demo de Veterinarias
                 <svg viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M7 5h8v8M15 5l-9 9" />
                 </svg>
