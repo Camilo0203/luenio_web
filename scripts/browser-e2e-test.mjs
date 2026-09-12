@@ -260,7 +260,10 @@ async function runAxe(page, label) {
     // otro fallo de contraste del mismo tipo sigue parando el gate.
     .map((violation) =>
       violation.id === "color-contrast"
-        ? { ...violation, nodes: violation.nodes.filter((node) => !isAcceptedContrast(node.target)) }
+        ? {
+            ...violation,
+            nodes: violation.nodes.filter((node) => !isAcceptedContrast(node.target)),
+          }
         : violation,
     )
     .filter((violation) => violation.nodes.length > 0);

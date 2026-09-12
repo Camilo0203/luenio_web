@@ -44,7 +44,8 @@ if (!reduced || !reduced.matches) start();
 reduced?.addEventListener?.("change", (event) => {
   if (event.matches) {
     delete document.documentElement.dataset.motion;
-    for (const el of document.querySelectorAll("[data-reveal], [data-reveal-group]")) el.dataset.visible = "";
+    for (const el of document.querySelectorAll("[data-reveal], [data-reveal-group]"))
+      el.dataset.visible = "";
   } else {
     start();
   }
