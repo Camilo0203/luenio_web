@@ -550,12 +550,17 @@ select {
 .wa-widget__form select:focus,
 .wa-widget__form textarea:focus {
   border-color: var(--blue);
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
 }
 
-/* The rules above clear the UA outline, and a border tint plus a 12% shadow does
-   not reach the 3:1 that WCAG 1.4.11 asks of a focus indicator. Put a real ring
-   back for keyboard focus only, so pointer interaction keeps its quiet styling. */
+/* The rules above clear the UA outline, and a border tint alone does not reach
+   the 3:1 that WCAG 1.4.11 asks of a focus indicator. Put a real ring back for
+   keyboard focus only, so pointer interaction keeps its quiet styling.
+
+   The soft 12% shadow this pair used to add on :focus is gone. It was written to
+   be the quiet pointer treatment, but browsers match :focus-visible on text
+   fields for a mouse click too, so both fired at once and the field showed two
+   stacked rings, 3px of shadow under 3px of outline. The border tint is the
+   quiet treatment now, and the outline is the only ring. */
 .lead-form input:focus-visible,
 .lead-form select:focus-visible,
 .lead-form textarea:focus-visible,
